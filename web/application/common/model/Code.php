@@ -17,6 +17,9 @@ use think\Model;
  */
 class Code extends Model{
 
+    const TYPE_PHONE_REGISTER = 1;  //手机号注册发送短信类型
+
+
 
 
 }

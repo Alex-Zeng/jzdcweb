@@ -71,11 +71,6 @@ class Login{
             "expire" => time() + 5*3600   //过期时间
         ];
        $jwt = JWT::encode($token,$key);
-
-//       $string = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9leGFtcGxlLm9yZyIsImF1ZCI6Imh0dHA6XC9cL2V4YW1wbGUuY29tIiwiaWF0IjoxMzU2OTk5NTI0LCJuYmYiOjEzNTcwMDAwMDB9.KcNaeDRMPwkRHDHsuIh1L2B01VApiu3aTOkWplFjoYI";
-//       $result = JWT::decode($string,$key,['HS256']);
-//       print_r($result);
-
        $data['token']= $jwt;
        return ['status'=>0,'data'=>$data,'msg'=>''];
     }
