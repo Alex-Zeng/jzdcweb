@@ -14,6 +14,20 @@ if(strtolower($_SERVER['HTTP_HOST'])!='www.lansion.cn' && strtolower($_SERVER['H
 }
 */
 
+//解析参数
+if(isset($_GET['s']) && $_GET['s']){
+    // 定义应用目录
+    define('APP_PATH', __DIR__ . '/web/application/');
+// 加载框架引导文件
+    require __DIR__ . '/web/thinkphp/start.php';
+
+//    $build = include '/web/build.php';
+//// 运行自动生成
+//    \think\Build::run($build);
+    exit;
+}
+
+
 $_POST['diy_meta']=de_safe_str($config['web']['diy_meta']);
 //go_domain($config['web']['domain']);
 $config['server_url']="http://www.lansion.cn/";
