@@ -18,7 +18,7 @@ class Captcha{
      * @return array
      */
     public function img(){
-        $src = captcha_img();
+        $src = captcha_src();
         return ['status'=>0,'data'=>['src'=>$src],'msg'=>''];
     }
 
