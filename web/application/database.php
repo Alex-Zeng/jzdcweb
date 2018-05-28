@@ -17,9 +17,9 @@ return [
     // 数据库名
     'database'        => 'jzdcmall',
     // 用户名
-    'username'        => 'root',
+    'username'        => 'jzdcadm',
     // 密码
-    'password'        => 's12345678',
+    'password'        => 'Jzdc@2018',
     // 端口
     'hostport'        => '3306',
     // 连接dsn
