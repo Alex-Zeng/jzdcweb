@@ -1,0 +1,1 @@
+<a href="./index.php" jzdc='index.index'><i class="fa fa-home"></i><span>商城首页</span></a><a href="./index.php?jzdc=mall.show_type"  jzdc='mall.show_type' ><i class="fa fa-list-ul"></i><span>商品分类</span></a><a href="./index.php?jzdc=index.login"  jzdc='index.user'><i class="fa fa-user"></i><span>用户中心</span></a>

@@ -1,0 +1,1 @@
+http://www.lansion.cn/receive.php?target=server.goods&username=test&password=123456&act=get_goods_info&barcode=6903148044971

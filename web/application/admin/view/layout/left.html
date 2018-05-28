@@ -1,0 +1,203 @@
+<!-- Main Sidebar Container -->
+<aside class="main-sidebar sidebar-dark-primary  elevation-4" style="background: #006699;">
+    <!-- Brand Logo -->
+    <a href="index3.html" class="brand-link">
+        <img src="__STATIC__/img/white_logo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+        <span class="brand-text font-weight-light">JZDC</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Sidebar user panel (optional) -->
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="image">
+                <img src="__STATIC__/img/user.jpg" class="img-circle elevation-2" alt="User Image">
+            </div>
+            <div class="info">
+                <a href="#" class="d-block">{:getUserName()}</a>
+            </div>
+        </div>
+
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                {if $groupId ==3}
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fa fa-dashboard"></i>
+                        <p>
+                            运营管理
+                            <i class="right fa fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{:url('admin/banner/index')}" class="nav-link">
+                                <i class="fa fa-image nav-icon"></i>
+                                <p>Banner管理</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{:url('admin/notice/index')}" class="nav-link">
+                                <i class="fa fa-bell nav-icon"></i>
+                                <p>公告管理</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {/if}
+                {if $groupId ==2}
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fa fa-dashboard"></i>
+                        <p>
+                            商城管理
+                            <i class="right fa fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="/index.php?jzdc=mall.m_goods_admin" class="nav-link">
+                                <i class="fa fa-image nav-icon"></i>
+                                <p>全站商品</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/index.php?jzdc=mall.type" class="nav-link">
+                                <i class="fa fa-cubes nav-icon"></i>
+                                <p>全站商品分类</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {/if}
+                {if $groupId ==2 }
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fa fa-dashboard"></i>
+                        <p>
+                            系统菜单
+                            <i class="right fa fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{:url('admin/banner/index')}" class="nav-link">
+                                <i class="fa fa-image nav-icon"></i>
+                                <p>菜单管理</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {/if}
+                {if $groupId ==2 }
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fa fa-group"></i>
+                        <p>
+                            会员中心
+                            <i class="right fa fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="/index.php?jzdc=index.admin_users" class="nav-link">
+                                <i class="fa fa-group nav-icon"></i>
+                                <p>管理会员</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {/if}
+                {if $groupId ==3 }
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fa fa-cart-arrow-down"></i>
+                        <p>
+                            商品订单
+                            <i class="right fa fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="/index.php?jzdc=mall.order_admin" class="nav-link">
+                                <i class="fa fa-database nav-icon"></i>
+                                <p>管理订单</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/index.php?jzdc=mall.goods_admin" class="nav-link">
+                                <i class="fa fa-gear nav-icon"></i>
+                                <p>商品管理</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {/if}
+
+
+                <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fa fa-user"></i>
+                        <p>
+                            个人中心
+                            <i class="right fa fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="/index.php?jzdc=index.edit_user" class="nav-link">
+                                <i class="fa fa-user nav-icon"></i>
+                                <p>编辑个人资料</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/index.php?jzdc=index.edit_phone&relaod=15" class="nav-link">
+                                <i class="fa fa-phone nav-icon"></i>
+                                <p>修改手机号</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/index.php?jzdc=index.edit_email" class="nav-link">
+                                <i class="fa fa-envelope-o nav-icon"></i>
+                                <p>修改邮箱</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/index.php?jzdc=index.edit_user&field=password&relaod=25" class="nav-link">
+                                <i class="fa fa-key nav-icon"></i>
+                                <p>修改登录密码</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                {if $groupId ==3 }
+                <li class="nav-item has-treeview">
+                    <a href="/index.php?jzdc=form.data_show_list&table_id=37" class="nav-link">
+                        <i class="nav-icon fa fa-users"></i>
+                        <p>企业认证</p>
+                    </a>
+                </li>
+                <li class="nav-item has-treeview">
+                    <a href="/index.php?jzdc=form.data_show_list&table_id=38" class="nav-link">
+                        <i class="nav-icon fa fa-money"></i>
+                        <p>金融服务</p>
+                    </a>
+                </li>
+                {/if}
+
+                {if $groupId ==3 }
+                <li class="nav-item has-treeview">
+                    <a href="/index.php?jzdc=form.data_show_list&table_id=39" class="nav-link">
+                        <i class="nav-icon fa fa-feed"></i>
+                        <p>投诉建议</p>
+                    </a>
+                </li>
+                {/if}
+            </ul>
+        </nav>
+        <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+</aside>
