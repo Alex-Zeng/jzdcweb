@@ -80,7 +80,6 @@
                 alert("请输入正确的核实价格");
                 return false;
             }
-
             if(confirm("确定要将订单状态改为:待签约?")){
                 $.get('<?php echo $module['action_url'];?>&act=pending_price', {id: id, price: price}, function (data) {
                     try {
@@ -110,6 +109,18 @@
                 alert("请输入正确的核实价格");
                 return false;
             }
+            //单价
+            var unit_price = $('#p_unit_price_'+id).val();
+            if(unit_price.length == 0|| unit_price < 0){
+                alert("请输入正确的单价");
+                return false;
+            }
+            //商品数量
+            var amount = $('#p_amount_'+id).val();
+            if(amount.length == 0|| amount < 0){
+                alert("请输入正确的商品数量");
+                return false;
+            }
 
             if(number1.length == 0){
                 alert("请输入正确的合同编号");
@@ -133,7 +144,7 @@
             }
 
             if(confirm("确定要提交吗?")){
-                $.get('<?php echo $module['action_url'];?>&act=pending_price2', {id: id, price: price1, number: number1, date:date1}, function (data) {
+                $.get('<?php echo $module['action_url'];?>&act=pending_price2', {id: id, price: price1, number: number1, date:date1,product_amount:amount,unit_price:unit_price}, function (data) {
                     try {
                         v = eval("(" + data + ")");
                     } catch (exception) {

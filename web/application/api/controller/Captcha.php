@@ -17,12 +17,22 @@ class Captcha{
      * @desc 返回图片验证码
      * @return array
      */
-    public function img(){
-        $src = captcha_src();
+    public function img(Request $request){
+        $id = $request->get('id',0);
+        $id = session_id();
+        $src = captcha_src($id);
         $http = config('jzdc_domain');
-        return ['status'=>0,'data'=>['src'=>$http.$src],'msg'=>''];
+        return ['status'=>0,'data'=>['src'=>$http.$src,'id'=>$id],'msg'=>''];
     }
 
+    public function test(Request $request){
+        $captcha = $request->get('code','');
+
+        if(!captcha_check($captcha)){
+            return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
+        }
+        return ['status'=>0];
+    }
 
 
 }

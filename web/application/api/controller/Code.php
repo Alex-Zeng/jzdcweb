@@ -20,6 +20,10 @@ class Code{
         $phone = $request->post('phone','');
         $captcha = $request->post('code','');
         $valid = $request->post('codeValid',0);
+        $id = $request->post('id','');
+
+        header('Access-Control-Allow-Origin:*');
+
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
         }
@@ -28,9 +32,14 @@ class Code{
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
         }
 
-        if(!captcha_check($captcha) && $valid){
-            return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
+        if($valid){
+            session_id($id);
+            if(!captcha_check($captcha,$id)){
+                return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
+            }
         }
+
+
 
         //检查手机号是否存在
         $model = new IndexUser();
@@ -103,6 +112,8 @@ class Code{
         $phone = $request->post('phone','');
         $captcha = $request->post('code','');
         $valid = $request->post('codeValid',0);
+        $id = $request->post('id','');
+        header('Access-Control-Allow-Origin:*');
 
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
@@ -112,7 +123,7 @@ class Code{
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
         }
 
-        if(!captcha_check($captcha) && $valid){
+        if(!captcha_check($captcha,$id) && $valid){
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
         }
 
@@ -154,9 +165,12 @@ class Code{
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
         }
 
-        if(!captcha_check($captcha) && $valid){
-            return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
+        if($valid){
+            if(!captcha_check($captcha)){
+                return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
+            }
         }
+
 
         //发送短信
         $code = getVerificationCode();
@@ -174,8 +188,7 @@ class Code{
                 return ['status'=>0,'data'=>[],'msg'=>'已成功发送验证码'];
             }
         }
-
-        return ['status'=>0,'data'=>[],'msg'=>'发送短信成功'];
+        return ['status'=>1,'data'=>[],'msg'=>'发送短信失败'];
     }
 
 }
