@@ -5,9 +5,9 @@
  * Date: 2018/5/21
  * Time: 11:03
  */
-namespace app\extend;
+namespace sms;
 
-class yunpian{
+class Yunpian{
 
 /*
 'apikey' => '11236d9bf0fe6a5bcc36adb74e47bf1c',
@@ -48,12 +48,16 @@ class yunpian{
      */
     public function send($mobile,$param,$type){
 
+        $content = $type;
         //根据短信类型获取模板
-        $content = $this->getTemplate($type);
+        if($type != self::CONTENT){
+            $content = $this->getTemplate($type);
+        }else{
+            $content =str_replace('#code#',$param['code'],self::CONTENT);
+        }
         if(!$content){
             return false;
         }
-
         //如果是订单类型
         if(in_array($type,[self::TPL_ORDER_CANCEL,self::TPL_ORDER_PENDING_SEND,self::TPL_ORDER_SEND,self::TPL_ORDER_SEND2,self::TPL_ORDER_SUPPLIER_CONFIRM,self::TPL_ORDER_OUT_DATE])){
             if(isset($param['order_id'])){
@@ -69,31 +73,8 @@ class yunpian{
         }
 
         //添加发送短信日志
-
-
         //调用发送接口
         return $this->sendSms($mobile,$content);
-
-        //add send sms record
-//        $sender=$_SESSION['jzdc']['username'];
-//        $sql="insert into ".$pdo->index_pre."phone_msg (`sender`,`addressee`,`content`,`state`,`time`,`count`,`timing`) values ('".$sender."','".$mobile."','".$content."','1','".time()."','1','0')";
-//        $res = $pdo->exec($sql);
-//        $id = $pdo->lastInsertId();
-
-//        if ($res) {
-//            $send_result = yunpian_sms($config, $config['sms']['apikey'], $mobile, $content);
-//            if ($send_result) {
-//                $sql = "update " . $pdo->index_pre . "phone_msg set `state`='2' where `id`='" . $id . "'";
-//                $pdo->exec($sql);
-//                return true;
-//            } else {
-//                $sql = "update " . $pdo->index_pre . "phone_msg set `state`='3' where `id`='" . $id. "'";
-//                $pdo->exec($sql);
-//                return false;
-//            }
-//        } else {
-//            return false;
-//        }
     }
 
 
@@ -102,12 +83,14 @@ class yunpian{
      * @param $templateId
      * @return bool
      */
-    protected function getTemplate($templateId){
+    private function getTemplate($templateId){
         $ch = curl_init();
         $data = ['tpl_id'=>$templateId,'apikey'=>$this->apikey];
+       // curl_setopt ($ch, CURLOPT_URL, 'https://sms.yunpian.com/v2/tpl/get.json');
         curl_setopt ($ch, CURLOPT_URL, 'https://sms.yunpian.com/v2/tpl/get.json');
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         $json_data = curl_exec($ch);
         $r = json_decode($json_data,true);
         if(isset($r['tpl_content'])){
@@ -123,15 +106,13 @@ class yunpian{
      * @param $context
      * @return bool
      */
-    protected function sendSms($mobile,$context){
-        if(mb_strlen($context)<10){
-            $text=str_replace('#code#',$context,self::CONTENT);
-        }
+    protected function sendSms($mobile,$content){
         $ch = curl_init();
-        $data = ['text'=>$text,'apikey'=>$this->apikey,'mobile'=>$mobile];
-        curl_setopt ($ch, CURLOPT_URL, 'http://sms.yunpian.com/v2/sms/single_send.json');
+        $data = ['text'=>$content,'apikey'=>$this->apikey,'mobile'=>$mobile];
+        curl_setopt ($ch, CURLOPT_URL, 'https://sms.yunpian.com/v2/sms/single_send.json');
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         $json_data = curl_exec($ch);
         $r = json_decode($json_data,true);
         if(isset($r['sid'])){

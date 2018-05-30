@@ -142,8 +142,10 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
+                                    <form enctype="multipart/form-data">
                                     <label for="exampleInputFile">上传图片</label>
-                                    <input type="file" class="file" id="exampleInputFile" multiple>
+                                    <input type="file" class="file" name="exampleInputFile" id="exampleInputFile">
+                                    </form>
                                 </div>
                             </form>
                         </div>
@@ -177,6 +179,19 @@
 </div>
 
 
+<script type="text/javascript">
+    $("#exampleInputFile").fileinput({
+        uploadUrl: '#', // you must set a valid URL here else you will get an error
+        allowedFileExtensions : ['jpg', 'png','gif'],
+        overwriteInitial: false,
+        maxFileSize: 1000,
+        maxFilesNum: 10,
+        //allowedFileTypes: ['image', 'video', 'flash'],
+        slugCallback: function(filename) {
+            return filename.replace('(', '_').replace(']', '_');
+        }
+    });
+</script>
 
 
 

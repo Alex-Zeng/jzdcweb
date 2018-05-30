@@ -24,13 +24,10 @@ class Login{
      * @throws \think\exception\DbException
      */
     public function index(Request  $request){
-       $name = $request->post('username','');
+       $name = $request->post('userName','');
        $password = $request->post('password','');
 
        //测试数据
-        $name = 'jzdcadm';
-        $password = '123456';
-
        if(!$name){
            return ['status'=>1,'data'=>[],'msg'=>'账户不能为空'];
        }
@@ -44,7 +41,6 @@ class Login{
        //判断账户类型
         $field = ['id','username','password','group','nickname','icon','state'];
         if(stripos( $name,'@')){
-           //  $where['email'] = $name;
             $row = $model->where(['email'=>$name])->field($field)->find();
         }else{
             $row = $model->where(['username'=>$name])->whereOr(['phone'=>$name])->field($field)->find();
@@ -81,8 +77,8 @@ class Login{
      * @param Request $request
      * @return array
      */
-    public function mobile(Request $request){
-        $phone = $request->post('mobile','');
+    public function phone(Request $request){
+        $phone = $request->post('phone','');
         $code = $request->post('code','');
 
         if(!$phone){
@@ -94,8 +90,7 @@ class Login{
 
         //查询验证码
         $codeModel = new Code();
-        $type = 1;
-        $codeRow = $codeModel->where(['phone'=>$phone,'type'=>$type])->order(['id'=>'desc'])->field(['code','create_time','expire_time'])->find();
+        $codeRow = $codeModel->where(['phone'=>$phone,'type'=>Code::TYPE_PHONE_LOGIN])->order(['id'=>'desc'])->field(['code','create_time','expire_time'])->find();
         if(!$codeRow){
            return ['status'=>1,'data'=>[],'msg'=>'验证码不存在'];
         }

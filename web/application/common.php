@@ -17,7 +17,7 @@
  * @param int $length
  * @return string
  */
-function getVerificationCode($length = 6){
+function getVerificationCode($length = 4){
     $code="123456789";
     $string='';
     for($i=0; $i<$length; $i++){

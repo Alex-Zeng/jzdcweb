@@ -20,6 +20,11 @@ class Banner extends Base {
     public function index(Request $request){
         $model = new SliderImg();
         $k = Request::instance()->get('k','');
+        if(isset($k) && $k){
+            $model->where('title|summary','like','%'.$k.'%');
+        }else{
+
+        }
         $rows = $model->where(['group_id'=>27])->field(['id','name','url','target','sequence','status'])->paginate(20,false,['query'=>request()->param()]);
         $this->assign('list',$rows);
         $this->assign('page',$rows->render());
