@@ -20,17 +20,17 @@ class Img
     public function banner(Request $request)
     {
         $model = new SliderImg();
-        $rows = $model->where('group_id',27)->field('id,name,url,target')->select();
+        $rows = $model->where('group_id',27)->field('id,name,url,target,path')->select();
         $data = [];
         foreach($rows as $row){
             $data[] = [
-                'name' => $row->name,
+                'title' => $row->name,
                 'id' => $row->id,
                 'url' => $row->url,
-                'img' => SliderImg::getFormatImg($row->id),
+                'img' => SliderImg::getFormatImg($row->path),
                 'target' => $row->target
             ];
         }
-        return ['status'=>1,'data'=>$data,'msg'=>''];
+        return ['status'=>0,'data'=>$data,'msg'=>''];
     }
 }

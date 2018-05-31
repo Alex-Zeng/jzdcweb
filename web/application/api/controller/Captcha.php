@@ -19,6 +19,7 @@ class Captcha{
      */
     public function img(Request $request){
         $id = $request->get('id',0);
+        session_start();
         $id = session_id();
         $src = captcha_src($id);
         $http = config('jzdc_domain');
@@ -27,8 +28,9 @@ class Captcha{
 
     public function test(Request $request){
         $captcha = $request->get('code','');
-
-        if(!captcha_check($captcha)){
+        $id = $request->get('id');
+        session_id($id);
+        if(!captcha_check($captcha,$id)){
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
         }
         return ['status'=>0];

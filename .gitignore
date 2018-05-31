@@ -2,3 +2,6 @@
 /config/session
 /.idea
 .DS_Store
+
+/program/mall/img
+/program/mall/img_thumb

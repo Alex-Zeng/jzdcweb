@@ -24,6 +24,7 @@ class Goods {
         $data = [];
         foreach($rows as $row){
             $data[] = [
+                'id' => $row->id,
                 'name' => $row->name,
                 'url' => $row->url,
                 'img' => getFormatImg($row->id)

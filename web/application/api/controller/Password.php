@@ -37,6 +37,40 @@ class Password{
     }
 
     /**
+     * @desc 验证短信
+     * @param Request $reques
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function checkCode(Request $request){
+        $phone = $request->post('phone','');
+        $code = $request->post('code','');
+        if(!$phone){
+            return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
+        }
+        if(!$code){
+            return ['status'=>1,'data'=>[],'msg'=>'短信验证码不能为空'];
+        }
+        $model = new IndexUser();
+        $user = $model->getUserByPhone($phone);
+        if(!$user){
+            return ['status'=>1,'data'=>[],'msg'=>'手机号尚未注册'];
+        }
+        //验证短信
+        $codeModel = new \app\common\model\Code();
+        $codeRow = $codeModel->where(['phone'=>$phone,'type'=>\app\common\model\Code::TYPE_PHONE_FORGET_PASSWORD])->order('id','desc')->find();
+        if(!$codeRow || $codeRow['code']!= $code){
+            return ['status'=>1,'data'=>[],'msg'=>'短信验证码错误'];
+        }
+        if($codeRow['expire_time'] < time()){
+            return ['status'=>1,'data'=>[],'msg'=>'短信验证已过期'];
+        }
+        return ['status'=>0,'data'=>[],'msg'=>'验证成功'];
+    }
+
+    /**
      * @desc 修改密码
      * @param Request $request
      * @return array
@@ -73,15 +107,15 @@ class Password{
             return ['status'=>1,'data'=>[],'msg'=>'手机号尚未注册'];
         }
 
-        //验证短信
-//        $codeModel = new \app\common\model\Code();
-//        $codeRow = $codeModel->where(['phone'=>$phone,'type'=>\app\common\model\Code::TYPE_PHONE_FORGET_PASSWORD])->order('id','desc')->find();
-//        if(!$codeRow || $codeRow['code']!= $code){
-//            return ['status'=>1,'data'=>[],'msg'=>'短信验证码错误'];
-//        }
-//        if($codeRow['expire_time'] < time()){
-//            return ['status'=>1,'data'=>[],'msg'=>'短信验证已过期'];
-//        }
+       // 验证短信
+        $codeModel = new \app\common\model\Code();
+        $codeRow = $codeModel->where(['phone'=>$phone,'type'=>\app\common\model\Code::TYPE_PHONE_FORGET_PASSWORD])->order('id','desc')->find();
+        if(!$codeRow || $codeRow['code']!= $code){
+            return ['status'=>1,'data'=>[],'msg'=>'短信验证码错误'];
+        }
+        if($codeRow['expire_time'] < time()){
+            return ['status'=>1,'data'=>[],'msg'=>'短信验证已过期'];
+        }
 
         //更新密码
         $result = $model->save(['password'=>md5($password)],['id'=>$user->id]);

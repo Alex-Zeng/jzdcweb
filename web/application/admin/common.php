@@ -36,9 +36,9 @@ function getGroupId(){
  */
 function getDeviceType($type = -1){
     $list = [
-       0 => 'PC端',
-       1 => 'APP端',
-       2 => '微信端'
+       1 => 'PC端',
+       2 => 'APP端',
+       3 => '微信端'
     ];
-    return isset($list[$type]) ? $list[$type] : $list;
+    return isset($list[$type]) ? $list[$type] : '';
 }

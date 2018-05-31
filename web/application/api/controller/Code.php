@@ -32,12 +32,12 @@ class Code{
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
         }
 
-        if($valid){
-            session_id($id);
-            if(!captcha_check($captcha,$id)){
-                return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
-            }
-        }
+//        if($valid){
+//            session_id($id);
+//            if(!captcha_check($captcha,$id)){
+//                return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
+//            }
+//        }
 
 
 
@@ -123,9 +123,13 @@ class Code{
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
         }
 
-        if(!captcha_check($captcha,$id) && $valid){
-            return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
+        if($valid){
+            session_id($id);
+            if(!captcha_check($captcha,$id)){
+                return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
+            }
         }
+
 
         //发送短信
         $code = getVerificationCode();
@@ -165,11 +169,11 @@ class Code{
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
         }
 
-        if($valid){
-            if(!captcha_check($captcha)){
-                return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
-            }
-        }
+//        if($valid){
+//            if(!captcha_check($captcha)){
+//                return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
+//            }
+//        }
 
 
         //发送短信
@@ -182,7 +186,7 @@ class Code{
             //更新短信验证码
             $codeModel = new \app\common\model\Code();
             $time = time();
-            $data = ['phone'=>$phone,'type'=>\app\common\model\Code::TYPE_PHONE_FORGET_PASSWORDY,'code'=>$code,'create_time'=>$time,'expire_time'=>$time+300];
+            $data = ['phone'=>$phone,'type'=>\app\common\model\Code::TYPE_PHONE_FORGET_PASSWORD,'code'=>$code,'create_time'=>$time,'expire_time'=>$time+300];
             $result = $codeModel->save($data);
             if($result){
                 return ['status'=>0,'data'=>[],'msg'=>'已成功发送验证码'];

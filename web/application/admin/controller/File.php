@@ -17,8 +17,8 @@ class File extends Base{
      * @return array
      */
     public function upload(Request $request){
-        $file = $request->file('image');
-        $type = $request->get('type','');
+        $file = $request->file('file');
+        $type = $request->post('type','');
         if($file){
             $config = config('jzdc_upload.'.$type);
             $path = $config['path'];

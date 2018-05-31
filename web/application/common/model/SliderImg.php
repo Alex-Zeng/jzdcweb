@@ -18,7 +18,8 @@ class SliderImg extends Model{
      * @return string
      */
     public static function getFormatImg($img){
-        return config('jzdc_domain').'/program/slider/img/'.$img.'.jpg';
+       // return config('jzdc_domain').'/program/slider/img/'.$img.'.jpg';
+        return config('jzdc_doc_path').'/banner/'.$img;
     }
 
 }
