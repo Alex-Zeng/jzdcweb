@@ -292,7 +292,7 @@ if($category == 1){
         foreach ($userRows as $user){
             $userIds[] = $user['id'];
         }
-        $userIdStr = $userIds ? implode(',',$userIds) : '';
+        $userIdStr = $userIds ? implode(',',$userIds) : '\'\'';
         $where .=" and supplier IN (".$userIdStr.") ";
     }
 }else{
