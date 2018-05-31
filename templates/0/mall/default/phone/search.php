@@ -67,7 +67,7 @@
 	
 	function exe_mall_search(){
 		if($(".show_search_div .search").val()==''){return false;}
-		url='./index.php?jzdc='+$(".show_search_div .type").val()+'&search='+encodeURI($(".show_search_div input").val());
+		url='./index.php?jzdc=mall.goods_list&category='+$(".show_search_div .type").val()+'&search='+encodeURI($(".show_search_div input").val());
 		window.location.href=url;	
 	}
     </script>
@@ -120,7 +120,11 @@
     	<div class=top_input_div>
         	<div class=return_div></div><div class=input_div>
            
-         		<select class=type><option value="mall.goods_list"><?php echo self::$language['goods'];?></select><input type="text"  class='search'  placeholder="<?php echo $module['jzdc_search_placeholder']?>" />
+         		<select class=type>
+                    <option value="0"><?php echo self::$language['goods'];?></option>
+                    <option value="1">供应商</option>
+                </select>
+                <input type="text"  class='search'  placeholder="<?php echo $module['jzdc_search_placeholder']?>" />
             </div><div class=button_div><?php echo self::$language['search'];?></div>
         </div>
         <div class=hot_search_div>
