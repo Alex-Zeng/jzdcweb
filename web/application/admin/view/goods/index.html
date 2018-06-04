@@ -1,0 +1,106 @@
+{include file="layout/header" title="投诉与建议" keywords="开源WEB开发框架" /}
+
+{include file="layout/left" groupId="$groupId" keywords="开源WEB开发框架" /}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"></h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">商品列表</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">商品列表</h3>
+                    </div>
+                    <div class="row" style="padding-top: 15px;padding-right: 15px">
+                        <div class="col-md-6">
+                            <form class="form-inline ml-3" action="{:url()}"  method="get">
+                                <div class="input-group">
+                                    <select class="form-control" name="supplier"  placeholder="供应商">
+                                        <option value="0" {if $supplier eq 0}selected{/if}>全部</option>
+                                        {volist name=":getSupplierList()"  id='user'}
+                                        <option  {if $supplier eq $user.id}selected{/if} value="{$user.id}">{$user.real_name}</option>
+                                        {/volist}
+                                    </select>
+                                </div>
+
+                                <div class="input-group">
+                                    <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="商品名称" aria-label="Search">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" id="search" type="submit">查找</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <a class="btn btn-primary pull-right"  target="_blank"  href="{:url('admin/goods/create')}" >新增</a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th width="150px">封面图片</th>
+                                <th width="150px">商品名称</th>
+                                <th>总销量</th>
+                                <th>时间</th>
+                                <th>排序</th>
+                                <th>上架</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {volist name='list' id='goods'}
+                            <tr>
+                                <td><img src="{$goods.icon_path}" width="100px" /></td>
+                                <td>{$goods.title}<br />{$goods.supplier_name}</td>
+                                <td>{$goods.sold}</td>
+                                <td>{:date('Y-m-d H:i',$goods.time)}<br />¥{$goods.min_price}起</td>
+                                <td>{$goods.shop_sequence}</td>
+                                <td>{$goods.state == 2 ? '是' : '否'}</td>
+                                <td>{:getGoodsMallState($goods.mall_state)}</td>
+                                <td>
+                                    <a href="{:url('admin/goods/view','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-primary"    >详情</a>
+                                    <a href="{:url('admin/goods/edit','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-primary"    >编辑</a>
+                                    <a href="javascript:void(0)"  class="btn btn-sm btn-danger"  data-id="{$goods.id}" data-toggle="modal"   data-target="#delete-modal">删除</a>
+                                </td>
+                            </tr>
+                            {/volist}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="5">{$page}</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="modal fade" id="info-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body ">
+            </div>
+        </div>
+    </div>
+</div>
+
+{include file="layout/footer" title="$title" keywords="开源WEB开发框架" /}

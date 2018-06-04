@@ -1,0 +1,128 @@
+{include file="layout/header" title="投诉与建议" keywords="开源WEB开发框架" /}
+<link href="__STATIC__/js/plugins/bootstrap-fileinput/css/fileinput.css" media="all" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="__STATIC__/js/plugins/bootstrapvalidator/css/bootstrapValidator.css"/>
+{include file="layout/left" groupId="$groupId" keywords="开源WEB开发框架" /}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"></h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">商品列表</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- left column -->
+                <div class="col-md-12">
+                    <!-- general form elements -->
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">修改商品分类</h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <!-- form start -->
+                        <form role="form" action="" method="post">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="">分类名称</label>
+                                    <input type="text" class="form-control" name="name" value="{$row.name}" maxlength="50" placeholder="">
+                                </div>
+                                <div class="form-group">
+                                    <label>上级分类</label>
+                                    <select class="form-control"  name="parent">
+                                        <option {if $row.parent == 0}selected{/if} value="0">请选择</option>
+                                        {foreach name=":getTypeLevelList(2)" id="type"}
+                                        <option value="{$type.id}"  {if $type.id == $row.parent}selected{/if}>{if $type.level == 2}&nbsp;&nbsp;&nbsp;&nbsp;|-&nbsp;{/if}{$type.name}</option>
+                                        {/foreach}
+                                    </select>
+                                    <p class="help-block">如果不选择上级分类，默认为顶级分类</p>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label">图标:</label>
+                                    <div class="col-sm-12">
+                                        <input id="edit-file" name="file" type="file" data-show-caption="true">
+                                        <input  type="hidden" name="path" id="edit-upload-file"  value="{$row.path}" />
+                                        <p class="help-block">支持jpg、jpeg、png格式，大小不超过2.0M</p>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>排序</label>
+                                    <input type="number" name="sequence" min="0" class="form-control" value="{$row.sequence}" placeholder="排序">
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                                    <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                                </div>
+                            </div>
+                            <!-- /.card-body -->
+
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">添加</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- /.card -->
+
+                </div>
+
+
+            </div>
+            <!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>
+
+<div class="modal fade" id="info-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body ">
+            </div>
+        </div>
+    </div>
+</div>
+
+{include file="layout/footer" title="$title" keywords="开源WEB开发框架" /}
+<script src="__STATIC__/js/plugins/bootstrap-fileinput/js/fileinput.js" type="text/javascript"></script>
+<script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
+<script type="text/javascript">
+    $("#edit-file").fileinput({
+        language: 'zh', //设置语言
+        uploadUrl: '?s=admin/file/upload',  //上传地址
+        showUpload: true, //是否显示上传按钮
+        showRemove:true,
+        dropZoneEnabled: false,
+        showCaption: true,//是否显示标题
+        allowedPreviewTypes: ['image'],
+        allowedFileTypes: ['image'],
+        allowedFileExtensions:  ['jpg', 'png'],
+        maxFileSize : 2000,
+        maxFileCount: 1,
+        uploadExtraData: function(previewId, index) {   //额外参数的关键点
+            var obj = {};
+            obj.type = 'type_icon';
+            return obj;
+        },
+        initialPreview: [
+              "<img src='{$preview_path}' class='file-preview-image' alt='肖像图片' title='肖像图片'>",
+        ],
+    });
+    $('#edit-file').on("fileuploaded", function(event, data) {
+        if(data.response)
+        {
+            alert(data.response.data.filename);
+            $('#edit-upload-file').val(data.response.data.filename);
+        }
+    });
+</script>

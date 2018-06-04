@@ -51,4 +51,13 @@ class MallType extends Model{
         return $idArr;
     }
 
+    /**
+     * @desc返回图标
+     * @param $icon
+     * @return string
+     */
+    public static function getFormatIcon($icon){
+        return config('jzdc_domain').'/web/public/uploads/type_icon/'.$icon;
+    }
+
 }

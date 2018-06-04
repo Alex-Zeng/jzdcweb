@@ -22,22 +22,25 @@ class Code{
         $valid = $request->post('codeValid',0);
         $id = $request->post('id','');
 
-        header('Access-Control-Allow-Origin:*');
+//        header('Access-Control-Allow-Origin:*');
 
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
+        }
+        if(!checkPhone($phone)){
+            return  ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
         }
 
         if(!$captcha && $valid){
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
         }
 
-//        if($valid){
-//            session_id($id);
-//            if(!captcha_check($captcha,$id)){
-//                return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
-//            }
-//        }
+        if($valid){
+            session_id($id);
+            if(!captcha_check($captcha,$id)){
+                return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
+            }
+        }
 
 
 
@@ -82,6 +85,10 @@ class Code{
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
         }
+        if(!checkPhone($phone)){
+            return  ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
+        }
+
         if(!$code){
             return ['status'=>1,'data'=>[],'msg'=>'验证码不能为空'];
         }
@@ -118,6 +125,10 @@ class Code{
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
         }
+        if(!checkPhone($phone)){
+            return  ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
+        }
+
 
         if(!$captcha && $valid){
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
@@ -164,16 +175,20 @@ class Code{
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
         }
+        if(!checkPhone($phone)){
+            return  ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
+        }
+
 
         if(!$captcha && $valid){
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
         }
 
-//        if($valid){
-//            if(!captcha_check($captcha)){
-//                return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
-//            }
-//        }
+        if($valid){
+            if(!captcha_check($captcha)){
+                return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
+            }
+        }
 
 
         //发送短信

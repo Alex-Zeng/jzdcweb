@@ -1,0 +1,182 @@
+{include file="layout/header" title="投诉与建议" keywords="开源WEB开发框架" /}
+
+{include file="layout/left" groupId="$groupId" keywords="开源WEB开发框架" /}
+
+<style type="text/css">
+    .operator.fa {
+        min-width: 28px;
+        font-size: 20px;
+    }
+
+</style>
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"></h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">商品分类</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">商品分类</h3>
+                    </div>
+                    <div class="row" style="padding-top: 15px;padding-right: 15px">
+                        <div class="col-md-6">
+
+                        </div>
+                        <div class="col-md-6">
+                            <a class="btn btn-default pull-right" href="{:url('admin/type/create')}">
+                                <i class="fa fa-plus"></i> 添加分类
+                            </a>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table class="table list-table" id="list_table">
+                            <colgroup>
+                                <col>
+                                <col width="80px">
+                                <col width="120px">
+                                <col width="120px">
+                                <col width="300px">
+                            </colgroup>
+                            <thead>
+                            <tr>
+                                <th>分类名称</th>
+                                <th>图标</th>
+                                <th>排序</th>
+                                <th>首页显示</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            {foreach name="list" id="type"}
+                            <tr id="{$type.id}" parent="{$type.parent}">
+                                <td><i style="margin-left:{$type.level*30}px" class="operator fa fa-minus-square-o" onclick="displayData(this);" title="关闭"></i>{$type.name}</td>
+                                <td><img width="40px" src="{$type.icon}" /></td>
+                                <td><input class="form-control sort" id="s1" size="10" type="number"  value="{$type.sequence}"></td>
+                                <td><span class="text-success">是</span></td>
+                                <td>
+                                    <a class="btn btn-sm btn-primary" href="{:url('admin/type_attribute/index','id='.$type.id)}">属性</a>
+                                    <a class="btn btn-sm btn-primary" href="{:url('admin/type_option/index','id='.$type.id)}">规格</a>
+                                    <a class="btn btn-sm btn-primary" href="{:url('admin/type/edit','id='.$type.id)}">编辑</a>
+                                    <a  class="btn btn-sm btn-danger" href="javascript:void(0)" data-id="{$type.id}" data-toggle="modal" data-target="#delete-modal">删除</a>
+                                    {if $type.level == 0 || $type.level == 1}
+                                    <a class="btn btn-sm btn-danger" href="{:url('admin/type/create','id='.$type.id)}">添加</a>
+                                    {/if}
+                                </td>
+                            </tr>
+                            {/foreach}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">是否确认删除该分类?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="delete-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{include file="layout/footer" title="$title" keywords="开源WEB开发框架" /}
+<script type="text/javascript">
+
+    //折叠展示
+    function displayData(_self)
+    {
+        if(_self.title == "关闭")
+        {
+            jqshow($(_self).parent().parent().attr('id'), 'hide');
+            $(_self).removeClass("fa-minus-square-o").addClass("fa-plus-square-o");
+            _self.title = '打开';
+        }
+        else
+        {
+            jqshow($(_self).parent().parent().attr('id'), 'show');
+            $(_self).removeClass("fa-plus-square-o").addClass("fa-minus-square-o");
+            _self.title = '关闭';
+        }
+    }
+
+    function jqshow(id,isshow) {
+        var obj = $("#list_table tr[parent='"+id+"']");
+        if (obj.length>0)
+        {
+            obj.each(function(i) {
+                jqshow($(this).attr('id'), isshow);
+            });
+            if (isshow=='hide')
+            {
+                obj.hide();
+            }
+            else
+            {
+                obj.show();
+            }
+        }
+    }
+
+    $('#delete-modal').on('show.bs.modal', function (event) {
+        var id = $(event.relatedTarget).data('id');
+        $("#delete-request").data('id',id);
+    });
+
+    $("#delete-request").click(function () {
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        $.ajax({
+            type:'post',
+            url:'?s=admin/type/delete&id='+id,
+            data:{},
+            dataType:'json',
+            success:function (data) {
+                if(data.status == 0){
+                    window.location.reload();
+                }else{
+                    alert(data.msg);
+                }
+            }
+        })
+    });
+    $(".sort").blur(function () {
+        var id =$(this).closest('tr').attr('id');
+        var value = $(this).val();
+        $.ajax({
+            type:'post',
+            url:'?s=admin/type/sequence',
+            data:{id:id,value:value},
+            dataType:'json',
+            success:function (data) {
+
+            }
+        })
+    });
+
+</script>

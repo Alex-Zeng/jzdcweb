@@ -246,6 +246,13 @@ return [
         ],
         'banner' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/banner',
+        ],
+        'type_icon' => [
+            'path' => ROOT_PATH.'public'.DS.'uploads/type_icon',
+        ],
+        'order' => [
+            'path' => ROOT_PATH.'public'.DS.'uploads/order',
+            'thumb' => ['width'=>100,'height'=>100]
         ]
     ],
     'jzdc_doc_path' => 'http://192.168.3.101/web/public/uploads/'

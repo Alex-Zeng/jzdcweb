@@ -26,6 +26,10 @@ class Password{
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>"手机号不能为空"];
         }
+        if(!checkPhone($phone)){
+            return  ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
+        }
+
         //检查手机号是否存在
         $model = new IndexUser();
         $user = $model->getUserByPhone($phone);
@@ -50,6 +54,10 @@ class Password{
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
         }
+        if(!checkPhone($phone)){
+            return  ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
+        }
+
         if(!$code){
             return ['status'=>1,'data'=>[],'msg'=>'短信验证码不能为空'];
         }
@@ -87,6 +95,10 @@ class Password{
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
         }
+        if(!checkPhone($phone)){
+            return  ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
+        }
+
         if(!$code){
             return ['status'=>1,'data'=>[],'msg'=>'短信验证码不能为空'];
         }
