@@ -1,0 +1,196 @@
+{include file="layout/header" title="$title" keywords="开源WEB开发框架" /}
+<link rel="stylesheet" href="__STATIC__/js/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+<link rel="stylesheet" href="__STATIC__/js/plugins/bootstrapvalidator/css/bootstrapValidator.css"/>
+{include file="layout/left" groupId="$groupId" keywords="开源WEB开发框架" /}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"></h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">公告管理</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">公告管理</h3>
+                    </div>
+                    <div class="row" style="padding-top: 15px;padding-right: 15px">
+                        <div class="col-md-6">
+                            <form class="form-inline ml-3" action="{:url()}"  method="get">
+                                <div class="input-group">
+                                    <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="用户名/手机" aria-label="Search">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" id="search" type="submit">查找</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-modal">新增</button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th><input type="checkbox" /> </th>
+                                <th>图像</th>
+                                <th>用户名</th>
+                                <th>用户组</th>
+                                <th>注册时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {volist name='list' id='member'}
+                            <tr>
+                                <td><input type="checkbox" /> </td>
+                                <td><img src=""/></td>
+                                <td>{$member.username}<br />{$member.phone}<br/>{$member.real_name}<br />{$member.email}</td>
+                                <td>{:getMemberGroup($member.group)}</td>
+                                <td>{:date('Y-m-d H:i',$member.reg_time)}</td>
+                                <td>{$member.state == 1 ? '正常' : '被锁'}</td>
+                                <td>
+                                    <a href="javascript:void(0)"  class="btn btn-sm btn-primary"  data-id="{$member.id}" data-toggle="modal"   data-target="#edit-modal">编辑</a>
+                                </td>
+                            </tr>
+                            {/volist}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="5">{$page}</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+
+<div class="modal fade" id="create-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">新增公告</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <div class="container-fluid">
+                    <div class="row">
+                        <!-- left column -->
+                        <div class="col-md-12">
+                            <!-- form start -->
+                            <form role="form" class="" id="add-form">
+                                <div class="form-group">
+                                    <label for="">标题</label>
+                                    <input type="text" class="form-control"  name="title" placeholder="公告标题">
+                                </div>
+                                <div class="form-group">
+                                    <label for="">摘要</label>
+                                    <textarea class="form-control" rows="3" placeholder="摘要..."  name="summary"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="">正文</label>
+                                    <textarea class="textarea" placeholder="公告内容..."  name="content"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label >状态</label>
+                                    <select class="form-control">
+                                        <option value="1">显示</option>
+                                        <option value="0">屏蔽</option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="add-request">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="edit-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">新增公告</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <div class="container-fluid">
+                    <div class="row">
+                        <!-- left column -->
+                        <div class="col-md-12">
+                            <!-- form start -->
+                            <form role="form" class="" id="edit-form">
+                                <div class="form-group">
+                                    <label for="">标题</label>
+                                    <input type="text" class="form-control"  name="title" placeholder="公告标题">
+                                </div>
+                                <div class="form-group">
+                                    <label for="">摘要</label>
+                                    <textarea class="form-control" rows="3" placeholder="摘要..."  name="summary"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="">正文</label>
+                                    <textarea  id="edit-content" class="textarea2" placeholder="公告内容..."  name="content"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label >状态</label>
+                                    <select class="form-control" name="status">
+                                        <option value="1">显示</option>
+                                        <option value="0">屏蔽</option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="edit-request">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="info-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body ">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{include file="layout/footer" title="$title" keywords="开源WEB开发框架" /}
+<script src="__STATIC__/js/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
+<script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
+<script type="text/javascript" src="__STATIC__/js/admin/notice.js"></script>

@@ -1,0 +1,192 @@
+{include file="layout/header" title="投诉与建议" keywords="开源WEB开发框架" /}
+
+{include file="layout/left" groupId="$groupId" keywords="开源WEB开发框架" /}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"></h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">商品列表</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-offset-2 col-md-8">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">添加商品</h3>
+                        </div>
+                        <form role="form">
+                            <div class="card-body">
+                                <div class="input-group">
+                                    <label for="">所属商城分类</label>
+                                    <select class="form-control"  name="parent">
+                                        {foreach name=":getTypeLevelList(3)" id="type"}
+                                        <option value="{$type.id}" >
+                                            {if $type.level == 2}&nbsp;&nbsp;&nbsp;&nbsp;|-&nbsp;{elseif $type.level == 3}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|-&nbsp;{/if}{$type.name}</option>
+                                        {/foreach}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="">商品供应商</label>
+                                    <select class="form-control" name="supplier"  placeholder="供应商">
+                                        {volist name=":getSupplierList()"  id='user'}
+                                        <option  value="{$user.id}">{$user.real_name}</option>
+                                        {/volist}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="">商品计量单位</label>
+                                    <input type="password" class="form-control"  placeholder="商品计量单位">
+                                </div>
+                                <div class="form-group">
+                                    <label for="">商品名称</label>
+                                    <input type="password" class="form-control"  placeholder="商品名称">
+                                </div>
+                                <div class="form-group">
+                                    <label for="">封面图片</label>
+                                    <div class="input-group">
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" >
+                                            <label class="custom-file-label" for="">选择文件</label>
+                                        </div>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text" id="">Upload</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="exampleInputFile">多视角图片</label>
+                                    <div class="input-group">
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="exampleInputFile">
+                                            <label class="custom-file-label" for="exampleInputFile">选择文件</label>
+                                        </div>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text" id="">Upload</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="">商品状态</label>
+                                    <select name="" class="form-control">
+                                        <option>未上架</option>
+                                        <option>正常出售</option>
+                                    </select>
+                                </div>
+                                <!--<div class="form-check">-->
+                                    <!--<input type="checkbox" class="form-check-input" id="exampleCheck1">-->
+                                    <!--<label class="form-check-label" for="exampleCheck1">Check me out</label>-->
+                                <!--</div>-->
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">提交</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<div class="modal fade" id="area-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">新增Banner</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form role="form" class="" id="add-form">
+                                <div class="form-group">
+                                    <label >标题</label>
+                                    <input type="text" class="form-control" name="title" placeholder="banner 标题">
+                                </div>
+                                <div class="form-group">
+                                    <label >链接</label>
+                                    <input type="url" class="form-control" name="link" placeholder="http://">
+                                </div>
+                                <div class="form-group">
+                                    <label >分组</label>
+                                    <select class="form-control" name="type">
+                                        <option  value="1">PC端</option>
+                                        <option  value="2">APP端</option>
+                                        <option value="3">微信端</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label >打开方式</label>
+                                    <select class="form-control" name="target">
+                                        <option  value="_self">新窗口打开</option>
+                                        <option value="_blank">当前窗口打开</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label >状态</label>
+                                    <select class="form-control" name="target">
+                                        <option  value="1">显示</option>
+                                        <option value="0">隐藏</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label >显示顺序</label>
+                                    <input type="number" min="0" class="form-control" value="0" name="sequence" placeholder="">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">图片上传:</label>
+                                    <div class="col-sm-12">
+                                        <input id="add-file" name="file" type="file" data-show-caption="true">
+                                        <input  type="hidden" name="path" id="add-upload-file"  value="" />
+                                        <p class="help-block">支持jpg、jpeg、png格式，大小不超过2.0M</p>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="add-request">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+-->
+
+<div class="modal fade" id="info-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body ">
+            </div>
+        </div>
+    </div>
+</div>
+
+{include file="layout/footer" title="$title" keywords="开源WEB开发框架" /}
+
+<script type="text/javascript">
+    // $(function () {
+    //     $("#area-modal").modal({
+    //         remote: "page.jsp"
+    //     });
+    // });
+</script>

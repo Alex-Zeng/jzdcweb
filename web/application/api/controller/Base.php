@@ -15,12 +15,6 @@ class Base
     protected $userId = 0;
     protected $groupId = 0;
 
-    public function __construct()
-    {
-
-
-
-    }
 
     /**
      * @desc 执行需要登录
@@ -31,6 +25,7 @@ class Base
         if(!$token){
             return ['status'=>-2,'data'=>[],'msg'=>'数据错误'];
         }
+
         //解析token
         $key = config('jzdc_token_key');
         $data = JWT::decode($token,$key,['HS256']);
@@ -52,15 +47,40 @@ class Base
 
         $this->userId = $data->id;
         $this->groupId = $data->group;
+        return;
     }
 
 
     /**
      * @desc 执行不需要登录操作
      */
-    public function visitor(){
+    public function noauth(){
+        //获取http header变量cookie
+        $token = cookie('_token');
+        if(!$token){
+            return;
+        }
+        //解析token
+        $key = config('jzdc_token_key');
+        $data = JWT::decode($token,$key,['HS256']);
+        //
+        if(!$data->id  || !$data->group || !$data->time || !$data->expire ){
+            return;
+        }
 
+        //更新用户数据
+        $model = new IndexUser();
+        $row = $model->where(['id'=>$data->id])->field(['id','group','state'])->find();
+        if(!$row){
+            return;
+        }
 
+        if($row->group != $data->group || $row->state != 1){
+            return;
+        }
+
+        $this->userId = $data->id;
+        $this->groupId = $data->group;
     }
 
 }

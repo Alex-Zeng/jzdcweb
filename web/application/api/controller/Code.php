@@ -32,12 +32,12 @@ class Code{
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
         }
 
-//        if($valid){
-//            session_id($id);
-//            if(!captcha_check($captcha,$id)){
-//                return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
-//            }
-//        }
+        if($valid){
+            session_id($id);
+            if(!captcha_check($captcha,$id)){
+                return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
+            }
+        }
 
 
 
@@ -169,11 +169,11 @@ class Code{
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
         }
 
-//        if($valid){
-//            if(!captcha_check($captcha)){
-//                return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
-//            }
-//        }
+        if($valid){
+            if(!captcha_check($captcha)){
+                return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
+            }
+        }
 
 
         //发送短信

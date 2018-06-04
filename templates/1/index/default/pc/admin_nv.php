@@ -266,7 +266,8 @@ $(document).ready(function(){
 </style>
 
 <div class=nv>
-	<div class="container"><ul class=nv_ul >
+	<div class="container">
+        <ul class=nv_ul >
 			<li><a href=./index.php?jzdc=index.personal_center><img src="./templates/1/index/default/page_icon/index.personal_center.png" /><span><?php echo self::$language['personal_center']?></span><i class="fa fa-angle-down"></i></a><ul>
     <li><a href="./index.php?jzdc=index.edit_user"><span><?php echo self::$language['pages']['index.edit_user']['name']?></span></a></li>
     <li><a href="./index.php?jzdc=index.edit_phone"><span><?php echo self::$language['pages']['index.edit_phone']['name']?></span></a></li>							

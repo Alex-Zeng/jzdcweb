@@ -351,6 +351,7 @@ foreach($r as $v){
                       <div class=remark>".$v['buyer_remark']."
                             <div class=seller_remark>采购商支付: <span class=value>".self::get_buyer_pay_info($pdo, $v['id'])."</span> </div>
                             <div class=seller_remark>支付至供应商: <span class=value>".self::get_supplier_pay_info($pdo, $v['id'])."</span> </div>
+                            <div class=seller_remark>买家留言: <span class=value>".$v['buyer_comment']."</span> </div>
                       </div>
                 </div>
                 <div class=preferential_td>".$money_info.$v['change_price_reason']."</div>
