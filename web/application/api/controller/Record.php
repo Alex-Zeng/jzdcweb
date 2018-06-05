@@ -8,7 +8,7 @@
 
 namespace app\api\controller;
 
-use app\common\model\MallSearchLog;
+use app\common\model\UserSearchLog;
 
 class Record extends Base{
 
@@ -17,10 +17,13 @@ class Record extends Base{
      * @return array
      */
     public function getSearch(){
-        $model = new MallSearchLog();
-        $rows = $model->where([])->order(['sum'=>'desc','id'=>'desc'])->field(['keyword'])->limit(5)->select();
+        $this->noauth();
+        if($this->userId <= 0){
+            return ['status'=>0,'data'=>[],'msg'=>''];
+        }
+        $model = new UserSearchLog();
+        $rows = $model->where(['user_id'=>$this->userId])->order('update_time','desc')->limit(20)->field(['type','keyword'])->select();
         return ['status'=>0,'data'=>$rows,'msg'=>''];
-
     }
 
 

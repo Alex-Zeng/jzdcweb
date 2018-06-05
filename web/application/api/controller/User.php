@@ -9,6 +9,7 @@ namespace app\api\controller;
 
 use app\common\model\IndexUser;
 use app\common\model\MallReceiver;
+use app\common\model\UserSearchLog;
 use think\Request;
 
 class User extends Base {
@@ -129,4 +130,5 @@ class User extends Base {
         }
         return ['status'=>1,'data'=>[],'msg'=>'删除失败'];
     }
+
 }
