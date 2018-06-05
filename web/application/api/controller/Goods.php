@@ -19,24 +19,6 @@ use think\Request;
 
 class Goods  extends Base {
 
-    /**
-     * @desc 商城首页分类
-     * @return array
-     */
-    public function getCategory(){
-        $model = new MenuMenu();
-        $rows = $model->where(['parent_id'=>16,'visible'=>1])->order('sequence','desc')->field('id,name,url')->select();
-        $data = [];
-        foreach($rows as $row){
-            $data[] = [
-                'id' => $row->id,
-                'name' => $row->name,
-                'url' => $row->url,
-                'img' => getFormatImg($row->id)
-            ];
-        }
-        return ['status'=>0,'data'=>$data,'msg'=>''];
-    }
 
     /**
      * @desc 获取分类信息
@@ -66,6 +48,7 @@ class Goods  extends Base {
             $row['child'] = $rows2;
         }
         return ['status'=>0,'data'=>$rows,'msg'=>''];
+
     }
 
 
@@ -79,6 +62,7 @@ class Goods  extends Base {
     public function getRecommend(Request $request){
         $pageNumber = $request->post('pageNumber',1);
         $pageSize = $request->post('pageSize',10);
+
 
         $start = ($pageNumber - 1)*$pageSize;
         $end = $pageNumber*$pageSize;
@@ -110,6 +94,7 @@ class Goods  extends Base {
         }
         return ['status'=>0,'data'=>['total'=>$total,'list'=>$list],'msg'=>''];
     }
+
 
     /**
      * @desc 添加商品收藏

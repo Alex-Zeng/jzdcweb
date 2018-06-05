@@ -20,6 +20,7 @@ class Record extends Base{
         $model = new MallSearchLog();
         $rows = $model->where([])->order(['sum'=>'desc','id'=>'desc'])->field(['keyword'])->limit(5)->select();
         return ['status'=>0,'data'=>$rows,'msg'=>''];
+
     }
 
 

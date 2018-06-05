@@ -238,7 +238,8 @@ return [
     ],
 
     //自定义配置
-    'jzdc_domain' => 'http://192.168.3.101',//  'http://'.$_SERVER['HTTP_HOST'],
+    'jzdc_domain'=>'http://'.$_SERVER['HTTP_HOST'],
+  //  'jzdc_domain' => 'http://192.168.3.101',//
     'jzdc_token_key' => 'jzdc@12345',
     'jzdc_upload' => [  //上传图片配置参数
         'company' => [

@@ -178,6 +178,7 @@ foreach($r as $v){
 		$tem=$pdo->query($sql,2)->fetch(2);
 		$v['inventory']=$tem['c'];		
 	}
+	//var_dump(self::$language['mall_state']);exit;
 	if($v['min_price']==0){$v['min_price']=$v['w_price'];}
 	$list.="<tr id='tr_".$v['id']."'>
 	<td><input type='checkbox' name='".$v['id']."' id='".$v['id']."' class='id' /></td>

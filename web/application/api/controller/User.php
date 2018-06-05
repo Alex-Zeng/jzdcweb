@@ -73,6 +73,7 @@ class User extends Base {
         return ['status'=>1,'data'=>[],'msg'=>'添加失败'];
     }
 
+
     /**
      * @desc 修改收货人地址
      * @param Request $request
@@ -116,7 +117,6 @@ class User extends Base {
      */
     public function removeAddress(Request $request){
         $id = $request->post('id',0);
-
         $auth = $this->auth();
         if($auth){
             return $auth;
