@@ -1,8 +1,6 @@
 {include file="layout/header" title="$title" keywords="开源WEB开发框架" /}
-<link rel="stylesheet" href="__STATIC__/js/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
 <link rel="stylesheet" href="__STATIC__/js/plugins/bootstrapvalidator/css/bootstrapValidator.css"/>
 {include file="layout/left" groupId="$groupId" keywords="开源WEB开发框架" /}
-<!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <div class="content-header">
         <div class="container-fluid">
@@ -108,7 +106,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="">正文</label>
-                                    <textarea class="textarea" placeholder="公告内容..."  name="content"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                    <textarea id="add-content" class="textarea" placeholder="公告内容..."  name="content"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label >状态</label>
@@ -187,8 +185,7 @@
     </div>
 </div>
 
-
 {include file="layout/footer" title="$title" keywords="开源WEB开发框架" /}
-<script src="__STATIC__/js/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
+<script src="__STATIC__/js/plugins/ckeditor-4.8.0/ckeditor.js"></script>
 <script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
 <script type="text/javascript" src="__STATIC__/js/admin/notice.js"></script>

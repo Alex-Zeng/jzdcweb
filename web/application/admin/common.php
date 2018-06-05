@@ -5,7 +5,9 @@
  */
 function getUserId()
 {
-    session_start();
+    if(!isset($_SESSION)){
+        session_start();
+    }
     $jzdc = isset($_SESSION['jzdc']) ? $_SESSION['jzdc'] : [];
     return isset($jzdc['id']) ? $jzdc['id'] : 0;
 }

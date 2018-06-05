@@ -51,7 +51,6 @@ class Notice extends Base{
         $status = $request->post('status',0);
 
         //验证数据
-
         //添加
         $model = new \app\common\model\Notice();
         $data = ['title'=>$title,'summary'=>$summary,'content'=>$content,'create_time'=>time(),'release_time'=>time(),'create_by'=>getUserId(),'status'=>$status];
@@ -73,7 +72,6 @@ class Notice extends Base{
         $summary = $request->post('summary');
         $content = $request->post('content');
         $status = $request->post('status',0);
-
         //验证数据
         //添加
         $model = new \app\common\model\Notice();

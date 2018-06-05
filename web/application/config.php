@@ -237,6 +237,8 @@ return [
         'list_rows' => 15,
     ],
 
+    'SESSION_AUTO_START' => true,
+
     //自定义配置
     'jzdc_domain'=>'http://'.$_SERVER['HTTP_HOST'],
   //  'jzdc_domain' => 'http://192.168.3.101',//
