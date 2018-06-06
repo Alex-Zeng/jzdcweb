@@ -26,7 +26,6 @@ class Login{
     public function index(Request  $request){
        $name = $request->post('userName','');
        $password = $request->post('password','');
-
        //测试数据
        if(!$name){
            return ['status'=>1,'data'=>[],'msg'=>'账户不能为空'];

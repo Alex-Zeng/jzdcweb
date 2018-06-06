@@ -26,15 +26,5 @@ class Captcha{
         return ['status'=>0,'data'=>['src'=>$http.$src,'id'=>$id],'msg'=>''];
     }
 
-    public function test(Request $request){
-        $captcha = $request->get('code','');
-        $id = $request->get('id');
-        session_id($id);
-        if(!captcha_check($captcha,$id)){
-            return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
-        }
-        return ['status'=>0];
-    }
-
 
 }

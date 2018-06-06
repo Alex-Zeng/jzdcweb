@@ -28,19 +28,19 @@ function getVerificationCode($length = 4){
 }
 
 /**
- * @desc 根据ID返回首页菜单图标路径
- * @param $id
- * @return string
- */
-function getFormatImg($id){
-    return config('jzdc_domain').'/program/menu/icon/'.$id.'.png';
-}
-
-/**
  * @desc 验证手机号
  * @param $phone
  * @return false|int
  */
 function checkPhone($phone){
     return preg_match("/13[123569]{1}\d{8}|15[1235689]\d{8}|188\d{8}/",$phone);
+}
+
+/**
+ * @desc 生成订单号，简单处理
+ * @param int $number
+ * @return string
+ */
+function getOrderOutId($number = 0){
+    return date('YmdHis').$number.rand(10,100);
 }

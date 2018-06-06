@@ -14,9 +14,6 @@ use think\Request;
 
 class User extends Base {
 
-    public function __construct()
-    {
-    }
 
     /**
      * @desc 返回用户所在组
@@ -36,7 +33,7 @@ class User extends Base {
      * @throws \think\exception\DbException
      */
     public function addAddress(Request $request){
-        $areaId = $request->post('areaId',0);
+        $areaId = $request->post('areaId',0,'intval');
         $detail = $request->post('detail','');
         $postCode = $request->post('postCode','');
         $name = $request->post('name','');
@@ -81,8 +78,8 @@ class User extends Base {
      * @return array
      */
     public function editAddress(Request $request){
-        $id = $request->post('id',0);
-        $areaId = $request->post('areaId',0);
+        $id = $request->post('id',0,'intval');
+        $areaId = $request->post('areaId',0,'intval');
         $detail = $request->post('detail','');
         $postCode = $request->post('postCode','');
         $name = $request->post('name','');
@@ -117,7 +114,7 @@ class User extends Base {
      * @return array
      */
     public function removeAddress(Request $request){
-        $id = $request->post('id',0);
+        $id = $request->post('id',0,'intval');
         $auth = $this->auth();
         if($auth){
             return $auth;

@@ -21,6 +21,25 @@ class Goods  extends Base {
 
 
     /**
+     * @desc 商城首页分类
+     * @return array
+     */
+    public function getCategory(){
+        $model = new MenuMenu();
+        $rows = $model->where(['parent_id'=>16,'visible'=>1])->order('sequence','desc')->field(['id','name','url','path'])->select();
+        $data = [];
+        foreach($rows as $row){
+            $data[] = [
+                'id' => $row->id,
+                'name' => $row->name,
+                'url' => $row->url,
+                'img' => MenuMenu::getFormatImg($row->path)
+            ];
+        }
+        return ['status'=>0,'data'=>$data,'msg'=>''];
+    }
+
+    /**
      * @desc 获取分类信息
      * @param Request $request
      * @return array
@@ -63,7 +82,6 @@ class Goods  extends Base {
         $pageNumber = $request->post('pageNumber',1,'intval');
         $pageSize = $request->post('pageSize',10,'intval');
 
-
         $start = ($pageNumber - 1)*$pageSize;
         $end = $pageNumber*$pageSize;
 
@@ -83,6 +101,7 @@ class Goods  extends Base {
 
         $rows = $model->where($where)->order('id desc, bidding_show desc')->limit($start,$end)->field(['id','icon','title','w_price','min_price','max_price','discount','bidding_show'])->select();
         $list = [];
+        //'id':41,'title':'办公室专用打印纸','url':'http://127.0.0.1/program/mall/img_thumb/2018_05/15/1526377338_0_3947.gif','min_price':'0.00','max_price':'0.00'
         foreach ($rows as $row){
             $list[] = [
                 'id' => $row->id,

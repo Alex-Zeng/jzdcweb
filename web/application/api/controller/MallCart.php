@@ -8,6 +8,7 @@
 
 namespace app\api\controller;
 
+use think\Request;
 
 class MallCart extends Base{
 

@@ -19,10 +19,8 @@ class Code{
     public function registerSend(Request $request){
         $phone = $request->post('phone','');
         $captcha = $request->post('code','');
-        $valid = $request->post('codeValid',0);
+        $valid = $request->post('codeValid',0,'intval');
         $id = $request->post('id','');
-
-//        header('Access-Control-Allow-Origin:*');
 
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
@@ -42,8 +40,6 @@ class Code{
             }
         }
 
-
-
         //检查手机号是否存在
         $model = new IndexUser();
         $user = $model->getUserByPhone($phone);
@@ -52,7 +48,6 @@ class Code{
         }
 
         $code = getVerificationCode();
-
         $param['code'] = $code;
         $yunpian = new \sms\Yunpian();
         //发送短信验证码
@@ -118,9 +113,8 @@ class Code{
     public function loginSend(Request $request){
         $phone = $request->post('phone','');
         $captcha = $request->post('code','');
-        $valid = $request->post('codeValid',0);
+        $valid = $request->post('codeValid',0,'intval');
         $id = $request->post('id','');
-        header('Access-Control-Allow-Origin:*');
 
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
@@ -170,7 +164,7 @@ class Code{
     public function passwordSend(Request $request){
         $phone = $request->post('phone','');
         $captcha = $request->post('code','');
-        $valid = $request->post('codeValid',0);
+        $valid = $request->post('codeValid',0,'intval');
 
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
@@ -178,18 +172,14 @@ class Code{
         if(!checkPhone($phone)){
             return  ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
         }
-
-
         if(!$captcha && $valid){
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
         }
-
         if($valid){
             if(!captcha_check($captcha)){
                 return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
             }
         }
-
 
         //发送短信
         $code = getVerificationCode();

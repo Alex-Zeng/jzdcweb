@@ -19,8 +19,9 @@ class Img
      */
     public function banner(Request $request)
     {
+        $type = $request->post('type',1,'intval');
         $model = new SliderImg();
-        $rows = $model->where('group_id',27)->field('id,name,url,target,path')->select();
+        $rows = $model->where(['group_id'=>27,'type'=>$type,'status'=>1])->field('id,name,url,target,path')->limit(3)->select();
         $data = [];
         foreach($rows as $row){
             $data[] = [
@@ -30,6 +31,12 @@ class Img
                 'img' => SliderImg::getFormatImg($row->path),
                 'target' => $row->target
             ];
+        }
+
+        //如果为空返回默认图
+        if(!$data){
+            $path = $type == 1 ? 'pc.png' : 'h5.png';
+            $data[] = ['title'=>'','id'=>0,'url'=>'http://http://www.jizhongdiancai.com/','img' => SliderImg::getFormatImg($path),'target'=>'_blank'];
         }
         return ['status'=>0,'data'=>$data,'msg'=>''];
     }
