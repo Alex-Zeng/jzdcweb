@@ -106,7 +106,7 @@ switch ($act){
                     $param = array (
                         'order_id' => $r['out_id'],
                     );
-                    $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_pending_send', $param);
+                   // $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_pending_send', $param);
                 }
             }
             exit("{'state':'success','info':'<span class=success>".self::$language['success']."</span>'}");
@@ -151,7 +151,7 @@ switch ($act){
                 $param = array (
                     'order_id' => $r['out_id'],
                 );
-                $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_pending_send', $param);
+               // $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_pending_send', $param);
             }
         }
 
@@ -232,7 +232,7 @@ switch ($act){
                 $param = array (
                     'order_id' => $r['out_id'],
                 );
-                $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_pending_send', $param);
+              //  $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_pending_send', $param);
             }
         }
 
@@ -276,7 +276,7 @@ switch ($act){
                 $param = array (
                     'order_id' => $r['out_id'],
                     );
-                $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_cancel', $param);
+              //  $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_cancel', $param);
             }
 
             exit("{'state':'success','info':'<span class=success>".self::$language['success']."</span>'}");
