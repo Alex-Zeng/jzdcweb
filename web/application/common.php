@@ -11,6 +11,14 @@
 
 // 应用公共文件
 
+/**
+ * @desc 检查是否开启session
+ */
+function startSession(){
+    if(!isset($_SESSION)){
+        session_start();
+    }
+}
 
 /**
  * @desc 获取随机验证码

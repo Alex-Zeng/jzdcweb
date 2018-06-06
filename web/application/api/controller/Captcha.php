@@ -18,8 +18,7 @@ class Captcha{
      * @return array
      */
     public function img(Request $request){
-        $id = $request->get('id',0);
-        session_start();
+        startSession();
         $id = session_id();
         $src = captcha_src($id);
         $http = config('jzdc_domain');
