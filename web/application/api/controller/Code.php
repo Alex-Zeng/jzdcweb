@@ -34,9 +34,7 @@ class Code{
         }
 
         if($valid){
-            session_id($id);
-            startSession();
-            if(!captcha_check($captcha,$id)){
+            if(!captchaDb_check($captcha,$id)){
                 return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
             }
         }
@@ -123,15 +121,12 @@ class Code{
             return  ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
         }
 
-
         if(!$captcha && $valid){
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
         }
 
         if($valid){
-            session_id($id);
-            startSession();
-            if(!captcha_check($captcha,$id)){
+            if(!captchaDb_check($captcha,$id)){
                 return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
             }
         }
@@ -177,8 +172,7 @@ class Code{
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
         }
         if($valid){
-            startSession();
-            if(!captcha_check($captcha)){
+            if(!captchaDb_check($captcha)){
                 return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
             }
         }

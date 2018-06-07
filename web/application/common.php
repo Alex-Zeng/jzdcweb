@@ -20,6 +20,11 @@ function startSession(){
     }
 }
 
+
+function captchaDb_check($value, $id = "", $config = []){
+    $captcha = new \think\captcha\Captcha($config);
+    return $captcha->checkDb($value, $id);
+}
 /**
  * @desc 获取随机验证码
  * @param int $length
