@@ -8,6 +8,9 @@
 namespace app\api\controller;
 
 use app\common\model\IndexUser;
+use app\common\model\MallFavorite;
+use app\common\model\MallGoods;
+use app\common\model\MallOrder;
 use app\common\model\MallReceiver;
 use app\common\model\UserSearchLog;
 use think\Request;
@@ -127,5 +130,98 @@ class User extends Base {
         }
         return ['status'=>1,'data'=>[],'msg'=>'删除失败'];
     }
+
+    /**
+     * @desc 返回用户收藏商品数量
+     * @return array
+     */
+    public function getFavoriteNumber(){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $model = new MallFavorite();
+        $count = $model->where(['user_id'=>$this->userId])->count();
+
+        return ['status'=>0,'data'=>['number'=>$count],'msg'=>''];
+    }
+
+    /**
+     * @desc 返回收藏列表
+     * @param Request $request
+     * @return array|void
+     */
+    public function getFavoriteList(Request $request){
+        $pageSize = $request->post('pageSize',10,'intval');
+        $pageNumber = $request->post('pageNumber',1,'intval');
+        $field = $request->post('field','time','trim');
+        $sort = $request->post('sort','desc','trim');
+        if(!in_array($field,['time','price'])){
+            return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
+        }
+        if(!in_array($sort,['asc','desc'])){
+            return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
+        }
+
+        if($pageSize > 10){ $pageSize = 10;};
+        $offset = ($pageNumber - 1)*$pageSize;
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        $model = new MallFavorite();
+        $field == 'time' ? ($field = 'a.'.$field) : ($field = 'b.w_price');
+        $total = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['user_id'=>6])->count();
+        $rows =  $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['user_id'=>6])->order([$field => $sort])->field(['b.id','b.title','b.w_price','b.icon'])->limit($offset,$pageSize)->select();
+
+        foreach ($rows as &$row){
+            $row['icon'] = MallGoods::getFormatImg($row->icon);
+        }
+        return ['status'=>0,'data'=>['total'=>$total,'list'=>$rows],'msg'=>''];
+    }
+
+    /**
+     * @desc
+     * @return array|void
+     */
+    public function getSupplierOrderInfo(){
+//        $auth = $this->auth();
+//        if($auth){
+//            return $auth;
+//        }
+        //
+        $model = new MallOrder();
+
+        $startTime = strtotime(date("Y-m-d 00:00:00",strtotime("-1 day")));
+        $endTime = strtotime(date('Y-m-d 23:59:59',strtotime("-1 day")));
+
+        //
+        $yesterdayCount = $model->where(['supplier'=>$this->userId])->where('add_time','>',$startTime)->where('add_time','<',$endTime)->count();
+        $total = $model->where(['supplier'=>$this->userId])->count();
+        $pendingNumber = $model->where(['supplier'=>$this->userId,'state'=>MallOrder::STATE_DELIVER])->count();
+
+       return ['status'=>0,'data'=>['yesterday'=>$yesterdayCount,'total'=>$total,'pending'=>$pendingNumber],'msg'=>''];
+    }
+
+    /**
+     * @desc
+     * @return array|void
+     */
+    public function getBuyerOrderInfo(){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        //
+        $model = new MallGoods();
+        $payCount = $model->where(['buyer_id'=>$this->userId])->count();
+        $recieveNumber = $model->where(['buyer_id'=>$this->userId])->count();
+        $pendingNumber = $model->where(['buyer_id'=>$this->userId])->count();
+
+        return ['status'=>0,'data'=>['pay'=>$payCount,'recieve'=>$recieveNumber,'deliver'=>$pendingNumber],'msg'=>''];
+    }
+
 
 }
