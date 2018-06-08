@@ -25,6 +25,7 @@ class Register{
         $phone = $request->post('phone','');
         $code = $request->post('code','');
         $username = $request->post('userName','');
+        $channel = $request->post('channel',0,'intval');
 
         //判断手机号
         if(!$phone){
@@ -54,7 +55,12 @@ class Register{
 
         //验证短信
         $codeModel = new \app\common\model\Code();
-        $codeRow = $codeModel->where(['phone'=>$phone,'type'=>\app\common\model\Code::TYPE_PHONE_REGISTER])->order('id','desc')->find();
+        if($channel == 1){
+            $codeRow = $codeModel->where(['phone'=>$phone,'type'=>\app\common\model\Code::TYPE_PHONE_REGISTER])->order('id','desc')->find();
+        }else{
+            $codeRow = $codeModel->where(['phone'=>$phone,'type'=>\app\common\model\Code::TYPE_PHONE_LOGIN])->order('id','desc')->find();
+        }
+
         if(!$codeRow || $codeRow['code']!= $code){
             return ['status'=>1,'data'=>[],'msg'=>'短信验证码错误'];
         }

@@ -52,11 +52,19 @@ class User extends Base {
             return $auth;
         }
 
+        $model = new MallReceiver();
+
         $userId = $this->userId;
+        $count = $model->where(['user_id'=>$userId])->count();
+        if($count >= 20){
+            return ['status'=>1,'data'=>[],'msg'=>'最多添加20个收货人地址'];
+        }
+
+
         $userRow = (new IndexUser())->getInfoById($userId);
         $userName = $userRow ? $userRow['username'] : '';
 
-        $model = new MallReceiver();
+
         $data = [
             'username' => $userName,
             'time' => time(),
@@ -187,10 +195,10 @@ class User extends Base {
      * @return array|void
      */
     public function getSupplierOrderInfo(){
-//        $auth = $this->auth();
-//        if($auth){
-//            return $auth;
-//        }
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
         //
         $model = new MallOrder();
 

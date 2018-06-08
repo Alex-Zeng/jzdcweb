@@ -109,17 +109,18 @@ class Login{
         $row = $model->where(['phone'=>$phone])->field(['id','username','password','group','nickname','icon','state'])->find();
         if(!$row){
             //插入新用户
-            $user = ['group'=>6,'phone'=>$phone,'state'=>1];
-            $result = IndexUser::create($user);
-            if(!$result){
-                return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
-            }
-            $token = [
-                "id" => $result->id,
-                "group" => $user['group'],
-                "time" => time(),
-                "expire" => time() + 5*3600   //过期时间
-            ];
+//            $user = ['group'=>6,'phone'=>$phone,'state'=>1,'username'=>$phone];
+//            $result = IndexUser::create($user);
+//            if(!$result){
+//                return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
+//            }
+//            $token = [
+//                "id" => $result->id,
+//                "group" => $user['group'],
+//                "time" => time(),
+//                "expire" => time() + 5*3600   //过期时间
+//            ];
+            return ['status'=>-2,'data'=>[],'msg'=>'用户未注册'];
         }else{
             if($row->state != 1){
                 return ['status'=>1,'data'=>[],'msg'=>'用户已被禁用'];
