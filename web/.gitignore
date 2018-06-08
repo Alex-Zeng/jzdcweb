@@ -2,3 +2,7 @@
 composer.lock
 *.log
 public/uploads/banner/*
+public/uploads/type_icon/*
+public/uploads/type_index_icon/*
+public/uploads/goods_thumb/*
+public/uploads/order_icon/*
