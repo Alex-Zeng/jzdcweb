@@ -131,7 +131,7 @@ class Password{
 
         //更新密码
         $result = $model->save(['password'=>md5($password)],['id'=>$user->id]);
-        if($result != false){
+        if($result !== false){
             $data = [];
             //生成token
             $key = config('jzdc_token_key');

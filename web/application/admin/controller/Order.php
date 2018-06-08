@@ -40,7 +40,11 @@ class Order extends Base{
             $goodsRows = $goodsModel->where(['order_id'=>$row->id])->order('time','desc')->select();
             $total = 0;
             foreach ($goodsRows as & $goodsRow){
-                $goodsRow['icon'] = MallOrderGoods::getFormatIcon($goodsRow->icon);
+                $productModel = new MallGoods();
+                $productRow = $productModel->where(['id'=>$goodsRow->goods_id])->find();
+                $path = $productRow ? $productRow->icon : '';
+                $goodsRow['icon'] = MallGoods::getFormatImg($path);
+
                 $total += $goodsRow->price * $goodsRow->quantity;
             }
             $row['total'] = $total;
