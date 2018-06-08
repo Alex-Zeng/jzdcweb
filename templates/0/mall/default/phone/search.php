@@ -119,12 +119,11 @@
     <div class=show_search_div>
     	<div class=top_input_div>
         	<div class=return_div></div><div class=input_div>
-           
          		<select class=type>
-                    <option value="0"><?php echo self::$language['goods'];?></option>
-                    <option value="1">供应商</option>
-                </select>
-                <input type="text"  class='search'  placeholder="<?php echo $module['jzdc_search_placeholder']?>" />
+				   <option value="0"><?php echo self::$language['goods'];?></option>
+                   <option value="1">供应商</option>
+				</select>
+				<input type="text"  class='search'  placeholder="<?php echo $module['jzdc_search_placeholder']?>" />
             </div><div class=button_div><?php echo self::$language['search'];?></div>
         </div>
         <div class=hot_search_div>

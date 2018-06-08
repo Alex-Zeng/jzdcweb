@@ -101,8 +101,9 @@ foreach($r as $v){
 	$r2=$pdo->query($sql,2);
 	$temp='';
 	$phone_temp='';
+	$priceHtml = '';
 	if($v['state']==0 || ($v['state']==1 && $v['pay_method']=='cash_on_delivery')){$edit_quantity="<a href=# class=edit_a d_id act='edit_quantity'></a>";}else{$edit_quantity='';}
-    $priceHtml = '';
+	
 	
 	foreach($r2 as $v2){
 		if($v['preferential_way']==5){$o_price='<span class=o_price>'.$v2['price'].'</span>';$v2['price']=$v2['transaction_price'];}else{$o_price='';}
@@ -123,7 +124,6 @@ foreach($r as $v){
 		}
 		
 		$goods_money+=$v2['transaction_price']*$v2['quantity'];
-
 		//计算单价 以及数量
         $priceHtml.='<div class=line><span class=m_label>单价</span><span class=value><input type="text"  value="'.$v2['price'].'" id="p_unit_price_'.$v['id'].'" /> <span class=state>元</span></span></div>';
         $priceHtml.='<div class=line><span class=m_label>数量</span><span class=value><input style="height: 31px" type="number" min="1"  value="'.self::format_quantity($v2['quantity']).'" id="p_amount_'.$v['id'].'" /></span></div>';
@@ -151,7 +151,7 @@ foreach($r as $v){
             $act='<div class=line><select id="sign_type" class="form-control" onchange="signTypeChange(this,'.$v['id'].')"><option value="1" selected>已签定合同</option><option value="2">未签定合同</option></select></div>';
 
             $act.='<div id="sign1_'.$v['id'].'" >';
-            $act.=$priceHtml;
+			$act.=$priceHtml;
             $act.='<div class=line><span class=m_label>核实总价</span><span class=value><input type="text" id="price_'.$v['id'].'" /> <span class=state>元</span></span></div>';
             $act.='<div class=line><span class=m_label>合同编号</span><span class=value><input type="text" id="contract_number_'.$v['id'].'" /> <span class=state></span></span></div>';
             $act.='<div class=line><span class=m_label>账期截止</span><span class=value><input type="text" id="pay_date_'.$v['id'].'" value="" onclick="show_datePicker(this.id,\'date\')" onblur="hide_datePicker()"/> <span class=state>(如果没有账期,请留空)</span></span></div>';
@@ -351,7 +351,7 @@ foreach($r as $v){
                       <div class=remark>".$v['buyer_remark']."
                             <div class=seller_remark>采购商支付: <span class=value>".self::get_buyer_pay_info($pdo, $v['id'])."</span> </div>
                             <div class=seller_remark>支付至供应商: <span class=value>".self::get_supplier_pay_info($pdo, $v['id'])."</span> </div>
-                            <div class=seller_remark>买家留言: <span class=value>".$v['buyer_comment']."</span> </div>
+							 <div class=seller_remark>买家留言: <span class=value>".$v['buyer_comment']."</span> </div>
                       </div>
                 </div>
                 <div class=preferential_td>".$money_info.$v['change_price_reason']."</div>

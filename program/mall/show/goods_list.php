@@ -5,7 +5,7 @@ $module['data']['top_html']='';
 $_GET['search']=safe_str(@$_GET['search']);
 $_GET['search']=trim($_GET['search']);
 $show_method=(isset($_GET['show_method']))?$_GET['show_method']:'show_grid';
-$category = isset($_GET['category']) ? $_GET['category'] : 0;   //0=
+$category = isset($_GET['category']) ? $_GET['category'] : 0; 
 $module['ad']='';
 $search_type=false;
 if($_GET['search']!='' && !isset($_GET['no_search_type'])){
@@ -281,7 +281,6 @@ if(intval(@$_GET['max_price'])!=0){
 	$where.=" and `w_price`<=".intval($_GET['max_price']);	
 }
 
-
 if($category == 1){
     //查询用户数据表
     if($_GET['search']){
@@ -297,18 +296,18 @@ if($category == 1){
     }
 }else{
     if($_GET['search']!=''){
-        $where.=" and (`title` like '%".$_GET['search']."%')";
-
-        if($_GET['current_page']==1 && !isset($_GET['click'])){
-            $temp_sql="select `id` from ".self::$table_pre."search_log where `keyword`='".$_GET['search']."' limit 0,1";
-            $r=$pdo->query($temp_sql,2)->fetch(2);
-            if($r['id']==''){
-                $temp_sql="insert into ".self::$table_pre."search_log (`keyword`) values ('".$_GET['search']."')";
-            }else{
-                $temp_sql="update ".self::$table_pre."search_log set `sum`=`sum`+1,`year`=`year`+1,`month`=`month`+1,`week`=`week`+1,`day`=`day`+1 where `id`=".$r['id'];
-            }
-            $pdo->exec($temp_sql);
-        }
+	$where.=" and (`title` like '%".$_GET['search']."%')";
+	
+	if($_GET['current_page']==1 && !isset($_GET['click'])){
+		$temp_sql="select `id` from ".self::$table_pre."search_log where `keyword`='".$_GET['search']."' limit 0,1";
+		$r=$pdo->query($temp_sql,2)->fetch(2);
+		if($r['id']==''){
+			$temp_sql="insert into ".self::$table_pre."search_log (`keyword`) values ('".$_GET['search']."')";	
+		}else{
+			$temp_sql="update ".self::$table_pre."search_log set `sum`=`sum`+1,`year`=`year`+1,`month`=`month`+1,`week`=`week`+1,`day`=`day`+1 where `id`=".$r['id'];
+		}
+		$pdo->exec($temp_sql);
+	  }
     }
 
 }

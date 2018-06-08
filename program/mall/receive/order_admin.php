@@ -57,11 +57,12 @@ switch ($act){
 
     case 'pending_price'://================================================================================================================
         //待核价 --> 待签约
+
         $price  =@$_GET['price'];
         if($price<=0){exit("{'state':'fail','info':'<span class=fail>核实价格不正确</span>'}");}
 
         if($r['state']!=0){exit("{'state':'fail','info':'<span class=fail>".self::$language['state'].':'.self::$language['order_state'][$r['state']]." ".self::$language['inoperable']."</span>'}");}
-        $sql="update ".self::$table_pre."order set `state`='1',`goods_money`=".$price.", `received_money`=".$price.",`sum_money`=".$price.",`actual_money`=".$price."  where `id`=".$id;
+        $sql="update ".self::$table_pre."order set `state`='1',`goods_money`=".$price.", `received_money`=".$price.",`sum_money`=".$price.",`actual_money`=".$price." where `id`=".$id;
         if($pdo->exec($sql)){
             $r['state']=1;
             exit("{'state':'success','info':'<span class=success>".self::$language['success']."</span>'}");
@@ -75,12 +76,12 @@ switch ($act){
         $contract_number  =@$_GET['number'];
         $pay_date =@$_GET['date'];
         $price  =@$_GET['price'];
-        $product_amount = isset($_GET['product_amount']) ? $_GET['product_amount'] : 0;
+		$product_amount = isset($_GET['product_amount']) ? $_GET['product_amount'] : 0;
         $unit_price = isset($_GET['unit_price']) ? $_GET['unit_price'] : 0;
 
         if($price<=0){exit("{'state':'fail','info':'<span class=fail>核实价格不正确</span>'}");}
         if(empty($contract_number)){exit("{'state':'fail','info':'<span class=fail>合同编号不能为空</span>'}");}
-        if($unit_price<=0){exit("{'state':'fail','info':'<span class=fail>单价不正确</span>'}");}
+		if($unit_price<=0){exit("{'state':'fail','info':'<span class=fail>单价不正确</span>'}");}
         if($product_amount<=0){exit("{'state':'fail','info':'<span class=fail>产品数量不正确</span>'}");}
         if($r['state']<>0 ){exit("{'state':'fail','info':'<span class=fail>".self::$language['state'].':'.self::$language['order_state'][$r['state']]." ".self::$language['inoperable']."</span>'}");}
 
@@ -95,7 +96,7 @@ switch ($act){
 
         if($pdo->exec($sql)){
             $r['state']=$status;
-            //更新商品单价
+			  //更新商品单价
             $priceSql = "update ".self::$table_pre."order_goods set `price`=".$unit_price.",`quantity`=".$product_amount." where order_id=".$id;
             $pdo->exec($priceSql);
             if ($status == '3'){
@@ -106,7 +107,7 @@ switch ($act){
                     $param = array (
                         'order_id' => $r['out_id'],
                     );
-                   // $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_pending_send', $param);
+                    $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_pending_send', $param);
                 }
             }
             exit("{'state':'success','info':'<span class=success>".self::$language['success']."</span>'}");
@@ -151,7 +152,7 @@ switch ($act){
                 $param = array (
                     'order_id' => $r['out_id'],
                 );
-               // $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_pending_send', $param);
+                $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_pending_send', $param);
             }
         }
 
@@ -232,7 +233,7 @@ switch ($act){
                 $param = array (
                     'order_id' => $r['out_id'],
                 );
-              //  $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_pending_send', $param);
+                $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_pending_send', $param);
             }
         }
 
@@ -276,7 +277,7 @@ switch ($act){
                 $param = array (
                     'order_id' => $r['out_id'],
                     );
-              //  $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_cancel', $param);
+                $msg = send_notice_sms(self::$config, $pdo, $r2["phone"], 'order_cancel', $param);
             }
 
             exit("{'state':'success','info':'<span class=success>".self::$language['success']."</span>'}");

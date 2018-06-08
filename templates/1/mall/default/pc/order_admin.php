@@ -80,6 +80,7 @@
                 alert("请输入正确的核实价格");
                 return false;
             }
+
             if(confirm("确定要将订单状态改为:待签约?")){
                 $.get('<?php echo $module['action_url'];?>&act=pending_price', {id: id, price: price}, function (data) {
                     try {
@@ -109,7 +110,8 @@
                 alert("请输入正确的核实价格");
                 return false;
             }
-            //单价
+
+			  //单价
             var unit_price = $('#p_unit_price_'+id).val();
             if(unit_price.length == 0|| unit_price < 0){
                 alert("请输入正确的单价");
@@ -122,6 +124,7 @@
                 return false;
             }
 
+			
             if(number1.length == 0){
                 alert("请输入正确的合同编号");
                 return false;

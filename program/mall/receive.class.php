@@ -2302,7 +2302,7 @@ function delete_shop_relevant($pdo,$shop_id){
 		return $pdo->exec($sql);	
 	}
 	
-//======================================================================================================= fv
+//======================================================================================================= 更新店内会员 订单统计
 	function update_shop_buyer($pdo,$table_pre,$order){
 		$sql="select count(id) as c,sum(`actual_money`) as c2 from ".self::$table_pre."order where `shop_id`=".$order['shop_id']." and `buyer`='".$order['buyer']."' and `state`=6";
 		$r=$pdo->query($sql,2)->fetch(2);

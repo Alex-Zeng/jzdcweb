@@ -13,7 +13,6 @@ if(strtolower($_SERVER['HTTP_HOST'])!='www.lansion.cn' && strtolower($_SERVER['H
 	if(is_match( '/^(.*)\.jzdc\.com$/',strtolower($_SERVER['HTTP_HOST']))){header('location:http://www.lansion.cn/index.php?jzdc=mall.shop_index&domain='.$_SERVER['HTTP_HOST']);exit;}
 }
 */
-
 //解析参数
 if(isset($_GET['s']) && $_GET['s']){
     // 定义应用目录

@@ -19,7 +19,7 @@
                 	<?php $v['object']->$v['method']($v['pdo'],$v['args'])?>
                 <?php }?>
             </div>
-
+        
         </div>
     </div>
     <!--middle_malllayout_end-->
