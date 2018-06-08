@@ -46,7 +46,7 @@ function getVerificationCode($length = 4){
  * @return false|int
  */
 function checkPhone($phone){
-    return preg_match("/13[1235689]{1}\d{8}|15[01235689]\d{8}|188\d{8}|183\d{8}/",$phone);
+    return preg_match("/^1[34578]\d{9}$/ims",$phone);
 }
 
 /**
