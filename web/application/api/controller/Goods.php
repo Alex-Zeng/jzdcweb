@@ -10,6 +10,7 @@ namespace app\api\controller;
 use app\common\model\IndexUser;
 use app\common\model\MallFavorite;
 use app\common\model\MallGoods;
+use app\common\model\MallGoodsSpecifications;
 use app\common\model\UserSearchLog;
 use app\common\model\MallType;
 use app\common\model\MallTypeOption;
@@ -248,6 +249,27 @@ class Goods  extends Base {
         //商家
         $userModel = new IndexUser();
         $user = $userModel->getInfoById($row->supplier);
+
+
+        //
+        $standards = [];
+        $mallTypeModel = new MallType();
+        $mallTypeRow = $mallTypeModel->where(['id'=>$row->type])->find();
+
+        $goodsSpecificationsModel = new MallGoodsSpecifications();
+        if($mallTypeRow && $mallTypeRow->color == 1){
+            $rows =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where('b.real_name','like','%'.$keywords.'%')->order('a.w_price',$sort)->field(['a.id','a.icon','a.title','a.w_price','a.min_price','a.max_price','a.discount','a.bidding_show'])->select();
+
+        }
+
+        if($mallTypeRow && $mallTypeRow->diy_option == 1){
+            $rows =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where('b.real_name','like','%'.$keywords.'%')->order('a.w_price',$sort)->field(['a.id','a.icon','a.title','a.w_price','a.min_price','a.max_price','a.discount','a.bidding_show'])->select();
+        }
+
+
+
+
+
 
         //查询规格
         $option = [];

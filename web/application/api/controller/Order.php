@@ -30,6 +30,7 @@ class Order extends Base{
 //            return $auth;
 //        }
 
+        //商品规格{}
         //根据购物清单分商家生成订单
         $goodsArr = [19 => 2,20 => 4,21 => 5];
 //        $goodsArr = [
