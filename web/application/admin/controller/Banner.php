@@ -79,7 +79,7 @@ class Banner extends Base {
         $model = new SliderImg();
         $data = ['name'=>$title,'url'=>$link,'type'=>$type,'target'=>$target,'sequence'=>$sequence,'status'=>$status,'path'=>$path];
         $result = $model->save($data,['id'=>$id]);
-        if($result == true){
+        if($result !== false){
             return ['status'=>0,'msg'=>'修改成功'];
         }
         return ['status'=>1,'msg'=>'修改失败'];
