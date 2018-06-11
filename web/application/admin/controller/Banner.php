@@ -54,7 +54,7 @@ class Banner extends Base {
         $model = new SliderImg();
         $data = ['group_id'=>27,'name'=>$title,'url'=>$link,'type'=>$type,'target'=>$target,'sequence'=>$sequence,'status'=>$status,'path'=>$path];
         $result = $model->save($data);
-        if($result == true){
+        if($result !== false){
             return ['status'=>0,'msg'=>'添加成功'];
         }
         return ['status'=>1,'添加失败'];
