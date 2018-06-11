@@ -258,5 +258,5 @@ return [
             'thumb' => ['width'=>100,'height'=>100]
         ]
     ],
-    'jzdc_doc_path' => 'http://192.168.3.101/web/public/uploads/'
+    'jzdc_doc_path' => 'http://'.$_SERVER['HTTP_HOST'].'/web/public/uploads/'
 ];
