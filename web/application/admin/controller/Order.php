@@ -14,6 +14,7 @@ use app\common\model\MallOrder;
 use app\common\model\MallOrderGoods;
 use app\common\model\MallOrderPay;
 use app\common\model\MallShopFinance;
+use app\common\model\OrderMsg;
 use sms\Yunpian;
 use think\Request;
 
@@ -101,6 +102,12 @@ class Order extends Base{
                   $user = $userModel->getInfoById($row->supplier);
                   $yunpian = new Yunpian();
                  // $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
+
+                //更新消息通知
+                $orderMsgModel = new OrderMsg();
+                $content = "您好，订单号：{$row->out_id}现可安排发货，发货完成后，请在\"用户中心-待发货\"发布物流信息，谢谢。";
+                $msgData = ['title'=>"待发货",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer,'create_time'=>time()];
+                $orderMsgModel->save($msgData);
             }
             return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
         }
@@ -130,6 +137,13 @@ class Order extends Base{
                 $user = $userModel->getInfoById($row->supplier);
                 $yunpian = new Yunpian();
                 // $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
+
+                //更新消息通知
+                $orderMsgModel = new OrderMsg();
+                $statusList = MallOrder::getStateList();
+                $content = "您好，订单号：{$row->out_id}现可安排发货，发货完成后，请在\"用户中心-待发货\"发布物流信息，谢谢。";
+                $msgData = ['title'=>$statusList[$row->state],'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer,'create_time'=>time()];
+                $orderMsgModel->save($msgData);
             }
             return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
         }
@@ -185,6 +199,13 @@ class Order extends Base{
                 $user = $userModel->getInfoById($row->supplier);
                 $yunpian = new Yunpian();
                 // $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
+
+                //更新消息通知
+                $orderMsgModel = new OrderMsg();
+                $statusList = MallOrder::getStateList();
+                $content = "您好，订单号：{$row->out_id}现可安排发货，发货完成后，请在\"用户中心-待发货\"发布物流信息，谢谢。";
+                $msgData = ['title'=>$statusList[$row->state],'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer,'create_time'=>time()];
+                $orderMsgModel->save($msgData);
             }
             if($flag == 3){
                  //更新店铺财务记录
@@ -210,6 +231,13 @@ class Order extends Base{
 //                    $pdo->exec($sql);
 //
 //                }
+
+                //更新消息通知
+                $orderMsgModel = new OrderMsg();
+                $content = "尊敬的供应商用户，订单号：{$row->out_id}的款项已经汇出,实际到账时间依您的银行通知为准，详细汇款信息请进入\"用户中心-待收款\"中查看，谢谢。";
+                $msgData = ['title'=>"打款给供应商",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
+                $orderMsgModel->save($msgData);
+
             }
             return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
         }
@@ -234,6 +262,16 @@ class Order extends Base{
 
         $result = $model->save(['state'=>MallOrder::STATE_SIGN],['id'=>$id]);
         if($result == true){
+            //更新消息通知
+            $orderMsgModel = new OrderMsg();
+            $content = "尊敬的用户，经与您确认，订单号：{$row->out_id}现已取消交易，感谢您的使用。";
+            //采购商
+            $msgData = ['title'=>"关闭订单",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer,'create_time'=>time()];
+            $orderMsgModel->save($msgData);
+            //供应商
+            $msgData['user_id'] = $row->supplier;
+            $orderMsgModel->save($msgData);
+
             return ['status'=>0,'data'=>[],'msg'=>'成功取消订单'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'失败取消订单'];
