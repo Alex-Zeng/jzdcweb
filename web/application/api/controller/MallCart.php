@@ -8,6 +8,8 @@
 
 namespace app\api\controller;
 
+use app\common\model\MallGoods;
+use app\common\model\MallGoodsSpecifications;
 use think\Request;
 
 class MallCart extends Base{
@@ -38,6 +40,8 @@ class MallCart extends Base{
     public function add(Request $request){
         $id = $request->post('id',0);
         $number = $request->post('number',1);
+        $optionId = $request->post('optionId',0,'intval');
+        $colorId = $request->post('colorId',0,'intval');
 
         //验证登录
         $auth = $this->auth();
@@ -51,9 +55,12 @@ class MallCart extends Base{
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'商品不存在'];
         }
-        //$
+        //
+        $goodsSpecificationsModel = new MallGoodsSpecifications();
+        $specificationsRow = $goodsSpecificationsModel->where(['color_id'=>$colorId,'option_id'=>$optionId,'goods_id'=>$id])->field(['id','w_price'])->find();
+
         $cartModel = new \app\common\model\MallCart();
-        $where = ['user_id'=>$this->userId,'goods_id'=>$id];
+        $where = ['user_id'=>$this->userId,'goods_id'=>$id,'goods_specifications_id'=>$specificationsRow ? $specificationsRow->id : 0];
         $cartRow = $cartModel->where($where)->find();
         if($cartRow){
             $result = $cartModel->where($where)->setInc('quantity',$number);
@@ -66,8 +73,9 @@ class MallCart extends Base{
                 'key' => 0,
                 'goods_id' => $id,
                 'quantity'=>$number,
-                'price' => $row->w_price,
-                'create_time' => time()
+                'price' => $specificationsRow ? $specificationsRow->w_price : $row->w_price,
+                'time' => time(),
+                'goods_specifications_id' => $specificationsRow ? $specificationsRow->id : 0
             ];
             $result = $cartModel->save($data);
         }
@@ -90,14 +98,17 @@ class MallCart extends Base{
         }
         //查询数据
         $model = new \app\common\model\MallCart();
-        $rows = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['user_id'=>$this->userId])->field(['b.id','b.icon','b.title','b.w_price','b.min_price','b.max_price','a.id as cart_id','a.quantity'])->select();
-
+        $rows = $model->alias('a')
+                      ->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')
+                      ->join(config('prefix').'mall_goods_specifications c','a.goods_specifications_id=c.id','left')
+                      ->where(['user_id'=>$this->userId])
+                      ->field(['b.id','b.icon','b.title','b.w_price','a.id as cart_id','a.quantity','c.w_price as goods_price'])->select();
         $data = [];
         foreach ($rows as $row){
             $data[] = [
                 'goodsId' => $row->id,
                 'cartId' => $row->cart_id,
-                'price' => $row->w_price,
+                'price' => $row->goods_price ?  $row->goods_price : $row->w_price,
                 'title' => $row->title,
                 'icon' => MallGoods::getFormatImg($row->icon),
                 'quantity' => intval($row->quantity)

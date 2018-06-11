@@ -161,6 +161,7 @@ class Code{
         $phone = $request->post('phone','');
         $captcha = $request->post('code','');
         $valid = $request->post('codeValid',0,'intval');
+        $id = $request->post('id','');
 
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
@@ -172,7 +173,7 @@ class Code{
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
         }
         if($valid){
-            if(!captchaDb_check($captcha)){
+            if(!captchaDb_check($captcha,$id)){
                 return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
             }
         }

@@ -233,7 +233,7 @@ class Goods  extends Base {
      */
     public function get(Request $request, $id){
         $model = new MallGoods();
-        $row = $model->where(['id'=>$id,'state'=>2])->field(['min_price','max_price','state','type','w_price','supplier','icon','multi_angle_img','title','m_detail','option_enable'])->find();
+        $row = $model->where(['id'=>$id,'state'=>2])->field(['id','title','min_price','max_price','state','type','w_price','supplier','icon','multi_angle_img','title','m_detail','option_enable'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'商品不存在'];
         }
@@ -250,7 +250,6 @@ class Goods  extends Base {
         $userModel = new IndexUser();
         $user = $userModel->getInfoById($row->supplier);
 
-
         //
         $standards = [];
         $mallTypeModel = new MallType();
@@ -258,27 +257,30 @@ class Goods  extends Base {
 
         $goodsSpecificationsModel = new MallGoodsSpecifications();
         if($mallTypeRow && $mallTypeRow->color == 1){
-            $rows =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where('b.real_name','like','%'.$keywords.'%')->order('a.w_price',$sort)->field(['a.id','a.icon','a.title','a.w_price','a.min_price','a.max_price','a.discount','a.bidding_show'])->select();
-
+            $colorRows =  $goodsSpecificationsModel->where(['goods_id'=>$row->id])->field(['color_id','color_name'])->group('color_id')->select();
+            $colorList = $colorRows;
+            $standards[] = [
+               'title' =>'颜色',
+               'list' =>  $colorList
+            ];
         }
-
         if($mallTypeRow && $mallTypeRow->diy_option == 1){
-            $rows =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where('b.real_name','like','%'.$keywords.'%')->order('a.w_price',$sort)->field(['a.id','a.icon','a.title','a.w_price','a.min_price','a.max_price','a.discount','a.bidding_show'])->select();
+            $optionRows =  $goodsSpecificationsModel->alias('a')->join(config('prefix').'mall_type_option b','a.option_id=b.id','left')->where(['a.goods_id'=>$row->id])->field(['a.option_id','b.name as option_name'])->group('a.option_id')->select();
+            $optionName = $mallTypeRow->option_name ? $mallTypeRow->option_name : '自定义规格';
+            $standards[] = [
+                'title' => $optionName,
+                'list' =>  $optionRows
+            ];
         }
 
-
-
-
-
-
-        //查询规格
-        $option = [];
-        if($row->option_enable){
-            $optionModel = new MallTypeOption();
-            $optionRows = $optionModel->where(['type_id'=>$row->type])->order('sequence','desc')->select();
-            foreach ($optionRows as $optionRow){
-                $option[] = ['id'=>$optionRow->id,'name'=>$optionRow->name];
-            }
+        $standardsPriceRows = $goodsSpecificationsModel->where(['goods_id'=>$row->id])->field(['color_id','option_id','w_price'])->select();
+        $standardsPrice = [];
+        foreach ($standardsPriceRows as $standardsPriceRow){
+            $standardsPrice[] = [
+                'option_id' => $standardsPriceRow->option_id,
+                'color_id' => $standardsPriceRow->color_id,
+                'price' => $standardsPriceRow->w_price
+            ];
         }
 
         //是否收藏
@@ -291,16 +293,46 @@ class Goods  extends Base {
 
         $data = [
             'title' => $row->title,  //商品标题
-            'price' => $row->w_price, //商品价格
+            'min_price' => $row->min_price, //商品价格
+            'max_price' => $row->max_price,//
             'supplier' => $user ? $user->real_name : '', //供应商
             'supplierLogo' => '', //供应商logo
-            'option' => $option, //规格
+            'standard' => $standards, //规格
+            'standardPrice' => $standardsPrice,
             'imgList' => $imgList, //视图图片
             'detail' => $row->m_detail,
             'isFavorite' => $isFavorite //是否收藏
         ];
 
         return ['status'=>0,'data'=>$data,'msg'=>''];
+    }
+
+
+    /**
+     *
+     * @param Request $request
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function standardPrice(Request $request){
+        $id = $request->post('id',0,'intval');
+        $colorId = $request->post('colorId',0,'intval');
+        $optionId = $request->post('optionId',0,'intval');
+
+        $model = new MallGoodsSpecifications();
+        $row = $model->where(['color_id'=>$colorId,'option_id'=>$optionId,'goods_id'=>$id])->field(['w_price'])->find();
+        if($row && $row->w_price){
+            return ['status'=>0,'data'=>['price'=>$row->w_price],'msg'=>''];
+        }
+        $goodsMoel = new MallGoods();
+        $goodsRow = $goodsMoel->where(['id'=>$id])->field(['w_price'])->find();
+        if($goodsRow && $goodsRow->w_price){
+            return ['status'=>0,'data'=>['price'=>$goodsRow->w_price],'msg'=>''];
+        }
+
+        return ['status'=>0,'data'=>['price'=>0],'msg'=>''];
     }
 
 }
