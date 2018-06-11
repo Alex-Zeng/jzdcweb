@@ -162,8 +162,8 @@ $(function () {
                     previewSettings: {
                         image: {width: "100px", height: "100px"},
                     },
-                    maxImageWidth: '1920px',
-                    maxImageHeight: '520px',
+                    // maxImageWidth: '1920px',
+                    // maxImageHeight: '520px',
                     uploadExtraData: function(previewId, index) {   //额外参数的关键点
                         var obj = {};
                         obj.type = 'banner';
