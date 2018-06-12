@@ -123,15 +123,20 @@ class MallCart extends Base{
      * @return array|void
      */
     public function delete(Request $request){
-        $id = $request->post('id',0);
+        $ids = $request->post('ids','');
         //验证登录
         $auth = $this->auth();
         if($auth){
             return $auth;
         }
+        $idsArr = explode(',',$ids);
+        if(!$idsArr){
+            return ['status'=>1,'data'=>[],'msg'=>'删除失败'];
+        }
+
         $cartModel = new \app\common\model\MallCart();
-        $result = $cartModel->where(['id'=>$id])->delete();
-        if($request !== false){
+        $result = $cartModel->where('id','in',$idsArr)->where(['user_id'=>$this->userId])->delete();
+        if($result !== false){
             return ['status'=>0,'data'=>[],'msg'=>'删除成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'删除失败'];

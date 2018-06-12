@@ -187,7 +187,9 @@ class Goods  extends Base {
         if(!$keywords){
             $type = 0;
         }
+
         if($type == 0 ){  //商品搜索
+            $where['state'] = 2;
             if($keywords){
                 $where['title'] = ['like','%'.$keywords.'%'];
             }
@@ -197,8 +199,8 @@ class Goods  extends Base {
             $total = $model->where($where)->count();
             $rows = $model->where($where)->order('w_price',$sort)->limit($start,$end)->field(['id','icon','title','w_price','min_price','max_price','discount','bidding_show'])->select();
         }else{ //供应商搜索
-            $total =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where('b.real_name','like','%'.$keywords.'%')->count();
-            $rows =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where('b.real_name','like','%'.$keywords.'%')->order('a.w_price',$sort)->field(['a.id','a.icon','a.title','a.w_price','a.min_price','a.max_price','a.discount','a.bidding_show'])->select();
+            $total =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where(['a.state'=>2])->where('b.real_name','like','%'.$keywords.'%')->count();
+            $rows =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where(['a.state'=>2])->where('b.real_name','like','%'.$keywords.'%')->order('a.w_price',$sort)->field(['a.id','a.icon','a.title','a.w_price','a.min_price','a.max_price','a.discount','a.bidding_show'])->select();
         }
         $list = [];
         foreach($rows as $row){
