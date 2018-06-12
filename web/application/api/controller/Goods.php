@@ -175,10 +175,11 @@ class Goods  extends Base {
         $pageSize = $request->post('pageSize',10,'intval');
         $pageNumber = $request->post('pageNumber',1,'intval');
         $categoryId = $request->post('cateId',0,'intval');
+        if($pageSize > 12){ $pageSize = 12;}
 
         $start = ($pageNumber - 1)*$pageSize;
         $end = $pageNumber*$pageSize;
-        if($pageSize > 12){ $pageSize = 12;}
+
 
         $this->noauth();
 

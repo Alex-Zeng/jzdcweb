@@ -224,4 +224,50 @@ class Order extends Base{
     }
 
 
+    /**
+     * @desc 订单状态
+     * @return array
+     */
+    public function getStatus(){
+        $statusList = MallOrder::getStateList();
+        $statusList[-1] = '全部';
+        ksort($statusList);
+        return ['status'=>0,'data'=>$statusList,'msg'=>''];
+    }
+
+    public function getList(Request $request){
+        $status = $request->get('status',-1,'intval');
+        $pageSize = $request->post('pageSize',10,'intval');
+        $pageNumber = $request->post('pageNumber',1,'intval');
+
+        if($pageSize > 12){ $pageSize = 12;}
+        $start = ($pageNumber - 1)*$pageSize;
+        $end = $pageNumber*$pageSize;
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $orderModel = new MallOrder();
+        $orderGoodsModel = new MallOrderGoods();
+
+        $where['buyer_id'] = $this->userId;
+        if($status != '-1'){
+            $where['state'] = $status;
+        }
+        $rows = $orderModel->where($where)->limit($start,$end)->field(['id','state','out_id'])->select();
+        echo $orderModel->getLastSql();
+        foreach ($rows as &$row){
+            $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon'])->select();
+            foreach($goodsRows as &$goodsRow){
+                $goodsRow['quantity'] = intval($goodsRow->quantity);
+                $goodsRow['icon'] = MallGoods::getFormatImg($goodsRow->icon);
+            }
+            $row['goods'] = $goodsRows;
+        }
+
+        return ['status'=>0,'data'=>$rows,'msg'=>''];
+    }
+
 }
