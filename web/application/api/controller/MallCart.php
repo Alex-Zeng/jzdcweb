@@ -100,13 +100,14 @@ class MallCart extends Base{
         //查询数据
         $model = new \app\common\model\MallCart();
         $rows = $model->alias('a')
-                      ->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')
-                      ->join(config('prefix').'mall_goods_specifications c','a.goods_specifications_id=c.id','left')
-                      ->where(['user_id'=>$this->userId])
-                      ->field(['b.id','b.icon','b.title','b.w_price','a.id as cart_id','a.quantity','c.w_price as goods_price'])->select();
-        $data = [];
+            ->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')
+            ->join(config('prefix').'mall_goods_specifications c','a.goods_specifications_id=c.id','left')
+            ->where(['user_id'=>$this->userId])
+            ->field(['b.id','b.icon','b.title','b.supplier','b.w_price','a.id as cart_id','a.quantity','c.w_price as goods_price'])->select();
+
+        $supplierData = [];
         foreach ($rows as $row){
-            $data[] = [
+            $supplierData[$row->supplier][] = [
                 'goodsId' => $row->id,
                 'cartId' => $row->cart_id,
                 'price' => $row->goods_price ?  $row->goods_price : $row->w_price,
@@ -115,6 +116,18 @@ class MallCart extends Base{
                 'quantity' => intval($row->quantity)
             ];
         }
+        $data = [];
+        foreach ($supplierData as $supplierId => $supplierRow){
+
+            $userModel = new IndexUser();
+            $userInfo = $userModel->getInfoById($supplierId);
+
+            $data[] = [
+                'supplierName' => $userInfo ? $userInfo->real_name : '',
+                'list' => $supplierRow
+            ];
+        }
+
         return ['status'=>0,'data'=>$data,'msg'=>''];
     }
 

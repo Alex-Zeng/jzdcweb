@@ -11,8 +11,10 @@ use app\common\model\IndexUser;
 use app\common\model\MallFavorite;
 use app\common\model\MallGoods;
 use app\common\model\MallOrder;
+use app\common\model\MallOrderGoods;
 use app\common\model\MallReceiver;
 use app\common\model\Notice;
+use app\common\model\OrderMsg;
 use app\common\model\UserSearchLog;
 use think\Request;
 
@@ -232,10 +234,55 @@ class User extends Base {
         return ['status'=>0,'data'=>['pay'=>$payCount,'recieve'=>$recieveNumber,'deliver'=>$pendingNumber],'msg'=>''];
     }
 
-    public function getMessageList(){
 
+    /**
+     * @desc 消息列表
+     * @param Request $request
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getMessageList(Request $request){
+        $pageSize = $request->post('pageSize',10,'intval');
+        $pageNumber = $request->post('pageNumber',1,'intval');
+        $pageSize = $pageSize > 10 ? 10 : $pageSize;
+
+        $start = ($pageNumber - 1)*$pageNumber;
+        $model = new OrderMsg();
+        $rows = $model->where(['user_id'=>$this->userId,'is_delete'=>0])->order('create_time','desc')->field(['id','title','content','order_no','create_time'])->limit($start,$pageSize)->select();
+
+        $data = [];
+        foreach($rows as &$row){
+            $orderModel = new MallOrder();
+            $orderRow = $orderModel->where(['out_id'=>$row->order_no])->field('id')->find();
+
+            $orderGoodsModel = new MallOrderGoods();
+            $orderGoodsRow = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$orderRow->id])->field(['b.icon'])->find();
+            $icon= MallGoods::getFormatImg($orderGoodsRow ? $orderGoodsRow->icon : '') ;
+            $time = strtotime($row['create_time']);
+
+           $data[] = [
+              'id' => $row->id,
+              'title' => $row->title,
+              'content' => $row->content,
+              'orderNo' => $row->order_no,
+              'release_time' =>  date('Y',$time).'年'.date('m',$time).'月'.date('d',$time).'日 '.date('H:i',$time),
+               'icon' => $icon
+           ];
+
+        }
+        return ['status'=>0,'data'=>['list'=>$data],'msg'=>''];
     }
 
+    /**
+     * @desc 通知列表
+     * @param Request $request
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public function getNoticeList(Request $request){
         $pageSize = $request->post('pageSize',10,'intval');
         $pageNumber = $request->post('pageNumber',1,'intval');
@@ -243,11 +290,32 @@ class User extends Base {
 
         $start = ($pageNumber - 1)*$pageNumber;
         $model = new Notice();
-        $rows = $model->where(['status'=>1])->order('release_time','desc')->field(['id','title','summary','content','release_time'])->limit($start,$pageSize)->select();
+        $rows = $model->where(['status'=>1])->order('release_time','desc')->field(['id','title','summary','release_time'])->limit($start,$pageSize)->select();
 
+        foreach($rows as &$row){
+          $row['release_time'] = date('Y',$row->release_time).'年'.date('m',$row->release_time).'月'.date('d',$row->release_time).'日 '.date('H:i',$row->release_time);
+        }
+        return ['status'=>0,'data'=>['list'=>$rows],'msg'=>''];
+    }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getNoticeInfo(Request $request,$id){
+        $model = new Notice();
+        $row = $model->where(['status'=>1,'id'=>$id])->order('release_time','desc')->field(['id','title','summary','content','release_time'])->find();
 
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'公告不存在'];
+        }
 
+        $row['release_time'] = date('Y',$row->release_time).'年'.date('m',$row->release_time).'月'.date('d',$row->release_time).'日 '.date('H:i',$row->release_time);
+        return ['status'=>0,'data'=>$row,'msg'=>''];
     }
 
 
