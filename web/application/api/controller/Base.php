@@ -23,7 +23,7 @@ class Base
     public function auth(){
         //获取http header变量cookie
         $token = cookie('_token');
-        $token2 = Request::instance()->get('_token','');
+        $token2 = Request::instance()->request('_token','');
         if(!$token && !$token2){
             return ['status'=>-2,'data'=>[],'msg'=>'数据错误'];
         }
