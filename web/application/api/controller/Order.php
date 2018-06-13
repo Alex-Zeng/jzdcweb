@@ -7,6 +7,7 @@
  */
 namespace app\api\controller;
 
+use app\common\model\IndexGroup;
 use app\common\model\IndexUser;
 use app\common\model\IndexArea;
 use app\common\model\MallGoods;
@@ -235,6 +236,14 @@ class Order extends Base{
         return ['status'=>0,'data'=>$statusList,'msg'=>''];
     }
 
+    /**
+     * @desc 订单列表
+     * @param Request $request
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public function getList(Request $request){
         $status = $request->get('status',-1,'intval');
         $pageSize = $request->post('pageSize',10,'intval');
@@ -252,12 +261,20 @@ class Order extends Base{
         $orderModel = new MallOrder();
         $orderGoodsModel = new MallOrderGoods();
 
-        $where['buyer_id'] = $this->userId;
+        if($this->groupId != IndexGroup::GROUP_BUYER && $this->groupId != IndexGroup::GROUP_SUPPLIER){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
+        }
+
+        if($this->groupId == IndexGroup::GROUP_BUYER){
+            $where['buyer_id'] = $this->userId;
+        }else{
+            $where['supplier'] = $this->userId;
+        }
+
         if($status != '-1'){
             $where['state'] = $status;
         }
-        $rows = $orderModel->where($where)->limit($start,$end)->field(['id','state','out_id'])->select();
-        echo $orderModel->getLastSql();
+        $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id'])->select();
         foreach ($rows as &$row){
             $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon'])->select();
             foreach($goodsRows as &$goodsRow){
@@ -268,6 +285,65 @@ class Order extends Base{
         }
 
         return ['status'=>0,'data'=>$rows,'msg'=>''];
+    }
+
+    /**
+     * @desc 订单详情
+     * @param Request $request
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function detail(Request $request){
+        $no = $request->post('no','');
+        //  $no = '2018053124610';
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        //订单号
+        $model = new MallOrder();
+        $where['out_id'] = $no;
+
+        if($this->groupId != IndexGroup::GROUP_BUYER && $this->groupId != IndexGroup::GROUP_SUPPLIER){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
+        }
+
+        if($this->groupId == IndexGroup::GROUP_BUYER){
+            $where['buyer_id'] = $this->userId;
+        }else{
+            $where['supplier'] = $this->userId;
+        }
+
+        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','state','pay_date','out_id','buyer_comment'])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
+        }
+
+        //查询产品
+        $goodsModel = new MallOrderGoods();
+        $goodsRows = $goodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon'])->select();
+
+        foreach($goodsRows as &$goodsRow){
+            $goodsRow['quantity'] = intval($goodsRow->quantity);
+            $goodsRow['icon'] = MallGoods::getFormatImg($goodsRow->icon);
+        }
+
+        $data = [
+            'orderNo' => $row->out_id,
+            'state' => $row->state,
+            'name' => $row->receiver_name,
+            'phone' => $row->receiver_phone,
+            'address' => $row->receiver_area_name. $row->receiver_detail,
+            'time' => date('Y-m-d H:i',$row->add_time),
+            'date' => date('Y-m-d',$row->delivery_time),
+            'remark' => $row->buyer_comment,
+            'payMethod' => $row->pay_date ? '账期支付': '',
+            'goods' => $goodsRows
+        ];
+
+        return ['status'=>0,'data'=>$data,'msg'=>''];
     }
 
 }
