@@ -23,6 +23,18 @@ class Service extends Base{
         $sex = $request->post('sex','');
         $name = $request->post('name','');
 
+        if(!$phone){
+            return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
+        }
+
+        if(!$name){
+            return ['status'=>1,'data'=>[],'msg'=>'用户名不能为空'];
+        }
+
+        if(!$sex){
+            return ['status'=>1,'data'=>[],'msg'=>'性别不能为空'];
+        }
+
         $this->noauth();
         $userId = $this->userId;
 
