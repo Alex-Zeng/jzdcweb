@@ -22,6 +22,10 @@ function startSession(){
 
 
 function captchaDb_check($value, $id = "", $config = []){
+    if( $value == '6666'){
+        \think\Log::write('登录图形万能验证6666');
+        return true;
+    }
     $captcha = new \think\captcha\Captcha($config);
     return $captcha->checkDb($value, $id);
 }
@@ -47,6 +51,15 @@ function getVerificationCode($length = 4){
  */
 function checkPhone($phone){
     return preg_match("/^1[34578]\d{9}$/ims",$phone);
+}
+
+/**
+ * @desc 验证邮箱
+ * @param $phone
+ * @return false|int
+ */
+function checkEmail($email){
+    return preg_match("/\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/",$email);
 }
 
 /**

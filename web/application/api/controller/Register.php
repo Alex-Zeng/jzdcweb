@@ -44,11 +44,23 @@ class Register{
         //检查账号是否已注册
         $model = new IndexUser();
         $user = $model->getUserByPhone($phone);
+
+
+
         if($user){
             return ['status'=>1,'data'=>[],'msg'=>'手机号已注册'];
         }
 
-        $u = (new IndexUser())->where(['username'=>$username])->find();
+        $u = (new IndexUser())->where(['username'=>$username])->whereOr(['phone'=>$username])->whereOr(['email'=>$username])->find();
+
+        if(checkPhone($username)){
+            return ['status'=>1,'data'=>[],'msg'=>'用户名不能为手机号码'];
+        }
+
+        if(checkEmail($username)){
+            return ['status'=>1,'data'=>[],'msg'=>'用户名不能为邮箱'];
+        }
+
         if($u){
             return ['status'=>1,'data'=>[],'msg'=>'用户名称已注册'];
         }
