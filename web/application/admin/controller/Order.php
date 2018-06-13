@@ -106,7 +106,7 @@ class Order extends Base{
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();
                 $content = "您好，订单号：{$row->out_id}现可安排发货，发货完成后，请在\"用户中心-待发货\"发布物流信息，谢谢。";
-                $msgData = ['title'=>"待发货",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer,'create_time'=>time()];
+                $msgData = ['title'=>"待发货",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
                 $orderMsgModel->save($msgData);
             }
             return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
@@ -142,7 +142,7 @@ class Order extends Base{
                 $orderMsgModel = new OrderMsg();
                 $statusList = MallOrder::getStateList();
                 $content = "您好，订单号：{$row->out_id}现可安排发货，发货完成后，请在\"用户中心-待发货\"发布物流信息，谢谢。";
-                $msgData = ['title'=>$statusList[$row->state],'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer,'create_time'=>time()];
+                $msgData = ['title'=>$statusList[$row->state],'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
                 $orderMsgModel->save($msgData);
             }
             return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
@@ -204,7 +204,7 @@ class Order extends Base{
                 $orderMsgModel = new OrderMsg();
                 $statusList = MallOrder::getStateList();
                 $content = "您好，订单号：{$row->out_id}现可安排发货，发货完成后，请在\"用户中心-待发货\"发布物流信息，谢谢。";
-                $msgData = ['title'=>$statusList[$row->state],'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer,'create_time'=>time()];
+                $msgData = ['title'=>$statusList[$row->state],'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
                 $orderMsgModel->save($msgData);
             }
             if($flag == 3){
