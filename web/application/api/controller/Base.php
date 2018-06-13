@@ -23,11 +23,14 @@ class Base
     public function auth(){
         //获取http header变量cookie
         $token = cookie('_token');
-        $token2 = Request::instance()->request('_token','');
-        if(!$token && !$token2){
+        $token2 = Request::instance()->get('_token','');
+        $token3 = Request::instance()->post('_token','');
+
+        $token = $token ? $token : ($token2 ? $token2 : $token3);
+        if(!$token){
             return ['status'=>-2,'data'=>[],'msg'=>'数据错误'];
         }
-        $token = $token ? $token : $token2;
+
        // $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6NSwiZ3JvdXAiOjQsInRpbWUiOjE1Mjg4NzA2MzQsImV4cGlyZSI6MTUyODg4ODYzNH0.8C514ai0hgrXB675DNXguiG-G8p_sZ_iw8Gv126UK7I';
 
         //解析token
