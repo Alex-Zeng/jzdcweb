@@ -12,6 +12,7 @@ use app\common\model\MallFavorite;
 use app\common\model\MallGoods;
 use app\common\model\MallOrder;
 use app\common\model\MallReceiver;
+use app\common\model\Notice;
 use app\common\model\UserSearchLog;
 use think\Request;
 
@@ -230,6 +231,25 @@ class User extends Base {
 
         return ['status'=>0,'data'=>['pay'=>$payCount,'recieve'=>$recieveNumber,'deliver'=>$pendingNumber],'msg'=>''];
     }
+
+    public function getMessageList(){
+
+    }
+
+    public function getNoticeList(Request $request){
+        $pageSize = $request->post('pageSize',10,'intval');
+        $pageNumber = $request->post('pageNumber',1,'intval');
+        $pageSize = $pageSize > 10 ? 10 : $pageSize;
+
+        $start = ($pageNumber - 1)*$pageNumber;
+        $model = new Notice();
+        $rows = $model->where(['status'=>1])->order('release_time','desc')->field(['id','title','summary','content','release_time'])->limit($start,$pageSize)->select();
+
+
+
+
+    }
+
 
 
 }
