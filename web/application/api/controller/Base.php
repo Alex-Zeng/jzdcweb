@@ -9,6 +9,7 @@ namespace app\api\controller;
 
 use app\common\model\IndexUser;
 use Firebase\JWT\JWT;
+use think\Request;
 
 class Base
 {
@@ -22,9 +23,12 @@ class Base
     public function auth(){
         //获取http header变量cookie
         $token = cookie('_token');
-        if(!$token){
+        $token2 = Request::instance()->get('_token','');
+        if(!$token && !$token2){
             return ['status'=>-2,'data'=>[],'msg'=>'数据错误'];
         }
+        $token = $token ? $token : $token2;
+       // $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6NSwiZ3JvdXAiOjQsInRpbWUiOjE1Mjg4NzA2MzQsImV4cGlyZSI6MTUyODg4ODYzNH0.8C514ai0hgrXB675DNXguiG-G8p_sZ_iw8Gv126UK7I';
 
         //解析token
         $key = config('jzdc_token_key');
