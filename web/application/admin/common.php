@@ -154,3 +154,17 @@ function getOrderState($state = -1){
     ];
     return isset($list[$state]) ? $list[$state] : '';
 }
+
+/**
+ * @desc 返回企业认证状态
+ * @param int $status
+ * @return mixed|string
+ */
+function getCertificationStatus($status = -1){
+    $list = [
+        1 => '<span class="bg-primary">待审核</span>',
+        2 => '<span class="bg-success">已通过</span>',
+        3 => '<span class="bg-danger">已拒绝</span>'
+    ];
+    return isset($list[$status]) ? $list[$status] : '';
+}

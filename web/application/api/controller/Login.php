@@ -120,7 +120,7 @@ class Login{
 //                "time" => time(),
 //                "expire" => time() + 5*3600   //过期时间
 //            ];
-            return ['status'=>-2,'data'=>[],'msg'=>'用户未注册'];
+            return ['status'=>-3,'data'=>[],'msg'=>'用户未注册'];
         }else{
             if($row->state != 1){
                 return ['status'=>1,'data'=>[],'msg'=>'用户已被禁用'];

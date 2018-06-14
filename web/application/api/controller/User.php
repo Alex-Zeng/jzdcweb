@@ -339,5 +339,11 @@ class User extends Base {
     }
 
 
+    public  function addCertification(Request $request){
+        $companyName = $request->post('companyName','');
+
+    }
+
+
 
 }
