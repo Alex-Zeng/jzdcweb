@@ -126,15 +126,23 @@ class Goods  extends Base {
      */
     public function addFavorite(Request $request){
         $productId = $request->post('goodsId',0,'intval');
-        $userId = $this->userId;
-        $user = (new IndexUser())->getInfoById($userId);
-        $username = $user ? $user->username :  '';
+
         $auth = $this->auth();
         if($auth){
             return $auth;
         }
 
+        $userId = $this->userId;
+        $user = (new IndexUser())->getInfoById($userId);
+        $username = $user ? $user->username :  '';
+
         $model = new MallFavorite();
+
+        $result_already = $model->where(['user_id'=>$userId,'goods_id'=>$productId])->find(); //已收藏
+        if($result_already){
+            return ['status'=>1,'data'=>[],'msg'=>'商品已经收藏过'];
+        }
+
         $result = $model->save(['user_id'=>$userId,'username'=>$username,'goods_id'=>$productId,'time'=>time()]);
         if($result == true){
             return ['status'=>0,'data'=>[],'msg'=>'收藏成功'];
@@ -149,12 +157,12 @@ class Goods  extends Base {
      */
     public function removeFavorite(Request $request){
         $productId = $request->post('goodsId',0,'intval');
-        $userId = $this->userId;
         $auth = $this->auth();
         if($auth){
             return $auth;
         }
 
+        $userId = $this->userId;
         $model = new MallFavorite();
         $result = $model->where(['user_id'=>$userId,'goods_id'=>$productId])->delete();
         if($result == true){
