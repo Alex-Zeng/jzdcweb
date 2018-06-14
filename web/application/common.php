@@ -55,11 +55,21 @@ function checkPhone($phone){
 
 /**
  * @desc 验证邮箱
- * @param $phone
+ * @param $email
  * @return false|int
  */
 function checkEmail($email){
     return preg_match("/\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/",$email);
+}
+//'/^[\\~!@#$%^&*()-_=+|{}\[\],.?\/:;\'\"\d\w]{'.$minLen.','.$maxLen.'}$/';
+
+/**
+ * @desc 验证密码
+ * @param $password
+ * @return false|int
+ */
+function checkPassword($password){
+    return preg_match("/^([A-Z]|[a-z]|[0-9]|[`-=[];,./~!@#$%^*()_+}{:?]){6,20}$/",$password);
 }
 
 /**
