@@ -288,7 +288,7 @@ class User extends Base {
         $pageNumber = $request->post('pageNumber',1,'intval');
         $pageSize = $pageSize > 10 ? 10 : $pageSize;
 
-        $start = ($pageNumber - 1)*$pageNumber;
+        $start = ($pageNumber - 1)*$pageSize;
         $model = new Notice();
         $rows = $model->where(['status'=>1])->order('release_time','desc')->field(['id','title','summary','release_time'])->limit($start,$pageSize)->select();
 
