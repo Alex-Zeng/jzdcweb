@@ -158,6 +158,7 @@ class Order extends Base{
 
             $orderGoodsModel = new MallOrderGoods();
             $userGoodSpecificationsModel = new UserGoodsSpecifications();
+            $cartModel = new \app\common\model\MallCart();
             $result = $orderModel->save($orderValue);
             if($result == true){
                 //插入order_goods数据表
@@ -212,8 +213,19 @@ class Order extends Base{
                             $specificationsWhere['create_time'] = time();
                             $userGoodSpecificationsModel->save($specificationsWhere);
                         }
+                        //删除购物清单 同步操作,
+                        $cartRow = $cartModel->where(['user_id'=>$this->userId,'goods_id'=>$list['goods_id']])->field(['quantity'])->find();
+                        if($cartRow){
+                            if($cartRow['quantity'] <= $list['quantity']){
+                                $cartModel->where(['user_id'=>$this->userId,'goods_id'=>$list['goods_id']])->delete();
+                            }else{
+                                //同一用户不考虑扣减为负，并发量没那么高
+                                $cartModel->where(['user_id'=>$this->userId,'goods_id'=>$list['goods_id']])->setDec('quantity',$list['quantity']);
+                            }
+                        }
                     }
                 }
+
                 //添加日志
 
                 //触发消息通知
