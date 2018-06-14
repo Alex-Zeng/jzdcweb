@@ -9,6 +9,7 @@
 namespace app\admin\controller;
 
 use app\common\model\FormUserCert;
+use app\common\model\IndexGroup;
 use think\Request;
 
 
@@ -85,6 +86,16 @@ class Certification extends Base{
         }
         $result = $model->save(['status'=>2],['id'=>$id]);
         if($result !== false){
+            //更改角色
+            $groupId = 0;
+            if($row->reg_role == '采购商'){
+                $groupId = IndexGroup::GROUP_BUYER;
+            }
+            if($row->reg_role == '供应商'){
+                $groupId = IndexGroup::GROUP_SUPPLIER;
+            }
+
+
             return ['status'=>0,'data'=>[],'msg'=>'审核成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'审核失败'];

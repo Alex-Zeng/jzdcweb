@@ -241,7 +241,6 @@ return [
 
     //自定义配置
     'jzdc_domain'=>'http://'.$_SERVER['HTTP_HOST'],
-  //  'jzdc_domain' => 'http://192.168.3.101',//
     'jzdc_token_key' => 'jzdc@12345',
     'jzdc_upload' => [  //上传图片配置参数
         'company' => [
@@ -256,7 +255,10 @@ return [
         'order' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/order',
             'thumb' => ['width'=>100,'height'=>100]
-        ]
+        ],
+        'certification' => [
+            'path' => ROOT_PATH.'public'.DS.'uploads/company_cert',
+        ],
     ],
     'jzdc_doc_path' => 'http://'.$_SERVER['HTTP_HOST'].'/web/public/uploads/'
 ];
