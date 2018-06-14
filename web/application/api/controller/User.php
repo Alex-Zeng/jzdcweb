@@ -50,6 +50,14 @@ class User extends Base {
             return  ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
         }
 
+        if($detail){
+            return  ['status'=>1,'data'=>[],'msg'=>'详细地址不能为空'];
+        }
+
+        if($name){
+            return  ['status'=>1,'data'=>[],'msg'=>'收货人不能为空'];
+        }
+
         $auth = $this->auth();
         if($auth){
             return $auth;
@@ -103,6 +111,18 @@ class User extends Base {
         $auth = $this->auth();
         if($auth){
             return $auth;
+        }
+
+        if(!checkPhone($phone)){
+            return  ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
+        }
+
+        if($detail){
+            return  ['status'=>1,'data'=>[],'msg'=>'详细地址不能为空'];
+        }
+
+        if($name){
+            return  ['status'=>1,'data'=>[],'msg'=>'收货人不能为空'];
         }
 
         $model = new MallReceiver();
