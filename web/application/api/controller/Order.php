@@ -257,7 +257,7 @@ class Order extends Base{
      * @throws \think\exception\DbException
      */
     public function getList(Request $request){
-        $status = $request->get('status',-1,'intval');
+        $status = $request->post('status',-1,'intval');
         $pageSize = $request->post('pageSize',10,'intval');
         $pageNumber = $request->post('pageNumber',1,'intval');
 
