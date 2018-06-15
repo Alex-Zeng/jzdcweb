@@ -167,6 +167,27 @@ class MallCart extends Base{
         return ['status'=>1,'data'=>[],'msg'=>'删除失败'];
     }
 
+    /**
+     * @desc 更细购物车数量
+     * @param Request $request
+     * @return array|void
+     */
+    public function update(Request $request){
+        $id = $request->post('id','');
+        $number = $request->post('number',1,'intval');
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $cartModel = new \app\common\model\MallCart();
+        $result = $cartModel->save(['quantity'=>$number],['user_id'=>$this->userId,'id'=>$id]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'更新成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'更细失败'];
+    }
+
 
 
 }

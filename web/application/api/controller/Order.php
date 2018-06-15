@@ -214,15 +214,15 @@ class Order extends Base{
                             $userGoodSpecificationsModel->save($specificationsWhere);
                         }
                         //删除购物清单 同步操作,
-                        $cartRow = $cartModel->where(['user_id'=>$this->userId,'goods_id'=>$list['goods_id']])->field(['quantity'])->find();
-                        if($cartRow){
-                            if($cartRow['quantity'] <= $list['quantity']){
-                                $cartModel->where(['user_id'=>$this->userId,'goods_id'=>$list['goods_id']])->delete();
-                            }else{
-                                //同一用户不考虑扣减为负，并发量没那么高
-                                $cartModel->where(['user_id'=>$this->userId,'goods_id'=>$list['goods_id']])->setDec('quantity',$list['quantity']);
-                            }
-                        }
+                        $cartModel->where(['user_id'=>$this->userId,'goods_id'=>$list['goods_id'],'goods_specifications_id'=>$list['s_id']])->delete();
+//                        if($cartRow){
+//                            if($cartRow['quantity'] <= $list['quantity']){
+//                                $cartModel->where(['user_id'=>$this->userId,'goods_id'=>$list['goods_id']])->delete();
+//                            }else{
+//                                //同一用户不考虑扣减为负，并发量没那么高
+//                                $cartModel->where(['user_id'=>$this->userId,'goods_id'=>$list['goods_id']])->setDec('quantity',$list['quantity']);
+//                            }
+//                        }
                     }
                 }
 

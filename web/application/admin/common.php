@@ -193,3 +193,20 @@ function getTypeLevel($typeId = 0){
 
     return $list;
 }
+
+/**
+ * @desc 返回商品颜色
+ * @return false|PDOStatement|string|\think\Collection
+ * @throws \think\db\exception\DataNotFoundException
+ * @throws \think\db\exception\ModelNotFoundException
+ * @throws \think\exception\DbException
+ */
+function getColorList(){
+    $model = new \app\common\model\MallColor();
+    $rows = $model->field(['id','name'])->select();
+
+    foreach ($rows as &$row){
+        $row['path'] = \app\common\model\MallColor::getFormatImg($row->id);
+    }
+    return $rows;
+}

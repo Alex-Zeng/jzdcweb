@@ -9,6 +9,7 @@ namespace app\admin\controller;
 
 use app\common\model\IndexUser;
 use app\common\model\MallGoods;
+use app\common\model\MallType;
 use app\common\model\MallUnit;
 use think\Request;
 
@@ -132,9 +133,10 @@ class Goods extends Base{
     }
 
 
-    public function findModel($id){
-        $model = new MallGoods();
-
+    public function getType($typeId = 0){
+        $model = new MallType();
+        $row = $model->where(['id'=>$typeId])->find();
+        return ['status'=>0,'data'=>['color'=>$row->color,'option'=>$row->diy_option],'msg'=>''];
     }
 
 
