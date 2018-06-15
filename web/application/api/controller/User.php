@@ -50,11 +50,11 @@ class User extends Base {
             return  ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
         }
 
-        if($detail){
+        if(!$detail){
             return  ['status'=>1,'data'=>[],'msg'=>'详细地址不能为空'];
         }
 
-        if($name){
+        if(!$name){
             return  ['status'=>1,'data'=>[],'msg'=>'收货人不能为空'];
         }
 
@@ -117,11 +117,11 @@ class User extends Base {
             return  ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
         }
 
-        if($detail){
+        if(!$detail){
             return  ['status'=>1,'data'=>[],'msg'=>'详细地址不能为空'];
         }
 
-        if($name){
+        if(!$name){
             return  ['status'=>1,'data'=>[],'msg'=>'收货人不能为空'];
         }
 
@@ -211,6 +211,26 @@ class User extends Base {
             $row['icon'] = MallGoods::getFormatImg($row->icon);
         }
         return ['status'=>0,'data'=>['total'=>$total,'list'=>$rows],'msg'=>''];
+    }
+
+    /**
+     * @desc 返回收货地址列表
+     * @param Request $request
+     * @return array|void
+     */
+    public function getAddressList(Request $request){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+
+        $field = ['id','area_id','detail','post_code','name','phone','tag','time'];
+        $model = new MallReceiver();
+
+        $result = $model->where(['user_id'=>$this->userId])->field($field)->select();
+
+        return ['status'=>0,'data'=>['list'=>$result],'msg'=>''];
     }
 
     /**
