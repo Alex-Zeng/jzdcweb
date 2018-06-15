@@ -7,6 +7,7 @@
  */
 namespace app\api\controller;
 
+use app\common\model\FormUserCert;
 use app\common\model\IndexUser;
 use app\common\model\MallFavorite;
 use app\common\model\MallGoods;
@@ -16,6 +17,7 @@ use app\common\model\MallReceiver;
 use app\common\model\Notice;
 use app\common\model\OrderMsg;
 use app\common\model\UserSearchLog;
+use sms\Yunpian;
 use think\Request;
 
 class User extends Base {
@@ -359,9 +361,139 @@ class User extends Base {
     }
 
 
-    public  function addCertification(Request $request){
-        $companyName = $request->post('companyName','');
+    //
 
+
+    /**
+     * @desc 提交认证
+     * @param Request $request
+     * @return array
+     */
+    public  function certification(Request $request){
+        $type = $request->post('type',1,'intval');
+        $agent = $request->post('agent',0,'intval');
+        $companyName = $request->post('companyName',''); //公司名称
+        $representative = $request->post('representative',''); //代表人
+        $property = $request->post('property',0,'intval'); //企业性质
+        $capital = $request->post('capital',''); //资金
+        $detailAddress = $request->post('address',''); //住址
+
+        $businessPath = $request->post('business','');  //营业执照
+        $permitsAccounts = $request->post('permitsAccount'); //用户许可
+        $legalIdentityCard = $request->post('legalIdentityCard',''); //法人身份证
+        $agentIdentityCard = $request->post('agentIdentityCard','');//代理人身份证
+
+        $orgStructureCodePermits = $request->post('orgStructureCode',''); //组织机构代码
+        $taxRegistrationCert = $request->post('taxRegistrationCert',''); //税务登记
+        $powerOfAttorney = $request->post('attorney',''); //代办人授权委托书
+
+        if(!in_array($type,[1,2])){
+            return ['status'=>1,'data'=>[],'msg'=>'注册类型错误'];
+        }
+        if(!$companyName){
+            return ['status'=>1,'data'=>[],'msg'=>'企业名称不能为空'];
+        }
+        if(!$representative){
+            return ['status'=>1,'data'=>[],'msg'=>'法人代表不能为空'];
+        }
+        if(!$businessPath){
+            return ['status'=>1,'data'=>[],'msg'=>'营业执照必须上传'];
+        }
+        if(!$permitsAccounts){
+            return ['status'=>1,'data'=>[],'msg'=>'用户许可必须上传'];
+        }
+        if(!$legalIdentityCard){
+            return ['status'=>1,'data'=>[],'msg'=>'法人身份证必须上传'];
+        }
+
+        if($agent == 2){
+            if(!$agentIdentityCard){
+                return ['status'=>1,'data'=>[],'msg'=>'代理人身份证必须上传'];
+            }
+            if(!$powerOfAttorney){
+                return ['status'=>1,'data'=>[],'msg'=>'代办人授权委托书必须上传'];
+            }
+        }
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $model = new FormUserCert();
+        $row = $model->where(['writer'=>$this->userId])->order('id','desc')->find();
+
+        //保存数据
+        $data = [
+            'edit_time' => time(),
+            'editor' => $this->userId,
+            'company_name' => $companyName,
+            'business_license' => $businessPath,
+            'status' =>1,
+            'reg_role' => $type == 2 ? '供应商' : '采购商',
+            'ent_property' => getCompanyProperty($property),
+            'reg_capital' => $capital,
+            'legal_representative' =>$representative,
+            'legal_identity_card' => $legalIdentityCard,
+            'agent_identity_card' => $agentIdentityCard,
+            'permits_accounts' => $permitsAccounts,
+            'org_structure_code_permits' => $orgStructureCodePermits,
+            'tax_registration_cert' =>$taxRegistrationCert,
+            'detail_address' => $detailAddress
+        ];
+
+        if($row){ //再次提交审核
+            $result = $model->save($data,['id'=>$row->id]);
+        }else{ //首次提交审核
+            $result = $model->save($data);
+        }
+
+        if($result !== false){
+            //发送短信通知
+            $userModel = new IndexUser();
+            $userInfo = $userModel->getInfoById($this->userId);
+            if($userInfo && $userInfo->phone){
+                $yunPian = new Yunpian();
+                $yunPian->send($userInfo->phone,[],Yunpian::TPL_CERT_SUBMIT);
+            }
+
+            return ['status'=>0,'data'=>[],'msg'=>'已提交认证信息,等待审核...'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'提交审核失败'];
+    }
+
+    /**
+     * @desc 获取认证
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getCertification(){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $model = new FormUserCert();
+        $row = $model->where(['writer'=>$this->userId])->order('id','desc')->find();
+        if(!$row){
+            return ['status'=>-1,'data'=>[],'msg'=>'用户未提交认证'];
+        }
+        $data = [
+            'companyName' => $row->company_name,
+            'representative' => $row->legal_representative,
+            'capital' => $row->reg_capital,
+            'address' => $row->detail_address,
+            'business' => $row->business_license ?  FormUserCert::getFormatImg($row->business_license) : '',
+            'permitsAccount' => $row->permits_accounts ? FormUserCert::getFormatImg($row->permits_accounts) : '',
+            'legalIdentityCard' =>  $row->legal_identity_card ?  FormUserCert::getFormatImg($row->legal_identity_card) : '',
+            'agentIdentityCard' => $row->legal_identity_card ? FormUserCert::getFormatImg($row->agent_identity_card) : '',
+            'orgStructureCode' => $row->org_structure_code_permits ? FormUserCert::getFormatImg($row->org_structure_code_permits) : '',
+            'taxRegistrationCert' => $row->tax_registration_cert ? FormUserCert::getFormatImg($row->tax_registration_cert) : ''
+        ];
+
+        return ['status'=>0,'data'=>$data,'msg'=>''];
     }
 
 

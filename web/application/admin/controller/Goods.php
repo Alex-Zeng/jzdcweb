@@ -9,6 +9,7 @@ namespace app\admin\controller;
 
 use app\common\model\IndexUser;
 use app\common\model\MallGoods;
+use app\common\model\MallUnit;
 use think\Request;
 
 class Goods extends Base{
@@ -106,6 +107,26 @@ class Goods extends Base{
         $model = new MallGoods();
         $row = $model->where(['id'=>$id])->find();
 
+        $row['icon'] = MallGoods::getFormatImg($row->icon);
+        $multiImgArr = $row->multi_angle_img ? explode('|',$row->multi_angle_img) : [];
+        $multiImgs = [];
+        foreach ($multiImgArr as $path){
+            $multiImgs[] = MallGoods::getFormatMultiImg($path);
+        }
+        $row['multiImg'] = $multiImgs;
+
+        //
+        $userModel = new IndexUser();
+        $unitModel = new MallUnit();
+        $userInfo = $userModel->getInfoById($row->supplier);
+        $row['supplierName'] = $userInfo ? $userInfo->real_name : '';
+
+        $unitInfo = $unitModel->where(['id'=>$row->unit])->find();
+        $row['unitName'] = $unitInfo ? $unitInfo->name : '';
+
+        //
+        $goodsTypeArr = array_reverse(getTypeLevel($row->type));
+        $row['goodsTypeName'] = implode('&nbsp;>',$goodsTypeArr);
         $this->assign('goods',$row);
         return $this->fetch();
     }

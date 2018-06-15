@@ -168,3 +168,28 @@ function getCertificationStatus($status = -1){
     ];
     return isset($list[$status]) ? $list[$status] : '';
 }
+
+/**
+ * @param int $typeId
+ * @return array
+ * @throws \think\db\exception\DataNotFoundException
+ * @throws \think\db\exception\ModelNotFoundException
+ * @throws \think\exception\DbException
+ */
+function getTypeLevel($typeId = 0){
+    $model = new \app\common\model\MallType();
+    $row = $model->where(['id'=>$typeId])->field(['id','name','parent'])->find();
+    $list = [];
+
+    $list[] = $row->name;
+    if($row->parent > 0){
+        $row2 = $model->where(['id'=>$row->parent])->field(['id','name','parent'])->find();
+        $list[] = $row2->name;
+        if($row2->parent > 0){
+            $row3 = $model->where(['id'=>$row2->parent])->field(['id','name','parent'])->find();
+            $list[] = $row3->name;
+        }
+    }
+
+    return $list;
+}

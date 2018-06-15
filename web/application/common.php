@@ -80,3 +80,18 @@ function checkPassword($password){
 function getOrderOutId($number = 0){
     return date('YmdHis').$number.rand(10,100);
 }
+
+/**
+ * @desc 企业性质
+ * @param int $property
+ * @return mixed|string
+ */
+function getCompanyProperty($property = -1){
+    $list = [
+        0 => '有限责任公司',
+        1 => '股份有限公司',
+        2 => '个体工商户',
+        3 => '合伙企业'
+    ];
+    return isset($list[$property]) ? $list[$property] : '';
+}

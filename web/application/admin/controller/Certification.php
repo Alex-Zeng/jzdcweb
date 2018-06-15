@@ -10,6 +10,7 @@ namespace app\admin\controller;
 
 use app\common\model\FormUserCert;
 use app\common\model\IndexGroup;
+use sms\Yunpian;
 use think\Request;
 
 
@@ -86,6 +87,9 @@ class Certification extends Base{
         }
         $result = $model->save(['status'=>2],['id'=>$id]);
         if($result !== false){
+            $userModel = new \app\common\model\IndexUser();
+            $userRow = $userModel->getInfoById($row->writer);
+
             //更改角色
             $groupId = 0;
             if($row->reg_role == '采购商'){
@@ -94,7 +98,11 @@ class Certification extends Base{
             if($row->reg_role == '供应商'){
                 $groupId = IndexGroup::GROUP_SUPPLIER;
             }
-
+            $groupId = $groupId>0 ? $groupId : $userRow->group;
+            $userModel->save(['group'=>$groupId,'real_name'=>$row->company_name],['id'=>$row->writer]);
+            //发送短信通知
+            $yunpian = new Yunpian();
+            $yunpian->send($userRow->phone,[],Yunpian::TPL_CERT_SUC);
 
             return ['status'=>0,'data'=>[],'msg'=>'审核成功'];
         }
@@ -123,7 +131,12 @@ class Certification extends Base{
         $result = $model->save(['status'=>3,'refuse_reason'=>$reason],['id'=>$id]);
         if($result !== false){
             //发送短信通知
+            $userModel = new \app\common\model\IndexUser();
+            $userRow = $userModel->getInfoById($row->writer);
 
+            //发送短信通知
+            $yunpian = new Yunpian();
+            $yunpian->send($userRow->phone,[],Yunpian::TPL_CERT_FAIL);
             return ['status'=>0,'data'=>[],'msg'=>'审核成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'审核拒绝失败'];
