@@ -148,17 +148,20 @@
 </script>
 
 <script id="custom-template" type="text/html">
-    <tr>
-        <td><img src="{{path}}" width="30px" height="30px"  />{{color_name}} &nbsp;</td>
+    <tr data-color="{{color_id}}" data-option="{{option_id}}">
+        <td>
+            <input type="hidden" name="standard[][color_id]"   value="{{color_id}}" />
+            <input type="hidden" name="standard[][option_id]"  value="{{option_id}}"  />
+            <input type="hidden" name="standard[][color_name]"  value="{{color_name}}"  />
+            {{ if path}}<img src="{{path}}" width="30px" height="30px"  />{{/if}}{{color_name}}
+        </td>
         <td>{{option_name}}</td>
-        <td><input type="number"  class="form-control" value=""  /></td>
-        <td><input type="number" class="form-control" value=""  /></td>
+        <td><input type="number"    class="form-control" value=""  name="standard[][cost_price]" /></td>
+        <td><input type="number" class="form-control" value=""  name="standard[][e_price]" /></td>
         <td><input type="number" class="form-control"  value=""  /></td>
         <td><input type="number" class="form-control" value=""  /></td>
         <td><input type="number" class="form-control" value=""  /></td>
-        <td>
-            <i class="fa fa-user glyphicon glyphicon-trash"></i>
-        </td>
+        <td><i class="fa fa-trash-o" style="cursor: pointer" title="删除"></i></td>
     </tr>
 </script>
 
@@ -204,7 +207,7 @@
             <table class="table table table-striped">
                 <thead>
                 <tr>
-                    <th  width="100px">颜色</th>
+                    <th  width="110px">颜色</th>
                     <th>规格</th>
                     <th>成本价</th>
                     <th>实体店售价</th>
@@ -231,7 +234,6 @@
     var optionObj = [];
 
     $(function () {
-        //
         $('#goods_type').change(function () {
             var typeId = $('select[name="type"]').val();
             $.ajax({
@@ -246,7 +248,6 @@
                              var html = template('standard-container',data);
                              //alert(html);
                              $('#standard_container').html(html);
-
 
                          }
                      }
@@ -361,23 +362,20 @@
             if(color.length > 0 && option.length > 0){
                 for(var i=0; i< color.length; i++){
                     for(var j=0;j<option.length; j++){
-                        html +=template('custom-template',{color_name:color[i].name,path:color[i].path,option_id:option[j].id,option_name:option[j].name});
+                        html +=template('custom-template',{color_id:color[i].id,color_name:color[i].name,path:color[i].path,option_id:option[j].id,option_name:option[j].name});
                     }
                 }
             }
-
             if(color.length == 0 && option.length > 0){
                 for(var j=0;j<option.length; j++){
-                    html +=template('custom-template',{option_id:option[j].id,option_name:option[j].name});
+                    html +=template('custom-template',{color_id:0,color_name:'',option_id:option[j].id,option_name:option[j].name});
                 }
             }
-
             if(color.length > 0 && option.length == 0){
                 for(var i=0; i< color.length; i++){
-                    html +=template('custom-template',{color_name:color[i].name,path:color[i].path});
+                    html +=template('custom-template',{color_id:color[i].id,color_name:color[i].name,path:color[i].path,option_id:0,option_name:''});
                 }
             }
-
             $('#custom-container').html(html);
         }
 

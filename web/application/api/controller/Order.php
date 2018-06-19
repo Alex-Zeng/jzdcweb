@@ -273,7 +273,7 @@ class Order extends Base{
         $orderModel = new MallOrder();
         $orderGoodsModel = new MallOrderGoods();
 
-        if($this->groupId != IndexGroup::GROUP_BUYER && $this->groupId != IndexGroup::GROUP_SUPPLIER){
+        if($this->groupId != IndexGroup::GROUP_BUYER && $this->groupId != IndexGroup::GROUP_SUPPLIER && $this->groupId != IndexGroup::GROUP_MEMBER){
             return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
         }
 
@@ -286,8 +286,11 @@ class Order extends Base{
         if($status != '-1'){
             $where['state'] = $status;
         }
-        $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id'])->select();
+        $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','receiver_name','supplier'])->select();
+        $userModel = new IndexUser();
         foreach ($rows as &$row){
+            $userInfo = $userModel->getInfoById($row->supplier);
+            $row['supplier'] = $userInfo ? $userInfo->real_name : '';
             $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon'])->select();
             foreach($goodsRows as &$goodsRow){
                 $goodsRow['quantity'] = intval($goodsRow->quantity);
