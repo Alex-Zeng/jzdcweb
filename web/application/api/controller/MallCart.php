@@ -138,7 +138,10 @@ class MallCart extends Base{
                 'title' => $row->title,
                 'icon' => MallGoods::getFormatImg($row->icon),
                 'quantity' => intval($row->quantity),
-                'specificationsInfo' => $specificationsInfo
+                'specificationsInfo' => $specificationsInfo,
+                'no' =>'',
+                'requirement' => ''
+
             ];
         }
         $data = [];

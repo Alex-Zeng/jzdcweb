@@ -255,6 +255,10 @@ temp=v[0];
                 <a href="./index.php?jzdc=index.resetPassword&field=password" id=get_password><?php echo self::$language['get_password']?></a><a href="./index.php?jzdc=index.reg_user&group_id=<?php echo $module['default_group_id'];?>" id="register" ><?php echo self::$language['register']?></a>
                 <a href="#" type="submit" name="submit" id="login" user_color=button><?php echo self::$language['login']?></a>
                 <span id=submit_state></span>
+                <br /><br /><br />
+                <p style="height: 24px">QQ：3510294139</p>
+                <p style="height:24px">电话：18024595469</p>
+                <p style="height: 24px">服务时间：工作日09:00-18:00</p>
                 <?php echo $module['oauth'];?>
                 
             </div>

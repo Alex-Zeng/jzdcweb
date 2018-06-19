@@ -184,9 +184,15 @@
      
     </div>
     <div class="pagination"></div>
-    
+
 <!--	<div class=show_sum_div><a class=show_sum_a>--><?php //echo self::$language['view_sum_module']?><!--</a></div>-->
     
     
 </div>
 
+<div style="text-align: center">
+    <br /><br /><br /><br /><br><br/><br /><br /><br /><br /><br /><br /><br /><br />
+    <p style="height: 24px">QQ：3510294139</p>
+    <p style="height:24px">电话：18024595469</p>
+    <p style="height: 24px">服务时间：工作日09:00-18:00</p>
+</div>

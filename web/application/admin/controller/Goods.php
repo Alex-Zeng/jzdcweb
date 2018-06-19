@@ -10,6 +10,7 @@ namespace app\admin\controller;
 use app\common\model\IndexUser;
 use app\common\model\MallGoods;
 use app\common\model\MallType;
+use app\common\model\MallTypeOption;
 use app\common\model\MallUnit;
 use think\Request;
 
@@ -136,7 +137,18 @@ class Goods extends Base{
     public function getType($typeId = 0){
         $model = new MallType();
         $row = $model->where(['id'=>$typeId])->find();
-        return ['status'=>0,'data'=>['color'=>$row->color,'option'=>$row->diy_option],'msg'=>''];
+
+        //根据color查询
+        $colorList = $optionList = [];
+        if($row->color == 1){
+           $colorList = getColorList();
+        }
+        //根据
+        if($row->diy_option == 1){
+            $typeOptionModel = new MallTypeOption();
+            $optionList = $typeOptionModel->where(['type_id'=>$typeId])->field(['id','name'])->select();
+        }
+        return ['status'=>0,'data'=>['color'=>$row->color,'color_list' => $colorList,'option'=>$row->diy_option,'option_list'=>$optionList,'option_name'=>$row->option_name],'msg'=>''];
     }
 
 
