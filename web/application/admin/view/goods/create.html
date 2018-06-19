@@ -32,7 +32,7 @@
                         <div class="card-header">
                             <h3 class="card-title">添加商品</h3>
                         </div>
-                        <form role="form">
+                        <form role="form" action="{:url('create')}" method="post">
                             <div class="card-body">
                                 <div class="form-inline form-group">
                                     <label for="" class="col-md-2 pull-right">所属商城分类</label>
@@ -61,9 +61,8 @@
                                     <label for="" class="col-md-2 pull-right">商品计量单位</label>
                                     <span class="">
                                         <select class="form-control"  name="parent">
-                                        {foreach name=":getTypeLevelList(3)" id="type"}
-                                        <option value="{$type.id}" >
-                                            {if $type.level == 2}&nbsp;&nbsp;&nbsp;&nbsp;|-&nbsp;{elseif $type.level == 3}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|-&nbsp;{/if}{$type.name}</option>
+                                        {foreach name="unitRows" id="unit"}
+                                        <option value="{$unit.id}" >{$unit.name}</option>
                                         {/foreach}
                                     </select>
                                     </span>
@@ -158,9 +157,9 @@
         <td>{{option_name}}</td>
         <td><input type="number"    class="form-control" value=""  name="standard[][cost_price]" /></td>
         <td><input type="number" class="form-control" value=""  name="standard[][e_price]" /></td>
-        <td><input type="number" class="form-control"  value=""  /></td>
-        <td><input type="number" class="form-control" value=""  /></td>
-        <td><input type="number" class="form-control" value=""  /></td>
+        <td><input type="number" class="form-control"  value="" name="standard[][w_price]" /></td>
+        <td><input type="number" class="form-control" value=""  name="standard[][barcode]" /></td>
+        <td><input type="number" class="form-control" value=""  name="standard[][store_code]" /></td>
         <td><i class="fa fa-trash-o" style="cursor: pointer" title="删除"></i></td>
     </tr>
 </script>

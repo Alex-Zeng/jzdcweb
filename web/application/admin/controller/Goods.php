@@ -56,9 +56,13 @@ class Goods extends Base{
     public function create(Request $request){
         if($request->isPost()){
 
-
+         exit;
         }
 
+        $unitModel = new MallUnit();
+        $unitRows = $unitModel->where([])->order('sequence','desc')->field(['id','name'])->select();
+
+        $this->assign('unitRows',$unitRows);
         return $this->fetch();
     }
 
