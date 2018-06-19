@@ -32,7 +32,7 @@
                                 <div class="form-inline form-group">
                                     <label for="" class="col-md-2 pull-right">所属商城分类</label>
                                     <span class="">
-                                        <select class="form-control"  name="type">
+                                        <select  id="goods_type" class="form-control"  name="type">
                                         {foreach name=":getTypeLevelList(3)" id="type"}
                                         <option value="{$type.id}" >
                                             {if $type.level == 2}&nbsp;&nbsp;&nbsp;&nbsp;|-&nbsp;{elseif $type.level == 3}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|-&nbsp;{/if}{$type.name}</option>
@@ -44,7 +44,7 @@
                                 <div class="form-inline form-group">
                                     <label for="" class="col-md-2 pull-right">商品供应商</label>
                                     <span class="">
-                                        <select class="form-control"  name="parent">
+                                        <select class="form-control"  name="supplier">
                                             {volist name=":getSupplierList()"  id='user'}
                                         <option  value="{$user.id}">{$user.real_name}</option>
                                             {/volist}
@@ -230,8 +230,8 @@
 
 <script type="text/javascript">
     $(function () {
-
-        $('select[name="type"]').change(function () {
+        //
+        $('#goods_type').change(function () {
             var typeId = $('select[name="type"]').val();
             $.ajax({
                 type:'get',
@@ -239,10 +239,12 @@
                 data:{},
                 dataType:'json',
                 success:function (data) {
-
+                     //alert('tttt');
                 }
             });
         });
+
+        $('select[name="type"]').trigger('change');
 
 
         var ckeditor = CKEDITOR.replace('goods-content');

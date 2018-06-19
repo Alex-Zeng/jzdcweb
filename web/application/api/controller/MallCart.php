@@ -93,6 +93,8 @@ class MallCart extends Base{
      * @param Request $request
      */
     public function index(Request $request){
+        $ids = $request->post('ids','');
+        //$ids = '62,64,65';
         //验证登录
         $auth = $this->auth();
         if($auth){
@@ -100,12 +102,24 @@ class MallCart extends Base{
         }
         //查询数据
         $model = new \app\common\model\MallCart();
+
+        if($ids){
+           // $where['id'] = ['in',explode(',')];
+            $where = [
+              'a.id' => ['in',explode(',',$ids)],
+              'a.user_id' => $this->userId
+            ];
+        }else{
+           $where = [
+               'a.user_id' => $this->userId
+           ];
+        }
+
         $rows = $model->alias('a')
             ->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')
             ->join(config('prefix').'mall_goods_specifications c','a.goods_specifications_id=c.id','left')
-            ->where(['user_id'=>$this->userId])
+            ->where($where)
             ->field(['b.id','b.icon','b.title','b.supplier','b.w_price','a.id as cart_id','a.quantity','c.w_price as goods_price','c.color_name','c.option_id'])->select();
-
         $supplierData = [];
         $typeOptionModel = new MallTypeOption();
         foreach ($rows as $row){
