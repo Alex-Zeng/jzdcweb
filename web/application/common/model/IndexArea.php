@@ -41,7 +41,7 @@ class IndexArea extends Model{
      * @throws \think\exception\DbException
      */
     public function getCityListByProvince($provinceId){
-        $rows = $this->where(['upid' => $provinceId,'level'=>3])->field(['id','name','level'])->select();
+        $rows = $this->where(['upid' => $provinceId,'level'=>3])->field(['id','name','level','upid'])->select();
         return $rows;
     }
 
@@ -54,7 +54,7 @@ class IndexArea extends Model{
      * @throws \think\exception\DbException
      */
     public function getCountyListByCity($cityId = 0){
-        $rows = $this->where(['upid' => $cityId,'level'=>4])->field(['id','name','level'])->select();
+        $rows = $this->where(['upid' => $cityId,'level'=>4])->field(['id','name','level','upid'])->select();
         return $rows;
     }
 
@@ -67,7 +67,7 @@ class IndexArea extends Model{
      * @throws \think\exception\DbException
      */
     public function getTownListByCounty($countyId = 0){
-        $rows = $this->where(['upid' => $countyId,'level'=>5])->field(['id','name','level'])->select();
+        $rows = $this->where(['upid' => $countyId,'level'=>5])->field(['id','name','level','upid'])->select();
         return $rows;
     }
 
