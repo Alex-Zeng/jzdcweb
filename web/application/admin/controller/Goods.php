@@ -9,6 +9,8 @@ namespace app\admin\controller;
 
 use app\common\model\IndexUser;
 use app\common\model\MallGoods;
+use app\common\model\MallGoodsSpecifications;
+use app\common\model\MallOrderGoods;
 use app\common\model\MallType;
 use app\common\model\MallTypeOption;
 use app\common\model\MallUnit;
@@ -55,8 +57,72 @@ class Goods extends Base{
      */
     public function create(Request $request){
         if($request->isPost()){
+            $title = $request->post('title','');
+            $type = $request->post('type',0,'intval');
+            $supplier = $request->post('supplier',0,'intval');
+            $unit = $request->post('unit',0,'intval');
+            $cover_path = $request->post('cover_path','');
+            $multi_path = $request->post('multi_path','');
+            $color = $request->post('color/a');
 
-         exit;
+            $standard = $request->post('standard/a');
+            $cost_price = $request->post('cost_price',0);
+            $w_price = $request->post('w_price',0);
+            $e_price = $request->post('e_price',0);
+
+            $content = $request->post('content','');
+            $state = $request->post('state',0,'intval');
+            $standardArr =  [];
+
+
+            //计算min_price,max_price
+
+            //添加商品
+            $goodsModel = new MallGoods();
+            $goods = [
+                'shop_id' =>1,
+                'min_price' => '',
+                'max_price' => '',
+                'state' => $state,
+                'type' =>$type,
+                'unit' =>$unit,
+                'w_price' =>$w_price,
+                'e_price' => $e_price,
+                'cost_price' => $cost_price,
+                'supplier' => $supplier,
+                'title' => $title,
+                'icon' => $cover_path,
+                'multi_angle_img' => $multi_path,
+                'detail' => $content,
+                'm_detail' => $content,
+                'limit_cycle' => ''
+            ];
+
+            $result = $goodsModel->save($goods);
+            if($result == true){
+                for($i =0; $i < count($standard); $i++){
+                    $colorId = $standard[$i]['color_id'];
+                    $standardArr[] = [
+                        'color_id' => $standard[$i]['color_id'],
+                        'color_name' => isset($color[$colorId]) ? $color[$colorId]['name'] : '',
+                        'color_img' => isset($color[$colorId]) ? $color[$colorId]['path'] : '',
+                        'option_id' => $standard[$i]['option_id'],
+                        'goods_id' => $goodsModel->id,
+                        'e_price' => $standard[$i]['e_price'],
+                        'w_price' => $standard[$i]['w_price'],
+                        'quantity' => 1000000,
+                        'barcode' => $standard[$i]['barcode'],
+                        'type' => $type,
+                        'store_code' => $standard[$i]['store_code']
+                    ];
+                }
+
+                //商品规格处理
+                $specificationModel = new MallGoodsSpecifications();
+                $specificationModel->saveAll($standardArr);
+
+                $this->redirect(url('admin/goods/index'));
+            }
         }
 
         $unitModel = new MallUnit();
@@ -73,13 +139,27 @@ class Goods extends Base{
      * @return mixed
      */
     public function edit(Request $request,$id){
-
+        $goodsModel = new MallGoods();
+        $row = $goodsModel->where(['id'=>$id])->find();
         if($request->isPost()){
 
 
         }
 
-        return $this->fetch('template/create');
+        $imgList = [];
+        $imgArr = $row->multi_angle_img ? explode('|',$row->multi_angle_img) : [];
+        for($i = 0; $i < count($imgArr); $i++){
+            $imgList[] =["img"=>MallGoods::getFormatMultiImg($imgArr[$i])];
+        }
+
+        $row['icon_path'] = MallGoods::getFormatImg($row->icon);
+        $row['imgList'] = $imgList;
+
+        $unitModel = new MallUnit();
+        $unitRows = $unitModel->where([])->order('sequence','desc')->field(['id','name'])->select();
+        $this->assign('unitRows',$unitRows);
+        $this->assign('row',$row);
+        return $this->fetch();
     }
 
 
@@ -91,8 +171,14 @@ class Goods extends Base{
      */
     public function delete(Request $request, $id){
         //检查删除条件
+        $orderGoodsModel = new MallOrderGoods();
+        $row = $orderGoodsModel->where(['goods_id'=>$id])->find();
+        if($row){
+            return ['status'=>1,'data'=>[],'msg'=>'已有下单商品,不能删除'];
+        }
         $model = new MallGoods();
-        $result = $model->save(['is_delete'=>1],['id'=>$id]);
+
+        $result = $model->where(['id'=>$id])->delete();
         if($result == true){
             return ['status'=>0,'data'=>[],'msg'=>'删除成功'];
         }

@@ -1,6 +1,6 @@
-{include file="layout/header" title="投诉与建议" keywords="开源WEB开发框架" /}
+{include file="layout/header" title="" keywords="" /}
 
-{include file="layout/left" groupId="$groupId" keywords="开源WEB开发框架" /}
+{include file="layout/left" groupId="$groupId" keywords="" /}
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <div class="content-header">
@@ -93,13 +93,45 @@
     </section>
 </div>
 
-<div class="modal fade" id="info-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+<div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-body ">
+            <div class="modal-body">是否确认删除该Banner?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="delete-request">是</button>
             </div>
         </div>
     </div>
 </div>
 
-{include file="layout/footer" title="$title" keywords="开源WEB开发框架" /}
+
+{include file="layout/footer" title="$title" keywords="" /}
+<script  type="text/javascript">
+    $(function () {
+        $('#delete-modal').on('show.bs.modal', function (event) {
+            var id = $(event.relatedTarget).data('id');
+            $("#delete-request").data('id',id);
+        });
+
+        $("#delete-request").click(function () {
+            var id = $(this).data('id');
+            if(id < 0){
+                return;
+            }
+            $.ajax({
+                type:'post',
+                url:'?s=admin/goods/delete&id='+id,
+                data:{},
+                dataType:'json',
+                success:function (data) {
+                    if(data.status == 0){
+                        window.location.reload();
+                    }else{
+                        alert(data.msg);
+                    }
+                }
+            })
+        });
+    });
+</script>

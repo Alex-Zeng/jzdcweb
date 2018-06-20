@@ -259,6 +259,15 @@ return [
         'certification' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/company_cert',
         ],
+        'goods_thumb' =>[
+            'path' => ROOT_PATH.'public'.DS.'uploads/goods_thumb',
+        ],
+        'goods' => [
+            'path' => ROOT_PATH.'public'.DS.'uploads/goods',
+        ],
+        'goods_color' => [
+            'path' => ROOT_PATH.'public'.DS.'uploads/goods_color',
+        ],
     ],
     'jzdc_doc_path' => 'http://'.$_SERVER['HTTP_HOST'].'/web/public/uploads/'
 ];
