@@ -86,7 +86,8 @@ class User extends Base {
             'post_code' => $postCode,
             'name' => $name,
             'phone' => $phone,
-            'tag' => $tag
+            'tag' => $tag,
+            'user_id' => $userId
         ];
         $result = $model->save($data);
         if($result == true){
