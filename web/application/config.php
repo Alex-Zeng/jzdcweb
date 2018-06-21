@@ -245,28 +245,44 @@ return [
     'jzdc_upload' => [  //上传图片配置参数
         'company' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/company',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
         ],
         'banner' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/banner',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
         ],
         'type_icon' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/type_icon',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
         ],
         'order' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/order',
-            'thumb' => ['width'=>100,'height'=>100]
+            'thumb' => ['width'=>100,'height'=>100],
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
         ],
         'certification' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/company_cert',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
         ],
         'goods_thumb' =>[
             'path' => ROOT_PATH.'public'.DS.'uploads/goods_thumb',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
         ],
         'goods' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/goods',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
         ],
         'goods_color' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/goods_color',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
         ],
     ],
     'jzdc_doc_path' => 'http://'.$_SERVER['HTTP_HOST'].'/web/public/uploads/'
