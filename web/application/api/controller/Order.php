@@ -277,6 +277,7 @@ class Order extends Base{
             return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
         }
 
+        $where = [];
         if($this->groupId == IndexGroup::GROUP_BUYER){
             $where['buyer_id'] = $this->userId;
         }else{
@@ -286,6 +287,7 @@ class Order extends Base{
         if($status != '-1'){
             $where['state'] = $status;
         }
+        $count = $orderModel->where($where)->count();
         $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','receiver_name','supplier'])->select();
         $userModel = new IndexUser();
         foreach ($rows as &$row){
@@ -299,7 +301,7 @@ class Order extends Base{
             $row['goods'] = $goodsRows;
         }
 
-        return ['status'=>0,'data'=>$rows,'msg'=>''];
+        return ['status'=>0,'data'=>['total'=>$count,'list'=>$rows],'msg'=>''];
     }
 
     /**
