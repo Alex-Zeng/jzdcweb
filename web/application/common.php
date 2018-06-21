@@ -61,7 +61,7 @@ function checkPhone($phone){
 function checkEmail($email){
     return preg_match("/\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/",$email);
 }
-//'/^[\\~!@#$%^&*()-_=+|{}\[\],.?\/:;\'\"\d\w]{'.$minLen.','.$maxLen.'}$/';
+
 
 /**
  * @desc 验证密码
@@ -97,13 +97,13 @@ function getCompanyProperty($property = -1){
 }
 
 /**
- * 图片地址替换成压缩URL
+ * 图片地址替换为绝对地址
  * @param string $content 内容
  * @param string $suffix 后缀
  */
-function get_img_thumb_url($content="",$suffix="http://192.168.3.101/"){
-// by http://www.manongjc.com/article/1319.html
-    $pregRule = "/<[img|IMG].*?src=[\'|\"](.*?(?:[\.jpg|\.jpeg|\.png|\.gif|\.bmp]))[\'|\"].*?[\/]?>/";
-    $content = preg_replace($pregRule, '<img src="'.$suffix.'${1}" style="max-width:100%">', $content);
+function getImgUrl($content="",$suffix = ''){
+    $suffix = $suffix ? $suffix : config('jzdc_domain');
+    $pregRule = "/<img src=&#34;/";  //<img src=&#34;
+    $content = preg_replace($pregRule,$suffix, $content);
     return $content;
 }

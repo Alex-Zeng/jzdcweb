@@ -311,7 +311,7 @@ class Goods  extends Base {
             'standard' => $standards, //规格
             'standardPrice' => $standardsPrice,
             'imgList' => $imgList, //视图图片
-            'detail' => get_img_thumb_url(htmlspecialchars_decode($row->m_detail)),
+            'detail' => getImgUrl($row->m_detail),
             'isFavorite' => $isFavorite //是否收藏
         ];
 

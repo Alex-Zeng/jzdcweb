@@ -40,8 +40,7 @@ class Register{
         if(!$username){
             return ['status'=>1,'data'=>[],'msg' => '用户名不能为空'];
         }
-        $pattern = '/^[a-z0-9]+([._-][a-z0-9]+)*@([0-9a-z]+\.[a-z]{2,14}(\.[a-z]{2})?)$/i';
-        if(preg_match($pattern,$username)){
+        if(checkEmail($username)){
             return ['status'=>1,'data'=>[],'msg' => '用户名不能为邮箱'];
         }
         if(checkPhone($username)){

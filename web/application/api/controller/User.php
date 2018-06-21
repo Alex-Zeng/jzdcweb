@@ -19,6 +19,7 @@ use app\common\model\Notice;
 use app\common\model\OrderMsg;
 use app\common\model\UserSearchLog;
 use sms\Yunpian;
+use think\Db;
 use think\Request;
 
 class User extends Base {
@@ -48,6 +49,7 @@ class User extends Base {
         $name = $request->post('name','');
         $phone = $request->post('phone','');
         $tag = $request->post('tag','');
+        $default = $request->post('is_default',0,'intval');
 
         if(!checkPhone($phone)){
             return  ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
@@ -74,10 +76,8 @@ class User extends Base {
             return ['status'=>1,'data'=>[],'msg'=>'最多添加20个收货人地址'];
         }
 
-
         $userRow = (new IndexUser())->getInfoById($userId);
         $userName = $userRow ? $userRow['username'] : '';
-
 
         $data = [
             'username' => $userName,
@@ -88,10 +88,16 @@ class User extends Base {
             'name' => $name,
             'phone' => $phone,
             'tag' => $tag,
-            'user_id' => $userId
+            'user_id' => $userId,
+            'is_default' => $default
         ];
         $result = $model->save($data);
         if($result == true){
+            //更新
+            if($default == 1){
+                (new MallReceiver())->where('user_id='.$this->userId.' AND id NOT IN ('.$model->id.')')->save(['is_default'=>0]);
+            }
+
             return ['status'=>0,'data'=>[],'msg'=>'添加成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'添加失败'];
@@ -111,6 +117,7 @@ class User extends Base {
         $name = $request->post('name','');
         $phone = $request->post('phone','');
         $tag = $request->post('tag','');
+        $default = $request->post('is_default',0,'intval');
 
         $auth = $this->auth();
         if($auth){
@@ -137,10 +144,15 @@ class User extends Base {
             'post_code' => $postCode,
             'name' => $name,
             'phone' => $phone,
-            'tag' => $tag
+            'tag' => $tag,
+            'is_default' => $default
         ];
         $result = $model->save($data,['id'=>$id]);
         if($result == true){
+            //更新
+            if($default == 1){
+                (new MallReceiver())->where('user_id='.$this->userId.' AND id NOT IN ('.$id.')')->save(['is_default'=>0]);
+            }
             return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'修改失败'];
@@ -228,15 +240,20 @@ class User extends Base {
             return $auth;
         }
 
-        $field = ['id','area_id','detail','post_code','name','phone','tag','time'];
+        $field = ['id','area_id','detail','post_code','name','phone','tag','time','is_default'];
         $model = new MallReceiver();
         $areaModel = new IndexArea();
         $rows = $model->where(['user_id'=>$this->userId])->field($field)->select();
         foreach ($rows as &$row){
             $areaList = $areaModel->getAreaInfo($row->area_id);
             $areaIds = $areaModel->getAreaIds($row->area_id);
+            if($areaList){
+                array_shift($areaList);
+            }
+            if($areaList){
+                array_pop($areaList);
+            }
             $row['areaName'] = $areaList ?  implode('-',array_reverse($areaList)) : '';
-
             $arrIds = [];
             if($areaIds){
                 array_shift($areaIds);
