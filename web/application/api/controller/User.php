@@ -361,10 +361,6 @@ class User extends Base {
         return ['status'=>0,'data'=>$row,'msg'=>''];
     }
 
-
-    //
-
-
     /**
      * @desc 提交认证
      * @param Request $request
@@ -499,6 +495,18 @@ class User extends Base {
         return ['status'=>0,'data'=>$data,'msg'=>''];
     }
 
+    /**
+     * @desc
+     * @return array|void
+     */
+    public function getAddressTag(){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
 
+        $data = ['家','公司'];
+        return ['status'=>0,'data'=>$data,'msg'=>''];
+    }
 
 }
