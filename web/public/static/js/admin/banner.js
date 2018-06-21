@@ -53,6 +53,9 @@ $(function () {
         allowedPreviewTypes: ['image'],
         allowedFileTypes: ['image'],
         allowedFileExtensions:  ['jpg', 'png','jpeg'],
+        previewSettings: {
+            image: {width: "300px", height: "300px"},
+        },
         maxFileSize : 5120,
         maxFileCount: 1,
         uploadExtraData: function(previewId, index) {   //额外参数的关键点

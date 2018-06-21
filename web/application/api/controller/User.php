@@ -479,7 +479,7 @@ class User extends Base {
         $model = new FormUserCert();
         $row = $model->where(['writer'=>$this->userId])->order('id','desc')->find();
         if(!$row){
-            return ['status'=>-1,'data'=>[],'msg'=>'用户未提交认证'];
+            return ['status'=>0,'data'=>[],'msg'=>'用户未提交认证'];
         }
         $data = [
             'companyName' => $row->company_name,
