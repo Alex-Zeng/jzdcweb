@@ -93,8 +93,7 @@ class MallCart extends Base{
      * @param Request $request
      */
     public function index(Request $request){
-        $ids = $request->post('ids','');
-        //$ids = '62,64,65';
+        $ids = $request->get('ids','');
         //验证登录
         $auth = $this->auth();
         if($auth){

@@ -142,7 +142,7 @@ $(function () {
                 $("#edit-form").find('select[name="status"]').val(data.data.status);
                 $("#edit-form").find('input[name="sequence"]').val(data.data.sequence);
                 $("#edit-upload-file").val(data.data.path);
-                var imgTag = "<img src='"+data.data.preview+"' class='file-preview-image' alt='' title=''>";
+                var imgTag = "<img width='300px' height='300px' src='"+data.data.preview+"' class='file-preview-image' alt='' title=''>";
                 //初始化图片
                 $("#edit-file").fileinput({
                     language: 'zh', //设置语言
@@ -158,7 +158,7 @@ $(function () {
                     maxFileCount: 1,
                     initialPreview: [imgTag],
                     previewSettings: {
-                        image: {width: "100px", height: "100px"},
+                        image: {width: "100", height: "100"},
                     },
                     // maxImageWidth: '1920px',
                     // maxImageHeight: '520px',
@@ -171,7 +171,6 @@ $(function () {
                 $('#edit-file').on("fileuploaded", function(event, data) {
                     if(data.response)
                     {
-                        alert(data.response.data.filename);
                         $('#edit-upload-file').val(data.response.data.filename);
                     }
                 });
