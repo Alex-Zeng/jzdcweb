@@ -37,7 +37,7 @@ class ImageUpload{
                     $image = Image::open($path.DS.$fileName);
                     $image->thumb($width, $height,Image::THUMB_CENTER)->save($thumbPath);
                 }
-                return ['status'=>0,'data'=>['filename'=>$fileName],'msg'=>''];
+                return ['status'=>0,'data'=>['filename'=>$fileName],'msg'=>'','path' => config('jzdc_doc_path').$type.DS.$fileName];
             }
             return ['status'=>1,'data'=>[],'msg'=>$file->getError()];
         }

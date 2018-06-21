@@ -227,13 +227,15 @@ class User extends Base {
             return $auth;
         }
 
-
         $field = ['id','area_id','detail','post_code','name','phone','tag','time'];
         $model = new MallReceiver();
+        $rows = $model->where(['user_id'=>$this->userId])->field($field)->select();
+        foreach ($rows as &$row){
 
-        $result = $model->where(['user_id'=>$this->userId])->field($field)->select();
+        }
 
-        return ['status'=>0,'data'=>['list'=>$result],'msg'=>''];
+
+        return ['status'=>0,'data'=>['list'=>$rows],'msg'=>''];
     }
 
     /**
@@ -482,7 +484,7 @@ class User extends Base {
             'companyName' => $row->company_name,
             'representative' => $row->legal_representative,
             'capital' => $row->reg_capital,
-            'address' => $row->detail_address,
+            'address' => $row->detail_address,  //detail_address
             'property' => $row->ent_property,
             'role' => $row->reg_role,
             'status' => $row->status,

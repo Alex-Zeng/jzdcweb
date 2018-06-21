@@ -101,10 +101,9 @@ function getCompanyProperty($property = -1){
  * @param string $content 内容
  * @param string $suffix 后缀
  */
-function get_img_thumb_url($content="",$suffix="!c550x260.jpg")
-{
+function get_img_thumb_url($content="",$suffix="http://192.168.3.101/"){
 // by http://www.manongjc.com/article/1319.html
     $pregRule = "/<[img|IMG].*?src=[\'|\"](.*?(?:[\.jpg|\.jpeg|\.png|\.gif|\.bmp]))[\'|\"].*?[\/]?>/";
-    $content = preg_replace($pregRule, '<img src="${1}'.$suffix.'" style="max-width:100%">', $content);
+    $content = preg_replace($pregRule, '<img src="'.$suffix.'${1}" style="max-width:100%">', $content);
     return $content;
 }
