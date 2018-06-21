@@ -468,13 +468,13 @@ class User extends Base {
      * @throws \think\exception\DbException
      */
     public function getCertification(){
-        $auth = $this->auth();
-        if($auth){
-            return $auth;
-        }
+//        $auth = $this->auth();
+//        if($auth){
+//            return $auth;
+//        }
 
         $model = new FormUserCert();
-        $row = $model->where(['writer'=>$this->userId])->order('id','desc')->find();
+        $row = $model->where(['writer'=>78])->order('id','desc')->find();
         if(!$row){
             return ['status'=>0,'data'=>[],'msg'=>'用户未提交认证'];
         }
@@ -483,7 +483,7 @@ class User extends Base {
             'representative' => $row->legal_representative,
             'capital' => $row->reg_capital,
             'address' => $row->detail_address,
-            'ent_property' => $row->ent_property,
+            'property' => $row->ent_property,
             'role' => $row->reg_role,
             'status' => $row->status,
             'business' => $row->business_license ?  FormUserCert::getFormatImg($row->business_license) : '',
