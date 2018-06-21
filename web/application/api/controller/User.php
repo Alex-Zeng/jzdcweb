@@ -427,6 +427,7 @@ class User extends Base {
         //保存数据
         $data = [
             'edit_time' => time(),
+            'writer'=> $this->userId,
             'editor' => $this->userId,
             'company_name' => $companyName,
             'business_license' => $businessPath,
