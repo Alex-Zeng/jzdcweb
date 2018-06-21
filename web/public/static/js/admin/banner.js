@@ -62,9 +62,7 @@ $(function () {
         }
     });
     $('#add-file').on("fileuploaded", function(event, data) {
-        if(data.response)
-        {
-            alert(data.response.data.filename);
+        if(data.response){
             $('#add-upload-file').val(data.response.data.filename);
         }
     });

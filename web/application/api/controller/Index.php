@@ -23,26 +23,26 @@ class Index extends Base
      * @throws \think\exception\DbException
      */
     public function getArea(Request $request){
-        $id = $request->get('id',0);
-        $type = $request->get('type',0,'intval');
         $model = new IndexArea();
+        $list = [];
+        //获取省级
+        $rows = $model->getProvinceList();
+        foreach ($rows as $row){
+            $list[] = ['name'=>$row->name,'value'=>$row->id];
+            $cityRows = $model->getCityListByProvince($row->id);
+            foreach($cityRows as $cityRow){
+                $list[] = ['name'=>$cityRow->name,'value'=>$cityRow->id,'parent'=>$cityRow->upid];
+                $countyRows = $model->getCountyListByCity($cityRow->id);
+                foreach ($countyRows as $countyRow){
+                    $list[] = ['name'=>$countyRow->name,'value'=>$countyRow->id,'parent'=>$countyRow->upid];
+                    $townRows = $model->getTownListByCounty($countyRow->id);
+                    foreach ($townRows as $townRow){
+                        $list[] = ['name'=>$townRow->name,'value'=>$townRow->id,'parent'=>$townRow->upid];
+                    }
+                }
+            }
 
-        switch ($type){
-            case 0: //获取省份
-                $rows = $model->getProvinceList();
-                break;
-            case 1: //获取市
-                $rows = $model->getCityListByProvince($id);
-                break;
-            case 2: //获取区县
-                $rows = $model->getCountyListByCity($id);
-                break;
-            case 3: //获取镇
-                $rows = $model->getTownListByCounty($id);
-                break;
-            default:
-                $rows = $model->getProvinceList();
         }
-        return ['status'=>0,'data'=>['list'=>$rows],'msg'=>''];
+        return ['status'=>0,'data'=>['list'=>$list],'msg'=>''];
     }
 }
