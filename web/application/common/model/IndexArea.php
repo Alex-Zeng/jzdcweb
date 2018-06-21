@@ -20,6 +20,16 @@ class IndexArea extends Model{
         return $list;
     }
 
+    public function getAreaIds($areaId = 0,$list = []){
+        $result = $this->where(['id'=>$areaId])->field(['id','level','upid'])->find();
+        if($result){
+            $list[]  = $result['id'];
+            return $this->getAreaIds($result['upid'],$list);
+        }
+        return $list;
+    }
+
+
     /**
      * @desc 返回省份列表
      * @return false|\PDOStatement|string|\think\Collection

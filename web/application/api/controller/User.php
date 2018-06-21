@@ -8,6 +8,7 @@
 namespace app\api\controller;
 
 use app\common\model\FormUserCert;
+use app\common\model\IndexArea;
 use app\common\model\IndexUser;
 use app\common\model\MallFavorite;
 use app\common\model\MallGoods;
@@ -229,11 +230,26 @@ class User extends Base {
 
         $field = ['id','area_id','detail','post_code','name','phone','tag','time'];
         $model = new MallReceiver();
+        $areaModel = new IndexArea();
         $rows = $model->where(['user_id'=>$this->userId])->field($field)->select();
         foreach ($rows as &$row){
+            $areaList = $areaModel->getAreaInfo($row->area_id);
+            $areaIds = $areaModel->getAreaIds($row->area_id);
+            $row['areaName'] = $areaList ?  implode('-',array_reverse($areaList)) : '';
 
+            $arrIds = [];
+            if($areaIds){
+                array_shift($areaIds);
+            }
+            if($areaIds){
+                array_pop($areaIds);
+            }
+            $areaIds = $areaIds ? array_reverse($areaIds) : [];
+            for($i=0; $i < count($areaIds); $i++){
+                $arrIds[] = trim($areaIds[$i]);
+            }
+            $row['areaIds'] = $arrIds;
         }
-
 
         return ['status'=>0,'data'=>['list'=>$rows],'msg'=>''];
     }

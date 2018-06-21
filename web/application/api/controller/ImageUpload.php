@@ -37,7 +37,9 @@ class ImageUpload{
                     $image = Image::open($path.DS.$fileName);
                     $image->thumb($width, $height,Image::THUMB_CENTER)->save($thumbPath);
                 }
-                return ['status'=>0,'data'=>['filename'=>$fileName],'msg'=>'','path' => config('jzdc_doc_path').$type.DS.$fileName];
+                $typeName = $type == 'certification' ? 'company_cert' :  $type;
+
+                return ['status'=>0,'data'=>['filename'=>$fileName],'msg'=>'','path' => config('jzdc_doc_path').$typeName.DS.$fileName];
             }
             return ['status'=>1,'data'=>[],'msg'=>$file->getError()];
         }
