@@ -491,7 +491,8 @@ class User extends Base {
             'legalIdentityCard' =>  $row->legal_identity_card ?  FormUserCert::getFormatImg($row->legal_identity_card) : '',
             'agentIdentityCard' => $row->legal_identity_card ? FormUserCert::getFormatImg($row->agent_identity_card) : '',
             'orgStructureCode' => $row->org_structure_code_permits ? FormUserCert::getFormatImg($row->org_structure_code_permits) : '',
-            'taxRegistrationCert' => $row->tax_registration_cert ? FormUserCert::getFormatImg($row->tax_registration_cert) : ''
+            'taxRegistrationCert' => $row->tax_registration_cert ? FormUserCert::getFormatImg($row->tax_registration_cert) : '',
+            'refuseReason' => $row->refuse_reason
         ];
 
         return ['status'=>0,'data'=>$data,'msg'=>''];
