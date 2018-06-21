@@ -483,6 +483,8 @@ class User extends Base {
             'representative' => $row->legal_representative,
             'capital' => $row->reg_capital,
             'address' => $row->detail_address,
+            'ent_property' => $row->ent_property,
+            'role' => $row->reg_role,
             'status' => $row->status,
             'business' => $row->business_license ?  FormUserCert::getFormatImg($row->business_license) : '',
             'permitsAccount' => $row->permits_accounts ? FormUserCert::getFormatImg($row->permits_accounts) : '',
