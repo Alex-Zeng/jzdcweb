@@ -116,7 +116,7 @@ class Order extends Base{
         }
 
         $return = [];
-        $orderModel = new MallOrder();
+
 
         $receiverModel = new MallReceiver();
         $receiverRow = $receiverModel->where(['id'=>$receiverId])->find();
@@ -127,9 +127,9 @@ class Order extends Base{
         $userModel = new IndexUser();
         $userInfo = $userModel->getInfoById($this->userId);
 
-
         //生成订单
         foreach ($orderList as $index => $order){
+            $orderModel = new MallOrder();
             $orderNo = getOrderOutId($index);
             $orderValue = [
                 'shop_id' => 1,
