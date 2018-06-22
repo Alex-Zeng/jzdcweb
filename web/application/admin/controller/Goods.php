@@ -8,6 +8,7 @@
 namespace app\admin\controller;
 
 use app\common\model\IndexUser;
+use app\common\model\MallColor;
 use app\common\model\MallGoods;
 use app\common\model\MallGoodsSpecifications;
 use app\common\model\MallOrderGoods;
@@ -224,7 +225,7 @@ class Goods extends Base{
     }
 
 
-    public function getType($typeId = 0){
+    public function getType($typeId = 0,$goodsId = 0){
         $model = new MallType();
         $row = $model->where(['id'=>$typeId])->find();
 
@@ -238,7 +239,65 @@ class Goods extends Base{
             $typeOptionModel = new MallTypeOption();
             $optionList = $typeOptionModel->where(['type_id'=>$typeId])->field(['id','name'])->select();
         }
-        return ['status'=>0,'data'=>['color'=>$row->color,'color_list' => $colorList,'option'=>$row->diy_option,'option_list'=>$optionList,'option_name'=>$row->option_name],'msg'=>''];
+        $specificationModel = new MallGoodsSpecifications();
+
+        $colorRows = $specificationModel->where(['goods_id'=>$goodsId,'type'=>$typeId,'color_id'=>['gt',0]])->field(['color_id','color_name','color_img'])->group('color_id')->select();
+
+        foreach ($colorRows as &$colorRow){
+            $colorRow['color_path'] = MallColor::getFormatImg($colorRow->color_id);
+            $colorRow['color_img_path'] = MallGoodsSpecifications::getFormatPath($colorRow->color_img);
+        }
+
+        $colorIds  = $optionIds = [];
+
+        $rows = $specificationModel->where(['goods_id'=>$goodsId,'type'=>$typeId])->field(['color_id','color_name','color_img','option_id','cost_price','w_price','e_price','cost_price','barcode','store_code'])->select();
+        foreach ($rows as &$row2){
+            $colorIds[] = $row2->color_id;
+            $optionIds[] = $row2->option_id;
+
+            $row2['option_name'] = '';
+            foreach ($optionList as $opt_list){
+                if($row2->option_id == $opt_list->id){
+                    $row2['option_name'] = $opt_list->name;
+                    continue;
+                }
+            }
+        }
+        $colorIds = array_unique($colorIds);
+        $optionIds = array_unique($optionIds);
+
+        foreach ($colorList as &$color_list){
+            if(in_array($color_list->id,$colorIds)){
+                $color_list['checked'] = 1;
+            }else{
+                $color_list['checked'] = 0;
+            }
+        }
+
+        foreach($optionList as &$option_list){
+            if(in_array($option_list->id,$optionIds)){
+                $option_list['checked'] = 1;
+            }else{
+                $option_list['checked'] = 0;
+            }
+        }
+
+        //查询规格
+        return [
+            'status'=>0,
+            'data'=>[
+                'color'=>$row->color,
+                'color_list' => $colorList,
+                'option'=>$row->diy_option,
+                'option_list'=>$optionList,
+                'option_name'=>$row->option_name,
+                'specification'=>$rows,
+                'color_row' => $colorRows,
+                'colorIds' => $colorIds,
+                'optionIds' => $optionIds
+            ],
+            'msg'=>''
+        ];
     }
 
 
