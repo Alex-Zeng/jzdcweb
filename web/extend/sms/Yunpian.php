@@ -76,7 +76,8 @@ class Yunpian{
 
         //添加发送短信日志
         //调用发送接口
-        return $this->sendSms($mobile,$content);
+//        return $this->sendSms($mobile,$content);
+        return true;
     }
 
 

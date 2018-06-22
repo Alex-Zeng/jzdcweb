@@ -41,7 +41,8 @@ function getVerificationCode($length = 4){
         $char=$code{rand(0, strlen($code)-1)};
         $string.=$char;
     }
-    return $string;
+//    return $string;
+    return '6666';
 }
 
 /**
