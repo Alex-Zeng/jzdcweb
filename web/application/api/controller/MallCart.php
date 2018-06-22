@@ -118,7 +118,7 @@ class MallCart extends Base{
             ->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')
             ->join(config('prefix').'mall_goods_specifications c','a.goods_specifications_id=c.id','left')
             ->where($where)
-            ->field(['b.id','b.icon','b.title','b.supplier','b.w_price','a.id as cart_id','a.quantity','c.w_price as goods_price','c.color_name','c.option_id'])->select();
+            ->field(['b.id','b.icon','b.title','b.supplier','b.w_price','a.id as cart_id','a.quantity','c.w_price as goods_price','c.color_id','c.color_name','c.option_id'])->select();
         $supplierData = [];
         $typeOptionModel = new MallTypeOption();
         foreach ($rows as $row){
@@ -138,9 +138,10 @@ class MallCart extends Base{
                 'icon' => MallGoods::getFormatImg($row->icon),
                 'quantity' => intval($row->quantity),
                 'specificationsInfo' => $specificationsInfo,
+                'option_id' => $row->option_id,
+                'color_id' => $row->color_id,
                 'no' =>'',
                 'requirement' => ''
-
             ];
         }
         $data = [];
