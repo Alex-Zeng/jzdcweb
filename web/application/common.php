@@ -42,6 +42,7 @@ function getVerificationCode($length = 4){
         $string.=$char;
     }
 //    return $string;
+    \think\Log::write('短信接口万能验证6666');
     return '6666';
 }
 
