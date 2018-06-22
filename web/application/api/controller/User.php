@@ -266,6 +266,7 @@ class User extends Base {
                 $arrIds[] = trim($areaIds[$i]);
             }
             $row['areaIds'] = $arrIds;
+            $row['is_default'] = $row->is_default ? true : false;
         }
 
         return ['status'=>0,'data'=>['list'=>$rows],'msg'=>''];

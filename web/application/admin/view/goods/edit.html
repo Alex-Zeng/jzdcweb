@@ -277,6 +277,12 @@
                 return obj;
             }
         });
+
+        var multiImgs = {:json_encode($row.imgList)};
+        var multiImgTag = [];
+        for (var i =0; i < multiImgs.length;i++){
+            multiImgTag.push("<img src='"+multiImgs[i].img+"' class='file-preview-image' alt='' title=''>");
+        }
         $("#multi-file").fileinput({
             language: 'zh', //设置语言
             uploadUrl: '?s=admin/file/upload',  //上传地址
@@ -289,6 +295,10 @@
             allowedFileExtensions:  ['jpg', 'png','jpeg'],
             maxFileSize : 5120,
             maxFileCount: 20,
+            initialPreview: [multiImgTag],
+            previewSettings: {
+                image: {width: "50px", height: "50px"},
+            },
             uploadExtraData: function(previewId, index) {   //额外参数的关键点
                 var obj = {};
                 obj.type = 'goods';
