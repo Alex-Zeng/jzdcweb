@@ -284,6 +284,9 @@ return [
             'size' => 5*1024*1024,
             'ext' => 'jpg,jpeg,png',
         ],
+        'common' => [
+            'path' => ROOT_PATH.'public'.DS.'uploads/common',
+        ]
     ],
     'jzdc_doc_path' => 'http://'.$_SERVER['HTTP_HOST'].'/web/public/uploads/'
 ];

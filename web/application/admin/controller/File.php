@@ -17,9 +17,10 @@ class File extends Base{
      * @param Request $request
      * @return array
      */
-    public function upload(Request $request){
+    public function upload(Request $request,$dir = ''){
         $file = $request->file('file');
         $type = $request->post('type','');
+        $type = $dir ? $dir : $type;
         if($file){
             $config = config('jzdc_upload.'.$type);
             //验证大小以及文件格式
@@ -52,6 +53,5 @@ class File extends Base{
         }
         return ['status'=>1,'data'=>[],'msg'=>'上传错误'];
     }
-
 
 }
