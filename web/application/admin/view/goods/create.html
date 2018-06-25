@@ -1,5 +1,7 @@
 {include file="layout/header" title="投诉与建议" keywords="" /}
 <link href="__STATIC__/js/plugins/bootstrap-fileinput/css/fileinput.css" media="all" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="__STATIC__/js/plugins/kindeditor/themes/default/default.css" />
+<link rel="stylesheet" href="__STATIC__/js/plugins/kindeditor/plugins/code/prettify.css" />
 {include file="layout/left" groupId="$groupId" keywords="" /}
 
 <style type="text/css">
@@ -235,14 +237,29 @@
 
 
 <script type="text/javascript">
-
     KindEditor.ready(function(K) {
-        K.create('#goods-content', {
-            uploadJson : '/?s=admin/file/upload',
-            fileManagerJson : '../asp/file_manager_json.asp',
-            allowFileManager : true
+        var editor1 = K.create('#goods-content', {
+            cssPath : '__STATIC__/js/plugins/kindeditor/plugins/code/prettify.css',
+            uploadJson : '/kindeditordemo/php/upload_json.php',
+           // uploadJson : '/?s=admin/file/upload2',
+            fileManagerJson : '/kindeditordemo/php/file_manager_json.php',
+            allowFileManager : true,
+            afterCreate : function() {
+                var self = this;
+                // K.ctrl(document, 13, function() {
+                //     self.sync();
+                //     K('form[name=example]')[0].submit();
+                // });
+                // K.ctrl(self.edit.doc, 13, function() {
+                //     self.sync();
+                //     K('form[name=example]')[0].submit();
+                // });
+            }
         });
+       // prettyPrint();
     });
+
+
     $(function () {
 
        // var m_dtail_editor; KindEditor.ready(function(K) { m_dtail_editor = K.create('textarea[name="m_detail"]', { newlineTag:'br', urlType:'relative', langType : 'chinese_simplified', extraFileUploadParams : { program :"mall" } }); });

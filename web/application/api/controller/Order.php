@@ -56,7 +56,7 @@ class Order extends Base{
                 }
                 $specificationsRow = [];
                 if(isset($detailList['color_id']) && isset($detailList['option_id'])){
-                    $specificationsRow = $specificationsModel->where(['color_id'=>$detailList['color_id'],'option_id'=>$detailList['option_id'],'goods_id'=>$detailList['goods_id']])->find();
+                    $specificationsRow = $specificationsModel->where(['color_id'=>$detailList['color_id'],'option_id'=>$detailList['option_id'],'goods_id'=>$detailList['goodsId']])->find();
                 }
                 $goodsRows[] = [
                     'supplier' => $row->supplier,
