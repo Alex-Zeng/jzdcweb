@@ -192,7 +192,9 @@ class Order extends Base{
                         'goods_id' => $goodsList['goods_id'],
                         'title' => $goodsList['title'],
                         'quantity' => $goodsList['quantity'],
-                        'price' => $goodsList['price']
+                        'price' => $goodsList['price'],
+                        'no' => $goodsList['no'],
+                        'requirement' => $goodsList['requirement']
                     ];
                 }
 
@@ -206,7 +208,7 @@ class Order extends Base{
                         'date' => $order['date'],
                         'goods' => $returnGoodsList,
                         'remark' => $order['remark'],
-                        'supplierName' => $supplerInfo ? $supplerInfo->real_name : ''
+                        'supplierName' => $supplerInfo ? $supplerInfo->real_name : '',
                     ];
                     foreach ($order['list'] as $list){
                         $specificationsWhere = ['user_id'=>$this->userId,'goods_id'=>$list['goods_id'],'specifications_id'=>$list['s_id']];

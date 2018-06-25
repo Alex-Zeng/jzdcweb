@@ -55,14 +55,25 @@ class File extends Base{
     }
 
 
-    public function upload2(){
+    public function upload2(Request $request){
         $php_path = dirname(__FILE__) . '/';
         $php_url = dirname($_SERVER['PHP_SELF']) . '/';
 
-//文件保存目录路径
+        //文件保存目录路径
         $save_path = ROOT_PATH . 'web/public/uploads/attached/';
 //文件保存目录URL
         $save_url = config('jzdc_domain') . '/web/public/uploads/attached/';
+
+        $file = $request->file('imgFile');
+        if($file){
+            $info = $file->move($save_path);
+            if($info){
+
+            }
+
+        }
+
+/*
 //定义允许上传的文件扩展名
         $ext_arr = array(
             'image' => array('gif', 'jpg', 'jpeg', 'png', 'bmp'),
@@ -75,6 +86,7 @@ class File extends Base{
 
         $save_path = realpath($save_path) . '/';
 
+        print_r($_FILES); EXIT;
 //PHP上传失败
         if (!empty($_FILES['imgFile']['error'])) {
             switch($_FILES['imgFile']['error']){
@@ -179,6 +191,9 @@ class File extends Base{
             echo json_encode(['error'=>0,'url'=>$file_url]);
             exit;
         }
+
+        */
+
     }
 
     function alert($msg) {
