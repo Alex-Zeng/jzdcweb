@@ -50,14 +50,17 @@ class Order extends Base{
 
         foreach ($detailRows as $detailRow){
             foreach ($detailRow['list'] as $detailList){
-                $row = $model->where(['id'=>$detailList['goods_id']])->field(['id','title','supplier','w_price','unit'])->find();
+                $row = $model->where(['id'=>$detailList['goodsId']])->field(['id','title','supplier','w_price','unit'])->find();
                 if(!$row){
                     continue;
                 }
-                $specificationsRow = $specificationsModel->where(['color_id'=>$detailList['color_id'],'option_id'=>$detailList['option_id'],'goods_id'=>$detailList['goods_id']])->find();
+                $specificationsRow = [];
+                if(isset($detailList['color_id']) && isset($detailList['option_id'])){
+                    $specificationsRow = $specificationsModel->where(['color_id'=>$detailList['color_id'],'option_id'=>$detailList['option_id'],'goods_id'=>$detailList['goods_id']])->find();
+                }
                 $goodsRows[] = [
                     'supplier' => $row->supplier,
-                    'goods_id' => $detailList['goods_id'],
+                    'goods_id' => $detailList['goodsId'],
                     'price' => $specificationsRow ? $specificationsRow->w_price : $row->w_price,
                     'cost_price' => $specificationsRow ? $specificationsRow->cost_price : $row->w_price,
                     's_id' => $specificationsRow ? $specificationsRow->id : 0,
@@ -113,7 +116,7 @@ class Order extends Base{
         }
 
         $return = [];
-        $orderModel = new MallOrder();
+
 
         $receiverModel = new MallReceiver();
         $receiverRow = $receiverModel->where(['id'=>$receiverId])->find();
@@ -124,9 +127,9 @@ class Order extends Base{
         $userModel = new IndexUser();
         $userInfo = $userModel->getInfoById($this->userId);
 
-
         //生成订单
         foreach ($orderList as $index => $order){
+            $orderModel = new MallOrder();
             $orderNo = getOrderOutId($index);
             $orderValue = [
                 'shop_id' => 1,
@@ -195,12 +198,15 @@ class Order extends Base{
 
                 $result2 = $orderGoodsModel->insertAll($orderGoods);
                 if($result2){
+                    $supplerInfo = $userModel->getInfoById($index);
+
                     //返回数据
                     $return[] = [
                         'orderNo' =>  $orderNo,
                         'date' => $order['date'],
                         'goods' => $returnGoodsList,
-                        'remark' => $order['remark']
+                        'remark' => $order['remark'],
+                        'supplierName' => $supplerInfo ? $supplerInfo->real_name : ''
                     ];
                     foreach ($order['list'] as $list){
                         $specificationsWhere = ['user_id'=>$this->userId,'goods_id'=>$list['goods_id'],'specifications_id'=>$list['s_id']];

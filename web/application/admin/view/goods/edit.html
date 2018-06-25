@@ -144,7 +144,7 @@
         </td>
         <td>
             <input id="color-file"  class="color_file" name="file" type="file"  data-show-caption="true">
-            <input  type="hidden"  class="color_hide_file" name="color[{{id}}][path]"   value="" />
+            <input  type="hidden"  class="color_hide_file" name="color[{{id}}][path]"   value="{{img_path}}" />
             <p class="help-block">支持jpg、jpeg、png格式，大小不超过2.0M</p>
         </td>
     </tr>
@@ -158,11 +158,11 @@
             {{ if path}}<img src="{{path}}" width="30px" height="30px"  />{{/if}}{{color_name}}
         </td>
         <td>{{option_name}}</td>
-        <td><input type="number"    class="form-control" value=""  name="standard[{{index}}][cost_price]" /></td>
-        <td><input type="number" class="form-control" value=""  name="standard[{{index}}][e_price]" /></td>
-        <td><input type="number" class="form-control"  value="" name="standard[{{index}}][w_price]" /></td>
-        <td><input type="number" class="form-control" value=""  name="standard[{{index}}][barcode]" /></td>
-        <td><input type="number" class="form-control" value=""  name="standard[{{index}}][store_code]" /></td>
+        <td><input type="number"    class="form-control" value="{{cost_price}}"  name="standard[{{index}}][cost_price]" /></td>
+        <td><input type="number" class="form-control" value="{{e_price}}"  name="standard[{{index}}][e_price]" /></td>
+        <td><input type="number" class="form-control"  value="{{w_price}}" name="standard[{{index}}][w_price]" /></td>
+        <td><input type="number" class="form-control" value="{{barcode}}"  name="standard[{{index}}][barcode]" /></td>
+        <td><input type="number" class="form-control" value="{{store_code}}"  name="standard[{{index}}][store_code]" /></td>
         <td><i class="fa fa-trash-o" style="cursor: pointer" title="删除"></i></td>
     </tr>
 </script>
@@ -173,7 +173,7 @@
         <div class="row">
             {{each color_list as value}}
             <div class="col-md-2 col-sm-6" style="padding-bottom: 15px;padding-left: 0px">
-                <input type="checkbox"  data-id="{{value.id}}" data-name="{{value.name}}"  data-path="{{value.path}}" class="color_select" value="{{value.id}}"  />
+                <input type="checkbox"  data-id="{{value.id}}"  {{ if value.checked}}checked{{/if}}  data-name="{{value.name}}"  data-path="{{value.path}}" class="color_select" value="{{value.id}}"  />
                 <img src="{{value.path}}" width="30px" height="30px"  />
                 &nbsp;{{value.name}}
             </div>
@@ -184,7 +184,7 @@
         <div class="row">
             {{each option_list as value}}
             <div class="col-md-2 col-sm-6" style="padding-bottom: 15px;padding-left: 0px">
-                <input type="checkbox"   data-id="{{value.id}}" data-name="{{value.name}}"  class="option_select" value="{{value.id}}"  />
+                <input type="checkbox"   data-id="{{value.id}}"  {{ if value.checked}}checked{{/if}}  data-name="{{value.name}}"  class="option_select" value="{{value.id}}"  />
                 &nbsp;{{value.name}}
             </div>
             {{/each}}
@@ -230,19 +230,85 @@
 
 <script type="text/javascript">
     $(function () {
+      var  specification = null;
         $('#goods_type').change(function () {
             var typeId = $('select[name="type"]').val();
             $.ajax({
                 type:'get',
-                url:'?s=admin/goods/getType&typeId='+typeId,
+                url:'?s=admin/goods/getType&typeId='+typeId+'&goodsId={$row.id}',
                 data:{},
                 dataType:'json',
                 success:function (data) {
                     if(data.status == 0){
+                        var color_rows = data.data.color_row;
+                        var specification = data.data.specification;
+
                         if(data.data.color == 1 || data.data.diy_option == 1){
-                            var data = {color:data.data.color,color_list:data.data.color_list,option:data.data.option,option_list:data.data.option_list,option_name:data.data.option_name}; //
-                            var html = template('standard-container',data);
+                            //
+                            var colorIds = data.data.colorIds;
+                            var optionIds = data.data.optionIds;
+
+                            var json_data = {color:data.data.color,color_list:data.data.color_list,option:data.data.option,option_list:data.data.option_list,option_name:data.data.option_name,colorIds:colorIds,optionIds:optionIds}; //
+                            var html = template('standard-container',json_data);
                             $('#standard_container').html(html);
+
+                            //
+                            if(color_rows.length > 0){
+                                for(var i=0; i < color_rows.length;i++){
+                                    var temp_data = {id:color_rows[i].color_id,name:color_rows[i].color_name,path:color_rows[i].color_path,img_path:color_rows[i].color_img};
+                                    var html = template('color-template', temp_data);
+                                    var imgTag = "<img width='300px' height='300px' src='"+color_rows[i].color_img_path+"' class='file-preview-image' alt='' title=''>";
+                                    $('#color-container').append(html);
+                                    $(".color_file").fileinput({
+                                        language: 'zh', //设置语言
+                                        uploadUrl: '?s=admin/file/upload',  //上传地址
+                                        showUpload: true, //是否显示上传按钮
+                                        showRemove:true,
+                                        dropZoneEnabled: false,
+                                        showCaption: true,//是否显示标题
+                                        allowedPreviewTypes: ['image'],
+                                        allowedFileTypes: ['image'],
+                                        allowedFileExtensions:  ['jpg', 'png','jpeg'],
+                                        maxFileSize : 5120,
+                                        maxFileCount: 20,
+                                        initialPreview: [imgTag],
+                                        previewSettings: {
+                                            image: {width: "100", height: "100"},
+                                        },
+                                        uploadExtraData: function(previewId, index) {   //额外参数的关键点
+                                            var obj = {};
+                                            obj.type = 'goods_color';
+                                            return obj;
+                                        }
+                                    }).on('fileuploaded',function (event,data) {
+                                        if(data.response){
+                                            $(event.target).closest('td').find('.color_hide_file').val(data.response.data.filename);
+                                        }
+                                    });
+                                }
+                            }
+
+
+                            if(data.data.specification.length > 0){
+                                var index = 0;
+                                var shtml = '';
+                                for(var j=0;j<data.data.specification.length; j++){
+                                    shtml +=template('custom-template',{
+                                         index:index,color_id:data.data.specification[j].color_id,
+                                         color_name:data.data.specification[j].color_name,
+                                         path:data.data.specification[j].path,
+                                         option_id:data.data.specification[j].option_id,
+                                         option_name:data.data.specification[j].option_name,
+                                         cost_price:data.data.specification[j].cost_price,
+                                         e_price: data.data.specification[j].e_price,
+                                         w_price:data.data.specification[j].w_price,
+                                        barcode:data.data.specification[j].barcode,
+                                        store_code:data.data.specification[j].store_code,
+                                    });
+                                    index++;
+                                }
+                                $('#custom-container').html(shtml);
+                            }
 
                         }
                     }

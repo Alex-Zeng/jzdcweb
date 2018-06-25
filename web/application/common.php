@@ -104,7 +104,7 @@ function getCompanyProperty($property = -1){
  * @param string $suffix 后缀
  */
 function getImgUrl($content="",$suffix = ''){
-    $suffix = $suffix ? $suffix : config('jzdc_domain');
+    $suffix = $suffix ? $suffix : config('jzdc_domain').DS;
     $pregRule = "/<img src=&#34;/";  //<img src=&#34;
     $content = preg_replace($pregRule,$suffix, $content);
     return $content;

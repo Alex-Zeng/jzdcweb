@@ -4,7 +4,8 @@ $sql="select `id`,`page_power`,`map`,`map_update_token` from ".$pdo->index_pre."
 //echo $sql;
 $v=$pdo->query($sql,2)->fetch(2);
 if ($_SESSION['jzdc']['group_id'] == 3){
-    $module['map'] = '<li><a href="index.php?jzdc=form.data_show_list&table_id=37"><img src="./templates/1/form/default/page_icon/form.index.png" /> <span>企业认证</span></a></li>';
+   // $module['map'] = '<li><a href="index.php?jzdc=form.data_show_list&table_id=37"><img src="./templates/1/form/default/page_icon/form.index.png" /> <span>企业认证</span></a></li>';
+    $module['map'] = '<li><a href="admin/certification/index.html"><img src="./templates/1/form/default/page_icon/form.index.png" /> <span>企业认证</span></a></li>';
 //    $module['map'].= '<li><a href="index.php?jzdc=slider.img&id=27"><img src="./templates/1/image/default/page_icon/image.index.png" /> <span>首页广告</span></a></li>';
     $module['map'].= '<li><a href="admin/banner/index.html"><img src="./templates/1/image/default/page_icon/image.index.png" /> <span>首页广告</span></a></li>';
     $module['map'].= '<li><a href="admin/notice/index.html"><img src="./templates/1/image/default/page_icon/image.index.png" /> <span>公告管理</span></a></li>';
