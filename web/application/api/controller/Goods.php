@@ -394,7 +394,7 @@ class Goods  extends Base {
 
         $rows = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')
             ->join(config('prefix').'mall_type c','b.type=c.id')
-            ->where($where)->group('b.type')->field(['COUNT(*) AS count','c.name'])->select();
+            ->where($where)->group('b.type')->field(['COUNT(*) AS count','c.name','c.id'])->select();
 
         return ['status'=>0,'data'=>['list'=>$rows],'msg'=>''];
     }
