@@ -15,6 +15,7 @@ use app\common\model\MallGoodsSpecifications;
 use app\common\model\MallOrder;
 use app\common\model\MallOrderGoods;
 use app\common\model\MallReceiver;
+use app\common\model\MallTypeOption;
 use app\common\model\UserGoodsSpecifications;
 use think\Request;
 
@@ -81,10 +82,9 @@ class Order extends Base{
         //获取数据列表，根据供应商进行分类
         $supplierGroup = [];
         foreach($goodsRows as $row){
-
-            $specificationsInfo = $row->color_name ? $row->color_name : '';
-            if($row->option_id > 0){
-                $typeOptionRow = $typeOptionModel->where(['id'=>$row->option_id])->find();
+            $specificationsInfo = $row['color_name'] ? $row['color_name'] : '';
+            if($row['option_id'] > 0){
+                $typeOptionRow = $typeOptionModel->where(['id'=>$row['option_id']])->find();
                 if($typeOptionRow){
                     $specificationsInfo .=','.$typeOptionRow->name;
                 }
