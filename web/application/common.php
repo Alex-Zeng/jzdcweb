@@ -107,3 +107,25 @@ function getImgUrl($content="",$suffix = ''){
     $content = preg_replace($pregRule,$suffix, $content);
     return $content;
 }
+
+function getTypeMap(){
+    $model = new \app\common\model\MallType();
+    $rows = $model->where(['parent'=>0])->field(['id','name','parent'])->select();
+    $map = [];
+    foreach ($rows as $row){
+        $map[$row->id][] = $row->id;
+        $rows2 = $model->where(['parent'=>$row->id])->field(['id','name','parent'])->select();
+        foreach ($rows2 as $row2){
+            $map[$row->id][] = $row2->id;
+
+            $rows3 = $model->where(['parent'=>$row2->id])->field(['id','name','parent'])->select();
+            foreach($rows3 as $row3){
+                $map[$row->id][] = $row3->id;
+            }
+
+        }
+    }
+    return $map;
+}
+
+

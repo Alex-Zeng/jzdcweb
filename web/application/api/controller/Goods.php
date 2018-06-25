@@ -358,7 +358,7 @@ class Goods  extends Base {
         $pageSize = $request->post('pageSize',10,'intval');
         $pageNumber = $request->post('pageNumber',1,'intval');
         $categoryId = $request->post('cateId',0,'intval');
-        if($pageSize > 12){ $pageSize = 12;}
+        if($pageSize > 20){ $pageSize = 20;}
 
         $auth = $this->auth();
         if($auth){
@@ -369,9 +369,18 @@ class Goods  extends Base {
         $model = new MallFavorite();
         $where['a.user_id'] = $this->userId;
         if($categoryId > 0){
-            $where['b.type'] = $categoryId;
+            $maps =   $maps = getTypeMap();
+            $targetIds = [];
+            foreach ($maps as $map){
+                if(in_array($categoryId,$map)){
+                    $targetIds = $map;
+                    break;
+                }
+            }
+            $where['b.type'] = ['in',$targetIds];
         }
         $total = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where($where)->count();
+        echo $model->getLastSql();
         $rows = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where($where)->order('a.time','desc')->limit($start,$pageSize)->field(['b.id','b.title','b.icon','b.min_price','b.max_price'])->select();
 
         foreach ($rows as &$row){
@@ -400,7 +409,45 @@ class Goods  extends Base {
             ->join(config('prefix').'mall_type c','b.type=c.id')
             ->where($where)->group('b.type')->field(['COUNT(*) AS count','c.name','c.id'])->select();
 
-        return ['status'=>0,'data'=>['list'=>$rows],'msg'=>''];
+        $maps = getTypeMap();
+        $list = [];
+        foreach ($rows as $row){
+            foreach ($maps as $parentId => $value){
+                if(in_array($row->id,$value)){
+                    $list[$row->id][] = ['id'=>$row->id,'count'=>$row->count,'parent'=>$parentId];
+                    continue;
+                }
+            }
+        }
+
+        $return = [];
+        $ids = [];
+        foreach ($list as $index => $item){
+            $count = 0;
+            for($i=0; $i < count($item); $i++){
+                $count += $item[$i]['count'];
+            }
+            if($count > 0){
+                $return[] = ['id'=>$item[0]['parent'],'count'=>$count];
+                $ids[] = $index;
+            }
+        }
+
+        if($ids){
+            $typeModel = new MallType();
+            $typeRows = $typeModel->where(['id'=>['in',$ids]])->field(['id','name'])->select();
+        }
+        foreach ($return as &$return_list){
+            $return_list['name'] = '';
+            foreach ($typeRows as $typeRow){
+                if($return_list['id'] == $typeRow->id){
+                    $return_list['name'] = $typeRow->name;
+                    continue;
+                }
+            }
+        }
+
+        return ['status'=>0,'data'=>['list'=>$return],'msg'=>''];
     }
 
 }
