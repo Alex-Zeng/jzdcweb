@@ -56,19 +56,21 @@ class File extends Base{
 
 
     public function upload2(Request $request){
-        $php_path = dirname(__FILE__) . '/';
-        $php_url = dirname($_SERVER['PHP_SELF']) . '/';
+
 
         //文件保存目录路径
-        $save_path = ROOT_PATH . 'web/public/uploads/attached/';
+        $save_path = ROOT_PATH . 'public/uploads/attached/image/';
 //文件保存目录URL
-        $save_url = config('jzdc_domain') . '/web/public/uploads/attached/';
+        $save_url = config('jzdc_domain') . '/web/public/uploads/attached/image/';
 
         $file = $request->file('imgFile');
         if($file){
             $info = $file->move($save_path);
             if($info){
-
+                $msg = $info->getSaveName();
+                header('Content-type: text/html; charset=UTF-8');
+                echo json_encode(['error'=>0,'url'=>$save_url.$msg]);
+                exit;
             }
 
         }

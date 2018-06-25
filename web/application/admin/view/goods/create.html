@@ -231,18 +231,16 @@
 </script>
 <script src="__STATIC__/js/plugins/bootstrap-fileinput/js/fileinput.js" type="text/javascript"></script>
 <script type="text/javascript" src="__STATIC__/js/template-web.js"></script>
-
 <script src="__STATIC__/js/plugins/kindeditor/kindeditor-all.js"></script>
 <script src="__STATIC__/js/plugins/kindeditor/lang/zh-CN.js"></script>
-
 
 <script type="text/javascript">
     KindEditor.ready(function(K) {
         var editor1 = K.create('#goods-content', {
             cssPath : '__STATIC__/js/plugins/kindeditor/plugins/code/prettify.css',
-           // uploadJson : '/kindeditordemo/php/upload_json.php',
+            //uploadJson : '/kindeditordemo/php/upload_json.php',
             uploadJson : '/?s=admin/file/upload2',
-            fileManagerJson : '/kindeditordemo/php/file_manager_json.php',
+          //  fileManagerJson : '/kindeditordemo/php/file_manager_json.php',
             allowFileManager : true,
             afterCreate : function() {
                 var self = this;
@@ -256,13 +254,10 @@
                 // });
             }
         });
-       // prettyPrint();
+
     });
 
-
     $(function () {
-
-       // var m_dtail_editor; KindEditor.ready(function(K) { m_dtail_editor = K.create('textarea[name="m_detail"]', { newlineTag:'br', urlType:'relative', langType : 'chinese_simplified', extraFileUploadParams : { program :"mall" } }); });
         $('#goods_type').change(function () {
             var typeId = $('select[name="type"]').val();
             $.ajax({
@@ -284,11 +279,6 @@
         });
 
         $('select[name="type"]').trigger('change');
-
-        // var ckeditor = CKEDITOR.replace('goods-content',{
-        //       filebrowserBrowseUrl : '/uploader/upload.php?type=Files',
-        //       filebrowserUploadUrl: '/?s=admin/file/upload&dir=common'
-        // });
         $("#cover-file").fileinput({
             language: 'zh', //设置语言
             uploadUrl: '?s=admin/file/upload',  //上传地址
