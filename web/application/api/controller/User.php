@@ -548,4 +548,137 @@ class User extends Base {
         return ['status'=>0,'data'=>$data,'msg'=>''];
     }
 
+//解绑手机号
+    public function bind(Request $request){
+        $phone = $request->post('phone','');
+        $id = $request->post('id','');
+        $code = $request->post('code','');
+        $oldCode = $request->post('oldCode','');
+        $newCode = $request->post('newCode','');
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        //验证
+        if(!$phone){
+            return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
+        }
+        if(!$code){
+            return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
+        }
+        if(!$oldCode || !$newCode){
+            return ['status'=>1,'data'=>[],'msg'=>'短信验证码不能为空'];
+        }
+        if(!checkPhone($phone)){
+            return ['status'=>1,'data'=>[],'msg'=>'手机号错误'];
+        }
+        if(!captchaDb_check($code,$id)){
+            return ['status'=>1,'data'=>[],'msg'=>'图片验证码有误'];
+        }
+
+        //查询用户手机号
+        $userModel = new IndexUser();
+        $userInfo = $userModel->getUserByPhone($phone);
+        if($userInfo){
+            return ['status'=>1,'data'=>[],'msg'=>'改号码已被其他用户绑定'];
+        }
+
+        $oldInfo = $userModel->getInfoById($this->userId);
+        if(!$oldInfo || !$oldInfo->phone){
+            return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
+        }
+
+        //验证短信
+        $codeModel = new \app\common\model\Code();
+        $codeRow = $codeModel->where(['phone'=>$oldInfo->phone,'type'=>\app\common\model\Code::TYPE_PHONE_BIND_OLD])->order('id','desc')->find();
+        if(!$codeRow || $codeRow['code']!= $code){
+            return ['status'=>1,'data'=>[],'msg'=>'短信验证码错误'];
+        }
+        if($codeRow['expire_time'] < time()){
+            return ['status'=>1,'data'=>[],'msg'=>'短信验证已过期'];
+        }
+
+        $codeRow = $codeModel->where(['phone'=>$phone,'type'=>\app\common\model\Code::TYPE_PHONE_BIND_NEW])->order('id','desc')->find();
+        if(!$codeRow || $codeRow['code']!= $code){
+            return ['status'=>1,'data'=>[],'msg'=>'短信验证码错误'];
+        }
+        if($codeRow['expire_time'] < time()){
+            return ['status'=>1,'data'=>[],'msg'=>'短信验证已过期'];
+        }
+
+        //更新数据
+        $result = $userModel->save(['phone'=>$phone],['id'=>$this->userId]);
+        if($result !== false){
+            return ['status' =>0,'data'=>[],'msg'=>'解绑成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'解绑失败'];
+    }
+
+//是否设置密码
+    public function getPasswordStatus(){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        //
+        $userModel = new IndexUser();
+        $userInfo = $userModel->getInfoById($this->userId);
+        if(!$userInfo->password){
+            return ['status'=>0,'data'=>['password'=>0],'msg'=>''];
+        }
+        return ['status'=>0,'data'=>['password'=>1],'msg'=>''];
+    }
+
+    //初始化密码
+    public function initPassword(Request $request){
+        $password = $request->post('password','');
+        $confirmPassword = $request->post('confirmPassword','');
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        if(!$password || !$confirmPassword){
+            return ['status'=>1,'data'=>[],'msg'=>'密码不能设置为空'];
+        }
+        if($password != $confirmPassword){
+            return ['status'=>1,'data'=>[],'msg'=>'两次密码不一致'];
+        }
+
+        $model = new IndexUser();
+
+        $result = $model->save(md5($password),['id'=>$this->userId]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'修改失败'];
+    }
+
+    //更新密码
+    public function updatePassword(Request $request){
+        $password = $request->post('oldPassword','');
+        $newPassword = $request->post('newPassword','');
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        if(!$password || !$newPassword){
+            return ['status'=>1,'data'=>[],'msg'=>'密码不能设置为空'];
+        }
+
+        $model = new IndexUser();
+        $userInfo = $model->getInfoById($this->userId);
+        if($userInfo->password != md5($password)){
+            return ['status'=>1,'data'=>[],'msg'=>'原密码不正确'];
+        }
+
+        $result = $model->save(md5($newPassword),['id'=>$this->userId]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'修改失败'];
+    }
+
+
 }
