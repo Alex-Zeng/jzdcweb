@@ -346,4 +346,57 @@ class Goods  extends Base {
         return ['status'=>0,'data'=>['price'=>0],'msg'=>''];
     }
 
+    /**
+     * @desc 收藏列表
+     * @param Request $request
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getFavoriteList(Request $request){
+        $pageSize = $request->post('pageSize',10,'intval');
+        $pageNumber = $request->post('pageNumber',1,'intval');
+        $categoryId = $request->post('cateId',0,'intval');
+        if($pageSize > 12){ $pageSize = 12;}
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        $start = ($pageNumber-1)*$pageSize;
+        //
+        $model = new MallFavorite();
+        $where['a.user_id'] = $this->userId;
+        if($categoryId > 0){
+            $where['b.type'] = $categoryId;
+        }
+        $total = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where($where)->count();
+        $rows = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where($where)->order('a.time','desc')->limit($start,$pageSize)->field(['b.id','b.title','b.min_price','b.max_price'])->select();
+
+        return ['status'=>0,'data'=>['total'=>$total,'list'=>$rows],'msg'=>''];
+    }
+
+    /**
+     * @desc 收藏分类数目
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getFavoriteType(){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        $model = new MallFavorite();
+        $where['a.user_id'] = $this->userId;
+
+        $rows = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')
+            ->join(config('prefix').'mall_type c','b.type=c.id')
+            ->where($where)->group('b.type')->field(['COUNT(*) AS count','c.name'])->select();
+
+        return ['status'=>0,'data'=>['list'=>$rows],'msg'=>''];
+    }
+
 }
