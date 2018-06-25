@@ -47,6 +47,7 @@ class Order extends Base{
         $goodsRows = [];
         $model = new MallGoods();
         $specificationsModel = new MallGoodsSpecifications();
+        $typeOptionModel = new MallTypeOption();
 
         foreach ($detailRows as $detailRow){
             foreach ($detailRow['list'] as $detailList){
@@ -70,7 +71,9 @@ class Order extends Base{
                     'date' => $detailRow['date'],
                     'remark' => $detailRow['remark'],
                     'no' => $detailList['no'],
-                    'requirement' => $detailList['requirement']
+                    'requirement' => $detailList['requirement'],
+                    'color_name' => $specificationsRow ? $specificationsRow->color_name : '',
+                    'option_id' => $specificationsRow ? $specificationsRow->option_id : ''
                 ];
             }
         }
@@ -78,6 +81,15 @@ class Order extends Base{
         //获取数据列表，根据供应商进行分类
         $supplierGroup = [];
         foreach($goodsRows as $row){
+
+            $specificationsInfo = $row->color_name ? $row->color_name : '';
+            if($row->option_id > 0){
+                $typeOptionRow = $typeOptionModel->where(['id'=>$row->option_id])->find();
+                if($typeOptionRow){
+                    $specificationsInfo .=','.$typeOptionRow->name;
+                }
+            }
+
             $supplierGroup[$row['supplier']][] = [
                 'goods_id'=>$row['goods_id'],
                 'title'=>$row['title'],
@@ -89,7 +101,8 @@ class Order extends Base{
                 'date'=>$row['date'],
                 'remark'=>$row['remark'],
                 'no' => $row['no'],
-                'requirement' => $row['requirement']
+                'requirement' => $row['requirement'],
+                'specificationsInfo' => $specificationsInfo
             ];
         }
         //循环遍历
@@ -194,7 +207,8 @@ class Order extends Base{
                         'quantity' => $goodsList['quantity'],
                         'price' => $goodsList['price'],
                         'no' => $goodsList['no'],
-                        'requirement' => $goodsList['requirement']
+                        'requirement' => $goodsList['requirement'],
+                        'specificationsInfo' => $goodsList['specificationsInfo'],
                     ];
                 }
 
