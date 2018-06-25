@@ -189,3 +189,8 @@
 <script src="__STATIC__/js/plugins/ckeditor-4.8.0/ckeditor.js"></script>
 <script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
 <script type="text/javascript" src="__STATIC__/js/admin/notice.js"></script>
+<script type="text/javascript">
+    var url = '{:url("admin/notice/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+    $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
+</script>

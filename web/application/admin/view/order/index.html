@@ -354,6 +354,10 @@
 <script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
 <script type="text/javascript">
 
+    var url = '{:url("admin/order/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+    $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
+
     //折叠展示
     function displayData(_self)
     {

@@ -134,4 +134,7 @@
             })
         });
     });
+    var url = '{:url("admin/goods/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+    $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
 </script>

@@ -238,20 +238,9 @@
 
 <script type="text/javascript">
     function validateSubmit(){
-        if($('#cover-upload-file').val() == ''){
-            $('#cover-upload-file').closest('.form-group').addClass('has-error');
-            $('#cover-upload-file').closest('.form-group').find('.help-block').show();
-        }
-
-        if($('#multi-upload-file').val() == ''){
-            $('#multi-upload-file').closest('.form-group').addClass('has-error');
-            $('#multi-upload-file').closest('.form-group').find('.help-block').show();
-        }
-       // alert($('#cover-upload-file').val());
         if ($("#add-form").data('bootstrapValidator').isValid()) {
-           alert('vvvv');
+           return true;
         }
-        alert('ggg');
         return false;
     }
     KindEditor.ready(function(K) {
@@ -349,7 +338,6 @@
                 $('#multi-upload-file').closest('.form-group').find('.help-block').html('');
             }
         });
-
         //
         $(document).delegate('.color_select','change',function () {
             var t = $(this).prop("checked");
@@ -436,6 +424,7 @@
         }
 
         $("#add-form").bootstrapValidator({
+            excluded:[":disabled"],
             live: 'disabled',
             message: 'This value is not valid',
             fields: {
@@ -492,6 +481,14 @@
                         },
                     }
                 },
+                cost_price:{
+                    message: 'The cost_price is not valid',
+                    validators: {
+                        notEmpty: {
+                            message: '成本价不能为空'
+                        },
+                    }
+                },
                 content:{
                     message: 'The content is not valid',
                     validators: {
@@ -502,8 +499,5 @@
                 }
             }
         });
-
-
-
     })
 </script>
