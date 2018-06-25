@@ -72,6 +72,9 @@ class Base
     public function noauth(){
         //获取http header变量cookie
         $token = cookie('_token');
+        $token2 = Request::instance()->get('_token','');
+        $token3 = Request::instance()->post('_token','');
+        $token = $token ? $token : ($token2 ? $token2 : $token3);
         if(!$token){
             return;
         }
