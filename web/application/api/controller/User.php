@@ -334,11 +334,11 @@ class User extends Base {
             return $auth;
         }
 
-        $start = ($pageNumber - 1)*$pageNumber;
+        $start = ($pageNumber - 1)*$pageSize;
         $model = new OrderMsg();
         $total = $model->where(['user_id'=>$this->userId,'is_delete'=>0])->order('create_time','desc')->count();
         $rows = $model->where(['user_id'=>$this->userId,'is_delete'=>0])->order('create_time','desc')->field(['id','title','content','order_no','create_time'])->limit($start,$pageSize)->select();
-
+//        dump($start);exit;
         $data = [];
         foreach($rows as &$row){
             $orderModel = new MallOrder();
