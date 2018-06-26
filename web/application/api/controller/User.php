@@ -536,7 +536,7 @@ class User extends Base {
     }
 
     /**
-     * @desc
+     * @desc 添加收货地址标签
      * @return array|void
      */
     public function addAddressTag(Request $request){
@@ -578,7 +578,7 @@ class User extends Base {
     }
 
     /**
-     * @desc
+     * @desc 删除收货地址标签
      * @return array|void
      */
     public function removeAddressTag(Request $request){
@@ -605,7 +605,7 @@ class User extends Base {
     }
 
     /**
-     * @desc
+     * @desc 获取收货地址标签
      * @return array|void
      */
     public function getAddressTag(){
