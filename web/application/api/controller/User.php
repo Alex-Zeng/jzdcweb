@@ -681,4 +681,21 @@ class User extends Base {
     }
 
 
+    public function getEmailStatus(){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        //
+        $userModel = new IndexUser();
+        $userInfo = $userModel->getInfoById($this->userId);
+        if(!$userInfo->email){
+            return ['status'=>0,'data'=>['email'=>0],'msg'=>''];
+        }
+        return ['status'=>0,'data'=>['email'=>1],'msg'=>''];
+    }
+
+
+
+
 }

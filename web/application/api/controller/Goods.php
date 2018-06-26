@@ -413,7 +413,7 @@ class Goods  extends Base {
         foreach ($rows as $row){
             foreach ($maps as $parentId => $value){
                 if(in_array($row->id,$value)){
-                    $list[$row->id][] = ['id'=>$row->id,'count'=>$row->count,'parent'=>$parentId];
+                    $list[$parentId][] = ['id'=>$row->id,'count'=>$row->count,'parent'=>$parentId];
                     continue;
                 }
             }
