@@ -108,6 +108,7 @@ class Order extends Base{
                 $content = "您好，订单号：{$row->out_id}现可安排发货，发货完成后，请在\"用户中心-待发货\"发布物流信息，谢谢。";
                 $msgData = ['title'=>"待发货",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
                 $orderMsgModel->save($msgData);
+                $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
             }
             return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
         }
@@ -144,6 +145,7 @@ class Order extends Base{
                 $content = "您好，订单号：{$row->out_id}现可安排发货，发货完成后，请在\"用户中心-待发货\"发布物流信息，谢谢。";
                 $msgData = ['title'=>$statusList[$row->state],'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
                 $orderMsgModel->save($msgData);
+                $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
             }
             return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
         }
@@ -192,10 +194,9 @@ class Order extends Base{
                 $data['accept_time'] = $payTime;
             }
             $payModel->save($data);
-
+            $userModel = new IndexUser();
             //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
             if($flag == 1){
-                $userModel = new IndexUser();
                 $user = $userModel->getInfoById($row->supplier);
                 $yunpian = new Yunpian();
                 // $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
@@ -237,6 +238,7 @@ class Order extends Base{
                 $content = "尊敬的供应商用户，订单号：{$row->out_id}的款项已经汇出,实际到账时间依您的银行通知为准，详细汇款信息请进入\"用户中心-待收款\"中查看，谢谢。";
                 $msgData = ['title'=>"打款给供应商",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
                 $orderMsgModel->save($msgData);
+                $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
 
             }
             return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
@@ -262,15 +264,18 @@ class Order extends Base{
 
         $result = $model->save(['state'=>MallOrder::STATE_SIGN],['id'=>$id]);
         if($result == true){
+            $userModel = new IndexUser();
             //更新消息通知
             $orderMsgModel = new OrderMsg();
             $content = "尊敬的用户，经与您确认，订单号：{$row->out_id}现已取消交易，感谢您的使用。";
             //采购商
-            $msgData = ['title'=>"关闭订单",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer,'create_time'=>time()];
+            $msgData = ['title'=>"关闭订单",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
             $orderMsgModel->save($msgData);
+            $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
             //供应商
             $msgData['user_id'] = $row->supplier;
             $orderMsgModel->save($msgData);
+            $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
 
             return ['status'=>0,'data'=>[],'msg'=>'成功取消订单'];
         }

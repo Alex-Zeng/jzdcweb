@@ -359,6 +359,11 @@ class User extends Base {
            ];
 
         }
+
+        //更新未读
+        $userModel = new IndexUser();
+        $userModel->save(['unread'=>0],['id'=>$this->userId]);
+
         return ['status'=>0,'data'=>['list'=>$data,'total'=>$total],'msg'=>''];
     }
 
@@ -859,6 +864,25 @@ class User extends Base {
         return ['status'=>1,'data'=>[],'msg'=>'修改失败'];
     }
 
+
+    /**
+     * @desc 获取消息未读总数
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function messageNumber(){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $model = new IndexUser();
+        $userInfo =$model->getInfoById($this->userId);
+        $total = $userInfo ? $userInfo->unread : 0;
+        return ['status'=>0,'data'=>['total'=>$total],'msg'=>''];
+    }
 
 
 
