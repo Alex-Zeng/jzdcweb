@@ -336,6 +336,7 @@ class User extends Base {
 
         $start = ($pageNumber - 1)*$pageNumber;
         $model = new OrderMsg();
+        $total = $model->where(['user_id'=>$this->userId,'is_delete'=>0])->order('create_time','desc')->count();
         $rows = $model->where(['user_id'=>$this->userId,'is_delete'=>0])->order('create_time','desc')->field(['id','title','content','order_no','create_time'])->limit($start,$pageSize)->select();
 
         $data = [];
@@ -358,7 +359,7 @@ class User extends Base {
            ];
 
         }
-        return ['status'=>0,'data'=>['list'=>$data],'msg'=>''];
+        return ['status'=>0,'data'=>['list'=>$data,'total'=>$total],'msg'=>''];
     }
 
     /**
