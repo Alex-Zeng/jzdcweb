@@ -346,4 +346,107 @@ class Goods  extends Base {
         return ['status'=>0,'data'=>['price'=>0],'msg'=>''];
     }
 
+    /**
+     * @desc 收藏列表
+     * @param Request $request
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getFavoriteList(Request $request){
+        $pageSize = $request->post('pageSize',10,'intval');
+        $pageNumber = $request->post('pageNumber',1,'intval');
+        $categoryId = $request->post('cateId',0,'intval');
+        if($pageSize > 20){ $pageSize = 20;}
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        $start = ($pageNumber-1)*$pageSize;
+        //
+        $model = new MallFavorite();
+        $where['a.user_id'] = $this->userId;
+        if($categoryId > 0){
+            $maps =   $maps = getTypeMap();
+            $targetIds = [];
+            foreach ($maps as $map){
+                if(in_array($categoryId,$map)){
+                    $targetIds = $map;
+                    break;
+                }
+            }
+            $where['b.type'] = ['in',$targetIds];
+        }
+        $total = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where($where)->count();
+        $rows = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where($where)->order('a.time','desc')->limit($start,$pageSize)->field(['b.id','b.title','b.icon','b.min_price','b.max_price'])->select();
+
+        foreach ($rows as &$row){
+            $row['icon'] = MallGoods::getFormatImg($row->icon);
+        }
+
+        return ['status'=>0,'data'=>['total'=>$total,'list'=>$rows],'msg'=>''];
+    }
+
+    /**
+     * @desc 收藏分类数目
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getFavoriteType(){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        $model = new MallFavorite();
+        $where['a.user_id'] = $this->userId;
+
+        $rows = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')
+            ->join(config('prefix').'mall_type c','b.type=c.id')
+            ->where($where)->group('b.type')->field(['COUNT(*) AS count','c.name','c.id'])->select();
+
+        $maps = getTypeMap();
+        $list = [];
+        foreach ($rows as $row){
+            foreach ($maps as $parentId => $value){
+                if(in_array($row->id,$value)){
+                    $list[$parentId][] = ['id'=>$row->id,'count'=>$row->count,'parent'=>$parentId];
+                    continue;
+                }
+            }
+        }
+
+        $return = [];
+        $ids = [];
+        foreach ($list as $index => $item){
+            $count = 0;
+            for($i=0; $i < count($item); $i++){
+                $count += $item[$i]['count'];
+            }
+            if($count > 0){
+                $return[] = ['id'=>$item[0]['parent'],'count'=>$count];
+                $ids[] = $index;
+            }
+        }
+
+        if($ids){
+            $typeModel = new MallType();
+            $typeRows = $typeModel->where(['id'=>['in',$ids]])->field(['id','name'])->select();
+        }
+        foreach ($return as &$return_list){
+            $return_list['name'] = '';
+            foreach ($typeRows as $typeRow){
+                if($return_list['id'] == $typeRow->id){
+                    $return_list['name'] = $typeRow->name;
+                    continue;
+                }
+            }
+        }
+
+        return ['status'=>0,'data'=>['list'=>$return],'msg'=>''];
+    }
+
 }

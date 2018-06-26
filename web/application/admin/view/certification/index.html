@@ -152,3 +152,7 @@
 {include file="layout/footer" title="$title" keywords="" /}
 <script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
 <script type="text/javascript" src="__STATIC__/js/admin/certification.js"></script>
+<script type="text/javascript">
+    var url = '{:url("admin/certification/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+</script>

@@ -15,6 +15,7 @@ use app\common\model\MallGoodsSpecifications;
 use app\common\model\MallOrder;
 use app\common\model\MallOrderGoods;
 use app\common\model\MallReceiver;
+use app\common\model\MallTypeOption;
 use app\common\model\UserGoodsSpecifications;
 use think\Request;
 
@@ -47,6 +48,7 @@ class Order extends Base{
         $goodsRows = [];
         $model = new MallGoods();
         $specificationsModel = new MallGoodsSpecifications();
+        $typeOptionModel = new MallTypeOption();
 
         foreach ($detailRows as $detailRow){
             foreach ($detailRow['list'] as $detailList){
@@ -56,7 +58,7 @@ class Order extends Base{
                 }
                 $specificationsRow = [];
                 if(isset($detailList['color_id']) && isset($detailList['option_id'])){
-                    $specificationsRow = $specificationsModel->where(['color_id'=>$detailList['color_id'],'option_id'=>$detailList['option_id'],'goods_id'=>$detailList['goods_id']])->find();
+                    $specificationsRow = $specificationsModel->where(['color_id'=>$detailList['color_id'],'option_id'=>$detailList['option_id'],'goods_id'=>$detailList['goodsId']])->find();
                 }
                 $goodsRows[] = [
                     'supplier' => $row->supplier,
@@ -70,7 +72,9 @@ class Order extends Base{
                     'date' => $detailRow['date'],
                     'remark' => $detailRow['remark'],
                     'no' => $detailList['no'],
-                    'requirement' => $detailList['requirement']
+                    'requirement' => $detailList['requirement'],
+                    'color_name' => $specificationsRow ? $specificationsRow->color_name : '',
+                    'option_id' => $specificationsRow ? $specificationsRow->option_id : ''
                 ];
             }
         }
@@ -78,6 +82,14 @@ class Order extends Base{
         //获取数据列表，根据供应商进行分类
         $supplierGroup = [];
         foreach($goodsRows as $row){
+            $specificationsInfo = $row['color_name'] ? $row['color_name'] : '';
+            if($row['option_id'] > 0){
+                $typeOptionRow = $typeOptionModel->where(['id'=>$row['option_id']])->find();
+                if($typeOptionRow){
+                    $specificationsInfo .=','.$typeOptionRow->name;
+                }
+            }
+
             $supplierGroup[$row['supplier']][] = [
                 'goods_id'=>$row['goods_id'],
                 'title'=>$row['title'],
@@ -89,7 +101,8 @@ class Order extends Base{
                 'date'=>$row['date'],
                 'remark'=>$row['remark'],
                 'no' => $row['no'],
-                'requirement' => $row['requirement']
+                'requirement' => $row['requirement'],
+                'specificationsInfo' => $specificationsInfo
             ];
         }
         //循环遍历
@@ -192,7 +205,10 @@ class Order extends Base{
                         'goods_id' => $goodsList['goods_id'],
                         'title' => $goodsList['title'],
                         'quantity' => $goodsList['quantity'],
-                        'price' => $goodsList['price']
+                        'price' => $goodsList['price'],
+                        'no' => $goodsList['no'],
+                        'requirement' => $goodsList['requirement'],
+                        'specificationsInfo' => $goodsList['specificationsInfo'],
                     ];
                 }
 
@@ -206,7 +222,7 @@ class Order extends Base{
                         'date' => $order['date'],
                         'goods' => $returnGoodsList,
                         'remark' => $order['remark'],
-                        'supplierName' => $supplerInfo ? $supplerInfo->real_name : ''
+                        'supplierName' => $supplerInfo ? $supplerInfo->real_name : '',
                     ];
                     foreach ($order['list'] as $list){
                         $specificationsWhere = ['user_id'=>$this->userId,'goods_id'=>$list['goods_id'],'specifications_id'=>$list['s_id']];
