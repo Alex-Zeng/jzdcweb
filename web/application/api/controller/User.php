@@ -359,7 +359,7 @@ class User extends Base {
            ];
 
         }
-        return ['status'=>0,'data'=>['list'=>$data,'total'=>$total, 'stat'=> $start],'msg'=>''];
+        return ['status'=>0,'data'=>['list'=>$data,'total'=>$total],'msg'=>''];
     }
 
     /**
