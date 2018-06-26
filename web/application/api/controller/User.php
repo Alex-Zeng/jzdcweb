@@ -17,6 +17,7 @@ use app\common\model\MallOrderGoods;
 use app\common\model\MallReceiver;
 use app\common\model\Notice;
 use app\common\model\OrderMsg;
+use app\common\model\MallReceiverTag;
 use app\common\model\UserSearchLog;
 use sms\Yunpian;
 use think\Db;
@@ -538,14 +539,85 @@ class User extends Base {
      * @desc
      * @return array|void
      */
+    public function addAddressTag(Request $request){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $userId = $this->userId;
+        $tag = $request->post('tag');
+
+        if(!$tag){
+            return ['status'=>1,'data'=>[],'msg'=>'标签不允许为空'];
+        }
+
+        $model = new MallReceiverTag();
+        $count = $model->where(['user_id'=>$userId])->count();
+        if($count >= 10){
+            return ['status'=>1,'data'=>[],'msg'=>'最多添加10个标签'];
+        }
+
+        $same = $model->where(['user_id'=>$userId,'tag'=>$tag])->find();
+        if($same){
+            return ['status'=>1,'data'=>[],'msg'=>'已经有相同的标签了'];
+        }
+
+        $data = [
+            'time' => time(),
+            'tag' => $tag,
+            'user_id' => $userId,
+        ];
+
+        $result = $model->save($data);
+        if($result == true){
+            return ['status'=>0,'data'=>[],'msg'=>'添加成功'];
+        }
+
+        return ['status'=>1,'data'=>[],'msg'=>'添加失败'];
+    }
+
+    /**
+     * @desc
+     * @return array|void
+     */
+    public function removeAddressTag(Request $request){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $userId = $this->userId;
+        $tagId = $request->post('id');
+
+        if(!$tagId){
+            return ['status'=>1,'data'=>[],'msg'=>'标签不允许为空'];
+        }
+
+        $model = new MallReceiverTag();
+        $result = $model->where(['user_id'=>$userId,'id'=>$tagId])->delete();
+
+
+        if($result == true){
+            return ['status'=>0,'data'=>[],'msg'=>'删除成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'删除失败'];
+    }
+
+    /**
+     * @desc
+     * @return array|void
+     */
     public function getAddressTag(){
         $auth = $this->auth();
         if($auth){
             return $auth;
         }
 
-        $data = ['家','公司'];
-        return ['status'=>0,'data'=>$data,'msg'=>''];
+        $model = new MallReceiverTag();
+        $row = $model->where(['user_id'=>$this->userId])->field(['tag','id'])->order('id','desc')->select();
+
+        return ['status'=>0,'data'=>$row,'msg'=>''];
     }
 
 }
