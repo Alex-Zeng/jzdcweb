@@ -329,6 +329,11 @@ class User extends Base {
         $pageNumber = $request->post('pageNumber',1,'intval');
         $pageSize = $pageSize > 10 ? 10 : $pageSize;
 
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
         $start = ($pageNumber - 1)*$pageNumber;
         $model = new OrderMsg();
         $rows = $model->where(['user_id'=>$this->userId,'is_delete'=>0])->order('create_time','desc')->field(['id','title','content','order_no','create_time'])->limit($start,$pageSize)->select();

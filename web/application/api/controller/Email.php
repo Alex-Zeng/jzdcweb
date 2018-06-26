@@ -50,9 +50,9 @@ class Email extends Base{
 
         $userModel = new IndexUser();
         $userInfo = $userModel->getInfoById($this->userId);
-//        if(!$userInfo || !$userInfo->email){
-//            return ['status'=>1,'data'=>[],'msg'=>'数据异常'];
-//        }
+        if(!$userInfo || !$userInfo->email){
+            return ['status'=>1,'data'=>[],'msg'=>'数据异常'];
+        }
         return $this->sendEmail($userInfo->email,EmailCode::TYPE_EMAIL_OLD);
     }
 
