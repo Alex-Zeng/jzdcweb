@@ -380,7 +380,6 @@ class Goods  extends Base {
             $where['b.type'] = ['in',$targetIds];
         }
         $total = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where($where)->count();
-        echo $model->getLastSql();
         $rows = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where($where)->order('a.time','desc')->limit($start,$pageSize)->field(['b.id','b.title','b.icon','b.min_price','b.max_price'])->select();
 
         foreach ($rows as &$row){
