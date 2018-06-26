@@ -327,7 +327,7 @@ class User extends Base {
     public function getMessageList(Request $request){
         $pageSize = $request->post('pageSize',10,'intval');
         $pageNumber = $request->post('pageNumber',1,'intval');
-        $pageSize = $pageSize > 10 ? 10 : $pageSize;
+        $pageSize = $pageSize > 20 ? 20 : $pageSize;
 
         $auth = $this->auth();
         if($auth){

@@ -108,6 +108,10 @@
 
 {include file="layout/footer" title="$title" keywords="" /}
 <script  type="text/javascript">
+    var url = '{:url("admin/goods/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+    $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
+
     $(function () {
         $('#delete-modal').on('show.bs.modal', function (event) {
             var id = $(event.relatedTarget).data('id');

@@ -105,7 +105,9 @@
 
 {include file="layout/footer" title="$title" keywords="开源WEB开发框架" /}
 <script type="text/javascript">
-
+    var url = '{:url("admin/type/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+    $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
     //折叠展示
     function displayData(_self)
     {

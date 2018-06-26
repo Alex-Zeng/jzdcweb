@@ -60,15 +60,11 @@
                                     <label>排序</label>
                                     <input type="number" name="sequence" min="0" class="form-control" value="{$row.sequence}" placeholder="排序">
                                 </div>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                                    <label class="form-check-label" for="exampleCheck1">Check me out</label>
-                                </div>
                             </div>
                             <!-- /.card-body -->
 
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-primary">添加</button>
+                                <button type="submit" class="btn btn-primary">保存</button>
                             </div>
                         </form>
                     </div>
@@ -97,6 +93,9 @@
 <script src="__STATIC__/js/plugins/bootstrap-fileinput/js/fileinput.js" type="text/javascript"></script>
 <script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
 <script type="text/javascript">
+    var url = '{:url("admin/type/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+    $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
     $("#edit-file").fileinput({
         language: 'zh', //设置语言
         uploadUrl: '?s=admin/file/upload',  //上传地址
