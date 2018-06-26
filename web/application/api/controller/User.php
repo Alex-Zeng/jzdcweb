@@ -7,6 +7,7 @@
  */
 namespace app\api\controller;
 
+use app\common\model\EmailCode;
 use app\common\model\FormUserCert;
 use app\common\model\IndexArea;
 use app\common\model\IndexUser;
@@ -719,7 +720,7 @@ class User extends Base {
 
         $model = new IndexUser();
 
-        $result = $model->save(md5($password),['id'=>$this->userId]);
+        $result = $model->save(['password'=>md5($password)],['id'=>$this->userId]);
         if($result !== false){
             return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
         }
@@ -745,14 +746,14 @@ class User extends Base {
             return ['status'=>1,'data'=>[],'msg'=>'原密码不正确'];
         }
 
-        $result = $model->save(md5($newPassword),['id'=>$this->userId]);
+        $result = $model->save(['password'=>md5($newPassword)],['id'=>$this->userId]);
         if($result !== false){
             return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'修改失败'];
     }
 
-
+    //检查邮箱状态
     public function getEmailStatus(){
         $auth = $this->auth();
         if($auth){
@@ -766,6 +767,92 @@ class User extends Base {
         }
         return ['status'=>0,'data'=>['email'=>1],'msg'=>''];
     }
+
+    //初始化邮箱
+    public function initEmail(Request $request){
+        $email = $request->post('email','');
+        $code = $request->post('code','');
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        if(!$email){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱不能为空'];
+        }
+        if(!checkEmail($email)){
+            return ['status'=>1,'data'=>[],'msg'=>'无效的邮箱'];
+        }
+        //验证邮箱
+        $codeModel = new EmailCode();
+        $codeRow = $codeModel->where(['email'=>$email,'type'=>EmailCode::TYPE_EMAIL_INIT])->order('id','desc')->find();
+        if(!$codeRow || $codeRow['code']!= $code){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱验证码错误'];
+        }
+        if($codeRow['expire_time'] < time()){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱验证已过期'];
+        }
+
+        $model = new IndexUser();
+        $result = $model->save(['email'=>$email],['id'=>$this->userId]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'修改失败'];
+    }
+
+
+    //更新邮箱
+    public function updateEmail(Request $request){
+        $email = $request->post('email','');
+        $code = $request->post('code','');
+        $newCode = $request->post('newCode','');
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        if(!$email){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱不能设置为空'];
+        }
+        if(!$code || !$newCode){
+            return ['status'=>1,'data'=>[],'msg'=>'验证码不能为空'];
+        }
+        if(!checkEmail($email)){
+            return ['status'=>1,'data'=>[],'msg'=>'无效的邮箱'];
+        }
+
+        $model = new IndexUser();
+        $userInfo = $model->getInfoById($this->userId);
+        if(!$userInfo){
+            return ['status'=>1,'data'=>[],'msg'=>'数据异常'];
+        }
+
+        //验证邮箱
+        $codeModel = new EmailCode();
+        $codeRow = $codeModel->where(['email'=>$userInfo->email,'type'=>EmailCode::TYPE_EMAIL_OLD])->order('id','desc')->find();
+        if(!$codeRow || $codeRow['code']!= $code){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱验证码错误'];
+        }
+        if($codeRow['expire_time'] < time()){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱验证已过期'];
+        }
+
+        $codeRow = $codeModel->where(['email'=>$email,'type'=>EmailCode::TYPE_MAIL_NEW])->order('id','desc')->find();
+        if(!$codeRow || $codeRow['code']!= $code){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱验证码错误'];
+        }
+        if($codeRow['expire_time'] < time()){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱验证已过期'];
+        }
+
+
+        $result = $model->save(['email'=>$email],['id'=>$this->userId]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'修改失败'];
+    }
+
 
 
 

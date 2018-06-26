@@ -22,10 +22,6 @@ function startSession(){
 
 
 function captchaDb_check($value, $id = "", $config = []){
-    if( $value == '6666'){
-        \think\Log::write('登录图形万能验证6666');
-        return true;
-    }
     $captcha = new \think\captcha\Captcha($config);
     return $captcha->checkDb($value, $id);
 }
@@ -126,6 +122,24 @@ function getTypeMap(){
         }
     }
     return $map;
+}
+
+function SendMail($tomail, $subject = '', $body = ''){
+    $mail = new \PHPMailer();
+    $mail->CharSet = 'UTF-8';
+    $mail->IsSMTP();
+    $mail->SMTPDebug = 0;
+    $mail->SMTPAuth = true;
+    $mail->SMTPSecure = 'ssl';
+    $mail->Host = config('JZDC_MAIL_SMTP');
+    $mail->Port = 465;
+    $mail->Username = config('JZDC_MAIL_LOGINNAME');
+    $mail->Password = config('JZDC_MAIL_PASSWORD');
+    $mail->SetFrom(config('JZDC_MAIL_LOGINNAME'), '集众电采');
+    $mail->Subject = $subject;
+    $mail->MsgHTML($body);
+    $mail->AddAddress($tomail, $tomail);
+    return $mail->Send() ? true : false;
 }
 
 
