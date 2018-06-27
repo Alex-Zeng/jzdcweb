@@ -288,5 +288,11 @@ return [
             'path' => ROOT_PATH.'public'.DS.'uploads/common',
         ]
     ],
-    'jzdc_doc_path' => 'http://'.$_SERVER['HTTP_HOST'].'/web/public/uploads/'
+    'jzdc_doc_path' => 'http://'.$_SERVER['HTTP_HOST'].'/web/public/uploads/',
+
+    ////////////////////////邮件配置//////////////////////////////////////
+    'JZDC_MAIL_ADDRESS' => '',
+    'JZDC_MAIL_SMTP' => 'smtp.163.com',
+    'JZDC_MAIL_LOGINNAME' => 'xxxxxxxx',
+    'JZDC_MAIL_PASSWORD' => 'xxxxxxxx',
 ];

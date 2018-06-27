@@ -7,6 +7,7 @@
  */
 namespace app\api\controller;
 
+use app\common\model\EmailCode;
 use app\common\model\FormUserCert;
 use app\common\model\IndexArea;
 use app\common\model\IndexUser;
@@ -17,6 +18,7 @@ use app\common\model\MallOrderGoods;
 use app\common\model\MallReceiver;
 use app\common\model\Notice;
 use app\common\model\OrderMsg;
+use app\common\model\MallReceiverTag;
 use app\common\model\UserSearchLog;
 use sms\Yunpian;
 use think\Db;
@@ -325,12 +327,18 @@ class User extends Base {
     public function getMessageList(Request $request){
         $pageSize = $request->post('pageSize',10,'intval');
         $pageNumber = $request->post('pageNumber',1,'intval');
-        $pageSize = $pageSize > 10 ? 10 : $pageSize;
+        $pageSize = $pageSize > 20 ? 20 : $pageSize;
 
-        $start = ($pageNumber - 1)*$pageNumber;
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $start = ($pageNumber - 1)*$pageSize;
         $model = new OrderMsg();
+        $total = $model->where(['user_id'=>$this->userId,'is_delete'=>0])->order('create_time','desc')->count();
         $rows = $model->where(['user_id'=>$this->userId,'is_delete'=>0])->order('create_time','desc')->field(['id','title','content','order_no','create_time'])->limit($start,$pageSize)->select();
-
+//        dump($start);exit;
         $data = [];
         foreach($rows as &$row){
             $orderModel = new MallOrder();
@@ -351,7 +359,12 @@ class User extends Base {
            ];
 
         }
-        return ['status'=>0,'data'=>['list'=>$data],'msg'=>''];
+
+        //更新未读
+        $userModel = new IndexUser();
+        $userModel->save(['unread'=>0],['id'=>$this->userId]);
+
+        return ['status'=>0,'data'=>['list'=>$data,'total'=>$total],'msg'=>''];
     }
 
     /**
@@ -535,7 +548,76 @@ class User extends Base {
     }
 
     /**
-     * @desc
+     * @desc 添加收货地址标签
+     * @return array|void
+     */
+    public function addAddressTag(Request $request){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $userId = $this->userId;
+        $tag = $request->post('tag');
+
+        if(!$tag){
+            return ['status'=>1,'data'=>[],'msg'=>'标签不允许为空'];
+        }
+
+        $model = new MallReceiverTag();
+        $count = $model->where(['user_id'=>$userId])->count();
+        if($count >= 10){
+            return ['status'=>1,'data'=>[],'msg'=>'最多添加10个标签'];
+        }
+
+        $same = $model->where(['user_id'=>$userId,'tag'=>$tag])->find();
+        if($same){
+            return ['status'=>1,'data'=>[],'msg'=>'已经有相同的标签了'];
+        }
+
+        $data = [
+            'time' => time(),
+            'tag' => $tag,
+            'user_id' => $userId,
+        ];
+
+        $result = $model->save($data);
+        if($result == true){
+            return ['status'=>0,'data'=>[],'msg'=>'添加成功'];
+        }
+
+        return ['status'=>1,'data'=>[],'msg'=>'添加失败'];
+    }
+
+    /**
+     * @desc 删除收货地址标签
+     * @return array|void
+     */
+    public function removeAddressTag(Request $request){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $userId = $this->userId;
+        $tagId = $request->post('id');
+
+        if(!$tagId){
+            return ['status'=>1,'data'=>[],'msg'=>'标签不允许为空'];
+        }
+
+        $model = new MallReceiverTag();
+        $result = $model->where(['user_id'=>$userId,'id'=>$tagId])->delete();
+
+
+        if($result == true){
+            return ['status'=>0,'data'=>[],'msg'=>'删除成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'删除失败'];
+    }
+
+    /**
+     * @desc 获取收货地址标签
      * @return array|void
      */
     public function getAddressTag(){
@@ -544,8 +626,265 @@ class User extends Base {
             return $auth;
         }
 
-        $data = ['家','公司'];
-        return ['status'=>0,'data'=>$data,'msg'=>''];
+        $model = new MallReceiverTag();
+        $row = $model->where(['user_id'=>$this->userId])->field(['tag','id'])->order('id','desc')->select();
+
+        return ['status'=>0,'data'=>$row,'msg'=>''];
     }
+
+//解绑手机号
+    public function bind(Request $request){
+        $phone = $request->post('phone','');
+        $id = $request->post('id','');
+        $code = $request->post('code','');
+        $oldCode = $request->post('oldCode','');
+        $newCode = $request->post('newCode','');
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        //验证
+        if(!$phone){
+            return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
+        }
+        if(!$code){
+            return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
+        }
+        if(!$oldCode || !$newCode){
+            return ['status'=>1,'data'=>[],'msg'=>'短信验证码不能为空'];
+        }
+        if(!checkPhone($phone)){
+            return ['status'=>1,'data'=>[],'msg'=>'手机号错误'];
+        }
+        if(!captchaDb_check($code,$id)){
+            return ['status'=>1,'data'=>[],'msg'=>'图片验证码有误'];
+        }
+
+        //查询用户手机号
+        $userModel = new IndexUser();
+        $userInfo = $userModel->getUserByPhone($phone);
+        if($userInfo){
+            return ['status'=>1,'data'=>[],'msg'=>'改号码已被其他用户绑定'];
+        }
+
+        $oldInfo = $userModel->getInfoById($this->userId);
+        if(!$oldInfo || !$oldInfo->phone){
+            return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
+        }
+
+        //验证短信
+        $codeModel = new \app\common\model\Code();
+        $codeRow = $codeModel->where(['phone'=>$oldInfo->phone,'type'=>\app\common\model\Code::TYPE_PHONE_BIND_OLD])->order('id','desc')->find();
+        if(!$codeRow || $codeRow['code']!= $code){
+            return ['status'=>1,'data'=>[],'msg'=>'短信验证码错误'];
+        }
+        if($codeRow['expire_time'] < time()){
+            return ['status'=>1,'data'=>[],'msg'=>'短信验证已过期'];
+        }
+
+        $codeRow = $codeModel->where(['phone'=>$phone,'type'=>\app\common\model\Code::TYPE_PHONE_BIND_NEW])->order('id','desc')->find();
+        if(!$codeRow || $codeRow['code']!= $code){
+            return ['status'=>1,'data'=>[],'msg'=>'短信验证码错误'];
+        }
+        if($codeRow['expire_time'] < time()){
+            return ['status'=>1,'data'=>[],'msg'=>'短信验证已过期'];
+        }
+
+        //更新数据
+        $result = $userModel->save(['phone'=>$phone],['id'=>$this->userId]);
+        if($result !== false){
+            return ['status' =>0,'data'=>[],'msg'=>'解绑成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'解绑失败'];
+    }
+
+//是否设置密码
+    public function getPasswordStatus(){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        //
+        $userModel = new IndexUser();
+        $userInfo = $userModel->getInfoById($this->userId);
+        if(!$userInfo->password){
+            return ['status'=>0,'data'=>['password'=>0],'msg'=>''];
+        }
+        return ['status'=>0,'data'=>['password'=>1],'msg'=>''];
+    }
+
+    //初始化密码
+    public function initPassword(Request $request){
+        $password = $request->post('password','');
+        $confirmPassword = $request->post('confirmPassword','');
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        if(!$password || !$confirmPassword){
+            return ['status'=>1,'data'=>[],'msg'=>'密码不能设置为空'];
+        }
+        if($password != $confirmPassword){
+            return ['status'=>1,'data'=>[],'msg'=>'两次密码不一致'];
+        }
+
+        $model = new IndexUser();
+
+        $result = $model->save(['password'=>md5($password)],['id'=>$this->userId]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'修改失败'];
+    }
+
+    //更新密码
+    public function updatePassword(Request $request){
+        $password = $request->post('oldPassword','');
+        $newPassword = $request->post('newPassword','');
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        if(!$password || !$newPassword){
+            return ['status'=>1,'data'=>[],'msg'=>'密码不能设置为空'];
+        }
+
+        $model = new IndexUser();
+        $userInfo = $model->getInfoById($this->userId);
+        if($userInfo->password != md5($password)){
+            return ['status'=>1,'data'=>[],'msg'=>'原密码不正确'];
+        }
+
+        $result = $model->save(['password'=>md5($newPassword)],['id'=>$this->userId]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'修改失败'];
+    }
+
+    //检查邮箱状态
+    public function getEmailStatus(){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        //
+        $userModel = new IndexUser();
+        $userInfo = $userModel->getInfoById($this->userId);
+        if(!$userInfo->email){
+            return ['status'=>0,'data'=>['email'=>0],'msg'=>''];
+        }
+        return ['status'=>0,'data'=>['email'=>1],'msg'=>''];
+    }
+
+    //初始化邮箱
+    public function initEmail(Request $request){
+        $email = $request->post('email','');
+        $code = $request->post('code','');
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        if(!$email){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱不能为空'];
+        }
+        if(!checkEmail($email)){
+            return ['status'=>1,'data'=>[],'msg'=>'无效的邮箱'];
+        }
+        //验证邮箱
+        $codeModel = new EmailCode();
+        $codeRow = $codeModel->where(['email'=>$email,'type'=>EmailCode::TYPE_EMAIL_INIT])->order('id','desc')->find();
+        if(!$codeRow || $codeRow['code']!= $code){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱验证码错误'];
+        }
+        if($codeRow['expire_time'] < time()){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱验证已过期'];
+        }
+
+        $model = new IndexUser();
+        $result = $model->save(['email'=>$email],['id'=>$this->userId]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'修改失败'];
+    }
+
+
+    //更新邮箱
+    public function updateEmail(Request $request){
+        $email = $request->post('email','');
+        $code = $request->post('code','');
+        $newCode = $request->post('newCode','');
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        if(!$email){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱不能设置为空'];
+        }
+        if(!$code || !$newCode){
+            return ['status'=>1,'data'=>[],'msg'=>'验证码不能为空'];
+        }
+        if(!checkEmail($email)){
+            return ['status'=>1,'data'=>[],'msg'=>'无效的邮箱'];
+        }
+
+        $model = new IndexUser();
+        $userInfo = $model->getInfoById($this->userId);
+        if(!$userInfo){
+            return ['status'=>1,'data'=>[],'msg'=>'数据异常'];
+        }
+
+        //验证邮箱
+        $codeModel = new EmailCode();
+        $codeRow = $codeModel->where(['email'=>$userInfo->email,'type'=>EmailCode::TYPE_EMAIL_OLD])->order('id','desc')->find();
+        if(!$codeRow || $codeRow['code']!= $code){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱验证码错误'];
+        }
+        if($codeRow['expire_time'] < time()){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱验证已过期'];
+        }
+
+        $codeRow = $codeModel->where(['email'=>$email,'type'=>EmailCode::TYPE_MAIL_NEW])->order('id','desc')->find();
+        if(!$codeRow || $codeRow['code']!= $code){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱验证码错误'];
+        }
+        if($codeRow['expire_time'] < time()){
+            return ['status'=>1,'data'=>[],'msg'=>'邮箱验证已过期'];
+        }
+
+
+        $result = $model->save(['email'=>$email],['id'=>$this->userId]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'修改失败'];
+    }
+
+
+    /**
+     * @desc 获取消息未读总数
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function messageNumber(){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $model = new IndexUser();
+        $userInfo =$model->getInfoById($this->userId);
+        $total = $userInfo ? $userInfo->unread : 0;
+        return ['status'=>0,'data'=>['total'=>$total],'msg'=>''];
+    }
+
+
+
 
 }

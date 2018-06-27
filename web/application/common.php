@@ -22,10 +22,6 @@ function startSession(){
 
 
 function captchaDb_check($value, $id = "", $config = []){
-    if( $value == '6666'){
-        \think\Log::write('登录图形万能验证6666');
-        return true;
-    }
     $captcha = new \think\captcha\Captcha($config);
     return $captcha->checkDb($value, $id);
 }
@@ -109,3 +105,43 @@ function getImgUrl($content="",$suffix = ''){
     $content = preg_replace($pregRule,$suffix, $content);
     return $content;
 }
+
+function getTypeMap(){
+    $model = new \app\common\model\MallType();
+    $rows = $model->where(['parent'=>0])->field(['id','name','parent'])->select();
+    $map = [];
+    foreach ($rows as $row){
+        $map[$row->id][] = $row->id;
+        $rows2 = $model->where(['parent'=>$row->id])->field(['id','name','parent'])->select();
+        foreach ($rows2 as $row2){
+            $map[$row->id][] = $row2->id;
+
+            $rows3 = $model->where(['parent'=>$row2->id])->field(['id','name','parent'])->select();
+            foreach($rows3 as $row3){
+                $map[$row->id][] = $row3->id;
+            }
+
+        }
+    }
+    return $map;
+}
+
+function SendMail($tomail, $subject = '', $body = ''){
+    $mail = new \PHPMailer();
+    $mail->CharSet = 'UTF-8';
+    $mail->IsSMTP();
+    $mail->SMTPDebug = 0;
+    $mail->SMTPAuth = true;
+    $mail->SMTPSecure = 'ssl';
+    $mail->Host = config('JZDC_MAIL_SMTP');
+    $mail->Port = 465;
+    $mail->Username = config('JZDC_MAIL_LOGINNAME');
+    $mail->Password = config('JZDC_MAIL_PASSWORD');
+    $mail->SetFrom(config('JZDC_MAIL_LOGINNAME'), '集众电采');
+    $mail->Subject = $subject;
+    $mail->MsgHTML($body);
+    $mail->AddAddress($tomail, $tomail);
+    return $mail->Send() ? true : false;
+}
+
+

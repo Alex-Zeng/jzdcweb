@@ -88,3 +88,7 @@
 </div>
 
 {include file="layout/footer" title="$title" keywords="开源WEB开发框架" /}
+<script type="text/javascript">
+    var url = '{:url("admin/service/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+</script>
