@@ -86,7 +86,7 @@
                                     {:date('Y-m-d',$order.add_time)}&nbsp&nbsp;
                                     订单号： {$order.out_id}&nbsp;&nbsp;
                                     采购商:  {$order.buyer}&nbsp;&nbsp;
-                                    供应商:  {$order.supplier}&nbsp;&nbsp;
+                                    供应商:  {$order.supplierName}&nbsp;&nbsp;
                                     账期截止日: {:substr($order.pay_date,0,10)}
                                 </td>
 
@@ -142,7 +142,7 @@
 
                                 </td>
                                 <td>
-                                    应付: {$order.sum_money|floatval}
+                                    应付: {$order.sum_money|floatval}元
                                 </td>
                                 <td><span class="text-success">{:getOrderState($order.state)}</span></td>
                                 <td>

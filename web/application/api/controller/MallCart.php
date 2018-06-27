@@ -75,7 +75,7 @@ class MallCart extends Base{
                 'key' => 0,
                 'goods_id' => $id,
                 'quantity'=>$number,
-                'price' => $specificationsRow ? $specificationsRow->w_price : $row->w_price,
+                'price' => $specificationsRow ? getFormatPrice($specificationsRow->w_price) : getFormatPrice($row->w_price),
                 'time' => time(),
                 'goods_specifications_id' => $specificationsRow ? $specificationsRow->id : 0
             ];
@@ -133,25 +133,24 @@ class MallCart extends Base{
             $supplierData[$row->supplier][] = [
                 'goodsId' => $row->id,
                 'cartId' => $row->cart_id,
-                'price' => $row->goods_price ?  $row->goods_price : $row->w_price,
+                'price' => $row->goods_price ?  getFormatPrice($row->goods_price) : getFormatPrice($row->w_price),
                 'title' => $row->title,
                 'icon' => MallGoods::getFormatImg($row->icon),
                 'quantity' => intval($row->quantity),
                 'specificationsInfo' => $specificationsInfo,
-                'option_id' => $row->option_id,
-                'color_id' => $row->color_id,
+                'option_id' => $row->option_id ? $row->option_id : '',
+                'color_id' => $row->color_id ? $row->color_id : '',
                 'no' =>'',
                 'requirement' => ''
             ];
         }
         $data = [];
         foreach ($supplierData as $supplierId => $supplierRow){
-
             $userModel = new IndexUser();
             $userInfo = $userModel->getInfoById($supplierId);
 
             $data[] = [
-                'supplierName' => $userInfo ? $userInfo->real_name : '',
+                'supplierName' => $userInfo ? ($userInfo->real_name ? $userInfo->real_name : '') : '',
                 'list' => $supplierRow
             ];
         }

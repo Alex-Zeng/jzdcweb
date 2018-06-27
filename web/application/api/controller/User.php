@@ -382,12 +382,13 @@ class User extends Base {
 
         $start = ($pageNumber - 1)*$pageSize;
         $model = new Notice();
+        $total = $model->where(['status'=>1])->count();
         $rows = $model->where(['status'=>1])->order('release_time','desc')->field(['id','title','summary','release_time'])->limit($start,$pageSize)->select();
 
         foreach($rows as &$row){
           $row['release_time'] = date('Y',$row->release_time).'年'.date('m',$row->release_time).'月'.date('d',$row->release_time).'日 '.date('H:i',$row->release_time);
         }
-        return ['status'=>0,'data'=>['list'=>$rows],'msg'=>''];
+        return ['status'=>0,'data'=>['list'=>$rows,'total'=>$total],'msg'=>''];
     }
 
     /**

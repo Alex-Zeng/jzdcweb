@@ -322,6 +322,7 @@ class Order extends Base{
             foreach($goodsRows as &$goodsRow){
                 $goodsRow['quantity'] = intval($goodsRow->quantity);
                 $goodsRow['icon'] = MallGoods::getFormatImg($goodsRow->icon);
+                $goodsRow['price'] = getFormatPrice($goodsRow->price);
             }
             $row['goods'] = $goodsRows;
         }

@@ -108,8 +108,8 @@ class Goods  extends Base {
                 'id' => $row->id,
                 'title' => $row->title,
                 'url' => MallGoods::getFormatImg($row->icon),
-                'min_price' => $row->min_price,
-                'max_price' => $row->max_price
+                'min_price' => getFormatPrice($row->min_price),
+                'max_price' => getFormatPrice($row->max_price)
             ];
         }
         return ['status'=>0,'data'=>['total'=>$total,'list'=>$list],'msg'=>''];
@@ -217,8 +217,8 @@ class Goods  extends Base {
                 'id' => $row->id,
                 'title' => $row->title,
                 'url' => MallGoods::getFormatImg($row->icon),
-                'min_price' => $row->min_price,
-                'max_price' => $row->max_price
+                'min_price' => getFormatPrice($row->min_price),
+                'max_price' => getFormatPrice($row->max_price)
             ];
         }
         //更新搜索历史
@@ -303,8 +303,8 @@ class Goods  extends Base {
 
         $data = [
             'title' => $row->title,  //商品标题
-            'min_price' => $row->min_price, //商品价格
-            'max_price' => $row->max_price,//
+            'min_price' => getFormatPrice($row->min_price), //商品价格
+            'max_price' => getFormatPrice($row->max_price),//
             'supplier' => $user ? $user->real_name : '', //供应商
             'supplierLogo' => '', //供应商logo
             'standard' => $standards, //规格
@@ -339,7 +339,7 @@ class Goods  extends Base {
         $goodsMoel = new MallGoods();
         $goodsRow = $goodsMoel->where(['id'=>$id])->field(['w_price'])->find();
         if($goodsRow && $goodsRow->w_price){
-            return ['status'=>0,'data'=>['price'=>$goodsRow->w_price],'msg'=>''];
+            return ['status'=>0,'data'=>['price'=>getFormatPrice($goodsRow->w_price)],'msg'=>''];
         }
 
         return ['status'=>0,'data'=>['price'=>0],'msg'=>''];
@@ -383,6 +383,8 @@ class Goods  extends Base {
 
         foreach ($rows as &$row){
             $row['icon'] = MallGoods::getFormatImg($row->icon);
+            $row['min_price'] = getFormatPrice($row->min_price);
+            $row['max_price'] = getFormatPrice($row->max_price);
         }
 
         return ['status'=>0,'data'=>['total'=>$total,'list'=>$rows],'msg'=>''];
