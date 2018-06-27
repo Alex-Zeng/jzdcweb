@@ -38,5 +38,8 @@ class IndexUser extends Model{
         return $row;
     }
 
+    public static function getFormatIcon($icon){
+        return config('jzdc_domain').'/web/public/uploads/user_icon/'.$icon;
+    }
 
 }
