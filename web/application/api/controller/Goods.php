@@ -223,7 +223,6 @@ class Goods  extends Base {
         }
         //更新搜索历史
         if($keywords && $this->userId){
-             $this->userId  = 0;
             $searchModel = new UserSearchLog();
             $searchRow = $searchModel->where(['user_id'=>$this->userId,'keyword'=>$keywords,'type'=>$type])->find();
             if($searchRow){
