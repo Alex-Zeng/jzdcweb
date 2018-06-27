@@ -884,6 +884,48 @@ class User extends Base {
         return ['status'=>0,'data'=>['total'=>$total],'msg'=>''];
     }
 
+    //用户设置
+    public function profile(Request $request){
+        $field = $request->post('field','');
+        $value = $request->post('value','');
+
+        if(!in_array($field,['contact','icon','tel']) || !$value){
+            return ['status'=>1,'data'=>[],'msg'=>'参数错误'];
+        }
+        //
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $model = new IndexUser();
+        $result = $model->save([$field=>$value],['id'=>$this->userId]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'修改失败'];
+    }
+    //获取信息
+    public function getProfile(){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        $model = new IndexUser();
+        $row = $model->getInfoById($this->userId);
+
+        $return = [
+            'contact' => $row->contact,
+            'tel' => $row->tel ? $row->tel : '',
+            'icon' => $row->icon ? $row->icon : '',
+            'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : ''
+        ];
+
+        return ['status'=>0,'data'=>$return,'msg'=>''];
+    }
+
+
+
 
 
 
