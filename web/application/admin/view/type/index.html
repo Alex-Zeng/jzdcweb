@@ -47,8 +47,8 @@
                         <table class="table list-table" id="list_table">
                             <colgroup>
                                 <col>
-                                <col width="80px">
                                 <col width="120px">
+                                <col width="200px">
                                 <col width="120px">
                                 <col width="300px">
                             </colgroup>
@@ -70,12 +70,11 @@
                                 <td><input class="form-control sort" id="s1" size="10" type="number"  value="{$type.sequence}"></td>
                                 <td><span class="text-success">是</span></td>
                                 <td>
-                                    <a class="btn btn-sm btn-primary" href="{:url('admin/type_attribute/index','id='.$type.id)}">属性</a>
-                                    <a class="btn btn-sm btn-primary" href="{:url('admin/type_option/index','id='.$type.id)}">规格</a>
-                                    <a class="btn btn-sm btn-primary" href="{:url('admin/type/edit','id='.$type.id)}">编辑</a>
+                                    <a class="btn btn-sm btn-warning" href="{:url('admin/type_option/index','id='.$type.id)}">规格</a>
+                                    <a class="btn btn-sm btn-info" href="{:url('admin/type/edit','id='.$type.id)}">编辑</a>
                                     <a  class="btn btn-sm btn-danger" href="javascript:void(0)" data-id="{$type.id}" data-toggle="modal" data-target="#delete-modal">删除</a>
                                     {if $type.level == 0 || $type.level == 1}
-                                    <a class="btn btn-sm btn-danger" href="{:url('admin/type/create','id='.$type.id)}">添加</a>
+                                    <a class="btn btn-sm btn-primary" href="{:url('admin/type/create','id='.$type.id)}">添加</a>
                                     {/if}
                                 </td>
                             </tr>

@@ -71,9 +71,9 @@
                                 <td>{:date('Y-m-d H:i',$goods.time)}<br />¥{$goods.min_price}起</td>
                                 <td>{$goods.shop_sequence}</td>
                                 <td>{$goods.state == 2 ? '是' : '否'}</td>
-                                <td>{:getGoodsMallState($goods.mall_state)}</td>
+                                <td>{:getGoodsMallState($goods.mall_state,1)}</td>
                                 <td>
-                                    <a href="{:url('admin/goods/view','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-primary"    >详情</a>
+                                    <a href="{:url('admin/goods/view','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-info"    >详情</a>
                                     <a href="{:url('admin/goods/edit','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-primary"    >编辑</a>
                                     <a href="javascript:void(0)"  class="btn btn-sm btn-danger"  data-id="{$goods.id}" data-toggle="modal"   data-target="#delete-modal">删除</a>
                                 </td>
@@ -82,7 +82,7 @@
                             </tbody>
                             <tfoot>
                             <tr>
-                                <td colspan="5">{$page}</td>
+                                <td colspan="8">{$page}</td>
                             </tr>
                             </tfoot>
                         </table>

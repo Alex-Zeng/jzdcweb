@@ -29,7 +29,18 @@
                         <div class="col-md-6">
                             <form class="form-inline ml-3" action="{:url()}"  method="get">
                                 <div class="input-group">
-                                    <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="用户名/手机" aria-label="Search">
+                                    <select class="form-control" name="group"  placeholder="角色">
+                                        <option value="0" {if $group eq 0}selected{/if}>全部</option>
+                                        <option value="2" {if $group eq 2}selected{/if}>管理员</option>
+                                        <option value="3" {if $group eq 3}selected{/if}>运营人员</option>
+                                        <option value="4" {if $group eq 4}selected{/if}>采购商</option>
+                                        <option value="5" {if $group eq 5}selected{/if}>供货商</option>
+                                        <option value="6" {if $group eq 6}selected{/if}>注册会员</option>
+
+                                    </select>
+                                </div>&nbsp;&nbsp;
+                                <div class="input-group">
+                                    <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="用户名/手机/邮箱" aria-label="Search">
                                     <div class="input-group-append">
                                         <button class="btn btn-primary" id="search" type="submit">查找</button>
                                     </div>
