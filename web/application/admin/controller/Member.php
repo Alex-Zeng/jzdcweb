@@ -20,8 +20,12 @@ class Member extends Base{
     public function index(){
         $model = new IndexUser();
         $k = Request::instance()->get('k','');
+        $group = Request::instance()->get('group',0,'intval');
         if(isset($k) && $k){
-            $model->where('username|phone','like','%'.$k.'%');
+            $model->where('username|phone|email','like','%'.$k.'%');
+        }
+        if($group > 0){
+            $model->where(['group'=>$group]);
         }
         $rows = $model->where([])->order(['id'=>'desc'])->paginate();
         foreach ($rows as &$row){
@@ -31,6 +35,7 @@ class Member extends Base{
         $this->assign('k',$k);
         $this->assign('list',$rows);
         $this->assign('page',$rows->render());
+        $this->assign('group',$group);
         return $this->fetch();
     }
 

@@ -255,7 +255,7 @@ return [
         ],
         'type_icon' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/type_icon',
-            'size' => 5*1024*1024,
+            'size' => 2*1024*1024,
             'ext' => 'jpg,jpeg,png',
         ],
         'order' => [
@@ -286,6 +286,11 @@ return [
         ],
         'common' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/common',
+        ],
+        'user_icon' => [
+            'path' => ROOT_PATH.'public'.DS.'uploads/user_icon',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
         ]
     ],
     'jzdc_doc_path' => 'http://'.$_SERVER['HTTP_HOST'].'/web/public/uploads/',

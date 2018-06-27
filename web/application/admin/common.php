@@ -50,13 +50,21 @@ function getDeviceType($type = -1){
  * @param int $state
  * @return mixed|string
  */
-function getGoodsMallState($state = -1){
+function getGoodsMallState($state = -1,$style = 0){
    // [0]=> string(9) "待审核" [1]=> string(12) "审核通过" [2]=> string(12) "审核失败"
     $list = [
         0 => '待审核',
         1 => '审核通过',
         2 => '审核失败'
     ];
+    if($style == 1){
+        $list = [
+            0 => '<span style="color:#0069d9 !important">待审核</span>',
+            1 => '<span style="color:#28a745!important">审核通过</span> ',
+            2 => '<span style="color:#dc3545 !important">审核失败</span>'
+        ];
+    }
+
     return isset($list[$state]) ? $list[$state] : '';
 }
 

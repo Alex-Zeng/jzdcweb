@@ -100,9 +100,10 @@ function getCompanyProperty($property = -1){
  * @param string $suffix 后缀
  */
 function getImgUrl($content="",$suffix = ''){
-    $suffix = $suffix ? $suffix : config('jzdc_domain').DS;
-    $pregRule = "/<img src=&#34;/";  //<img src=&#34;
-    $content = preg_replace($pregRule,$suffix, $content);
+    $suffix = $suffix ? $suffix : config('jzdc_domain');
+    $content = htmlspecialchars_decode($content);
+    $pregRule = "/src=\\\"program\/mall\/attachd\/image/";
+    $content = preg_replace($pregRule,"src=\"{$suffix}/program/mall/attachd/image", $content);
     return $content;
 }
 
@@ -120,7 +121,6 @@ function getTypeMap(){
             foreach($rows3 as $row3){
                 $map[$row->id][] = $row3->id;
             }
-
         }
     }
     return $map;

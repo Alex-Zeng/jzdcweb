@@ -107,7 +107,7 @@
         allowedPreviewTypes: ['image'],
         allowedFileTypes: ['image'],
         allowedFileExtensions:  ['jpg', 'png'],
-        maxFileSize : 2000,
+        maxFileSize : 2048,
         maxFileCount: 1,
         uploadExtraData: function(previewId, index) {   //额外参数的关键点
             var obj = {};
@@ -119,11 +119,12 @@
         ],
     });
     $('#edit-file').on("fileuploaded", function(event, data) {
-        if(data.response)
-        {
-            alert(data.response.data.filename);
+        if(data.response){
             $('#edit-upload-file').val(data.response.data.filename);
         }
+    });
+    $('#edit-file').on('filecleared', function(event) {
+        $('#edit-upload-file').val('');
     });
 
     $("#edit-form").bootstrapValidator({
