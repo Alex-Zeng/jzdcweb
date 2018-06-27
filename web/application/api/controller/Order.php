@@ -52,7 +52,7 @@ class Order extends Base{
 
         foreach ($detailRows as $detailRow){
             foreach ($detailRow['list'] as $detailList){
-                $row = $model->where(['id'=>$detailList['goodsId']])->field(['id','title','supplier','w_price','unit'])->find();
+                $row = $model->where(['id'=>$detailList['goodsId']])->field(['id','title','supplier','w_price','unit','icon'])->find();
                 if(!$row){
                     continue;
                 }
@@ -74,7 +74,8 @@ class Order extends Base{
                     'no' => $detailList['no'],
                     'requirement' => $detailList['requirement'],
                     'color_name' => $specificationsRow ? $specificationsRow->color_name : '',
-                    'option_id' => $specificationsRow ? $specificationsRow->option_id : ''
+                    'option_id' => $specificationsRow ? $specificationsRow->option_id : '',
+                    'icon'=>$row->icon
                 ];
             }
         }
@@ -102,7 +103,8 @@ class Order extends Base{
                 'remark'=>$row['remark'],
                 'no' => $row['no'],
                 'requirement' => $row['requirement'],
-                'specificationsInfo' => $specificationsInfo
+                'specificationsInfo' => $specificationsInfo,
+                'icon' =>$row['icon']
             ];
         }
         //循环遍历
@@ -124,7 +126,7 @@ class Order extends Base{
                 'goods_name' => $goodsName ? substr($goodsName,0,strlen($goodsName)-1) : '',
                 'date' => isset($items[0]['date']) ? $items[0]['date'] : '',
                 'remark' => isset($items[0]['remark']) ? $items[0]['remark'] : '',
-                'list' => $items
+                'list' => $items,
             ];
         }
 
@@ -185,7 +187,7 @@ class Order extends Base{
                         'buyer' => $userInfo ? $userInfo->username : '',
                         'order_id' =>  $orderModel->id,
                         'order_state' => MallOrder::STATE_PRICING,
-                        'icon' => '',
+                        'icon' => $goodsList['icon'],
                         'title' => $goodsList['title'],
                         'price' => $goodsList['price'],
                         's_id' => $goodsList['s_id'],
@@ -207,6 +209,7 @@ class Order extends Base{
                         'quantity' => $goodsList['quantity'],
                         'price' => $goodsList['price'],
                         'no' => $goodsList['no'],
+                        'icon' => MallGoods::getFormatImg($goodsList['icon']),
                         'requirement' => $goodsList['requirement'],
                         'specificationsInfo' => $goodsList['specificationsInfo'],
                     ];
