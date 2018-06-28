@@ -382,12 +382,13 @@ class User extends Base {
 
         $start = ($pageNumber - 1)*$pageSize;
         $model = new Notice();
+        $total = $model->where(['status'=>1])->count();
         $rows = $model->where(['status'=>1])->order('release_time','desc')->field(['id','title','summary','release_time'])->limit($start,$pageSize)->select();
 
         foreach($rows as &$row){
           $row['release_time'] = date('Y',$row->release_time).'年'.date('m',$row->release_time).'月'.date('d',$row->release_time).'日 '.date('H:i',$row->release_time);
         }
-        return ['status'=>0,'data'=>['list'=>$rows],'msg'=>''];
+        return ['status'=>0,'data'=>['list'=>$rows,'total'=>$total],'msg'=>''];
     }
 
     /**
@@ -486,7 +487,8 @@ class User extends Base {
             'permits_accounts' => $permitsAccounts,
             'org_structure_code_permits' => $orgStructureCodePermits,
             'tax_registration_cert' =>$taxRegistrationCert,
-            'detail_address' => $detailAddress
+            'detail_address' => $detailAddress,
+            'power_attorney' => $powerOfAttorney
         ];
 
         if($row){ //再次提交审核
@@ -535,12 +537,20 @@ class User extends Base {
             'property' => $row->ent_property,
             'role' => $row->reg_role,
             'status' => $row->status,
-            'business' => $row->business_license ?  FormUserCert::getFormatImg($row->business_license) : '',
-            'permitsAccount' => $row->permits_accounts ? FormUserCert::getFormatImg($row->permits_accounts) : '',
-            'legalIdentityCard' =>  $row->legal_identity_card ?  FormUserCert::getFormatImg($row->legal_identity_card) : '',
-            'agentIdentityCard' => $row->legal_identity_card ? FormUserCert::getFormatImg($row->agent_identity_card) : '',
-            'orgStructureCode' => $row->org_structure_code_permits ? FormUserCert::getFormatImg($row->org_structure_code_permits) : '',
+            'business' => $row->business_license ? $row->business_license : '',
+            'permitsAccount' => $row->permits_accounts ? $row->permits_accounts : '',
+            'legalIdentityCard' =>  $row->legal_identity_card ?  $row->legal_identity_card : '',
+            'agentIdentityCard' => $row->legal_identity_card ? $row->agent_identity_card : '',
+            'orgStructureCode' => $row->org_structure_code_permits ? $row->org_structure_code_permits : '',
+            'taxRegistrationCertPath' => $row->tax_registration_cert ? $row->tax_registration_cert : '',
+            'attorney' => $row->power_attorney ? $row->power_attorney : '',
+            'businessPath' => $row->business_license ?  FormUserCert::getFormatImg($row->business_license) : '',
+            'permitsAccountPath' => $row->permits_accounts ? FormUserCert::getFormatImg($row->permits_accounts) : '',
+            'legalIdentityCardPath' =>  $row->legal_identity_card ?  FormUserCert::getFormatImg($row->legal_identity_card) : '',
+            'agentIdentityCardPath' => $row->legal_identity_card ? FormUserCert::getFormatImg($row->agent_identity_card) : '',
+            'orgStructureCodePath' => $row->org_structure_code_permits ? FormUserCert::getFormatImg($row->org_structure_code_permits) : '',
             'taxRegistrationCert' => $row->tax_registration_cert ? FormUserCert::getFormatImg($row->tax_registration_cert) : '',
+            'attorneyPath' => $row->power_attorney ? FormUserCert::getFormatImg($row->power_attorney) : '',
             'refuseReason' => $row->refuse_reason
         ];
 

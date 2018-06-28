@@ -36,9 +36,11 @@ class Order extends Base{
         }
 
         $rows = $model->order('id','desc')->paginate(10,false,['query'=>request()->param()]);
+        $userModel = new IndexUser();
         $goodsModel = new MallOrderGoods();
         foreach($rows as &$row){
             $goodsRows = $goodsModel->where(['order_id'=>$row->id])->order('time','desc')->select();
+            $userInfo = $userModel->getInfoById($row->supplier);
             $total = 0;
             foreach ($goodsRows as & $goodsRow){
                 $productModel = new MallGoods();
@@ -63,6 +65,7 @@ class Order extends Base{
                     $supplierPayInfo[] = $payRow;
                 }
             }
+            $row['supplierName'] = $userInfo ? $userInfo->real_name : '';
             $row['buyerPayInfo'] = $buyerPayInfo;
             $row['supplierPayInfo'] = $supplierPayInfo;
         }

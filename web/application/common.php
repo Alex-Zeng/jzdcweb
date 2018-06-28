@@ -148,4 +148,8 @@ function SendMail($tomail, $subject = '', $body = ''){
     return $mail->Send() ? true : false;
 }
 
+function getFormatPrice($price,$length = 2){
+    return number_format(round($price,$length),$length);
+}
+
 

@@ -313,15 +313,19 @@ class Order extends Base{
             $where['state'] = $status;
         }
         $count = $orderModel->where($where)->count();
-        $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','receiver_name','supplier'])->select();
+        $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','receiver_name','supplier','buyer_id'])->select();
         $userModel = new IndexUser();
         foreach ($rows as &$row){
             $userInfo = $userModel->getInfoById($row->supplier);
             $row['supplier'] = $userInfo ? $userInfo->real_name : '';
+            $buyerInfo = $userModel->getInfoById($row->buyer_id);
+            $row['buyer'] = $buyerInfo ? $buyerInfo->real_name : '';
+
             $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon'])->select();
             foreach($goodsRows as &$goodsRow){
                 $goodsRow['quantity'] = intval($goodsRow->quantity);
                 $goodsRow['icon'] = MallGoods::getFormatImg($goodsRow->icon);
+                $goodsRow['price'] = getFormatPrice($goodsRow->price);
             }
             $row['goods'] = $goodsRows;
         }

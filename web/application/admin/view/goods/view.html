@@ -59,8 +59,41 @@
                                         {/foreach}
                                     </div>
                                 </div>
-
                             </div>
+                            {if $rows}
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">规格</label>
+                                <div class="col-md-8" style="padding-left: 0px">
+                                    <table class="table table-bordered">
+                                        <tbody><tr>
+                                            <th style="width: 10px">#</th>
+                                            <th>颜色自定义选项</th>
+                                            <th>规格</th>
+                                            <th >成本价</th>
+                                            <th >实体店售价</th>
+                                            <th >网点售价</th>
+                                            <th >国际条形码</th>
+                                            <th >店内编码</th>
+                                        </tr>
+                                        {foreach name="$rows" id="standard"}
+                                        <tr>
+                                            <td>{$key+1}</td>
+                                            <td>{$standard.color_name ? $standard.color_name : ''}</td>
+                                            <td>
+                                                {$standard.name ? $standard.name : ''}
+                                            </td>
+                                            <td>{$standard.cost_price}</td>
+                                            <td>{$standard.e_price}</td>
+                                            <td>{$standard.w_price}</td>
+                                            <td>{$standard.barcode}</td>
+                                            <td>{$standard.store_code}</td>
+                                        </tr>
+                                        {/foreach}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {/if}
                             <div class="form-inline form-group">
                                 <label for="" class="col-md-3">成本价</label>
                                 <span class="">{$goods.cost_price}元</span>
@@ -71,7 +104,7 @@
                             </div>
                             <div class="form-inline form-group">
                                 <label for="" class="col-md-3">商品详情</label>
-                                <span class="">{$goods.detail}</span>
+                                <span class="">{:getImgUrl($goods.detail)}</span>
                             </div>
                         </div>
                     </div>

@@ -144,6 +144,7 @@ class Goods extends Base{
         $row = $goodsModel->where(['id'=>$id])->find();
         if($request->isPost()){
 
+            //更新为待审核状态
 
         }
 
@@ -186,6 +187,22 @@ class Goods extends Base{
         return ['status'=>1,'data'=>[],'msg'=>'删除失败'];
     }
 
+    /**
+     * @desc
+     * @param Request $request
+     * @param $id
+     * @return array
+     */
+    public function update(Request $request,$id){
+        $goodsModel = new MallGoods();
+        $state = $request->post('state','');
+        $result = $goodsModel->save(['state'=>$state],['id'=>$id]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'设置成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'设置失败'];
+    }
+
 
     /**
      * @desc 商品详情
@@ -211,6 +228,8 @@ class Goods extends Base{
         //
         $userModel = new IndexUser();
         $unitModel = new MallUnit();
+        $typeModel = new MallType();
+        $specificationModel = new MallGoodsSpecifications();
         $userInfo = $userModel->getInfoById($row->supplier);
         $row['supplierName'] = $userInfo ? $userInfo->real_name : '';
 
@@ -218,9 +237,20 @@ class Goods extends Base{
         $row['unitName'] = $unitInfo ? $unitInfo->name : '';
 
         //
+        $typeRow = $typeModel->where(['id'=>$row->type])->find();
+        $rows = [];
+        if($typeRow->color == 1 || $typeRow->diy_option){
+           $rows = $specificationModel->alias('a')->join(config('prefix').'mall_type_option b','a.option_id=b.id','left')->where(['a.goods_id'=>$id])->field(['a.color_name','a.color_img','a.e_price','a.w_price','a.cost_price','a.barcode','a.store_code','b.name'])->select();
+           foreach ($rows as &$row2){
+               $row2['color_img'] = $row2->color_img ? MallGoodsSpecifications::getFormatPath($row2->color_img) : '';
+           }
+        }
+
+        //
         $goodsTypeArr = array_reverse(getTypeLevel($row->type));
         $row['goodsTypeName'] = implode('&nbsp;>',$goodsTypeArr);
         $this->assign('goods',$row);
+        $this->assign('rows',$rows);
         return $this->fetch();
     }
 
