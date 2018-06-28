@@ -187,8 +187,20 @@ class Goods extends Base{
         return ['status'=>1,'data'=>[],'msg'=>'删除失败'];
     }
 
-    public function update(){
-
+    /**
+     * @desc
+     * @param Request $request
+     * @param $id
+     * @return array
+     */
+    public function update(Request $request,$id){
+        $goodsModel = new MallGoods();
+        $state = $request->post('state','');
+        $result = $goodsModel->save(['state'=>$state],['id'=>$id]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'设置成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'设置失败'];
     }
 
 

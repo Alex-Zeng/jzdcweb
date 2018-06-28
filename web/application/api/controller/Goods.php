@@ -92,7 +92,7 @@ class Goods  extends Base {
         $model = new MallGoods();
 
         $where = [
-            'state' => ['<>',0],
+            'state' => 2,
             'mall_state' => 1,
             'online_forbid' => 0,
             'share' => 0,
@@ -208,8 +208,8 @@ class Goods  extends Base {
             $total = $model->where($where)->count();
             $rows = $model->where($where)->order('w_price',$sort)->limit($start,$end)->field(['id','icon','title','w_price','min_price','max_price','discount','bidding_show'])->select();
         }else{ //供应商搜索
-            $total =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where(['a.state'=>2])->where('b.real_name','like','%'.$keywords.'%')->count();
-            $rows =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where(['a.state'=>2])->where('b.real_name','like','%'.$keywords.'%')->order('a.w_price',$sort)->field(['a.id','a.icon','a.title','a.w_price','a.min_price','a.max_price','a.discount','a.bidding_show'])->select();
+            $total =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where(['a.state'=>2,'a.mall_state'=>1])->where('b.real_name','like','%'.$keywords.'%')->count();
+            $rows =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where(['a.state'=>2,'a.mall_state'=>1])->where('b.real_name','like','%'.$keywords.'%')->order('a.w_price',$sort)->field(['a.id','a.icon','a.title','a.w_price','a.min_price','a.max_price','a.discount','a.bidding_show'])->select();
         }
         $list = [];
         foreach($rows as $row){
@@ -243,7 +243,7 @@ class Goods  extends Base {
      */
     public function get(Request $request, $id){
         $model = new MallGoods();
-        $row = $model->where(['id'=>$id,'state'=>2])->field(['id','title','min_price','max_price','state','type','w_price','supplier','icon','multi_angle_img','title','m_detail','option_enable'])->find();
+        $row = $model->where(['id'=>$id,'state'=>2])->field(['id','title','min_price','max_price','w_price','state','type','w_price','supplier','icon','multi_angle_img','title','m_detail','option_enable'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'商品不存在'];
         }
@@ -305,6 +305,7 @@ class Goods  extends Base {
             'title' => $row->title,  //商品标题
             'min_price' => getFormatPrice($row->min_price), //商品价格
             'max_price' => getFormatPrice($row->max_price),//
+            'price' => getFormatPrice($row->w_price),
             'supplier' => $user ? $user->real_name : '', //供应商
             'supplierLogo' => '', //供应商logo
             'standard' => $standards, //规格
