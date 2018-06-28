@@ -26,5 +26,17 @@ class Record extends Base{
         return ['status'=>0,'data'=>$rows,'msg'=>''];
     }
 
-
+    /**
+     * @desc 删除搜索关键词
+     * @return array
+     */
+    public function removeSearch(){
+        $this->noauth();
+        if($this->userId <= 0){
+            return ['status'=>0,'data'=>[],'msg'=>''];
+        }
+        $model = new UserSearchLog();
+        $rows = $model->where(['user_id'=>$this->userId])->delete();
+        return ['status'=>0,'data'=>$rows,'msg'=>'删除成功'];
+    }
 }
