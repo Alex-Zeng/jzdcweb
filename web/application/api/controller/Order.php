@@ -318,6 +318,9 @@ class Order extends Base{
         foreach ($rows as &$row){
             $userInfo = $userModel->getInfoById($row->supplier);
             $row['supplier'] = $userInfo ? $userInfo->real_name : '';
+            $buyerInfo = $userModel->getInfoById($row->buyer_id);
+            $row['buyer'] = $buyerInfo ? $buyerInfo->real_name : '';
+
             $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon'])->select();
             foreach($goodsRows as &$goodsRow){
                 $goodsRow['quantity'] = intval($goodsRow->quantity);
