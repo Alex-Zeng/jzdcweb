@@ -27,6 +27,7 @@ class Base extends Controller{
         $groupId = getGroupId();
         if($groupId !=2 && $groupId !=3){
             //没有权限访问
+            $this->redirect('/index.php?jzdc=index.login');
             exit;
         }
 

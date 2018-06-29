@@ -1,5 +1,8 @@
 {include file="layout/header" title="投诉与建议" keywords="" /}
 <link href="__STATIC__/js/plugins/bootstrap-fileinput/css/fileinput.css" media="all" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="__STATIC__/js/plugins/kindeditor/themes/default/default.css" />
+<link rel="stylesheet" href="__STATIC__/js/plugins/kindeditor/plugins/code/prettify.css" />
+<link rel="stylesheet" href="__STATIC__/js/plugins/bootstrapvalidator/css/bootstrapValidator.css"/>
 {include file="layout/left" groupId="$groupId" keywords="" /}
 
 <style type="text/css">
@@ -32,7 +35,7 @@
                         <div class="card-header">
                             <h3 class="card-title">修改商品</h3>
                         </div>
-                        <form role="form" id="edit-form" action="{:url('create')}" method="post">
+                        <form role="form" id="edit-form" action="{:url('edit','id='.$id)}" method="post" onsubmit="return validateSubmit()">
                             <div class="card-body">
                                 <div class="form-inline form-group">
                                     <label for="" class="col-md-2 pull-right">所属商城分类</label>
@@ -78,7 +81,7 @@
                                     <label for="" class="col-md-2 pull-right">封面图片</label>
                                     <div class="col-sm-4" style="padding-left: 0px">
                                         <input id="cover-file" name="file" type="file"  data-show-caption="true">
-                                        <input  type="hidden" name="cover_path" id="cover-upload-file"  value="" />
+                                        <input  type="hidden" name="cover_path" id="cover-upload-file"  value="{$row.icon}" />
                                         <p class="help-block">支持jpg、jpeg、png格式，大小不超过2.0M</p>
                                     </div>
                                 </div>
@@ -87,7 +90,7 @@
                                     <label for="" class="col-md-2 pull-right">多视角图片</label>
                                     <div class="col-sm-4" style="padding-left: 0px">
                                         <input id="multi-file" name="file" type="file" data-show-caption="true"  multiple>
-                                        <input  type="hidden" name="multi_path" id="multi-upload-file"  value="" />
+                                        <input  type="hidden" name="multi_path" id="multi-upload-file"  value="{$row.multi_angle_img}" />
                                         <p class="help-block">支持jpg、jpeg、png格式，大小不超过2.0M</p>
                                     </div>
                                 </div>
@@ -225,10 +228,30 @@
     </div>
 </script>
 <script src="__STATIC__/js/plugins/bootstrap-fileinput/js/fileinput.js" type="text/javascript"></script>
+<script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
 <script type="text/javascript" src="__STATIC__/js/template-web.js"></script>
-<script src="__STATIC__/js/plugins/ckeditor-4.8.0/ckeditor.js"></script>
+<script src="__STATIC__/js/plugins/kindeditor/kindeditor-all.js"></script>
+<script src="__STATIC__/js/plugins/kindeditor/lang/zh-CN.js"></script>
 
 <script type="text/javascript">
+    function validateSubmit(){
+        if ($("#edit-form").data('bootstrapValidator').isValid()) {
+            return true;
+        }
+        return false;
+    }
+    KindEditor.ready(function(K) {
+        var editor1 = K.create('#goods-content', {
+            cssPath : '__STATIC__/js/plugins/kindeditor/plugins/code/prettify.css',
+            //uploadJson : '/kindeditordemo/php/upload_json.php',
+            uploadJson : '/?s=admin/file/upload2',
+            //  fileManagerJson : '/kindeditordemo/php/file_manager_json.php',
+            allowFileManager : true,
+            afterCreate : function() {
+                var self = this;
+            }
+        });
+    });
     $(function () {
       var  specification = null;
         $('#goods_type').change(function () {
@@ -318,9 +341,7 @@
 
         $('select[name="type"]').trigger('change');
 
-        var ckeditor = CKEDITOR.replace('goods-content');
-
-        var imgTag = "<img src='{$row.icon_path}' class='file-preview-image' alt='' title=''>";
+        var imgTag = '<img src="{$row.icon_path}" class="file-preview-image" >';
         $("#cover-file").fileinput({
             language: 'zh', //设置语言
             uploadUrl: '?s=admin/file/upload',  //上传地址
@@ -468,5 +489,82 @@
             }
             $('#custom-container').html(html);
         }
+
+        $("#edit-form").bootstrapValidator({
+            excluded:[":disabled"],
+            live: 'disabled',
+            message: 'This value is not valid',
+            fields: {
+                type: {
+                    message: 'The type is not valid',
+                    validators: {
+                        notEmpty: {
+                            message: '请选择商品分类'
+                        },
+                    }
+                },
+                supplier:{
+                    message: 'The supplier is not valid',
+                    validators: {
+                        notEmpty: {
+                            message: '请选择供应商'
+                        },
+                    }
+                },
+                title: {
+                    message: 'The title is not valid',
+                    validators: {
+                        notEmpty: {
+                            message: '商品名称不能为空'
+                        },
+                        stringLength: {
+                            min: 2,
+                            max: 100,
+                            message: '最大长度为100个字符'
+                        },
+                    }
+                },
+                cover_path:{
+                    message: 'The cover_path is not valid',
+                    validators: {
+                        notEmpty: {
+                            message: '请上传封面图片'
+                        }
+                    }
+                },
+                multi_path:{
+                    message: 'The cover_path is not valid',
+                    validators: {
+                        notEmpty: {
+                            message: '请上传多视角图片'
+                        }
+                    }
+                },
+                w_price:{
+                    message: '无效的价格',
+                    validators: {
+                        notEmpty: {
+                            message: '售价不能为空'
+                        },
+                    }
+                },
+                cost_price:{
+                    message: '无效的价格',
+                    validators: {
+                        notEmpty: {
+                            message: '成本价不能为空'
+                        },
+                    }
+                },
+                content:{
+                    message: 'The content is not valid',
+                    validators: {
+                        notEmpty: {
+                            message: '商品详情不能为空'
+                        },
+                    }
+                }
+            }
+        });
     })
 </script>

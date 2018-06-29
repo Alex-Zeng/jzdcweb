@@ -120,6 +120,7 @@ class Goods extends Base{
                         'goods_id' => $goodsModel->id,
                         'e_price' => $standard[$i]['e_price'],
                         'w_price' => $standard[$i]['w_price'],
+                        'cost_price' => $standard[$i]['cost_price'],
                         'quantity' => 1000000,
                         'barcode' => $standard[$i]['barcode'],
                         'type' => $type,
@@ -152,9 +153,79 @@ class Goods extends Base{
         $goodsModel = new MallGoods();
         $row = $goodsModel->where(['id'=>$id])->find();
         if($request->isPost()){
-
             //更新为待审核状态
+            $title = $request->post('title','');
+            $type = $request->post('type',0,'intval');
+            $supplier = $request->post('supplier',0,'intval');
+            $unit = $request->post('unit',0,'intval');
+            $cover_path = $request->post('cover_path','');
+            $multi_path = $request->post('multi_path','');
+            $color = $request->post('color/a');
 
+            $standard = $request->post('standard/a');
+            $cost_price = $request->post('cost_price',0);
+            $w_price = $request->post('w_price',0);
+            $e_price = $request->post('e_price',0);
+
+            $content = $request->post('content','');
+            $state = $request->post('state',0,'intval');
+            $standardArr =  [];
+
+            //计算min_price,max_price
+            $priceArr = [];
+            foreach ($standard as $arr){
+                $priceArr[] = $arr['w_price'];
+            }
+
+            //添加商品
+            $goodsModel = new MallGoods();
+            $goods = [
+                'shop_id' =>1,
+                'min_price' => $priceArr ? min($priceArr):$w_price,
+                'max_price' => $priceArr ? max($priceArr):$w_price,
+                'state' => $state,
+                'type' =>$type,
+                'unit' =>$unit,
+                'w_price' =>$w_price,
+                'e_price' => $e_price,
+                'cost_price' => $cost_price,
+                'supplier' => $supplier,
+                'title' => $title,
+                'icon' => $cover_path,
+                'multi_angle_img' => $multi_path,
+                'detail' => $content,
+                'm_detail' => $content,
+                'limit_cycle' => ''
+            ];
+
+            $result = $goodsModel->save($goods,['id'=>$id]);
+            if($result == true){
+                for($i =0; $i < count($standard); $i++){
+                    $colorId = $standard[$i]['color_id'];
+                    $standardArr[] = [
+                        'color_id' => $standard[$i]['color_id'],
+                        'color_name' => isset($color[$colorId]) ? $color[$colorId]['name'] : '',
+                        'color_img' => isset($color[$colorId]) ? $color[$colorId]['path'] : '',
+                        'option_id' => $standard[$i]['option_id'],
+                        'goods_id' => $goodsModel->id,
+                        'e_price' => $standard[$i]['e_price'],
+                        'w_price' => $standard[$i]['w_price'],
+                        'quantity' => 1000000,
+                        'barcode' => $standard[$i]['barcode'],
+                        'type' => $type,
+                        'store_code' => $standard[$i]['store_code']
+                    ];
+                }
+
+                //商品规格处理
+                $specificationModel = new MallGoodsSpecifications();
+                //删除规格数据
+                $specificationModel->where(['goods_id'=>$id])->delete();
+                //保存规格数据
+                $specificationModel->saveAll($standardArr);
+
+                $this->redirect(url('admin/goods/index'));
+            }
         }
 
         $imgList = [];
@@ -164,12 +235,14 @@ class Goods extends Base{
         }
 
         $row['icon_path'] = MallGoods::getFormatImg($row->icon);
+      //  echo $row['icon_path']; exit;
         $row['imgList'] = $imgList;
 
         $unitModel = new MallUnit();
         $unitRows = $unitModel->where([])->order('sequence','desc')->field(['id','name'])->select();
         $this->assign('unitRows',$unitRows);
         $this->assign('row',$row);
+        $this->assign('id',$id);
         return $this->fetch();
     }
 
