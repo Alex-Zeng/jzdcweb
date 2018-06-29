@@ -26,16 +26,19 @@ class Goods extends Base{
      */
     public function index(){
         $model = new MallGoods();
-
         $k = Request::instance()->get('k','');
         $supplier = Request::instance()->get('supplier',0);
-
+        $state = Request::instance()->get('state','-1','intval');
         if(isset($k) && $k){
             $model->where('title','like','%'.$k.'%');
         }
         if($supplier > 0){
             $model->where(['supplier'=>$supplier]);
         }
+        if($state >= 0){
+            $model->where(['mall_state'=>$state]);
+        }
+
         $rows = $model->order(['id'=>'desc'])->paginate(20,false,['query'=>request()->param()]);
         $userModel = new IndexUser();
         foreach ($rows as &$row){
@@ -48,6 +51,7 @@ class Goods extends Base{
         $this->assign('list',$rows);
         $this->assign('page',$rows->render());
         $this->assign('supplier',$supplier);
+        $this->assign('state',$state);
         return $this->fetch();
     }
 
@@ -77,13 +81,18 @@ class Goods extends Base{
 
 
             //计算min_price,max_price
+             $priceArr = [];
+             foreach ($standard as $arr){
+                 $priceArr[] = $arr['w_price'];
+             }
+
 
             //添加商品
             $goodsModel = new MallGoods();
             $goods = [
                 'shop_id' =>1,
-                'min_price' => '',
-                'max_price' => '',
+                'min_price' => $priceArr ? min($priceArr):$w_price,
+                'max_price' => $priceArr ? max($priceArr):$w_price,
                 'state' => $state,
                 'type' =>$type,
                 'unit' =>$unit,
@@ -197,6 +206,21 @@ class Goods extends Base{
         $goodsModel = new MallGoods();
         $state = $request->post('state','');
         $result = $goodsModel->save(['state'=>$state],['id'=>$id]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'设置成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'设置失败'];
+    }
+
+    /**
+     * @param Request $request
+     * @param $id
+     * @return array
+     */
+    public function check(Request $request,$id){
+        $goodsModel = new MallGoods();
+        $state = $request->post('state','');
+        $result = $goodsModel->save(['mall_state'=>$state],['id'=>$id]);
         if($result !== false){
             return ['status'=>0,'data'=>[],'msg'=>'设置成功'];
         }

@@ -132,7 +132,6 @@ class Order extends Base{
 
         $return = [];
 
-
         $receiverModel = new MallReceiver();
         $receiverRow = $receiverModel->where(['id'=>$receiverId])->find();
         $areaModel = new IndexArea();

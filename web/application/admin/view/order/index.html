@@ -70,8 +70,7 @@
                             </colgroup>
                             <thead>
                             <tr>
-                                <!--<th><input type="checkbox"  value="" /></th>-->
-                                <th>下单时间</th>
+                                <th>订单</th>
                                 <th>金额</th>
                                 <th>状态</th>
                                 <th>操作</th>
@@ -89,31 +88,27 @@
                                     供应商:  {$order.supplierName}&nbsp;&nbsp;
                                     账期截止日: {:substr($order.pay_date,0,10)}
                                 </td>
-
                              </tr>
                             <tr style="background: #EFEFEF">
-                                <!--<td></td>-->
                                 <td colspan="4" >
-                                   {$order.receiver_name}&nbsp;&nbsp;{$order.receiver_phone}&nbsp;&nbsp;{$order.receiver_area_name}&nbsp;&nbsp;{$order.receiver_detail}&nbsp;&nbsp;
-                                    {$order.receiver_post_code}
+                                   {$order.receiver_name}&nbsp;&nbsp;{$order.receiver_phone}&nbsp;&nbsp;{$order.receiver_area_name}&nbsp;&nbsp;{$order.receiver_detail}&nbsp;&nbsp;{$order.receiver_post_code}
                                 </td>
                             </tr>
-
                             <tr id="{$order.id}">
                                 <!--<td><input type="checkbox"  value="" /></td>-->
-                                <td>
-                                    {foreach name="order.goods" id="goods"}
-                                    <div class="row no-padding">
-                                         <div class="col-md-2 text-center" >
-                                             <img width="60px" height="60px" src="{$goods.icon}"  />
-                                         </div>
-                                        <div class="col-md-10">
-                                            <p>{$goods.title}</p>
-                                            <p>原价: {$goods.price|floatval}*{$goods.quantity|intval}{$goods.unit}={$goods.price*$goods.quantity}元</p>
-                                        </div>
-                                    </div>
-                                    {/foreach}
-
+                                <td style="border-right: 1px solid #dee2e6; ">
+                                    <table class="table no-border text-left" >
+                                        <tbody>
+                                        {foreach name="order.goods" id="goods"}
+                                        <tr>
+                                            <td width="40px" style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">#{$key+1}</td>
+                                            <td width="80px" style="vertical-align: middle;border-bottom: 1px solid #dee2e6;"><img width="60px" height="60px" src="{$goods.icon}"  /></td>
+                                            <td style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">{$goods.title}</td>
+                                            <td style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">原价: {$goods.price|floatval}*{$goods.quantity|intval}{$goods.unit}={$goods.price*$goods.quantity}元</td>
+                                        </tr>
+                                        {/foreach}
+                                        </tbody>
+                                    </table>
                                     <div class="">
                                         <p>采购商支付:
                                            {if $order.buyerPayInfo}
@@ -141,11 +136,11 @@
                                     </div>
 
                                 </td>
-                                <td>
+                                <td style="vertical-align: middle">
                                     应付: {$order.sum_money|floatval}元
                                 </td>
-                                <td><span class="text-success">{:getOrderState($order.state)}</span></td>
-                                <td>
+                                <td style="vertical-align: middle"><span class="text-success">{:getOrderState($order.state)}</span></td>
+                                <td style="vertical-align: middle">
                                     {if $order.state == 0} <!-- 待核价-->
                                     <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#pricing-modal">核价</a>
                                     <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
