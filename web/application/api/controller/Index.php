@@ -35,10 +35,10 @@ class Index extends Base
                 $countyRows = $model->getCountyListByCity($cityRow->id);
                 foreach ($countyRows as $countyRow){
                     $list[] = ['name'=>$countyRow->name,'value'=>trim($countyRow->id),'parent'=>trim($countyRow->upid)];
-                    $townRows = $model->getTownListByCounty($countyRow->id);
-                    foreach ($townRows as $townRow){
-                        $list[] = ['name'=>$townRow->name,'value'=>trim($townRow->id),'parent'=>trim($townRow->upid)];
-                    }
+//                    $townRows = $model->getTownListByCounty($countyRow->id);
+//                    foreach ($townRows as $townRow){
+//                        $list[] = ['name'=>$townRow->name,'value'=>trim($townRow->id),'parent'=>trim($townRow->upid)];
+//                    }
                 }
             }
 
