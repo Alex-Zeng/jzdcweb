@@ -45,6 +45,4 @@ class ImageUpload{
         }
         return ['status'=>1,'data'=>[],'msg'=>'上传错误'];
     }
-
-
 }
