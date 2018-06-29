@@ -284,16 +284,10 @@ class User extends Base
             $areaList = $areaModel->getAreaInfo($row->area_id);
             $areaIds = $areaModel->getAreaIds($row->area_id);
             if ($areaList) {
-                array_shift($areaList);
-            }
-            if ($areaList) {
                 array_pop($areaList);
             }
             $row['areaName'] = $areaList ? implode('-', array_reverse($areaList)) : '';
             $arrIds = [];
-            if ($areaIds) {
-                array_shift($areaIds);
-            }
             if ($areaIds) {
                 array_pop($areaIds);
             }
