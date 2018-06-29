@@ -126,7 +126,8 @@ class User extends Base
         $model = new MallReceiver();
         $model->save(['is_default' => 0], ['user_id' => $this->userId]);
         $result = $model->save(['is_default' => 1], ['id' => $id, 'user_id' => $this->userId]);
-        if ($result) {
+
+        if ($result !== false) {
             return ['status' => 0, 'data' => [], 'msg' => '设置默认地址成功'];
         }
         return ['status' => 1, 'data' => [], 'msg' => '设置默认地址失败'];
