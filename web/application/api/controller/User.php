@@ -945,6 +945,26 @@ class User extends Base
         return ['status' => 0, 'data' => ['total' => $total], 'msg' => ''];
     }
 
+    //删除消息
+    public function removeMessage(Request $request){
+        $msgId = $request->post('id');
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $model = new OrderMsg();
+
+        $result =$model->save(['is_delete'=>1],['user_id'=>$this->userId,'id'=>$msgId]);
+
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'修改失败'];
+
+    }
+
     //用户设置
     public function profile(Request $request)
     {

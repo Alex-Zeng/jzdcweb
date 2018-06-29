@@ -132,7 +132,6 @@ class Order extends Base{
 
         $return = [];
 
-
         $receiverModel = new MallReceiver();
         $receiverRow = $receiverModel->where(['id'=>$receiverId])->find();
         $areaModel = new IndexArea();
@@ -313,7 +312,7 @@ class Order extends Base{
             $where['state'] = $status;
         }
         $count = $orderModel->where($where)->count();
-        $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','receiver_name','supplier'])->select();
+        $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','receiver_name','supplier','buyer_id'])->select();
         $userModel = new IndexUser();
         foreach ($rows as &$row){
             $userInfo = $userModel->getInfoById($row->supplier);
