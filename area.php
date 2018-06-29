@@ -36,7 +36,7 @@ class area_select{
 	function get_select($id){
 		global $pdo,$input_id,$language;
 		$list='';
-			$sql="select `level`,`name`,`id` from ".$pdo->index_pre."area where `upid`='$id' order by `sequence` desc,`id` asc";
+			$sql="select `level`,`name`,`id` from ".$pdo->index_pre."area where `level` < 5 AND `upid`='$id' order by `sequence` desc,`id` asc";
 			$stmt=$pdo->query($sql,2);
 			$temp='';
 			foreach($stmt as $v){
