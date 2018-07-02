@@ -54,7 +54,6 @@ class User extends Base
         $phone = $request->post('phone', '');
         $tag = $request->post('tag', '');
         $default = $request->post('is_default', 0, 'intval');
-        print_r($default); exit;
         if (!checkPhone($phone)) {
             return ['status' => 1, 'data' => [], 'msg' => '手机号格式不正确'];
         }
