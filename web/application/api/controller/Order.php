@@ -132,12 +132,11 @@ class Order extends Base{
 
         $return = [];
 
-
         $receiverModel = new MallReceiver();
         $receiverRow = $receiverModel->where(['id'=>$receiverId])->find();
         $areaModel = new IndexArea();
         $areaList = $areaModel->getAreaInfo($receiverRow->area_id);
-        $areaInfo = $areaList ?  implode(' ',array_reverse($areaList)) : '';
+        $areaInfo = $areaList ?  implode(' ',array_reverse(array_pop($areaList))) : '';
 
         $userModel = new IndexUser();
         $userInfo = $userModel->getInfoById($this->userId);

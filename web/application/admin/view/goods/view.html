@@ -2,6 +2,26 @@
 
 {include file="layout/left" groupId="$groupId" keywords="开源WEB开发框架" /}
 
+<style type="text/css">
+    .preview-phone{
+        width: 410px;
+        height: 840px;
+        background: url(__STATIC__/img/iphone-bg.png) no-repeat no-repeat;
+        border-radius: 65px;
+    }
+    #preview-html{
+        position: absolute;
+        width:361px;
+        height: 638px;
+        top:98px;
+        left:24px;
+        border: 2px solid #000;
+        border-radius: 5px;
+        outline: none;
+        background-color: #fff;
+    }
+</style>
+
 <div class="content-wrapper">
     <div class="content-header">
         <div class="container-fluid">
@@ -107,11 +127,24 @@
                                 <span class="">{:getImgUrl($goods.detail)}</span>
                             </div>
                         </div>
+
+                        <div class="form-inline">
+                             <a href="javascript:void(0);"  class="btn btn-primary"  data-toggle="modal"   data-target="#view-modal">预览</a>
+                        </div>
+
                     </div>
                 </div>
             </div>
         </div>
     </section>
+</div>
+
+<div class="modal fade " id="view-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog " role="document">
+        <div class="modal-content preview-phone">
+            <iframe id="preview-html" name="preview-html" src="{:url('admin/goods/preview','id='.$goods->id)}"></iframe>
+        </div>
+    </div>
 </div>
 
 {include file="layout/footer" title="$title" keywords="" /}

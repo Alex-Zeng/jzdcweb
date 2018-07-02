@@ -35,14 +35,41 @@ class Index extends Base
                 $countyRows = $model->getCountyListByCity($cityRow->id);
                 foreach ($countyRows as $countyRow){
                     $list[] = ['name'=>$countyRow->name,'value'=>trim($countyRow->id),'parent'=>trim($countyRow->upid)];
-                    $townRows = $model->getTownListByCounty($countyRow->id);
-                    foreach ($townRows as $townRow){
-                        $list[] = ['name'=>$townRow->name,'value'=>trim($townRow->id),'parent'=>trim($townRow->upid)];
-                    }
+//                    $townRows = $model->getTownListByCounty($countyRow->id);
+//                    foreach ($townRows as $townRow){
+//                        $list[] = ['name'=>$townRow->name,'value'=>trim($townRow->id),'parent'=>trim($townRow->upid)];
+//                    }
                 }
             }
 
         }
         return ['status'=>0,'data'=>['list'=>$list],'msg'=>''];
+    }
+
+    /**
+     * @desc 返回层级区域数据
+     * @param Request $request
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getLevelArea(Request $request){
+        $model = new IndexArea();
+        $provinceId = $request->post('provinceId', 0, 'intval');
+        $cityId = $request->post('cityId', 0, 'intval');
+
+        if($provinceId === 0 && $cityId === 0) {
+            $list =  $model->getProvinceList();
+            return ['status' => 0, 'data' => ['list' => $list], 'msg' => '返回成功'];
+        }
+
+        if ($cityId === 0) {
+            $list = $model->getCityListByProvince($provinceId);
+            return ['status' => 0, 'data' => ['list' => $list], 'msg' => '返回成功'];
+        }else{
+            $list = $model->getCountyListByCity($cityId);
+            return ['status' => 0, 'data' => ['list' => $list], 'msg' => '返回成功'];
+        }
     }
 }

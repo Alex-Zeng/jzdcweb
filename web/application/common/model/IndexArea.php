@@ -80,6 +80,4 @@ class IndexArea extends Model{
         $rows = $this->where(['upid' => $countyId,'level'=>5])->field(['id','name','level','upid'])->select();
         return $rows;
     }
-
-
 }
