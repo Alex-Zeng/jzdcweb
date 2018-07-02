@@ -427,8 +427,13 @@ class Goods extends Base{
         ];
     }
 
-    public function preview(){
+    public function preview($id){
+        $model = new MallGoods();
+        $row = $model->where(['id'=>$id])->find();
 
+        $row['icon'] = MallGoods::getFormatImg($row->icon);
+
+        $this->assign('goods',$row);
         return $this->fetch();
     }
 

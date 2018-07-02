@@ -4,15 +4,11 @@
 
 <style type="text/css">
     .preview-phone{
-        position: fixed;
         width: 410px;
         height: 840px;
         background: url(__STATIC__/img/iphone-bg.png) no-repeat no-repeat;
-        z-index: 9999;
-        left: 746.5px;
-        top: 50px;
+        border-radius: 65px;
     }
-
     #preview-html{
         position: absolute;
         width:361px;
@@ -144,19 +140,15 @@
 </div>
 
 
-<div class="modal fade preview-phone" id="view-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-    <iframe id="preview-html" name="preview-html" src="{:url('admin/goods/preview','id='.$goods->id)}"></iframe>
-    </div>
+<div class="modal fade " id="view-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <!--<div class="modal-dialog" role="document">-->
-        <!--<div class="modal-content">-->
-            <!--<div class="modal-body">是否确认下架该商品?</div>-->
-            <!--<div class="modal-footer">-->
-                <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>-->
-                <!--<button type="button" class="btn btn-primary" data-id="" id="down-request">是</button>-->
-            <!--</div>-->
-        <!--</div>-->
+    <!--<iframe id="preview-html" name="preview-html" src="{:url('admin/goods/preview','id='.$goods->id)}"></iframe>-->
     <!--</div>-->
+    <div class="modal-dialog " role="document">
+        <div class="modal-content preview-phone">
+            <iframe id="preview-html" name="preview-html" src="{:url('admin/goods/preview','id='.$goods->id)}"></iframe>
+        </div>
+    </div>
 </div>
 
 {include file="layout/footer" title="$title" keywords="" /}
