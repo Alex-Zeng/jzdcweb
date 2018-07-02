@@ -279,7 +279,7 @@ class Code extends Base {
         $userModel = new IndexUser();
         $userInfo = $userModel->getUserByPhone($phone);
         if($userInfo){
-            return ['status'=>1,'data'=>[],'msg'=>'改号码已被其他用户绑定'];
+            return ['status'=>1,'data'=>[],'msg'=>'该号码已被其他用户绑定'];
         }
 
         //发送短信
