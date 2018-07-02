@@ -54,7 +54,7 @@ class User extends Base
         $phone = $request->post('phone', '');
         $tag = $request->post('tag', '');
         $default = $request->post('is_default', 0, 'intval');
-
+        print_r($default); exit;
         if (!checkPhone($phone)) {
             return ['status' => 1, 'data' => [], 'msg' => '手机号格式不正确'];
         }
@@ -173,8 +173,11 @@ class User extends Base
             'name' => $name,
             'phone' => $phone,
             'tag' => $tag,
-            'is_default' => $default
         ];
+        if(isset($_POST['is_default'])){
+            $data['is_default'] = $default;
+        }
+
         $result = $model->save($data, ['id' => $id]);
         if ($result == true) {
             //更新

@@ -230,7 +230,35 @@ class Code extends Base {
         }
         return ['status'=>1,'data'=>[],'msg'=>'发送短信失败'];
     }
+    //验证手机号
+    public function oldPhoneValid(Request $request){
+        $code = $request->post('code','');
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        if(!$code){
+            return ['status'=>1,'data'=>[],'msg'=>'验证码不能为空'];
+        }
+        //查询用户手机号
+        $userModel = new IndexUser();
+        $userInfo = $userModel->getInfoById($this->userId);
+        if(!$userInfo || !$userInfo->phone){
+            return ['status'=>1,'data'=>[],'msg'=>'用户数据异常'];
+        }
+        $phone = $userInfo->phone;
+        //验证短信
+        $codeModel = new \app\common\model\Code();
+        $codeRow = $codeModel->where(['phone' => $phone, 'type' => \app\common\model\Code::TYPE_PHONE_BIND_OLD])->order('id', 'desc')->find();
+        if (!$codeRow || $codeRow['code'] != $code) {
+            return ['status' => 1, 'data' => [], 'msg' => '短信验证码错误'];
+        }
+        if ($codeRow['expire_time'] < time()) {
+            return ['status' => 1, 'data' => [], 'msg' => '短信验证已过期'];
+        }
 
+        return ['status'=>0,'data'=>[],'msg'=>'短信验证成功'];
+    }
 
     //解绑新手机号
     public function newPhoneSend(Request $request){
