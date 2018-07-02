@@ -776,9 +776,17 @@ class User extends Base
         if (!$password || !$confirmPassword) {
             return ['status' => 1, 'data' => [], 'msg' => '密码不能设置为空'];
         }
+
+        if (!checkPassword($password) || !checkPassword($confirmPassword)){
+            return ['status'=>1,'data'=>[],'msg'=>'密码必须为4-20位的数字和字母组合'];
+        }
+
         if ($password != $confirmPassword) {
             return ['status' => 1, 'data' => [], 'msg' => '两次密码不一致'];
         }
+
+
+
 
         $model = new IndexUser();
 
@@ -801,6 +809,10 @@ class User extends Base
         }
         if (!$password || !$newPassword) {
             return ['status' => 1, 'data' => [], 'msg' => '密码不能设置为空'];
+        }
+
+        if (!checkPassword($newPassword)){
+            return ['status'=>1,'data'=>[],'msg'=>'密码必须为4-20位的数字和字母组合'];
         }
 
         $model = new IndexUser();
