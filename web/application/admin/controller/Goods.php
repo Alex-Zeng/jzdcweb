@@ -427,5 +427,10 @@ class Goods extends Base{
         ];
     }
 
+    public function preview(){
+
+        return $this->fetch();
+    }
+
 
 }

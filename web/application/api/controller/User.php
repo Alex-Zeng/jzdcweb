@@ -20,9 +20,7 @@ use app\common\model\MallReceiver;
 use app\common\model\Notice;
 use app\common\model\OrderMsg;
 use app\common\model\MallReceiverTag;
-use app\common\model\UserSearchLog;
 use sms\Yunpian;
-use think\Db;
 use think\Request;
 
 class User extends Base
@@ -101,7 +99,7 @@ class User extends Base
         if ($result == true) {
             //更新
             if ($default == 1) {
-                (new MallReceiver())->where('user_id=' . $this->userId . ' AND id NOT IN (' . $model->id . ')')->save(['is_default' => 0]);
+                (new MallReceiver())->save(['is_default' => 0],['user_id'=>$this->userId,'id'=>['in',$model->id]]);
             }
 
             return ['status' => 0, 'data' => [], 'msg' => '添加成功'];
@@ -181,7 +179,7 @@ class User extends Base
         if ($result == true) {
             //更新
             if ($default == 1) {
-                (new MallReceiver())->where('user_id=' . $this->userId . ' AND id NOT IN (' . $id . ')')->save(['is_default' => 0]);
+                (new MallReceiver())->save(['is_default' => 0],['user_id'=>$this->userId,'id'=>['in',$id]]);
             }
             return ['status' => 0, 'data' => [], 'msg' => '修改成功'];
         }
