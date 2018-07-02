@@ -30,7 +30,7 @@
                         <div class="col-md-6">
                             <form class="form-inline ml-3" action="{:url()}"  method="get">
                                 <div class="input-group">
-                                    <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="用户名/手机/邮箱" aria-label="Search">
+                                    <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="名称" aria-label="Search">
                                     <div class="input-group-append">
                                         <button class="btn btn-primary" id="search" type="submit">查找</button>
                                     </div>
@@ -46,11 +46,10 @@
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                             <tr>
-                                <!--<th><input type="checkbox" /> </th>-->
                                 <th>图标</th>
-                                <th>名称</th>
-                                <th>网址</th>
-                                <th>打开方式</th>
+                                <th>显示名称</th>
+                                <th>关联商品类型</th>
+                                <th>自定义服务</th>
                                 <th>排序</th>
                                 <th>显示</th>
                                 <th>操作</th>
@@ -59,14 +58,15 @@
                             <tbody>
                             {volist name='list' id='menu'}
                             <tr>
-                                <td><img src="{$menu.path}"  width="100px" height="100px"/></td>
+                                <td><img src="{$menu.path}"  width="80px" height="80px"/></td>
                                 <td>{$menu.name}</td>
-                                <td>{$menu.url}</td>
-                                <td>{$menu.open_target}</td>
+                                <td>{$menu.goodsTypeName}</td>
+                                <td>{$menu.flag > 0 ? '是' : '--'}</td>
                                 <td>{$menu.sequence}</td>
-                                <td>{$menu.visible}</td>
+                                <td>{$menu.visible ==1 ? '显示' : '隐藏'}</td>
                                 <td>
                                     <a href="javascript:void(0)"  class="btn btn-sm btn-primary"  data-id="{$menu.id}"   data-toggle="modal"   data-target="#edit-modal">编辑</a>
+                                    <a href="javascript:void(0)"  class="btn btn-sm btn-danger"  data-id="{$menu.id}" data-toggle="modal" data-target="#delete-modal">删除</a>
                                 </td>
                             </tr>
                             {/volist}
@@ -100,13 +100,42 @@
                                 <div class="form-group form-inline">
                                     <label for="" class="col-md-3">名称</label>
                                     <div class="col-md-9">
-                                        <input type="text" class="form-control col-md-12" maxlength="30"  name="username" placeholder="名称">
+                                        <input type="text" class="form-control col-md-12" maxlength="30"  name="name" placeholder="名称">
                                     </div>
                                 </div>
                                 <div class="form-group form-inline">
-                                    <label for="" class="col-md-3">关联类型</label>
+                                    <label class="col-md-3">菜单类型</label>
+                                    <div class="col-md-4">
+                                        <div class="radio">
+                                            <label style="padding-left: 0px;font-weight: normal">
+                                                <input type="radio" name="tag" id=""  value="1" checked> 商品类型菜单
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="radio">
+                                            <label style="padding-left: 0px;font-weight: normal">
+                                                <input type="radio" name="tag"   value="2" >自定义菜单
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label for="" class="col-md-3">商品类型</label>
                                     <div class="col-md-9">
-                                        <input type="text" class="form-control col-md-12" maxlength="11"  name="phone" placeholder="手机">
+                                        <select name="type" class="form-control">
+                                            {foreach name=":getTypeLevelList(2)" id="type"}
+                                            <option value="{$type.id}" >{if $type.level == 2}&nbsp;&nbsp;&nbsp;&nbsp;|-&nbsp;{/if}{$type.name}</option>
+                                            {/foreach}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label for="" class="col-md-3">服务类型</label>
+                                    <div class="col-md-9">
+                                        <select name="flag" class="form-control">
+                                            <option value="1" >金融服务</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="form-group form-inline">
@@ -116,11 +145,20 @@
                                     </div>
                                 </div>
                                 <div class="form-group form-inline">
-                                    <label class="col-md-3 control-label">图片上传:</label>
+                                    <label class="col-md-3 control-label">图片上传</label>
                                     <div class="col-md-8">
                                         <input id="add-file" name="file" type="file" data-show-caption="true">
                                         <input  type="hidden" name="path" id="add-upload-file"  value="" />
-                                        <p class="help-block">支持jpg、jpeg、png格式，大小不超过5.0M</p>
+                                        <p class="help-block">支持jpg、jpeg、png格式，大小不超过2M</p>
+                                    </div>
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3">显示状态</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="visible">
+                                            <option  value="1">显示</option>
+                                            <option value="0">隐藏</option>
+                                        </select>
                                     </div>
                                 </div>
                             </form>
@@ -140,7 +178,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">编辑会员</h5>
+                <h5 class="modal-title">修改首页菜单</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -148,34 +186,69 @@
             <div class="modal-body ">
                 <div class="container-fluid">
                     <div class="row">
-                        <!-- left column -->
                         <div class="col-md-12">
-                            <!-- form start -->
-                            <form role="form"  class="" id="edit-form">
+                            <form role="form" class="" id="edit-form"  method="post">
                                 <div class="form-group form-inline">
-                                    <label for="" class="col-md-3">用户名</label>
+                                    <label for="" class="col-md-3">名称</label>
                                     <div class="col-md-9">
-                                        <p class="show_name"></p>
+                                        <input type="text" class="form-control col-md-12" maxlength="30"  name="edit_name" placeholder="名称">
                                     </div>
                                 </div>
                                 <div class="form-group form-inline">
-                                    <label for="" class="col-md-3">昵称</label>
-                                    <div class="col-md-9">
-                                        <input type="text" class="form-control col-md-12" maxlength="30" value=""  name="nickname" placeholder="昵称">
+                                    <label class="col-md-3">菜单类型</label>
+                                    <div class="col-md-4">
+                                        <div class="radio">
+                                            <label style="padding-left: 0px;font-weight: normal">
+                                                <input type="radio" name="edit_tag"   value="1" > 商品类型菜单
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="radio">
+                                            <label style="padding-left: 0px;font-weight: normal">
+                                                <input type="radio" name="edit_tag"   value="2" >自定义菜单
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="form-group form-inline">
-                                    <label for="" class="col-md-3">密码</label>
+                                    <label for="" class="col-md-3">商品类型</label>
                                     <div class="col-md-9">
-                                        <input type="text" class="form-control col-md-12"  maxlength="10" name="password" placeholder="" value="">
+                                        <select name="edit_type" class="form-control">
+                                            {foreach name=":getTypeLevelList(2)" id="type"}
+                                            <option value="{$type.id}" >{if $type.level == 2}&nbsp;&nbsp;&nbsp;&nbsp;|-&nbsp;{/if}{$type.name}</option>
+                                            {/foreach}
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="form-group form-inline">
-                                    <label for="" class="col-md-3">状态</label>
+                                    <label for="" class="col-md-3">服务类型</label>
                                     <div class="col-md-9">
-                                        <select name="state" class="form-control">
-                                            <option value="1">正常</option>
-                                            <option value="0">锁定</option>
+                                        <select name="edit_flag" class="form-control">
+                                            <option value="1" >金融服务</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3" >显示顺序</label>
+                                    <div class="col-md-9">
+                                        <input type="number" min="0" class="form-control" value="0" name="edit_sequence" placeholder="">
+                                    </div>
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 control-label">图片上传</label>
+                                    <div class="col-md-8">
+                                        <input id="edit-file" name="edit_file" type="file" data-show-caption="true">
+                                        <input  type="hidden" name="edit_path" id="edit-upload-file"  value="" />
+                                        <p class="help-block">支持jpg、jpeg、png格式，大小不超过2M</p>
+                                    </div>
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3">显示状态</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="edit_visible">
+                                            <option  value="1">显示</option>
+                                            <option value="0">隐藏</option>
                                         </select>
                                     </div>
                                 </div>
@@ -186,32 +259,137 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-primary" id="edit-request">保存</button>
+                <button type="button" class="btn btn-primary" id="edit-request" data-id="">保存</button>
             </div>
         </div>
     </div>
 </div>
 
-
+<div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">是否确认删除该菜单?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="delete-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
 {include file="layout/footer" title="$title" keywords="" /}
 <script src="__STATIC__/js/plugins/bootstrap-fileinput/js/fileinput.js" type="text/javascript"></script>
 <script src="__STATIC__/js/plugins/bootstrap-fileinput/js/locales/zh.js"></script>
 <script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
 <script type="text/javascript">
-    var url = '{:url("admin/member/index")}';
+    var url = '{:url("admin/index_menu/index")}';
     $('a[href="'+url+'"]').addClass('active');
     $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
     $(function () {
+        $("#add-file").fileinput({
+            language: 'zh', //设置语言
+            uploadUrl: '?s=admin/file/upload',  //上传地址
+            showUpload: true, //是否显示上传按钮
+            showRemove:true,
+            dropZoneEnabled: false,
+            showCaption: true,//是否显示标题
+            allowedPreviewTypes: ['image'],
+            allowedFileTypes: ['image'],
+            allowedFileExtensions:  ['jpg', 'png','jpeg'],
+            previewSettings: {
+                image: {width: "100", height: "100"},
+            },
+            maxFileSize : 5120,
+            maxFileCount: 20,
+            uploadExtraData: function(previewId, index) {   //额外参数的关键点
+                var obj = {};
+                obj.type = 'type_index_icon';
+                return obj;
+            }
+        });
+        $('#add-file').on("fileuploaded", function(event, data) {
+            if(data.response){
+                $('#add-upload-file').val(data.response.data.filename);
+                $('#add-file').closest('.form-group').removeClass('has-error');
+                $('#add-file').closest('.form-group').find('.help-block').html('');
+            }
+        });
+        $('#create-modal').on('show.bs.modal', function (event) {
+            update();
+        });
+
+        $("#edit-modal").on('show.bs.modal',function (event) {
+            var id = $(event.relatedTarget).data('id');
+            $('#edit-request').data('id',id);
+            $.ajax({
+                url:'?s=admin/index_menu/get&id='+id,
+                data:{},
+                dataType:'json',
+                success:function (data) {
+                    $("#edit-request").data('id',id);
+                    $("#edit-form").find('input[name="edit_name"]').val(data.data.name);
+                    $("#edit-form").find(":radio[name='edit_tag'][value='" + data.data.tag + "']").prop("checked", "checked");
+                    if(data.data.type > 0){
+                        $("#edit-form").find('select[name="edit_type"]').val(data.data.type);
+                    }
+                    if(data.data.flag > 0){
+                        $("#edit-form").find('select[name="edit_flag"]').val(data.data.flag);
+                    }
+                    $("#edit-form").find('input[name="edit_sequence"]').val(data.data.sequence);
+                    update2();
+                    $("#edit-upload-file").val(data.data.path);
+                    var imgTag = "<img width='100px' height='100px' src='"+data.data.preview+"' class='file-preview-image' alt='' title=''>";
+                    //初始化图片
+                    $('#edit-file').fileinput('destroy');
+                    $("#edit-file").fileinput({
+                        language: 'zh', //设置语言
+                        uploadUrl: '?s=admin/file/upload',  //上传地址
+                        showUpload: true, //是否显示上传按钮
+                        showRemove:true,
+                        dropZoneEnabled: false,
+                        showCaption: true,//是否显示标题
+                        allowedPreviewTypes: ['image'],
+                        allowedFileTypes: ['image'],
+                        allowedFileExtensions:  ['jpg', 'png','jpeg'],
+                        maxFileSize : 5120,
+                        maxFileCount: 1,
+                        initialPreview: [imgTag],
+                        previewSettings: {
+                            image: {width: "100", height: "100"},
+                        },
+                        // maxImageWidth: '1920px',
+                        // maxImageHeight: '520px',
+                        uploadExtraData: function(previewId, index) {   //额外参数的关键点
+                            var obj = {};
+                            obj.type = 'banner';
+                            return obj;
+                        }
+                    });
+                    $('#edit-file').on("fileuploaded", function(event, data) {
+                        if(data.response)
+                        {
+                            $('#edit-upload-file').val(data.response.data.filename);
+                        }
+                    });
+                }
+            });
+
+        });
+
+        $("#delete-modal").on('show.bs.modal',function (event) {
+            var id = $(event.relatedTarget).data('id');
+            $('#delete-request').data('id', id);
+        });
+
         $("#add-form").bootstrapValidator({
             excluded:[":disabled"],
             live: 'disabled',
             message: 'This value is not valid',
             fields: {
-                username: {
+                name: {
                     message: 'The name is not valid',
                     validators: {
                         notEmpty: {
-                            message: '用户名不能为空'
+                            message: '名称不能为空'
                         },
                         stringLength: {
                             min: 2,
@@ -224,49 +402,43 @@
                         // }
                     }
                 },
-                phone: {
-                    message: 'The phone is not valid',
+                path: {
+                    message: 'The name is not valid',
                     validators: {
                         notEmpty: {
-                            message: '手机号不能为空'
+                            message: '请上传图标'
                         },
-                        stringLength: {
-                            min: 11,
-                            max: 11,
-                            message: '请输入11位手机号码'
-                        },
-                        regexp: {
-                            regexp: /^1[3|4|5|7|8]{1}[0-9]{9}$/,
-                            message: '请输入正确的手机号码'
-                        }
                     }
-                },
-                real_name: {
-                    message: 'The real_name is not valid',
+                }
+            }
+        });
+        $("#edit-form").bootstrapValidator({
+            excluded:[":disabled"],
+            live: 'disabled',
+            message: 'This value is not valid',
+            fields: {
+                edit_name: {
+                    message: 'The name is not valid',
                     validators: {
                         notEmpty: {
-                            message: '真实姓名不能为空'
+                            message: '名称不能为空'
                         },
                         stringLength: {
                             min: 2,
                             max: 30,
                             message: '最大长度为30个字符'
                         },
+                        // regexp: {
+                        //     regexp: /^[a-zA-Z0-9_\.]+$/,
+                        //     message: '只能是数字和字母_.'
+                        // }
                     }
                 },
-                email: {
-                    message: 'The email is not valid',
-                    validators: {
-                        emailAddress: {
-                            message: '请输入正确的邮件地址如：123@qq.com'
-                        }
-                    }
-                },
-                password:{
-                    message: 'The real_name is not valid',
+                edit_path: {
+                    message: 'The name is not valid',
                     validators: {
                         notEmpty: {
-                            message: '密码不能为空'
+                            message: '请上传图标'
                         },
                     }
                 }
@@ -274,70 +446,39 @@
         });
 
         $("#add-request").click(function () {
+            //验证数据
             $("#add-form").data('bootstrapValidator').validate();
-            if ($("#add-form").data('bootstrapValidator').isValid()) {
+            //获取数据
+            //数据提交
+            if($("#add-form").data('bootstrapValidator').isValid()) {
                 $.ajax({
-                    type:'post',
-                    url:'/?s=admin/member/create',
-                    data:$('#add-form').serialize(),
-                    success:function (data) {
-                        if(data.status == 0){
+                    type: 'post',
+                    url: '/?s=admin/index_menu/create',
+                    data: $('#add-form').serialize(),
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.status == 0) {
                             window.location.reload();
-                        }else{
+                        } else {
                             alert(data.msg);
                         }
                     }
                 });
             }
-            return false;
         });
-
-        $('#edit-modal').on('show.bs.modal', function (event) {
-            var id = $(event.relatedTarget).data('id');
-            var nickname = $(event.relatedTarget).data('nickname');
-            var username = $(event.relatedTarget).data('username');
-            $("#edit-request").data('id',id);
-            $("#edit-form").find('input[name="nickname"]').val(nickname);
-            $("#edit-form").find('.show_name').html(username);
-        });
-
-        $("#edit-form").bootstrapValidator({
-            excluded:[":disabled"],
-            live: 'disabled',
-            message: 'This value is not valid',
-            fields: {
-                nickname: {
-                    message: 'The name is not valid',
-                    validators: {
-                        notEmpty: {
-                            message: '昵称不能为空'
-                        },
-                        stringLength: {
-                            min: 2,
-                            max: 30,
-                            message: '最大长度为30个字符'
-                        },
-                        // regexp: {
-                        //     regexp: /^[a-zA-Z0-9_\.]+$/,
-                        //     message: '只能是数字和字母_.'
-                        // }
-                    }
-                },
-            }
-        });
-
-
         $("#edit-request").click(function () {
             //验证数据
-            //   $('#edit-form').bootstrapValidator('validate');
             $("#edit-form").data('bootstrapValidator').validate();
-            var id = $(this).data('id');
             //获取数据
+            var id = $(this).data('id');
+            if(id <= 0){
+                return ;
+            }
             //数据提交
             if ($("#edit-form").data('bootstrapValidator').isValid()) {
                 $.ajax({
                     type: 'post',
-                    url: '/?s=admin/member/edit&id=' + id,
+                    url: '/?s=admin/index_menu/edit&id='+id,
                     data: $('#edit-form').serialize(),
                     dataType: 'json',
                     success: function (data) {
@@ -351,6 +492,57 @@
             }
         });
 
+        $("#delete-request").click(function () {
+            //获取数据
+            var id = $(this).data('id');
+            if(id <= 0){
+                return ;
+            }
+            //数据提交
+            $.ajax({
+                type: 'post',
+                url: '/?s=admin/index_menu/delete&id='+id,
+                data: {},
+                dataType: 'json',
+                success: function (data) {
+                    if (data.status == 0) {
+                        window.location.reload();
+                    } else {
+                        alert(data.msg);
+                    }
+                }
+            });
+        });
+
+        $('input[name="tag"]').click(function () {
+           update();
+        });
+        $('input[name="edit_tag"]').click(function () {
+            update2();
+        });
+
+        var update = function () {
+            var value = $('input[name="tag"]:checked').val();
+            if(value == 1){
+                $('select[name="type"]').closest('.form-group').show();
+                $('select[name="flag"]').closest('.form-group').hide();
+            }else{
+                $('select[name="type"]').closest('.form-group').hide();
+                $('select[name="flag"]').closest('.form-group').show();
+            }
+        }
+
+        var update2 = function () {
+            var value = $('input[name="edit_tag"]:checked').val();
+            if(value == 1){
+                $('select[name="edit_type"]').closest('.form-group').show();
+                $('select[name="edit_flag"]').closest('.form-group').hide();
+            }else{
+                $('select[name="edit_type"]').closest('.form-group').hide();
+                $('select[name="edit_flag"]').closest('.form-group').show();
+            }
+        }
+        
     })
 
 
