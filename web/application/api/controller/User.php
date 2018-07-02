@@ -99,7 +99,7 @@ class User extends Base
         if ($result == true) {
             //更新
             if ($default == 1) {
-                (new MallReceiver())->save(['is_default' => 0],['user_id'=>$this->userId,'id'=>['in',$model->id]]);
+                (new MallReceiver())->save(['is_default' => 0],['user_id'=>$this->userId,'id'=>['not in',$model->id]]);
             }
 
             return ['status' => 0, 'data' => [], 'msg' => '添加成功'];
@@ -182,7 +182,7 @@ class User extends Base
         if ($result == true) {
             //更新
             if ($default == 1) {
-                (new MallReceiver())->save(['is_default' => 0],['user_id'=>$this->userId,'id'=>['in',$id]]);
+                (new MallReceiver())->save(['is_default' => 0],['user_id'=>$this->userId,'id'=>['not in',$id]]);
             }
             return ['status' => 0, 'data' => [], 'msg' => '修改成功'];
         }
