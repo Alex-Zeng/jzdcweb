@@ -102,7 +102,7 @@ class Goods  extends Base {
         ];
         $total = $model->where($where)->count();
 
-        $rows = $model->where($where)->order('id desc, bidding_show desc')->limit($start,$end)->field(['id','icon','title','w_price','min_price','max_price','discount','bidding_show'])->select();
+        $rows = $model->where($where)->order('id desc, bidding_show desc')->limit($start,$end)->field(['id','icon','title','w_price','min_price','max_price','w_price','discount','bidding_show'])->select();
         $list = [];
         foreach ($rows as $row){
             $list[] = [
@@ -110,7 +110,8 @@ class Goods  extends Base {
                 'title' => $row->title,
                 'url' => MallGoods::getFormatImg($row->icon),
                 'min_price' => getFormatPrice($row->min_price),
-                'max_price' => getFormatPrice($row->max_price)
+                'max_price' => getFormatPrice($row->max_price),
+                'w_price' => getFormatPrice($row->w_price)
             ];
         }
         return ['status'=>0,'data'=>['total'=>$total,'list'=>$list],'msg'=>''];
@@ -207,7 +208,8 @@ class Goods  extends Base {
                 $where['type'] = $categoryId;
             }
             $total = $model->where($where)->count();
-            $rows = $model->where($where)->order('w_price',$sort)->limit($start,$end)->field(['id','icon','title','w_price','min_price','max_price','discount','bidding_show'])->select();
+
+            $rows = $model->where($where)->order('w_price',$sort)->limit($start,$end)->field(['id','icon','title','w_price','min_price','max_price','w_price','discount','bidding_show'])->select();
         }else{ //供应商搜索
             $total =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where(['a.state'=>2,'a.mall_state'=>1])->where('b.real_name','like','%'.$keywords.'%')->count();
             $rows =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where(['a.state'=>2,'a.mall_state'=>1])->where('b.real_name','like','%'.$keywords.'%')->order('a.w_price',$sort)->field(['a.id','a.icon','a.title','a.w_price','a.min_price','a.max_price','a.discount','a.bidding_show'])->select();
@@ -219,7 +221,8 @@ class Goods  extends Base {
                 'title' => $row->title,
                 'url' => MallGoods::getFormatImg($row->icon),
                 'min_price' => getFormatPrice($row->min_price),
-                'max_price' => getFormatPrice($row->max_price)
+                'max_price' => getFormatPrice($row->max_price),
+                'w_price' => getFormatPrice($row->w_price)
             ];
         }
         //更新搜索历史
