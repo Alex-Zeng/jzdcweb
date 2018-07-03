@@ -97,6 +97,7 @@
     var url = '{:url("admin/type/index")}';
     $('a[href="'+url+'"]').addClass('active');
     $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
+  //  var imgTag = "<img width='100px' height='100px' src='"+data.data.preview+"' class='file-preview-image' alt='' title=''>";
     $("#edit-file").fileinput({
         language: 'zh', //设置语言
         uploadUrl: '?s=admin/file/upload',  //上传地址
@@ -115,8 +116,11 @@
             return obj;
         },
         initialPreview: [
-              "<img src='{$preview_path}' class='file-preview-image' alt='肖像图片' title='肖像图片'>",
+            "<img width='150px' height='150px' src='{$preview_path}' class='file-preview-image' alt='' title=''>"
         ],
+        previewSettings: {
+            image: {width: "200", height: "200"},
+        },
     });
     $('#edit-file').on("fileuploaded", function(event, data) {
         if(data.response){
