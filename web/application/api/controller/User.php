@@ -506,6 +506,7 @@ class User extends Base
 
         //保存数据
         $data = [
+            'write_time' => time(),
             'edit_time' => time(),
             'writer' => $this->userId,
             'editor' => $this->userId,
