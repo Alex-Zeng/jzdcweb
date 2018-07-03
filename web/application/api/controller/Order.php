@@ -136,7 +136,10 @@ class Order extends Base{
         $receiverRow = $receiverModel->where(['id'=>$receiverId])->find();
         $areaModel = new IndexArea();
         $areaList = $areaModel->getAreaInfo($receiverRow->area_id);
-        $areaInfo = $areaList ?  implode(' ',array_reverse(array_pop($areaList))) : '';
+        if($areaList){
+            array_pop($areaList);
+        }
+        $areaInfo = $areaList ?  implode(' ',array_reverse($areaList)) : '';
 
         $userModel = new IndexUser();
         $userInfo = $userModel->getInfoById($this->userId);
