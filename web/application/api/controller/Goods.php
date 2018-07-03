@@ -273,10 +273,12 @@ class Goods  extends Base {
         if($mallTypeRow && $mallTypeRow->color == 1){
             $colorRows =  $goodsSpecificationsModel->where(['goods_id'=>$row->id])->field(['color_id','color_name'])->group('color_id')->select();
             $colorList = $colorRows;
-            $standards[] = [
-               'title' =>'颜色',
-               'list' =>  $colorList
-            ];
+            if($colorList){
+                $standards[] = [
+                    'title' =>'颜色',
+                    'list' =>  $colorList
+                ];
+            }
         }
         if($mallTypeRow && $mallTypeRow->diy_option == 1){
             $optionRows =  $goodsSpecificationsModel->alias('a')->join(config('prefix').'mall_type_option b','a.option_id=b.id','left')->where(['a.goods_id'=>$row->id])->field(['a.option_id','b.name as option_name'])->group('a.option_id')->select();
@@ -312,7 +314,7 @@ class Goods  extends Base {
             'price' => getFormatPrice($row->w_price),
             'supplier' => $user ? $user->real_name : '', //供应商
             'supplierLogo' => '', //供应商logo
-            'standard' => $standards, //规格
+            'standard' => $standards ? $standards : [], //规格
             'standardPrice' => $standardsPrice,
             'imgList' => $imgList, //视图图片
             'detail' => getImgUrl($row->m_detail),
