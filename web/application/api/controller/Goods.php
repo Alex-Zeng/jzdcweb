@@ -283,10 +283,12 @@ class Goods  extends Base {
         if($mallTypeRow && $mallTypeRow->diy_option == 1){
             $optionRows =  $goodsSpecificationsModel->alias('a')->join(config('prefix').'mall_type_option b','a.option_id=b.id','left')->where(['a.goods_id'=>$row->id])->field(['a.option_id','b.name as option_name'])->group('a.option_id')->select();
             $optionName = $mallTypeRow->option_name ? $mallTypeRow->option_name : '自定义规格';
-            $standards[] = [
-                'title' => $optionName,
-                'list' =>  $optionRows
-            ];
+            if($optionRows){
+                $standards[] = [
+                    'title' => $optionName,
+                    'list' =>  $optionRows
+                ];
+            }
         }
 
         $standardsPriceRows = $goodsSpecificationsModel->where(['goods_id'=>$row->id])->field(['color_id','option_id','w_price'])->select();
