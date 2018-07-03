@@ -506,7 +506,6 @@ class User extends Base
 
         //保存数据
         $data = [
-            'write_time' => time(),
             'edit_time' => time(),
             'writer' => $this->userId,
             'editor' => $this->userId,
@@ -528,7 +527,8 @@ class User extends Base
 
         if ($row) { //再次提交审核
             $result = $model->save($data, ['id' => $row->id]);
-        } else { //首次提交审核
+        } else { //
+            $data['write_time'] = time();
             $result = $model->save($data);
         }
 
