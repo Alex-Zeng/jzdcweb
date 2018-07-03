@@ -79,13 +79,13 @@ class Goods extends Base{
             $state = $request->post('state',0,'intval');
             $standardArr =  [];
 
-
             //计算min_price,max_price
              $priceArr = [];
-             foreach ($standard as $arr){
-                 $priceArr[] = $arr['w_price'];
+             if($standard){
+                 foreach ($standard as $arr){
+                     $priceArr[] = $arr['w_price'];
+                 }
              }
-
 
             //添加商品
             $goodsModel = new MallGoods();

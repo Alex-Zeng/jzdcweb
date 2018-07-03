@@ -27,7 +27,7 @@ $(function () {
                     },
                 }
             },
-            file:{
+            path:{
                 message: '请上传图片',
                 validators: {
                     notEmpty: {
@@ -68,6 +68,9 @@ $(function () {
         if(data.response){
             $('#add-upload-file').val(data.response.data.filename);
         }
+    });
+    $('#add-file').on('filecleared', function(event) {
+        $('#add-upload-file').val('');
     });
 
     $("#add-form").bootstrapValidator({
@@ -145,7 +148,7 @@ $(function () {
                 $("#edit-form").find('select[name="status"]').val(data.data.status);
                 $("#edit-form").find('input[name="sequence"]').val(data.data.sequence);
                 $("#edit-upload-file").val(data.data.path);
-                var imgTag = "<img width='300px' height='300px' src='"+data.data.preview+"' class='file-preview-image' alt='' title=''>";
+                var imgTag = "<img width='250px' height='250px' src='"+data.data.preview+"' class='file-preview-image' alt='' title=''>";
                 //初始化图片
                 $("#edit-file").fileinput({
                     language: 'zh', //设置语言
@@ -172,10 +175,12 @@ $(function () {
                     }
                 });
                 $('#edit-file').on("fileuploaded", function(event, data) {
-                    if(data.response)
-                    {
+                    if(data.response) {
                         $('#edit-upload-file').val(data.response.data.filename);
                     }
+                });
+                $('#edit-file').on('filecleared', function(event) {
+                    $('#edit-upload-file').val('');
                 });
             }
         });
@@ -267,7 +272,5 @@ $(function () {
             }
         })
     });
-
-
 
 });

@@ -1010,7 +1010,10 @@ class User extends Base
             'contact' => $row->contact,
             'tel' => $row->tel ? $row->tel : '',
             'icon' => $row->icon ? $row->icon : '',
-            'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : ''
+            'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : '',
+            'phone' => $row->phone,
+            'email' => $row->email,
+            'username' => $row->username
         ];
 
         return ['status' => 0, 'data' => $return, 'msg' => ''];

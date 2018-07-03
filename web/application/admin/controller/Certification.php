@@ -27,9 +27,13 @@ class Certification extends Base{
         $model = new FormUserCert();
         $k = Request::instance()->get('k','');
         $type = Request::instance()->get('type','');
+        $status = Request::instance()->get('status',0,'intval');
         $where = [];
         if(isset($k) && $k){
             $where['a.company_name|a.legal_representative|a.contact_point'] = ['like','%'.$k.'%'];
+        }
+        if($status > 0){
+            $where['a.status'] = $status;
         }
         if(isset($type) && $type){
             $where['reg_role'] = $type;
@@ -40,6 +44,7 @@ class Certification extends Base{
 
         $this->assign('type',$type);
         $this->assign('k',$k);
+        $this->assign('status',$status);
         $this->assign('list',$rows);
         $this->assign('page',$rows->render());
         return $this->fetch();
