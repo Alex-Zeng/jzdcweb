@@ -256,12 +256,21 @@ class User extends Base
         $model = new MallFavorite();
         $field == 'time' ? ($field = 'a.' . $field) : ($field = 'b.w_price');
         $total = $model->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['user_id' => $this->userId])->count();
-        $rows = $model->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['user_id' => $this->userId])->order([$field => $sort])->field(['b.id', 'b.title', 'b.w_price', 'b.icon'])->limit($offset, $pageSize)->select();
+        $rows = $model->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['user_id' => $this->userId])->order([$field => $sort])->field(['b.id', 'b.title', 'b.w_price','b.min_price','b.max_price', 'b.icon'])->limit($offset, $pageSize)->select();
 
-        foreach ($rows as &$row) {
-            $row['icon'] = MallGoods::getFormatImg($row->icon);
+        $list = [];
+        foreach ($rows as $row){
+            $list[] = [
+                'id' => $row->id,
+                'title' => $row->title,
+                'icon' => MallGoods::getFormatImg($row->icon),
+                'min_price' => getFormatPrice($row->min_price),
+                'max_price' => getFormatPrice($row->max_price),
+                'w_price' => getFormatPrice($row->w_price)
+            ];
         }
-        return ['status' => 0, 'data' => ['total' => $total, 'list' => $rows], 'msg' => ''];
+
+        return ['status' => 0, 'data' => ['total' => $total, 'list' => $list], 'msg' => ''];
     }
 
     /**
@@ -1010,7 +1019,10 @@ class User extends Base
             'contact' => $row->contact,
             'tel' => $row->tel ? $row->tel : '',
             'icon' => $row->icon ? $row->icon : '',
-            'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : ''
+            'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : '',
+            'phone' => $row->phone,
+            'email' => $row->email,
+            'username' => $row->username
         ];
 
         return ['status' => 0, 'data' => $return, 'msg' => ''];
