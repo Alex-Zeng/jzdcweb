@@ -76,5 +76,29 @@ class Email extends Base{
         return ['status'=>1,'data'=>[],'msg'=>'邮件发送失败'];
     }
 
+    public function valid(Request $request){
+        $code = $request->post('code');
+        //发送邮件
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        $model = new IndexUser();
+        $userInfo = $model->getInfoById($this->userId);
+        if (!$userInfo) {
+            return ['status' => 1, 'data' => [], 'msg' => '数据异常'];
+        }
+        //验证邮箱
+        $codeModel = new EmailCode();
+        $codeRow = $codeModel->where(['email' => $userInfo->email, 'type' => EmailCode::TYPE_EMAIL_OLD])->order('id', 'desc')->find();
+        if (!$codeRow || $codeRow['code'] != $code) {
+            return ['status' => 1, 'data' => [], 'msg' => '邮箱验证码错误'];
+        }
+        if ($codeRow['expire_time'] < time()) {
+            return ['status' => 1, 'data' => [], 'msg' => '邮箱验证已过期'];
+        }
+        return ['status'=>0,'data'=>[],'msg'=>'验证成功'];
+    }
+
 
 }
