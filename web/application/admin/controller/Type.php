@@ -93,7 +93,7 @@ class Type extends Base{
                 'path' => $path
             ];
             $result = $model->save($data,['id'=>$id]);
-            if($result){
+            if($result !== false){
                 $this->redirect(url('admin/type/index'));
             }
         }

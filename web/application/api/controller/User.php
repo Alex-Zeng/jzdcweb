@@ -279,7 +279,7 @@ class User extends Base
         $field = ['id', 'area_id', 'detail', 'post_code', 'name', 'phone', 'tag', 'time', 'is_default'];
         $model = new MallReceiver();
         $areaModel = new IndexArea();
-        $rows = $model->where(['user_id' => $this->userId])->field($field)->select();
+        $rows = $model->where(['user_id' => $this->userId])->order(['is_default'=>'desc','id'=>'desc'])->field($field)->select();
         foreach ($rows as &$row) {
             $areaList = $areaModel->getAreaInfo($row->area_id);
             $areaIds = $areaModel->getAreaIds($row->area_id);
