@@ -27,12 +27,20 @@ class Order extends Base{
     public function index(){
         $k = Request::instance()->get('k','');
         $state = Request::instance()->get('state','');
+        $start = Request::instance()->get('start','');
+        $end = Request::instance()->get('end','');
         $model = new MallOrder();
         if(isset($k) && $k){
             $model->where('out_id|buyer','like','%'.$k.'%');
         }
         if(isset($state) && $state != ''){
             $model->where(['state' => $state]);
+        }
+        if(isset($start) && $start){
+            $model->where(['add_time'=>['gt',strtotime($start)]]);
+        }
+        if(isset($end) && $end){
+            $model->where(['add_time'=>['lt',strtotime($end.' 23:59:59')]]);
         }
 
         $rows = $model->order('id','desc')->paginate(10,false,['query'=>request()->param()]);
@@ -72,6 +80,8 @@ class Order extends Base{
 
         $this->assign('list',$rows);
         $this->assign('state',$state);
+        $this->assign('start',$start);
+        $this->assign('end',$end);
         $this->assign('k',$k);
         $this->assign('stateList',MallOrder::getStateList());
         $this->assign('page',$rows->render());
