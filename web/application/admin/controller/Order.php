@@ -26,14 +26,14 @@ class Order extends Base{
      */
     public function index(){
         $k = Request::instance()->get('k','','trim');
-        $state = Request::instance()->get('state','');
+        $state = Request::instance()->get('state','-1');
         $start = Request::instance()->get('start','');
         $end = Request::instance()->get('end','');
         $model = new MallOrder();
         if(isset($k) && $k){
             $model->where('out_id|buyer','like','%'.$k.'%');
         }
-        if(isset($state) && $state != ''){
+        if(isset($state) && $state >= 0){
             $model->where(['state' => $state]);
         }
         if(isset($start) && $start){
@@ -337,19 +337,48 @@ class Order extends Base{
         $objPHPExcel->setActiveSheetIndex(0);
         //设置表头
         $objPHPExcel->setActiveSheetIndex(0)
-            ->setCellValue('A1', 'ID')
+            ->setCellValue('A1', '创建时间')
             ->setCellValue('B1', '订单号')
             ->setCellValue('C1', '商品')
-            ->setCellValue('D1', '数量')
+            ->setCellValue('D1','状态')
             ->setCellValue('E1', '采购商')
-            ->setCellValue('F1', '供应商');
-
+            ->setCellValue('F1', '供应商')
+            ->setCellValue('G1', '合同编号')
+            ->setCellValue('H1','总价')
+            ->setCellValue('I1','数量')
+            ->setCellValue('J1','买家留言')
+            ->setCellValue('K1','账期截止日');
         //查询数据
+        $model = new MallOrder();
+        $total = $model->where([])->count();
+        $pageSize = 100;
+        $page = ceil($total/$pageSize);
+
+        $counter = 2;
+        for($i =0; $i < $page; $i++){
+            $start = $page*$i;
+            $rows = $model->where([])->limit($start,$pageSize)->order('add_time','desc')->select();
+            foreach ($rows as $row){
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('A'.$counter, date('Y-m-d H:i:s',$row->add_time));
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('B'.$counter, $row->out_id);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('C'.$counter, $row->goods_names);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('D'.$counter, $row->buyer_id);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('E'.$counter, $row->supplier);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('F'.$counter, $row->contract_number);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('H'.$counter, $row->sum_money);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('I'.$counter, $row->goods_count);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('J'.$counter, $row->buyer_comment);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('K'.$counter, $row->pay_date);
+                $counter++;
+            }
+        }
+
+
+
 
 
         $filename = '商品订单信息'.date('Ymd',time()).'.xls';
         $objPHPExcel->getActiveSheet()->setTitle('商品订单信息');
-
 
         header("Content-Type: application/force-download");
         header("Content-Type: application/octet-stream");

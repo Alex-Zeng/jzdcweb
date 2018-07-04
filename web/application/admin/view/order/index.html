@@ -44,7 +44,7 @@
                             <form class="form-inline ml-3" action="{:url()}"  method="get">
                                 <div class="input-group">
                                     <select class="form-control" name="state"  placeholder="订单状态">
-                                        <option value="" {if $state eq ""}selected{/if}>全部</option>
+                                        <option value="-1" {if $state eq -1}selected{/if}>全部</option>
                                         {foreach name="stateList"  key="sk" item='sv'}
                                         <option  {if $state eq $sk}selected{/if} value="{$sk}">{$sv}</option>
                                         {/foreach}
