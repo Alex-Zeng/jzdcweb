@@ -25,7 +25,7 @@ class Order extends Base{
      * @return mixed
      */
     public function index(){
-        $k = Request::instance()->get('k','');
+        $k = Request::instance()->get('k','','trim');
         $state = Request::instance()->get('state','');
         $start = Request::instance()->get('start','');
         $end = Request::instance()->get('end','');
