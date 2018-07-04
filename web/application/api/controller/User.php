@@ -925,7 +925,7 @@ class User extends Base
             return ['status' => 1, 'data' => [], 'msg' => '邮箱验证已过期'];
         }
 
-        $codeRow = $codeModel->where(['email' => $email, 'type' => EmailCode::TYPE_MAIL_NEW])->order('id', 'desc')->find();
+        $codeRow = $codeModel->where(['email' => $email, 'type' => EmailCode::TYPE_EMAIL_NEW])->order('id', 'desc')->find();
         if (!$codeRow || $codeRow['code'] != $code) {
             return ['status' => 1, 'data' => [], 'msg' => '邮箱验证码错误'];
         }
