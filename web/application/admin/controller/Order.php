@@ -173,7 +173,7 @@ class Order extends Base{
      * @return array
      */
     public function remittance(Request $request,$id){
-          $payType = $request->post('type',1);
+          $payType = $request->post('pay_type',1);
           $number = $request->post('number','');
           $payTime = $request->post('pay_time','');
           $picture = $request->post('path','');

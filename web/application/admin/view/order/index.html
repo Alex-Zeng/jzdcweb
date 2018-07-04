@@ -123,7 +123,7 @@
                                         </p>
                                         <p>支付至供应商:
                                             {if $order.supplierPayInfo}
-                                                {foreach name="$order.buyerPayInfo" id="supplierInfo"}
+                                                {foreach name="$order.supplierPayInfo" id="supplierInfo"}
                                                      {$supplierInfo.pay_type == 3 ? '转账' : '汇款'},{$supplierInfo.number},
                                                      {$supplierInfo.pay_type == 4 ? '支付日期:'.substr($supplierInfo.pay_time,0,10): '汇款日期:'.substr($supplierInfo.accept_time,0,10)}
                                                      <a target="_blank" href="{$supplierInfo.picture}">【回执照片】</a>
@@ -161,7 +161,7 @@
                                     {elseif $order.state == 10}<!-- 逾期中-->
                                     <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-primary" data-tag="3" data-toggle="modal" data-target="#remittance-modal">收款</a>
                                     {elseif $order.state == 11}<!-- 转账-->
-                                    <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-primary">转账</a>
+                                    <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#transfer-modal">转账</a>
                                     {elseif $order.state == 12}<!-- 交易完成-->
 
                                     {/if}
@@ -284,8 +284,8 @@
                                 <div class="form-group form-inline">
                                     <label  class="col-md-4">打款类型</label>
                                     <select class="form-control col-md-5" name="pay_type">
-                                        <option  value="3">转账</option>
-                                        <option  value="4">汇款</option>
+                                        <option  value="1">转账</option>
+                                        <option  value="2">汇款</option>
                                     </select>
                                 </div>
                                 <div class="form-group form-inline">
@@ -341,8 +341,59 @@
         </div>
     </div>
 </div>
+<!--待采购商打款-->
+<div class="modal fade" id="transfer-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">转账供应商</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form role="form" class="" id="transfer-form">
+                                <div class="form-group form-inline">
+                                    <label  class="col-md-3 no-padding">打款类型</label>
+                                    <select class="form-control col-md-5" name="pay_type">
+                                        <option  value="3">转账</option>
+                                        <option  value="4">汇款</option>
+                                    </select>
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 no-padding">流水号/票号</label>
+                                    <input type="text" class="form-control col-md-5" name="number" placeholder="">
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 no-padding">到账/承兑时间</label>
+                                    <input type="date" class="form-control" name="pay_time" placeholder="">
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 no-padding">回执图片</label>
+                                    <div class="col-md-8 no-padding">
+                                        <input id="transfer-file" name="file" type="file" data-show-caption="true">
+                                        <input  type="hidden" name="path" id="transfer-upload-file"  value="" />
+                                        <p class="help-block2">支持jpg、jpeg、png格式，大小不超过5M</p>
+                                    </div>
+                                </div>
+                                <input type="hidden" class="form-control" name="tag" placeholder="">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-id="" id="transfer-request">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-{include file="layout/footer" title="$title" keywords="开源WEB开发框架" /}
+{include file="layout/footer" title="$title" keywords="" /}
 <script src="__STATIC__/js/plugins/bootstrap-fileinput/js/fileinput.js" type="text/javascript"></script>
 <script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
 <script type="text/javascript">
@@ -522,7 +573,7 @@
                 message: 'The pay_date is not valid',
                 validators: {
                     notEmpty: {
-                        message: '回执图片不能为空'
+                        message: '到账/承兑时间不能为空'
                     },
                     date: {
                         format: 'YYYY/MM/DD',
@@ -604,18 +655,100 @@
             }
         })
     });
-    $(".sort").blur(function () {
-        var id =$(this).closest('tr').attr('id');
-        var value = $(this).val();
-        $.ajax({
-            type:'post',
-            url:'?s=admin/type/sequence',
-            data:{id:id,value:value},
-            dataType:'json',
-            success:function (data) {
-
+    //转账
+    $('#transfer-modal').on('show.bs.modal', function (event) {
+        var id = $(event.relatedTarget).data('id');
+        var tag = $(event.relatedTarget).data('tag');
+        $("#transfer-request").data('id',id);
+        $("#transfer-form").find("input[name=\"tag\"]").val(tag)
+        $("#transfer-file").fileinput({
+            language: 'zh', //设置语言
+            uploadUrl: '?s=admin/file/upload',  //上传地址
+            showUpload: true, //是否显示上传按钮
+            showRemove: true,
+            dropZoneEnabled: false,
+            showCaption: true,//是否显示标题
+            allowedPreviewTypes: ['image'],
+            allowedFileTypes: ['image'],
+            allowedFileExtensions: ['jpg', 'png','jpeg'],
+            maxFileSize: 5120,
+            maxFileCount: 1,
+            maxImageWidth: '1920',
+            maxImageHeight: '1000',
+            uploadExtraData: function (previewId, index) {   //额外参数的关键点
+                var obj = {};
+                obj.type = 'order';
+                return obj;
             }
-        })
+        }).on("fileuploaded", function(event, data) {
+            if(data.response){
+                //  alert(data.response.data.filename);
+                $('#transfer-upload-file').val(data.response.data.filename);
+                $('#transfer-upload-file').closest('.form-group').removeClass('has-error');
+                $('#transfer-upload-file').closest('.form-group').find('.help-block').html('');
+            }
+        });
+        $("#transfer-file").on('fileclear',function(event, id){
+            $('#transfer-upload-file').val('');
+        });
     });
-
+    $("#transfer-form").bootstrapValidator({
+        excluded:[":disabled"],
+        live: 'disabled',
+        message: 'This value is not valid',
+        fields: {
+            number: {
+                message: 'The name is not valid',
+                validators: {
+                    notEmpty: {
+                        message: '流水/票号不能为空'
+                    },
+                }
+            },
+            path: {
+                message: 'The name is not valid',
+                validators: {
+                    notEmpty: {
+                        message: '回执图片不能为空'
+                    },
+                }
+            },
+            pay_time:{
+                message: 'The pay_date is not valid',
+                validators: {
+                    notEmpty: {
+                        message: '到账/承兑时间不能为空'
+                    },
+                    date: {
+                        format: 'YYYY/MM/DD',
+                        message: '日期格式不正确'
+                    }
+                }
+            }
+        }
+    });
+    $("#transfer-request").click(function () {
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        $("#transfer-form").data('bootstrapValidator').validate();
+        if($("#transfer-form").data('bootstrapValidator').isValid()) {
+            if (confirm('确认要提交？')) {
+                $.ajax({
+                    type: 'post',
+                    url: '?s=admin/order/remittance&id=' + id,
+                    data: $('#transfer-form').serialize(),
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.status == 0) {
+                            window.location.reload();
+                        } else {
+                            alert(data.msg);
+                        }
+                    }
+                })
+            }
+        }
+    });
 </script>
