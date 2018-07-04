@@ -54,7 +54,6 @@ class User extends Base
         $phone = $request->post('phone', '');
         $tag = $request->post('tag', '');
         $default = $request->post('is_default', 0, 'intval');
-        print_r($default); exit;
         if (!checkPhone($phone)) {
             return ['status' => 1, 'data' => [], 'msg' => '手机号格式不正确'];
         }
@@ -109,7 +108,7 @@ class User extends Base
 
     /**
      * @desc 设置默认地址
-     * @return array|void
+     * @return array
      */
     public function setDefaultAddress(Request $request)
     {
@@ -578,14 +577,14 @@ class User extends Base
             'legalIdentityCard' => $row->legal_identity_card ? $row->legal_identity_card : '',
             'agentIdentityCard' => $row->legal_identity_card ? $row->agent_identity_card : '',
             'orgStructureCode' => $row->org_structure_code_permits ? $row->org_structure_code_permits : '',
-            'taxRegistrationCertPath' => $row->tax_registration_cert ? $row->tax_registration_cert : '',
+            'taxRegistrationCert' => $row->tax_registration_cert ? $row->tax_registration_cert : '',
             'attorney' => $row->power_attorney ? $row->power_attorney : '',
             'businessPath' => $row->business_license ? FormUserCert::getFormatImg($row->business_license) : '',
             'permitsAccountPath' => $row->permits_accounts ? FormUserCert::getFormatImg($row->permits_accounts) : '',
             'legalIdentityCardPath' => $row->legal_identity_card ? FormUserCert::getFormatImg($row->legal_identity_card) : '',
             'agentIdentityCardPath' => $row->legal_identity_card ? FormUserCert::getFormatImg($row->agent_identity_card) : '',
             'orgStructureCodePath' => $row->org_structure_code_permits ? FormUserCert::getFormatImg($row->org_structure_code_permits) : '',
-            'taxRegistrationCert' => $row->tax_registration_cert ? FormUserCert::getFormatImg($row->tax_registration_cert) : '',
+            'taxRegistrationCertPath' => $row->tax_registration_cert ? FormUserCert::getFormatImg($row->tax_registration_cert) : '',
             'attorneyPath' => $row->power_attorney ? FormUserCert::getFormatImg($row->power_attorney) : '',
             'refuseReason' => $row->refuse_reason
         ];
