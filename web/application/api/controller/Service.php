@@ -61,6 +61,14 @@ class Service extends Base{
         ];
         $result = $model->save($data);
         if($result == true){
+            //发送邮件通知
+            $email = 'liangjiahui@jizhongdiancai.com';
+            $subject='集众电采服务预约';
+            $content='您好，当前有新的服务预约申请，请及时跟进处理。';
+            $result = SendMail($email,$subject,$content);
+//            if($result == true){
+//                return ['status'=>0,'data'=>[],'msg'=>'邮件发送成功'];
+//            }
             return ['status'=>0, 'data'=>[],'msg'=>'添加成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'添加失败'];
