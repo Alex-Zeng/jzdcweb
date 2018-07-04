@@ -256,12 +256,21 @@ class User extends Base
         $model = new MallFavorite();
         $field == 'time' ? ($field = 'a.' . $field) : ($field = 'b.w_price');
         $total = $model->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['user_id' => $this->userId])->count();
-        $rows = $model->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['user_id' => $this->userId])->order([$field => $sort])->field(['b.id', 'b.title', 'b.w_price', 'b.icon'])->limit($offset, $pageSize)->select();
+        $rows = $model->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['user_id' => $this->userId])->order([$field => $sort])->field(['b.id', 'b.title', 'b.w_price','b.min_price','b.max_price', 'b.icon'])->limit($offset, $pageSize)->select();
 
-        foreach ($rows as &$row) {
-            $row['icon'] = MallGoods::getFormatImg($row->icon);
+        $list = [];
+        foreach ($rows as $row){
+            $list[] = [
+                'id' => $row->id,
+                'title' => $row->title,
+                'icon' => MallGoods::getFormatImg($row->icon),
+                'min_price' => getFormatPrice($row->min_price),
+                'max_price' => getFormatPrice($row->max_price),
+                'w_price' => getFormatPrice($row->w_price)
+            ];
         }
-        return ['status' => 0, 'data' => ['total' => $total, 'list' => $rows], 'msg' => ''];
+
+        return ['status' => 0, 'data' => ['total' => $total, 'list' => $list], 'msg' => ''];
     }
 
     /**
@@ -279,7 +288,7 @@ class User extends Base
         $field = ['id', 'area_id', 'detail', 'post_code', 'name', 'phone', 'tag', 'time', 'is_default'];
         $model = new MallReceiver();
         $areaModel = new IndexArea();
-        $rows = $model->where(['user_id' => $this->userId])->field($field)->select();
+        $rows = $model->where(['user_id' => $this->userId])->order(['is_default'=>'desc','id'=>'desc'])->field($field)->select();
         foreach ($rows as &$row) {
             $areaList = $areaModel->getAreaInfo($row->area_id);
             $areaIds = $areaModel->getAreaIds($row->area_id);
@@ -527,7 +536,8 @@ class User extends Base
 
         if ($row) { //再次提交审核
             $result = $model->save($data, ['id' => $row->id]);
-        } else { //首次提交审核
+        } else { //
+            $data['write_time'] = time();
             $result = $model->save($data);
         }
 
@@ -776,9 +786,17 @@ class User extends Base
         if (!$password || !$confirmPassword) {
             return ['status' => 1, 'data' => [], 'msg' => '密码不能设置为空'];
         }
+
+        if (!checkPassword($password) || !checkPassword($confirmPassword)){
+            return ['status'=>1,'data'=>[],'msg'=>'密码必须为4-20位的数字和字母组合'];
+        }
+
         if ($password != $confirmPassword) {
             return ['status' => 1, 'data' => [], 'msg' => '两次密码不一致'];
         }
+
+
+
 
         $model = new IndexUser();
 
@@ -801,6 +819,10 @@ class User extends Base
         }
         if (!$password || !$newPassword) {
             return ['status' => 1, 'data' => [], 'msg' => '密码不能设置为空'];
+        }
+
+        if (!checkPassword($newPassword)){
+            return ['status'=>1,'data'=>[],'msg'=>'密码必须为4-20位的数字和字母组合'];
         }
 
         $model = new IndexUser();
@@ -903,7 +925,7 @@ class User extends Base
             return ['status' => 1, 'data' => [], 'msg' => '邮箱验证已过期'];
         }
 
-        $codeRow = $codeModel->where(['email' => $email, 'type' => EmailCode::TYPE_MAIL_NEW])->order('id', 'desc')->find();
+        $codeRow = $codeModel->where(['email' => $email, 'type' => EmailCode::TYPE_EMAIL_NEW])->order('id', 'desc')->find();
         if (!$codeRow || $codeRow['code'] != $code) {
             return ['status' => 1, 'data' => [], 'msg' => '邮箱验证码错误'];
         }
@@ -997,7 +1019,10 @@ class User extends Base
             'contact' => $row->contact,
             'tel' => $row->tel ? $row->tel : '',
             'icon' => $row->icon ? $row->icon : '',
-            'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : ''
+            'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : '',
+            'phone' => $row->phone,
+            'email' => $row->email,
+            'username' => $row->username
         ];
 
         return ['status' => 0, 'data' => $return, 'msg' => ''];

@@ -27,14 +27,16 @@ class Goods  extends Base {
      */
     public function getCategory(){
         $model = new MenuMenu();
-        $rows = $model->where(['parent_id'=>16,'visible'=>1])->order('sequence','desc')->field(['id','name','url','path'])->select();
+        $rows = $model->where(['parent_id'=>16,'visible'=>1])->order('sequence','desc')->field(['id','name','url','path','type_id','flag'])->select();
         $data = [];
         foreach($rows as $row){
             $data[] = [
                 'id' => $row->id,
                 'name' => $row->name,
                 'url' => $row->url,
-                'img' => MenuMenu::getFormatImg($row->path)
+                'img' => MenuMenu::getFormatImg($row->path),
+                'type' => $row->type_id,
+                'flag' => $row->flag
             ];
         }
         return ['status'=>0,'data'=>$data,'msg'=>''];
@@ -100,16 +102,16 @@ class Goods  extends Base {
         ];
         $total = $model->where($where)->count();
 
-        $rows = $model->where($where)->order('id desc, bidding_show desc')->limit($start,$end)->field(['id','icon','title','w_price','min_price','max_price','discount','bidding_show'])->select();
+        $rows = $model->where($where)->order('id desc, bidding_show desc')->limit($start,$end)->field(['id','icon','title','w_price','min_price','max_price','w_price','discount','bidding_show'])->select();
         $list = [];
-        //'id':41,'title':'办公室专用打印纸','url':'http://127.0.0.1/program/mall/img_thumb/2018_05/15/1526377338_0_3947.gif','min_price':'0.00','max_price':'0.00'
         foreach ($rows as $row){
             $list[] = [
                 'id' => $row->id,
                 'title' => $row->title,
                 'url' => MallGoods::getFormatImg($row->icon),
                 'min_price' => getFormatPrice($row->min_price),
-                'max_price' => getFormatPrice($row->max_price)
+                'max_price' => getFormatPrice($row->max_price),
+                'w_price' => getFormatPrice($row->w_price)
             ];
         }
         return ['status'=>0,'data'=>['total'=>$total,'list'=>$list],'msg'=>''];
@@ -206,7 +208,8 @@ class Goods  extends Base {
                 $where['type'] = $categoryId;
             }
             $total = $model->where($where)->count();
-            $rows = $model->where($where)->order('w_price',$sort)->limit($start,$end)->field(['id','icon','title','w_price','min_price','max_price','discount','bidding_show'])->select();
+
+            $rows = $model->where($where)->order('w_price',$sort)->limit($start,$end)->field(['id','icon','title','w_price','min_price','max_price','w_price','discount','bidding_show'])->select();
         }else{ //供应商搜索
             $total =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where(['a.state'=>2,'a.mall_state'=>1])->where('b.real_name','like','%'.$keywords.'%')->count();
             $rows =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where(['a.state'=>2,'a.mall_state'=>1])->where('b.real_name','like','%'.$keywords.'%')->order('a.w_price',$sort)->field(['a.id','a.icon','a.title','a.w_price','a.min_price','a.max_price','a.discount','a.bidding_show'])->select();
@@ -218,7 +221,8 @@ class Goods  extends Base {
                 'title' => $row->title,
                 'url' => MallGoods::getFormatImg($row->icon),
                 'min_price' => getFormatPrice($row->min_price),
-                'max_price' => getFormatPrice($row->max_price)
+                'max_price' => getFormatPrice($row->max_price),
+                'w_price' => getFormatPrice($row->w_price)
             ];
         }
         //更新搜索历史
@@ -269,18 +273,22 @@ class Goods  extends Base {
         if($mallTypeRow && $mallTypeRow->color == 1){
             $colorRows =  $goodsSpecificationsModel->where(['goods_id'=>$row->id])->field(['color_id','color_name'])->group('color_id')->select();
             $colorList = $colorRows;
-            $standards[] = [
-               'title' =>'颜色',
-               'list' =>  $colorList
-            ];
+            if($colorList){
+                $standards[] = [
+                    'title' =>'颜色',
+                    'list' =>  $colorList
+                ];
+            }
         }
         if($mallTypeRow && $mallTypeRow->diy_option == 1){
             $optionRows =  $goodsSpecificationsModel->alias('a')->join(config('prefix').'mall_type_option b','a.option_id=b.id','left')->where(['a.goods_id'=>$row->id])->field(['a.option_id','b.name as option_name'])->group('a.option_id')->select();
             $optionName = $mallTypeRow->option_name ? $mallTypeRow->option_name : '自定义规格';
-            $standards[] = [
-                'title' => $optionName,
-                'list' =>  $optionRows
-            ];
+            if($optionRows){
+                $standards[] = [
+                    'title' => $optionName,
+                    'list' =>  $optionRows
+                ];
+            }
         }
 
         $standardsPriceRows = $goodsSpecificationsModel->where(['goods_id'=>$row->id])->field(['color_id','option_id','w_price'])->select();
@@ -308,7 +316,7 @@ class Goods  extends Base {
             'price' => getFormatPrice($row->w_price),
             'supplier' => $user ? $user->real_name : '', //供应商
             'supplierLogo' => '', //供应商logo
-            'standard' => $standards, //规格
+            'standard' => $standards ? $standards : [], //规格
             'standardPrice' => $standardsPrice,
             'imgList' => $imgList, //视图图片
             'detail' => getImgUrl($row->m_detail),

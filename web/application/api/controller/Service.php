@@ -22,9 +22,13 @@ class Service extends Base{
         $comment = $request->post('comment','');
         $sex = $request->post('sex','');
         $name = $request->post('name','');
+        $type = $request->post('type',0,'intval');
 
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
+        }
+        if(!checkPhone($phone)){
+            return ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
         }
 
         if(!$name){
@@ -39,6 +43,12 @@ class Service extends Base{
         $userId = $this->userId;
 
         $model = new FormFinService();
+        //判断
+        $exist = $model->where(['phone'=>$phone,'type'=>$type])->find();
+        if($exist){
+            return ['status'=>1,'data'=>[],'msg'=>'该手机号已经提交'];
+        }
+
         $data = [
             'write_time' => time(),
             'writer' => $userId,
@@ -46,10 +56,20 @@ class Service extends Base{
             'name' => $name,
             'sex' => $sex,
             'phone' => $phone,
-            'comment' => $comment
+            'comment' => $comment,
+            'type' => $type
         ];
         $result = $model->save($data);
         if($result == true){
+            //发送邮件通知
+            $email = 'liangjiahui@jizhongdiancai.com';
+            $email = 'songanwei@jizhongdiancai.com';
+            $subject='集众电采服务预约';
+            $content='您好，当前有新的服务预约申请，请及时跟进处理。';
+            $result = SendMail($email,$subject,$content);
+//            if($result == true){
+//                return ['status'=>0,'data'=>[],'msg'=>'邮件发送成功'];
+//            }
             return ['status'=>0, 'data'=>[],'msg'=>'添加成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'添加失败'];

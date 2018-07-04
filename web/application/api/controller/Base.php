@@ -9,6 +9,7 @@ namespace app\api\controller;
 
 use app\common\model\IndexUser;
 use Firebase\JWT\JWT;
+use think\Exception;
 use think\Request;
 
 class Base
@@ -80,7 +81,12 @@ class Base
         }
         //解析token
         $key = config('jzdc_token_key');
-        $data = JWT::decode($token,$key,['HS256']);
+        try {
+            $data = JWT::decode($token, $key, ['HS256']);
+        }catch (Exception $e){
+
+        }
+
         //
         if(!$data->id  || !$data->group || !$data->time || !$data->expire ){
             return;

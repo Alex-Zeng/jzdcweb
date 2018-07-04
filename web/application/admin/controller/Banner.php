@@ -49,7 +49,12 @@ class Banner extends Base {
         $sequence = $request->post('sequence',0);
         $status = $request->post('status',1);
         //验证数据
-
+        if(!$title){
+            return ['status'=>1,'data'=>'','msg'=>'标题必能为空'];
+        }
+        if(!$path){
+            return ['status'=>1,'data'=>'','msg'=>'图片必须上传'];
+        }
         //保存数据
         $model = new SliderImg();
         $data = ['group_id'=>27,'name'=>$title,'url'=>$link,'type'=>$type,'target'=>$target,'sequence'=>$sequence,'status'=>$status,'path'=>$path];
@@ -74,6 +79,13 @@ class Banner extends Base {
         $sequence = $request->post('sequence',0);
         $status = $request->post('status',1);
         //验证数据
+        if(!$title){
+            return ['status'=>1,'data'=>'','msg'=>'标题必能为空'];
+        }
+        if(!$path){
+            return ['status'=>1,'data'=>'','msg'=>'图片必须上传'];
+        }
+
 
         //保存数据
         $model = new SliderImg();
