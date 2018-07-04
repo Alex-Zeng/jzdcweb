@@ -297,7 +297,7 @@ return [
 
     ////////////////////////邮件配置//////////////////////////////////////
     'JZDC_MAIL_ADDRESS' => '',
-    'JZDC_MAIL_SMTP' => 'smtp.163.com',
-    'JZDC_MAIL_LOGINNAME' => 'xxxxxxxx',
-    'JZDC_MAIL_PASSWORD' => 'xxxxxxxx',
+    'JZDC_MAIL_SMTP' => 'smtp.exmail.qq.com',
+    'JZDC_MAIL_LOGINNAME' => 'jzdc@jizhongdiancai.com',
+    'JZDC_MAIL_PASSWORD' => '44339674abAB',
 ];
