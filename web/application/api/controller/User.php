@@ -378,7 +378,6 @@ class User extends Base
         $model = new OrderMsg();
         $total = $model->where(['user_id' => $this->userId, 'is_delete' => 0])->order('create_time', 'desc')->count();
         $rows = $model->where(['user_id' => $this->userId, 'is_delete' => 0])->order('create_time', 'desc')->field(['id', 'title', 'content', 'order_no', 'create_time'])->limit($start, $pageSize)->select();
-//        dump($start);exit;
         $data = [];
         foreach ($rows as &$row) {
             $orderModel = new MallOrder();
@@ -496,7 +495,7 @@ class User extends Base
             return ['status' => 1, 'data' => [], 'msg' => '法人身份证必须上传'];
         }
 
-        if ($agent == 2) {
+        if ($agent == 1) {
             if (!$agentIdentityCard) {
                 return ['status' => 1, 'data' => [], 'msg' => '代理人身份证必须上传'];
             }
@@ -512,6 +511,10 @@ class User extends Base
 
         $model = new FormUserCert();
         $row = $model->where(['writer' => $this->userId])->order('id', 'desc')->find();
+
+        if($row->status == 1) {
+            return ['status' => 0, 'data' => [], 'msg' => '已提交审核，请勿重复提交...'];
+        }
 
         //保存数据
         $data = [
