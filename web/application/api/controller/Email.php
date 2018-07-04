@@ -63,7 +63,7 @@ class Email extends Base{
         //写入数据库
         $codeModel = new EmailCode();
         $time = time();
-        $result = $codeModel->save(['email'=>$email,'type'=>$type,'create_time'=>$time,'expire_time'=>$time+300]);
+        $result = $codeModel->save(['email'=>$email,'type'=>$type,'code'=>$code,'create_time'=>$time,'expire_time'=>$time+300]);
         if($result == true){
             //发送邮件
             $subject='集众电采邮箱验证码';
