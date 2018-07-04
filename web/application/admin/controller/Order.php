@@ -85,9 +85,7 @@ class Order extends Base{
      * @return array
      */
     public function  pricing(Request $request,$id){
-       // contract_number
-        //pay_date
-        //sum_money    received_money  goods_money
+        $contract_type = $request->post('contract_type',0,'intval');
         $contractNumber = $request->post('contract_number','');
         $payDate = $request->post('pay_date','');
         $sumMoney = $request->post('sum_money',0);
@@ -96,25 +94,34 @@ class Order extends Base{
         if(!$row || $row->state != MallOrder::STATE_PRICING){
             return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
         }
-        //有账期 =》 待发货，没账期 => 待采购商打款
-        $data = ['contract_number'=>$contractNumber,'pay_date'=>$payDate,'sum_money'=>$sumMoney,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
-        $result = $model->save($data,['id'=>$id]);
-        if($result == true){
-            if($payDate){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
-                  $userModel = new IndexUser();
-                  $user = $userModel->getInfoById($row->supplier);
-                  $yunpian = new Yunpian();
-                 // $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
+        if($contract_type == 2){
+            //有账期 =》 待发货，没账期 => 待采购商打款
+            $data = ['contract_number'=>$contractNumber,'pay_date'=>$payDate,'sum_money'=>$sumMoney,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
+            $result = $model->save($data,['id'=>$id]);
+            if($result == true){
+                if($payDate){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
+                    $userModel = new IndexUser();
+                    $user = $userModel->getInfoById($row->supplier);
+                    $yunpian = new Yunpian();
+                    $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
 
-                //更新消息通知
-                $orderMsgModel = new OrderMsg();
-                $content = "您好，订单号：{$row->out_id}现可安排发货，发货完成后，请在\"用户中心-待发货\"发布物流信息，谢谢。";
-                $msgData = ['title'=>"待发货",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
-                $orderMsgModel->save($msgData);
-                $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+                    //更新消息通知
+                    $orderMsgModel = new OrderMsg();
+                    $content = "您好，订单号：{$row->out_id}现可安排发货，发货完成后，请在\"用户中心-待发货\"发布物流信息，谢谢。";
+                    $msgData = ['title'=>"待发货",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+                    $orderMsgModel->save($msgData);
+                    $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+                }
+                return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
             }
-            return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
+        }else{ //待签约
+            $data = ['sum_money'=>$sumMoney,'state'=>MallOrder::STATE_SIGN];
+            $result = $model->save($data,['id'=>$id]);
+            if($result == true){
+                return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
+            }
         }
+
         return ['status'=>1,'data'=>[],'msg'=>'失败核价'];
     }
 
@@ -129,18 +136,22 @@ class Order extends Base{
         $payDate = $request->post('pay_date','');
         $model = new MallOrder();
         $row = $model->where(['id'=>$id])->find();
-        if(!$row || $row->state != MallOrder::STATE_PRICING){
+        if(!$row || $row->state != MallOrder::STATE_SIGN){
             return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
         }
+
         //有账期 =》 待发货，没账期 => 待采购商打款
-        $data = ['contract_number'=>$contractNumber,'pay_date'=>$payDate,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
+        $data = ['contract_number'=>$contractNumber,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
+        if($payDate){
+            $data['pay_date'] = $payDate;
+        }
         $result = $model->save($data,['id'=>$id]);
         if($result == true){
             if($payDate){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
                 $userModel = new IndexUser();
                 $user = $userModel->getInfoById($row->supplier);
                 $yunpian = new Yunpian();
-                // $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
+                $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
 
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();
@@ -162,7 +173,6 @@ class Order extends Base{
      * @return array
      */
     public function remittance(Request $request,$id){
-          $tag = $request->post('tag',1);
           $payType = $request->post('type',1);
           $number = $request->post('number','');
           $payTime = $request->post('pay_time','');
@@ -171,7 +181,7 @@ class Order extends Base{
 
         $model = new MallOrder();
         $row = $model->where(['id'=>$id])->find();
-        if(!$row || $row->state != MallOrder::STATE_PRICING){
+        if(!$row || $row->state == MallOrder::STATE_PRICING){
             return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
         }
 
@@ -202,7 +212,7 @@ class Order extends Base{
             if($flag == 1){
                 $user = $userModel->getInfoById($row->supplier);
                 $yunpian = new Yunpian();
-                // $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
+                $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
 
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();

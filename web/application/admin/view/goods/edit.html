@@ -234,6 +234,9 @@
 <script src="__STATIC__/js/plugins/kindeditor/lang/zh-CN.js"></script>
 
 <script type="text/javascript">
+    var url = '{:url("admin/goods/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+    $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
     function validateSubmit(){
         if ($("#edit-form").data('bootstrapValidator').isValid()) {
             return true;
