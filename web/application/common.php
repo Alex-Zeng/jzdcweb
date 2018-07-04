@@ -80,7 +80,8 @@ function checkPassword($password){
  * @return string
  */
 function getOrderOutId($number = 0){
-    return date('YmdHis').$number.rand(10,100);
+    return uniqid();
+    //return date('YmdHis').$number.rand(10,100);
 }
 
 /**

@@ -218,3 +218,14 @@ function getColorList(){
     }
     return $rows;
 }
+
+function getServiceList($type = -1){
+    $list = [
+        1 => '保险',
+        2 => '法务',
+        3 => '金融',
+        4 => '售后',
+        5 => '知识产权',
+        6 => '自动'
+    ];return isset($list[$type]) ? $list[$type] : '';
+}
