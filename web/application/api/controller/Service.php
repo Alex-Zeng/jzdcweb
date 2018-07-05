@@ -24,7 +24,7 @@ class Service extends Base{
         $name = $request->post('name','');
         $type = $request->post('type',0,'intval');
         $submitTime = time();
-        $dayTimestamp = 86400;  //表示一天的时间戳
+        $dayTimestamp = 86400;  //表示一天的时间错
 
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];

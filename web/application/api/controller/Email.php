@@ -59,8 +59,7 @@ class Email extends Base{
 
     protected function sendEmail($email,$type){
         //发送邮件
-//        $code = getVerificationCode();
-        $code = '6666';
+        $code = getVerificationCode();
         //写入数据库
         $codeModel = new EmailCode();
         $time = time();
@@ -69,8 +68,7 @@ class Email extends Base{
             //发送邮件
             $subject='集众电采邮箱验证码';
             $content='验证码为：'.$code.',五分钟内有效。';
-//            $result = SendMail($email,$subject,$content);
-            $result = true;
+            $result = SendMail($email,$subject,$content);
             if($result == true){
                 return ['status'=>0,'data'=>[],'msg'=>'邮件发送成功'];
             }
