@@ -23,6 +23,7 @@ class Service extends Base{
         $sex = $request->post('sex','');
         $name = $request->post('name','');
         $type = $request->post('type',0,'intval');
+        $submitTime = time();
 
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
@@ -44,15 +45,16 @@ class Service extends Base{
 
         $model = new FormFinService();
         //判断
-        $exist = $model->where(['phone'=>$phone,'type'=>$type])->find();
-        if($exist){
+
+        $exist = $model->where(['phone'=>$phone,'type'=>$type])->order('1530775777','desc')->find();
+        $intervalTime = $submitTime - $exist->write_time;
+        if($intervalTime < 86400){
             return ['status'=>1,'data'=>[],'msg'=>'该手机号已经提交'];
         }
 
         $data = [
             'write_time' => time(),
             'writer' => $userId,
-            'write_time' => time(),
             'name' => $name,
             'sex' => $sex,
             'phone' => $phone,
