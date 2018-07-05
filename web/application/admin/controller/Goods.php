@@ -173,10 +173,11 @@ class Goods extends Base{
 
             //计算min_price,max_price
             $priceArr = [];
-            foreach ($standard as $arr){
-                $priceArr[] = $arr['w_price'];
+            if($standard){
+                foreach ($standard as $arr){
+                    $priceArr[] = $arr['w_price'];
+                }
             }
-
             //添加商品
             $goodsModel = new MallGoods();
             $goods = [
@@ -199,7 +200,7 @@ class Goods extends Base{
             ];
 
             $result = $goodsModel->save($goods,['id'=>$id]);
-            if($result == true){
+            if($result !== false){
                 for($i =0; $i < count($standard); $i++){
                     $colorId = $standard[$i]['color_id'];
                     $standardArr[] = [
@@ -234,8 +235,7 @@ class Goods extends Base{
             $imgList[] =["img"=>MallGoods::getFormatMultiImg($imgArr[$i])];
         }
 
-        $row['icon_path'] = MallGoods::getFormatImg($row->icon);
-      //  echo $row['icon_path']; exit;
+        $row['iconPath'] = MallGoods::getFormatImg($row->icon);
         $row['imgList'] = $imgList;
 
         $unitModel = new MallUnit();
