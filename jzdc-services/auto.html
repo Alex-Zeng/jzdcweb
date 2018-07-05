@@ -51,14 +51,14 @@
                             <div for="" class="label" style="color: #00b0f0;">
                                 手机号：
                             </div>
-                            <input class="pass-text-input" id="phone" style="color: #00b0f0;"/>
+                            <input class="pass-text-input" id="phone" type="tel" style="color: #00b0f0;"/>
                         </div>
                         <div class="item clearfix">
                             <div class="pass-radio left active" onclick="selectSex('男')">先生</div>
                             <div class="pass-radio right" onclick="selectSex('女')">女士</div>
                         </div>
                         <div class="item clearfix">
-                            <input type="button" class="pass-button" style="background-color: #00b0f0;" onclick="submit()" value="提交"/>
+                            <div class="pass-button" style="background-color: #00b0f0;" onclick="submit()">提交</div>
                         </div>
                     </div>
                 </div>
@@ -78,7 +78,7 @@
                             <div>稍后将有工作人员与您联系</div>
                         </div>
                         <div class="item clearfix">
-                            <input type="button" onclick="window.location.href='/jzdc-services'" class="pass-button" style="background-color: #00b0f0;" value="返回首页"/>
+                            <div onclick="window.location.href='/jzdc-services'" class="pass-button" style="background-color: #00b0f0;">返回首页"</div>
                         </div>
                     </div>
                 </div>
@@ -131,7 +131,7 @@
   });
 
   var sex = '男';
-  var type = '3';
+  var type = '6';
 
   function selectSex(_sex) {
       sex = _sex;

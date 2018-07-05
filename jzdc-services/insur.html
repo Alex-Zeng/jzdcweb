@@ -85,14 +85,14 @@
                                 <div for="" class="label" style="color: #0eda85;">
                                     手机号：
                                 </div>
-                                <input class="pass-text-input" id="phone" style="color: #0eda85;"/>
+                                <input class="pass-text-input" id="phone" type="tel" style="color: #0eda85;"/>
                             </div>
                             <div class="item clearfix">
                                 <div class="pass-radio left active" onclick="selectSex('男')">先生</div>
                                 <div class="pass-radio right" onclick="selectSex('女')">女士</div>
                             </div>
                             <div class="item clearfix">
-                                <input type="button" class="pass-button" style="background-color: #0eda85;" onclick="submit()" value="提交"/>
+                                <div class="pass-button" style="background-color: #0eda85;" onclick="submit()">提交</div>
                             </div>
                         </div>
                     </div>
@@ -112,7 +112,7 @@
                                 <div>稍后将有工作人员与您联系</div>
                             </div>
                             <div class="item clearfix">
-                                <input type="button" onclick="window.location.href='/jzdc-services'" class="pass-button" style="background-color: #0eda85;" value="返回首页"/>
+                                <div onclick="window.location.href='/jzdc-services'" class="pass-button" style="background-color: #0eda85;">返回首页</div>
                             </div>
                         </div>
                     </div>
@@ -173,7 +173,7 @@
       mySwiper.slideNext()
   }
   var sex = '男';
-  var type = '3';
+  var type = '1';
   function selectSex(_sex) {
       sex = _sex;
       $(".pass-radio").each(function () {

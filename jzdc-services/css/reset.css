@@ -99,6 +99,8 @@ table {
 .pass-button {
     display: block;
     height: 50px;
+    line-height: 50px;
+    text-align: center;
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;

@@ -58,8 +58,8 @@
                             <div class="pass-radio right" onclick="selectSex('女')">女士</div>
                         </div>
                         <div class="item clearfix">
-                            <input type="button" class="pass-button" style="background-color: #a47f7f;" value="提交"
-                                   onclick="submit()"/>
+                            <div class="pass-button" style="background-color: #a47f7f;"
+                                   onclick="submit()">提交</div>
                         </div>
                     </div>
                 </div>
@@ -79,8 +79,8 @@
                             <div>稍后将有工作人员与您联系</div>
                         </div>
                         <div class="item clearfix">
-                            <input type="button" onclick="window.location.href='/jzdc-services'" class="pass-button"
-                                   style="background-color: #a47f7f;" value="返回首页"/>
+                            <div onclick="window.location.href='/jzdc-services'" class="pass-button"
+                                   style="background-color: #a47f7f;">返回首页</div>
                         </div>
                     </div>
                 </div>
@@ -150,7 +150,7 @@
     }
 
     var sex = '男';
-    var type = '3';
+    var type = '4';
 
     function selectSex(_sex) {
         sex = _sex;
