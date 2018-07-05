@@ -108,7 +108,7 @@ class User extends Base
 
     /**
      * @desc 设置默认地址
-     * @return array|void
+     * @return array
      */
     public function setDefaultAddress(Request $request)
     {
@@ -378,7 +378,6 @@ class User extends Base
         $model = new OrderMsg();
         $total = $model->where(['user_id' => $this->userId, 'is_delete' => 0])->order('create_time', 'desc')->count();
         $rows = $model->where(['user_id' => $this->userId, 'is_delete' => 0])->order('create_time', 'desc')->field(['id', 'title', 'content', 'order_no', 'create_time'])->limit($start, $pageSize)->select();
-//        dump($start);exit;
         $data = [];
         foreach ($rows as &$row) {
             $orderModel = new MallOrder();
@@ -496,7 +495,7 @@ class User extends Base
             return ['status' => 1, 'data' => [], 'msg' => '法人身份证必须上传'];
         }
 
-        if ($agent == 2) {
+        if ($agent == 1) {
             if (!$agentIdentityCard) {
                 return ['status' => 1, 'data' => [], 'msg' => '代理人身份证必须上传'];
             }
@@ -512,6 +511,10 @@ class User extends Base
 
         $model = new FormUserCert();
         $row = $model->where(['writer' => $this->userId])->order('id', 'desc')->find();
+
+        if($row->status == 1) {
+            return ['status' => 0, 'data' => [], 'msg' => '已提交审核，请勿重复提交...'];
+        }
 
         //保存数据
         $data = [
@@ -587,14 +590,14 @@ class User extends Base
             'legalIdentityCard' => $row->legal_identity_card ? $row->legal_identity_card : '',
             'agentIdentityCard' => $row->legal_identity_card ? $row->agent_identity_card : '',
             'orgStructureCode' => $row->org_structure_code_permits ? $row->org_structure_code_permits : '',
-            'taxRegistrationCertPath' => $row->tax_registration_cert ? $row->tax_registration_cert : '',
+            'taxRegistrationCert' => $row->tax_registration_cert ? $row->tax_registration_cert : '',
             'attorney' => $row->power_attorney ? $row->power_attorney : '',
             'businessPath' => $row->business_license ? FormUserCert::getFormatImg($row->business_license) : '',
             'permitsAccountPath' => $row->permits_accounts ? FormUserCert::getFormatImg($row->permits_accounts) : '',
             'legalIdentityCardPath' => $row->legal_identity_card ? FormUserCert::getFormatImg($row->legal_identity_card) : '',
             'agentIdentityCardPath' => $row->legal_identity_card ? FormUserCert::getFormatImg($row->agent_identity_card) : '',
             'orgStructureCodePath' => $row->org_structure_code_permits ? FormUserCert::getFormatImg($row->org_structure_code_permits) : '',
-            'taxRegistrationCert' => $row->tax_registration_cert ? FormUserCert::getFormatImg($row->tax_registration_cert) : '',
+            'taxRegistrationCertPath' => $row->tax_registration_cert ? FormUserCert::getFormatImg($row->tax_registration_cert) : '',
             'attorneyPath' => $row->power_attorney ? FormUserCert::getFormatImg($row->power_attorney) : '',
             'refuseReason' => $row->refuse_reason
         ];

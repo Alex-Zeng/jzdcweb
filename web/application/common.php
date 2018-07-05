@@ -79,9 +79,25 @@ function checkPassword($password){
  * @param int $number
  * @return string
  */
-function getOrderOutId($number = 0){
-    return uniqid();
-    //return date('YmdHis').$number.rand(10,100);
+function getOrderOutId($channel = 0){
+    $model = new \app\common\model\Counter();
+    $row = $model->lock(true)->where(['id'=>1])->find();
+
+    $value = $row->order_count;
+    //
+    $channelArr = [0 => 'W',1=>'H',2 =>'A'];
+    //生成固定位数
+    $length = strlen($value);
+    $str = '';
+    for($i =0; $i < 12-$length-1; $i++){
+        $str .='0';
+    }
+
+    if($length < 12){
+        return $channelArr[$channel].'1'.$str.$value;
+    }else{
+        return $channelArr[$channel].$str.$value;
+    }
 }
 
 /**

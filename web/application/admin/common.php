@@ -145,7 +145,7 @@ function  getTypeLevelList($level = 2){
  * @param int $state
  * @return mixed|string
  */
-function getOrderState($state = -1){
+function getOrderState($state = -1,$style = 0){
     $list = [
         0 => '待核价',
         1 => '待签约',
@@ -160,6 +160,22 @@ function getOrderState($state = -1){
         11 => '待打款至供应商',
         13 => '交易完成'
     ];
+    if($style == 1){
+        $list = [
+            0 => '<span style="color:#0069d9 !important">待核价</span>',
+            1 => '<span style="color:#0069d9 !important">待签约</span>',
+            2 => '<span style="color:#0069d9 !important">待采购商打款</span>',
+            3 => '<span style="color:#0069d9 !important">待发货</span>',
+            4 => '<span style="color:#dc3545 !important">订单关闭</span>',
+            6 => '<span style="color:#0069d9 !important">待收货</span>',
+            7 => '<span style="color:#0069d9 !important">待质检</span>',
+            8 => '<span style="color:#0069d9 !important">问题确认中</span>',
+            9 => '<span style="color:#0069d9 !important">账期中</span>',
+            10 => '<span style="color:#0069d9 !important">逾期中</span>',
+            11 => '<span style="color:#0069d9 !important">待打款至供应商</span>',
+            13 => '<span style="color:#28a745!important">交易完成</span>'
+        ];
+    }
     return isset($list[$state]) ? $list[$state] : '';
 }
 

@@ -25,14 +25,22 @@ class Order extends Base{
      * @return mixed
      */
     public function index(){
-        $k = Request::instance()->get('k','');
-        $state = Request::instance()->get('state','');
+        $k = Request::instance()->get('k','','trim');
+        $state = Request::instance()->get('state','-1');
+        $start = Request::instance()->get('start','');
+        $end = Request::instance()->get('end','');
         $model = new MallOrder();
         if(isset($k) && $k){
             $model->where('out_id|buyer','like','%'.$k.'%');
         }
-        if(isset($state) && $state != ''){
+        if(isset($state) && $state >= 0){
             $model->where(['state' => $state]);
+        }
+        if(isset($start) && $start){
+            $model->where(['add_time'=>['gt',strtotime($start)]]);
+        }
+        if(isset($end) && $end){
+            $model->where(['add_time'=>['lt',strtotime($end.' 23:59:59')]]);
         }
 
         $rows = $model->order('id','desc')->paginate(10,false,['query'=>request()->param()]);
@@ -72,6 +80,8 @@ class Order extends Base{
 
         $this->assign('list',$rows);
         $this->assign('state',$state);
+        $this->assign('start',$start);
+        $this->assign('end',$end);
         $this->assign('k',$k);
         $this->assign('stateList',MallOrder::getStateList());
         $this->assign('page',$rows->render());
@@ -85,9 +95,7 @@ class Order extends Base{
      * @return array
      */
     public function  pricing(Request $request,$id){
-       // contract_number
-        //pay_date
-        //sum_money    received_money  goods_money
+        $contract_type = $request->post('contract_type',0,'intval');
         $contractNumber = $request->post('contract_number','');
         $payDate = $request->post('pay_date','');
         $sumMoney = $request->post('sum_money',0);
@@ -96,25 +104,34 @@ class Order extends Base{
         if(!$row || $row->state != MallOrder::STATE_PRICING){
             return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
         }
-        //有账期 =》 待发货，没账期 => 待采购商打款
-        $data = ['contract_number'=>$contractNumber,'pay_date'=>$payDate,'sum_money'=>$sumMoney,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
-        $result = $model->save($data,['id'=>$id]);
-        if($result == true){
-            if($payDate){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
-                  $userModel = new IndexUser();
-                  $user = $userModel->getInfoById($row->supplier);
-                  $yunpian = new Yunpian();
-                 // $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
+        if($contract_type == 2){
+            //有账期 =》 待发货，没账期 => 待采购商打款
+            $data = ['contract_number'=>$contractNumber,'pay_date'=>$payDate,'sum_money'=>$sumMoney,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
+            $result = $model->save($data,['id'=>$id]);
+            if($result == true){
+                if($payDate){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
+                    $userModel = new IndexUser();
+                    $user = $userModel->getInfoById($row->supplier);
+                    $yunpian = new Yunpian();
+                    $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
 
-                //更新消息通知
-                $orderMsgModel = new OrderMsg();
-                $content = "您好，订单号：{$row->out_id}现可安排发货，发货完成后，请在\"用户中心-待发货\"发布物流信息，谢谢。";
-                $msgData = ['title'=>"待发货",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
-                $orderMsgModel->save($msgData);
-                $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+                    //更新消息通知
+                    $orderMsgModel = new OrderMsg();
+                    $content = "您好，订单号：{$row->out_id}现可安排发货，发货完成后，请在\"用户中心-待发货\"发布物流信息，谢谢。";
+                    $msgData = ['title'=>"待发货",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+                    $orderMsgModel->save($msgData);
+                    $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+                }
+                return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
             }
-            return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
+        }else{ //待签约
+            $data = ['sum_money'=>$sumMoney,'state'=>MallOrder::STATE_SIGN];
+            $result = $model->save($data,['id'=>$id]);
+            if($result == true){
+                return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
+            }
         }
+
         return ['status'=>1,'data'=>[],'msg'=>'失败核价'];
     }
 
@@ -129,18 +146,22 @@ class Order extends Base{
         $payDate = $request->post('pay_date','');
         $model = new MallOrder();
         $row = $model->where(['id'=>$id])->find();
-        if(!$row || $row->state != MallOrder::STATE_PRICING){
+        if(!$row || $row->state != MallOrder::STATE_SIGN){
             return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
         }
+
         //有账期 =》 待发货，没账期 => 待采购商打款
-        $data = ['contract_number'=>$contractNumber,'pay_date'=>$payDate,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
+        $data = ['contract_number'=>$contractNumber,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
+        if($payDate){
+            $data['pay_date'] = $payDate;
+        }
         $result = $model->save($data,['id'=>$id]);
         if($result == true){
             if($payDate){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
                 $userModel = new IndexUser();
                 $user = $userModel->getInfoById($row->supplier);
                 $yunpian = new Yunpian();
-                // $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
+                $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
 
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();
@@ -162,8 +183,7 @@ class Order extends Base{
      * @return array
      */
     public function remittance(Request $request,$id){
-          $tag = $request->post('tag',1);
-          $payType = $request->post('type',1);
+          $payType = $request->post('pay_type',1);
           $number = $request->post('number','');
           $payTime = $request->post('pay_time','');
           $picture = $request->post('path','');
@@ -171,7 +191,7 @@ class Order extends Base{
 
         $model = new MallOrder();
         $row = $model->where(['id'=>$id])->find();
-        if(!$row || $row->state != MallOrder::STATE_PRICING){
+        if(!$row || $row->state == MallOrder::STATE_PRICING){
             return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
         }
 
@@ -202,7 +222,7 @@ class Order extends Base{
             if($flag == 1){
                 $user = $userModel->getInfoById($row->supplier);
                 $yunpian = new Yunpian();
-                // $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
+                $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
 
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();
@@ -317,20 +337,48 @@ class Order extends Base{
         $objPHPExcel->setActiveSheetIndex(0);
         //设置表头
         $objPHPExcel->setActiveSheetIndex(0)
-            ->setCellValue('A1', 'ID')
+            ->setCellValue('A1', '创建时间')
             ->setCellValue('B1', '订单号')
             ->setCellValue('C1', '商品')
-            ->setCellValue('D1', '数量')
+            ->setCellValue('D1','状态')
             ->setCellValue('E1', '采购商')
-            ->setCellValue('F1', '供应商');
-
+            ->setCellValue('F1', '供应商')
+            ->setCellValue('G1', '合同编号')
+            ->setCellValue('H1','总价')
+            ->setCellValue('I1','数量')
+            ->setCellValue('J1','买家留言')
+            ->setCellValue('K1','账期截止日');
         //查询数据
+        $model = new MallOrder();
+        $total = $model->where([])->count();
+        $pageSize = 100;
+        $page = ceil($total/$pageSize);
 
+        $counter = 2;
+        $userModel = new IndexUser();
+        for($i =0; $i < $page; $i++){
+            $start = $page*$i;
+            $rows = $model->where([])->limit($start,$pageSize)->order('add_time','desc')->select();
+            foreach ($rows as $row){
+                $buyerInfo = $userModel->getInfoById($row->buyer_id);
+                $supplier = $userModel->getInfoById($row->supplier);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('A'.$counter, date('Y-m-d H:i:s',$row->add_time));
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('B'.$counter, $row->out_id);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('C'.$counter, $row->goods_names);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('D'.$counter, getOrderState($row->state));
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('E'.$counter, $buyerInfo ? $buyerInfo->real_name : '');
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('F'.$counter, $supplier ? $supplier->real_name : '');
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('G'.$counter, $row->contract_number);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('H'.$counter, $row->sum_money);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('I'.$counter, $row->goods_count);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('J'.$counter, $row->buyer_comment);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('K'.$counter, $row->pay_date ?substr($row->pay_date,0,10) : '');
+                $counter++;
+            }
+        }
 
-        $filename = '商品订单信息'.date('Ymd',time()).'.xls';
+        $filename = 'order_'.date('YmdHi',time()).'.xls';
         $objPHPExcel->getActiveSheet()->setTitle('商品订单信息');
-
-
         header("Content-Type: application/force-download");
         header("Content-Type: application/octet-stream");
         header("Content-Type: application/download");
@@ -340,4 +388,5 @@ class Order extends Base{
         $objWriter->save('php://output');
         exit;
     }
+
 }

@@ -7,6 +7,7 @@
  */
 namespace app\api\controller;
 
+use app\common\model\Counter;
 use app\common\model\IndexGroup;
 use app\common\model\IndexUser;
 use app\common\model\IndexArea;
@@ -32,7 +33,9 @@ class Order extends Base{
 //        $receiverId = $jsonArr['receiverId'];
 //        $detailRows = $jsonArr['detail'];
         $receiverId = $request->post('receiverId',0,'intval');
+        $channel = $request->post('channel',0,'intval');
         $detailRows = $request->post('detail','');
+       // $detailRows = '[{"list":[{"goodsId":"169","option_id":"8","color_id":"7","quantity":"12","no":"SX00001","requirement":"测试商品名称A"}],"date": "2018-06-12","remark": "请尽快发货"}]';
         $detailRows = $detailRows ? json_decode($detailRows,true) : [];
 
         if($receiverId <= 0 || !$detailRows){
@@ -147,7 +150,7 @@ class Order extends Base{
         //生成订单
         foreach ($orderList as $index => $order){
             $orderModel = new MallOrder();
-            $orderNo = getOrderOutId($index);
+            $orderNo = getOrderOutId($channel);
             $orderValue = [
                 'shop_id' => 1,
                 'receiver_area_name' => $areaInfo,
@@ -182,6 +185,8 @@ class Order extends Base{
             $result = $orderModel->save($orderValue);
             if($result == true){
                 //插入order_goods数据表
+                $counterModel = new Counter();
+                $counterModel->where(['id'=>1])->setInc('order_count',1);
                 $orderGoods = [];
                 $returnGoodsList = [];
                 foreach ($order['list'] as $goodsList){

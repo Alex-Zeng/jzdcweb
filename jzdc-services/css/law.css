@@ -1,0 +1,42 @@
+.law-wrap{
+    background-color: #07274b;
+    background-image: url("../images/law-1-bg.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    height: 100vh;
+    padding: 0.4rem;
+    box-sizing: border-box;
+}
+
+.law-header{
+}
+.law-header .back{
+    float: left;
+    width: 0.21rem;
+    height: 0.38rem;
+    background-image: url("../images/law-back.png");
+    background-size: 100% 100%;
+}
+
+.step4{
+    height:fit-content;
+    width: 100%;
+}
+
+.law-next{
+    width: .92rem;
+    height: .92rem;
+    background-image: url("../images/law-next.png");
+    background-size: 100% 100%;
+    display: block;
+    position: fixed;
+    left: 50%;
+    margin-left: -0.46rem;
+    bottom: 0.16rem;
+    z-index: 999;
+}
+
+.active {
+    color: #ffffff;
+    background-color: #0081ff;
+}

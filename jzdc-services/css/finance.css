@@ -1,0 +1,42 @@
+.finance-wrap{
+    background-color: #07274b;
+    background-image: url("../images/finance-1-bg.jpg");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    height: 100vh;
+    padding: 0.4rem;
+    box-sizing: border-box;
+}
+
+.finance-header{
+}
+.finance-header .back{
+    float: left;
+    width: 0.21rem;
+    height: 0.38rem;
+    background-image: url("../images/finance-back.png");
+    background-size: 100% 100%;
+}
+
+.step5{
+    height:fit-content;
+    width: 100%;
+}
+
+.finance-next{
+    width: .92rem;
+    height: .92rem;
+    background-image: url("../images/finance-next.png");
+    background-size: 100% 100%;
+    display: block;
+    position: fixed;
+    left: 50%;
+    margin-left: -0.46rem;
+    bottom: 0.16rem;
+    z-index: 999;
+}
+
+.active {
+    color: #ffffff;
+    background-color: #f9c30b;
+}
