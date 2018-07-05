@@ -56,10 +56,10 @@
 }
 
 .icon{
-    width: 2.73rem;
-    height: 2.08rem;
-    -webkit-background-size: 2.73rem 2.08rem;
-    background-size: 2.73rem 2.08rem;
+    width: 2.48rem;
+    height: 1.89rem;
+    -webkit-background-size: 2.48rem 1.89rem;
+    background-size: 2.48rem 1.89rem;
     background-repeat: no-repeat;
 }
 
@@ -83,7 +83,7 @@
         background-repeat: no-repeat;
     }
     .index-menu .menu-row+.menu-row{
-        margin-top: 0.7rem;
+        margin-top: 0.38rem;
     }
 }
 
