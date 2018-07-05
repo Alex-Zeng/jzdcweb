@@ -377,7 +377,7 @@ class Order extends Base{
             }
         }
 
-        $filename = 'order_'.date('Ymd',time()).'.xls';
+        $filename = 'order_'.date('YmdHi',time()).'.xls';
         $objPHPExcel->getActiveSheet()->setTitle('商品订单信息');
         header("Content-Type: application/force-download");
         header("Content-Type: application/octet-stream");
