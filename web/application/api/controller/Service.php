@@ -24,6 +24,7 @@ class Service extends Base{
         $name = $request->post('name','');
         $type = $request->post('type',0,'intval');
         $submitTime = time();
+        $dayTimestamp = 86400;  //表示一天的时间戳
 
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
@@ -47,11 +48,14 @@ class Service extends Base{
         //判断
 
         $exist = $model->where(['phone'=>$phone,'type'=>$type])->order(['write_time' => 'desc'])->find();
-        $intervalTime = $submitTime - $exist->write_time;
-        echo $intervalTime; exit;
-        if($intervalTime < 86400){
-            return ['status'=>1,'data'=>[],'msg'=>'该手机号已经提交'];
+
+        if($exist){
+            $intervalTime = $submitTime - $exist->write_time;
+            if($intervalTime < $dayTimestamp){
+                return ['status'=>1,'data'=>[],'msg'=>'24小时内同一个手机号同一个业务只能提交一次'];
+            }
         }
+
 
         $data = [
             'write_time' => time(),
