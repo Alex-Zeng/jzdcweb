@@ -40,12 +40,12 @@
 }
 
 .index-menu{
-    padding-top: 2.0rem;
-    width:6.2rem;
+    padding-top: 1.8rem;
+    width:5.8rem;
     margin: 0 auto;
 }
 .index-menu .menu-row+.menu-row{
-    margin-top: 0.85rem;
+    margin-top: 0.45rem;
 }
 .menu-item-left{
     float: left;
