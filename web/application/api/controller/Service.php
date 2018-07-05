@@ -52,7 +52,7 @@ class Service extends Base{
         if($exist){
             $intervalTime = $submitTime - $exist->write_time;
             if($intervalTime < $dayTimestamp){
-                return ['status'=>1,'data'=>[],'msg'=>'24小时内同一个手机号同一个业务只能提交一次'];
+                return ['status'=>1,'data'=>[],'msg'=>'24小时内请勿重复提交'];
             }
         }
 
