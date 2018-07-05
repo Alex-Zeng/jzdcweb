@@ -46,7 +46,7 @@ class Service extends Base{
         $model = new FormFinService();
         //判断
 
-        $exist = $model->where(['phone'=>$phone,'type'=>$type])->order('1530775777','desc')->find();
+        $exist = $model->where(['phone'=>$phone,'type'=>$type])->order(['write_time' => 'desc'])->find();
         $intervalTime = $submitTime - $exist->write_time;
         if($intervalTime < 86400){
             return ['status'=>1,'data'=>[],'msg'=>'该手机号已经提交'];
