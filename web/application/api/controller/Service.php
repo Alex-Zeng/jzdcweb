@@ -23,6 +23,8 @@ class Service extends Base{
         $sex = $request->post('sex','');
         $name = $request->post('name','');
         $type = $request->post('type',0,'intval');
+        $submitTime = time();
+        $dayTimestamp = 86400;  //表示一天的时间错
 
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
@@ -44,15 +46,20 @@ class Service extends Base{
 
         $model = new FormFinService();
         //判断
-        $exist = $model->where(['phone'=>$phone,'type'=>$type])->find();
+
+        $exist = $model->where(['phone'=>$phone,'type'=>$type])->order(['write_time' => 'desc'])->find();
+
         if($exist){
-            return ['status'=>1,'data'=>[],'msg'=>'该手机号已经提交'];
+            $intervalTime = $submitTime - $exist->write_time;
+            if($intervalTime < $dayTimestamp){
+                return ['status'=>1,'data'=>[],'msg'=>'24小时内请勿重复提交'];
+            }
         }
+
 
         $data = [
             'write_time' => time(),
             'writer' => $userId,
-            'write_time' => time(),
             'name' => $name,
             'sex' => $sex,
             'phone' => $phone,
