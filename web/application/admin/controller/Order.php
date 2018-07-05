@@ -355,31 +355,30 @@ class Order extends Base{
         $page = ceil($total/$pageSize);
 
         $counter = 2;
+        $userModel = new IndexUser();
         for($i =0; $i < $page; $i++){
             $start = $page*$i;
             $rows = $model->where([])->limit($start,$pageSize)->order('add_time','desc')->select();
             foreach ($rows as $row){
+                $buyerInfo = $userModel->getInfoById($row->buyer_id);
+                $supplier = $userModel->getInfoById($row->supplier);
                 $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('A'.$counter, date('Y-m-d H:i:s',$row->add_time));
                 $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('B'.$counter, $row->out_id);
                 $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('C'.$counter, $row->goods_names);
-                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('D'.$counter, $row->buyer_id);
-                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('E'.$counter, $row->supplier);
-                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('F'.$counter, $row->contract_number);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('D'.$counter, getOrderState($row->state));
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('E'.$counter, $buyerInfo ? $buyerInfo->real_name : '');
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('F'.$counter, $supplier ? $supplier->real_name : '');
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('G'.$counter, $row->contract_number);
                 $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('H'.$counter, $row->sum_money);
                 $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('I'.$counter, $row->goods_count);
                 $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('J'.$counter, $row->buyer_comment);
-                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('K'.$counter, $row->pay_date);
+                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('K'.$counter, $row->pay_date ?substr($row->pay_date,0,10) : '');
                 $counter++;
             }
         }
 
-
-
-
-
-        $filename = '商品订单信息'.date('Ymd',time()).'.xls';
+        $filename = 'order_'.date('Ymd',time()).'.xls';
         $objPHPExcel->getActiveSheet()->setTitle('商品订单信息');
-
         header("Content-Type: application/force-download");
         header("Content-Type: application/octet-stream");
         header("Content-Type: application/download");
@@ -389,4 +388,5 @@ class Order extends Base{
         $objWriter->save('php://output');
         exit;
     }
+
 }
