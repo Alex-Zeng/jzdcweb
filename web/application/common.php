@@ -77,7 +77,7 @@ function checkPassword($password){
  */
 function getOrderOutId($channel = 0){
     $model = new \app\common\model\Counter();
-    $row = $model->where(['id'=>1])->find();
+    $row = $model->lock(true)->where(['id'=>1])->find();
 
     $value = $row->order_count;
     //
