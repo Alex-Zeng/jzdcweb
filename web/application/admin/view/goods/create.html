@@ -290,7 +290,7 @@
         }
         return false;
     }
-    
+
     KindEditor.ready(function(K) {
         var editor1 = K.create('#goods-content', {
             cssPath : '__STATIC__/js/plugins/kindeditor/plugins/code/prettify.css',
@@ -311,7 +311,7 @@
                 dataType:'json',
                 success:function (data) {
                      if(data.status == 0){
-                         if(data.data.color == 1 || data.data.diy_option == 1){
+                         if(data.data.color == 1 || data.data.option == 1){
                              var data = {color:data.data.color,color_list:data.data.color_list,option:data.data.option,option_list:data.data.option_list,option_name:data.data.option_name}; //
                              var html = template('standard-container',data);
                              $('#standard_container').html(html);
