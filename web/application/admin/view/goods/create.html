@@ -151,7 +151,7 @@
                                 </div>
                             </div>
                             <div class="card-footer col-md-offset-2">
-                                <button type="submit" class="btn btn-primary">提交</button>
+                                <button type="submit" class="btn btn-primary">添加</button>
                             </div>
                         </form>
                     </div>
@@ -271,7 +271,7 @@
       //  $("#add-form").data('bootstrapValidator').validate();
         var valid = true;
         //图片验证
-        alert($('#cover-upload-file').val());
+        // alert($('#cover-upload-file').val());
         if ($('#cover-upload-file').val() == '') {
             $('#cover-upload-file').closest('.form-group').addClass('has-error');
             $('#cover-upload-file').closest('.form-group').find('.help-block').html('请上传封面图片');
