@@ -1,12 +1,9 @@
-.index-wrap {
-    height: 100vh;
-}
-
-.index-wrap-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: -1;
+.index-1-wrap {
+    height: 100%;
+    width: 100%;
+    background-image: url("../images/index-wrap.jpg");
+    background-size: 100% 100%;
+    -webkit-background-size: 100% 100%;
 }
 
 .index-header {
@@ -23,6 +20,16 @@
     float: left;
 }
 
+.index-header .close {
+    width: 0.42rem;
+    background: url("../images/close.png");
+    background-size: 0.42rem 0.42rem;
+    -webkit-background-size: 0.42rem 0.42rem;
+    display: block;
+    height: 0.42rem;
+    float: right;
+}
+
 .index-header .index-close{
     float: right;
     width: 0.42rem;
@@ -32,16 +39,8 @@
     background-size: 0.42rem 0.42rem;
 }
 
-.index-text{
-    width: 5.38rem;
-    height: 0.88rem;
-    margin: 0 auto 0.8rem;
-    background: url("../images/jzdc-text.png");
-    -webkit-background-size: 5.38rem 0.88rem;
-    background-size: 5.38rem 0.88rem;
-}
-
 .index-menu{
+    padding-top: 2.0rem;
     width:6.2rem;
     margin: 0 auto;
 }
@@ -72,6 +71,7 @@
 
 @media screen and (max-width: 320px) {
     .index-menu{
+        padding-top: 1.2rem;
         width:5.32rem;
         margin: 0 auto;
     }
