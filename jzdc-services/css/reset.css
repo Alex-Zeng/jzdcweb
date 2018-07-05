@@ -69,6 +69,14 @@ table {
     line-height: 1.8;
 }
 
+.pass-form{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
 .pass-text-input {
     display: block;
     position: relative;
