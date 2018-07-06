@@ -179,7 +179,7 @@
       $.LoadingOverlay("show");
       $.ajax(
           {
-              url: "../api/service/finance",
+              url: "../index.php?s=api/service/finance",
               type: "POST",
               contentType: "application/json; charset=utf-8",
               data:JSON.stringify(
