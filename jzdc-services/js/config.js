@@ -1,2 +1,2 @@
-const domain = 'http://192.168.3.135:8079'
-const indexUrl = domain+'/jzdc-services'
+const domain = 'http://h5.jizhongdiancai.com'
+const indexUrl = domain+'/jzdc-services/index.html'

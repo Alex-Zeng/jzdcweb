@@ -79,7 +79,7 @@
                             <div>稍后将有工作人员与您联系</div>
                         </div>
                         <div class="item clearfix">
-                            <div onclick="window.location.href='/jzdc-services'" class="pass-button"
+                            <div onclick="gotoIndex()" class="pass-button"
                                    style="background-color: #a47f7f;">返回首页</div>
                         </div>
                     </div>
@@ -132,7 +132,9 @@
         }
     });
 
-    // 滑动回到首页
+    function gotoIndex () {
+        window.location.href = indexUrl
+    }
     var hammertime = new Hammer(document.getElementById("body"), {direction: Hammer.DIRECTION_HORIZONTAL});
     hammertime.on('swiperight', function () {
         window.location.href = indexUrl
@@ -140,7 +142,7 @@
 
     function prev() {
         if(mySwiper.myIndex ===0){
-            window.location.href = indexUrl
+            gotoIndex()
         }
         mySwiper.slidePrev()
     }
@@ -179,7 +181,7 @@
         $.LoadingOverlay("show");
         $.ajax(
             {
-                url: "../api/service/finance",
+                url: "../index.php?s=api/service/finance",
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify(
