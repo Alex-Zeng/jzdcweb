@@ -340,7 +340,7 @@ class Order extends Base{
 
                 }
 
-                $goodsRow['specification_info'] = '规格,颜色';
+                $goodsRow['specifications_info'] = '规格,颜色';
 
             }
             $row['goods'] = $goodsRows;
