@@ -331,8 +331,8 @@ class User extends Base
         $yesterdayCount = $model->where(['supplier' => $this->userId])->where('add_time', '>', $startTime)->where('add_time', '<', $endTime)->count();
         $total = $model->where(['supplier' => $this->userId])->count();
         $pendingNumber = $model->where(['supplier' => $this->userId, 'state' => MallOrder::STATE_DELIVER])->count();
-
-        return ['status' => 0, 'data' => ['yesterday' => $yesterdayCount, 'total' => $total, 'pending' => $pendingNumber], 'msg' => ''];
+        $serviceNumber = $model->where(['supplier'=> $this->userId])->count();
+        return ['status' => 0, 'data' => ['yesterday' => $yesterdayCount, 'total' => $total, 'pending' => $pendingNumber,'service'=>$serviceNumber], 'msg' => ''];
     }
 
     /**
@@ -346,12 +346,12 @@ class User extends Base
             return $auth;
         }
         //
-        $model = new MallGoods();
+        $model = new MallOrder();
         $payCount = $model->where(['buyer_id' => $this->userId])->count();
         $recieveNumber = $model->where(['buyer_id' => $this->userId])->count();
         $pendingNumber = $model->where(['buyer_id' => $this->userId])->count();
-
-        return ['status' => 0, 'data' => ['pay' => $payCount, 'recieve' => $recieveNumber, 'deliver' => $pendingNumber], 'msg' => ''];
+        $serviceNumber = $model->where(['buyer_id'=> $this->userId])->count();
+        return ['status' => 0, 'data' => ['pay' => $payCount, 'recieve' => $recieveNumber, 'deliver' => $pendingNumber,'service'=>$serviceNumber], 'msg' => ''];
     }
 
 
