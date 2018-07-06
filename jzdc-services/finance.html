@@ -94,7 +94,7 @@
                             <div>稍后将有工作人员与您联系</div>
                         </div>
                         <div class="item clearfix">
-                            <div onclick="window.location.href='/jzdc-services'" class="pass-button" style="background-color: #f9c30b;">返回首页</div>
+                            <div onclick="gotoIndex()" class="pass-button" style="background-color: #f9c30b;">返回首页</div>
                         </div>
                     </div>
                 </div>
@@ -225,9 +225,12 @@
     }
 
     // 滑动回到首页
+    function gotoIndex () {
+        window.location.href = indexUrl
+    }
     var hammertime = new Hammer(document.getElementById("body"), {direction: Hammer.DIRECTION_HORIZONTAL});
     hammertime.on('swiperight', function () {
-        window.location.href = indexUrl
+        gotoIndex()
     })
 </script>
 </html>
