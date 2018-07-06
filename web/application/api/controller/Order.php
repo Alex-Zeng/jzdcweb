@@ -328,11 +328,20 @@ class Order extends Base{
             $buyerInfo = $userModel->getInfoById($row->buyer_id);
             $row['buyer'] = $buyerInfo ? $buyerInfo->real_name : '';
 
-            $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon'])->select();
+            $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon','a.s_id'])->select();
+            $specificationModel = new MallGoodsSpecifications();
+
             foreach($goodsRows as &$goodsRow){
                 $goodsRow['quantity'] = intval($goodsRow->quantity);
                 $goodsRow['icon'] = MallGoods::getFormatImg($goodsRow->icon);
                 $goodsRow['price'] = getFormatPrice($goodsRow->price);
+
+                if($goodsRow->s_id > 0){
+
+                }
+
+                $goodsRow['specificationInfo'] = '规格,颜色';
+
             }
             $row['goods'] = $goodsRows;
         }
