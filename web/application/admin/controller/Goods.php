@@ -105,7 +105,8 @@ class Goods extends Base{
                 'multi_angle_img' => $multi_path,
                 'detail' => $content,
                 'm_detail' => $content,
-                'limit_cycle' => ''
+                'limit_cycle' => '',
+                'time' => time()
             ];
 
             $result = $goodsModel->save($goods);
@@ -196,7 +197,8 @@ class Goods extends Base{
                 'multi_angle_img' => $multi_path,
                 'detail' => $content,
                 'm_detail' => $content,
-                'limit_cycle' => ''
+                'limit_cycle' => '',
+                'time'=> time()
             ];
 
             $result = $goodsModel->save($goods,['id'=>$id]);
