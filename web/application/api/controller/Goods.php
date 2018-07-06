@@ -315,7 +315,7 @@ class Goods  extends Base {
             'max_price' => getFormatPrice($row->max_price),//
             'price' => getFormatPrice($row->w_price),
             'supplier' => $user ? $user->real_name : '', //供应商
-            'supplierLogo' => '', //供应商logo
+            'supplierLogo' => $user->icon ? IndexUser::getFormatIcon($user->icon) : '', //供应商logo
             'standard' => $standards ? $standards : [], //规格
             'standardPrice' => $standardsPrice,
             'imgList' => $imgList, //视图图片
