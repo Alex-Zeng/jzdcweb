@@ -543,4 +543,48 @@ class Order extends Base{
         }
         return ['status'=>1,'data'=>[],'msg'=>'订单取消失败'];
     }
+
+    /**
+     * @desc 申请售后
+     * @param Request $request
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function service(Request $request){
+        $orderNo = $request->post('no','');
+        $type = $request->post('type',0,'intval');
+
+        if(!$orderNo){
+            return ['status'=>1,'data'=>[],'msg'=>'订单号不能为空'];
+        }
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        if($this->groupId != IndexGroup::GROUP_BUYER){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
+        }
+
+        //查询数据
+        $model = new MallOrder();
+        $where['out_id'] = $orderNo;
+        $where['buyer_id'] = $this->userId;
+        $row = $model->where($where)->field(['id','state',])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
+        }
+        if($row->state != MallOrder::STATE_RECEIVE && $row->state != MallOrder::STATE_FINISH ){
+            return ['status'=>1,'data'=>[],'msg'=>'当前订单状态无法申请售后'];
+        }
+
+        $result = $model->save(['service_type'=>$type],$where);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'服务申请成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'服务申请失败'];
+    }
+
+
 }
