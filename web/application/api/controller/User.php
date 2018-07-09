@@ -575,9 +575,10 @@ class User extends Base
         $model = new FormUserCert();
         $row = $model->where(['writer' => $this->userId])->order('id', 'desc')->find();
         if (!$row) {
-            return ['status' => 0, 'data' => [], 'msg' => '用户未提交认证'];
+            return ['status' => 0, 'data' => ['status'=>0], 'msg' => '用户未提交认证'];
         }
         $data = [
+            'status'=>1,
             'companyName' => $row->company_name,
             'representative' => $row->legal_representative,
             'capital' => $row->reg_capital,
