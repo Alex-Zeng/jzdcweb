@@ -47,6 +47,10 @@ class Order extends Base{
             return $auth;
         }
 
+        if($this->groupId != IndexGroup::GROUP_BUYER){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限下单'];
+        }
+
         //根据购物清单分商家生成订单
         $goodsRows = [];
         $model = new MallGoods();
@@ -359,7 +363,6 @@ class Order extends Base{
      */
     public function detail(Request $request){
         $no = $request->post('no','');
-        //  $no = '2018053124610';
         $auth = $this->auth();
         if($auth){
             return $auth;
@@ -378,10 +381,20 @@ class Order extends Base{
             $where['supplier'] = $this->userId;
         }
 
-        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','state','pay_date','out_id','buyer_comment'])->find();
+        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','state','pay_date','out_id','buyer_comment','buyer_id','supplier'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
         }
+
+        //采购商供应商
+        $userModel = new IndexUser();
+        $userInfo = [];
+        if($this->groupId == IndexGroup::GROUP_SUPPLIER){
+            $userInfo = $userModel->getInfoById($row->buyer_id);
+        }elseif ($this->groupId == IndexGroup::GROUP_BUYER){
+            $userInfo = $userModel->getInfoById($row->supplier);
+        }
+
 
         //查询产品
         $goodsModel = new MallOrderGoods();
@@ -394,6 +407,8 @@ class Order extends Base{
 
         $data = [
             'orderNo' => $row->out_id,
+            'companyName' => $userInfo ? $userInfo->real_name : '',
+            'groupId' => $this->groupId,
             'state' => $row->state,
             'name' => $row->receiver_name,
             'phone' => $row->receiver_phone,
@@ -402,7 +417,7 @@ class Order extends Base{
             'date' => date('Y-m-d',$row->delivery_time),
             'remark' => $row->buyer_comment,
             'payMethod' => $row->pay_date ? '账期支付': '',
-            'goods' => $goodsRows
+            'goods' => $goodsRows,
         ];
 
         return ['status'=>0,'data'=>$data,'msg'=>''];
