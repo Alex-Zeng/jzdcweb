@@ -396,7 +396,7 @@ class Order extends Base{
             $where['supplier'] = $this->userId;
         }
 
-        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','state','pay_date','out_id','buyer_comment','buyer_id','supplier'])->find();
+        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','express','express_code','state','send_time','estimated_time','pay_date','out_id','buyer_comment','buyer_id','supplier'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
         }
@@ -420,6 +420,7 @@ class Order extends Base{
             $goodsRow['icon'] = MallGoods::getFormatImg($goodsRow->icon);
         }
 
+        //express expressCode sendDate estimatedDate
         $data = [
             'orderNo' => $row->out_id,
             'companyName' => $userInfo ? $userInfo->real_name : '',
@@ -432,6 +433,10 @@ class Order extends Base{
             'date' => date('Y-m-d',$row->delivery_time),
             'remark' => $row->buyer_comment,
             'payMethod' => $row->pay_date ? '账期支付': '',
+            'express' => $row->express ? $row->express : '',   //物流
+            'expressCode' => $row->express_code ? $row->express_code : '', //物流单号
+            'sendDate' => $row->send_time > 0 ? date('Y-m-d',$row->send_time) : '', //发货日期
+            'estimatedDate' => $row->estimated_time > 0 ? date('Y-m-d',$row->estimated_time) : '',  //到达日期
             'goods' => $goodsRows,
         ];
 
