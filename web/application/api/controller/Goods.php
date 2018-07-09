@@ -84,9 +84,7 @@ class Goods  extends Base {
     public function getRecommend(Request $request){
         $pageNumber = $request->post('pageNumber',1,'intval');
         $pageSize = $request->post('pageSize',10,'intval');
-
         $start = ($pageNumber - 1)*$pageSize;
-        $end = $pageNumber*$pageSize;
 
         $typeModel = new MallType();
         $typeIdArr = $typeModel->getAllIds();
@@ -102,7 +100,7 @@ class Goods  extends Base {
         ];
         $total = $model->where($where)->count();
 
-        $rows = $model->where($where)->order('id desc, bidding_show desc')->limit($start,$end)->field(['id','icon','title','w_price','min_price','max_price','w_price','discount','bidding_show'])->select();
+        $rows = $model->where($where)->order('id desc, bidding_show desc')->limit($start,$pageSize)->field(['id','icon','title','w_price','min_price','max_price','w_price','discount','bidding_show'])->select();
         $list = [];
         foreach ($rows as $row){
             $list[] = [
