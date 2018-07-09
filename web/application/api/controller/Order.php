@@ -423,4 +423,70 @@ class Order extends Base{
         return ['status'=>0,'data'=>$data,'msg'=>''];
     }
 
+
+    /**
+     * @desc 发货
+     * @param Request $request
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function delivery(Request $request){
+        $orderNo = $request->post('no','');
+        $express_name= $request->post('express','');   //物流公司
+        $express_code = $request->post('expressCode',''); // 物流单号
+        $send_time = $request->post('sendDate',''); //发货日期
+        $estimated_time = $request->post('estimatedDate',''); //到达日期
+        //
+        if(!$orderNo){
+            return ['status'=>1,'data'=>[],'msg'=>'订单号不能为空'];
+        }
+        if(!$express_name){
+            return ['status'=>1,'data'=>[],'msg'=>'物流公司不能为空'];
+        }
+        if(!$express_code){
+            return ['status'=>1,'data'=>[],'msg'=>'物流单号不能为空'];
+        }
+        if(!$send_time){
+            return ['status'=>1,'data'=>[],'msg'=>'发货日期不能为空'];
+        }
+        if(!$estimated_time){
+            return ['status'=>1,'data'=>[],'msg'=>'到达日期不能为空'];
+        }
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $model = new MallOrder();
+        $where['out_id'] = $orderNo;
+        if($this->groupId != IndexGroup::GROUP_SUPPLIER){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
+        }
+        $where['supplier'] = $this->userId;
+        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','state','pay_date','out_id','buyer_comment','buyer_id','supplier'])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
+        }
+        if($row->state != MallOrder::STATE_DELIVER){
+            return ['status'=>1,'data'=>[],'msg'=>'订单状态操作错误'];
+        }
+
+        $data = [
+            'express' =>$express_name,
+            'express_code' => $express_code,
+            'send_time' => strtotime($send_time),
+            'estimated_time' => strtotime($estimated_time),
+            'state' => MallOrder::STATE_RECEIVE
+        ];
+
+        $result = $model->save($data,$where);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'提交成功'];
+        }
+        return ['status'=>1,'data'=>0,'msg'=>'提交失败'];
+    }
+
 }
