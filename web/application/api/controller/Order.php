@@ -327,10 +327,14 @@ class Order extends Base{
         $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','receiver_name','supplier','buyer_id'])->select();
         $userModel = new IndexUser();
         foreach ($rows as &$row){
-            $userInfo = $userModel->getInfoById($row->supplier);
-            $row['supplier'] = $userInfo ? $userInfo->real_name : '';
-            $buyerInfo = $userModel->getInfoById($row->buyer_id);
-            $row['buyer'] = $buyerInfo ? $buyerInfo->real_name : '';
+            $userInfo = [];
+            if($this->groupId  == IndexGroup::GROUP_SUPPLIER){
+                $userInfo = $userModel->getInfoById($row->buyer_id);
+            }elseif ($this->groupId == IndexGroup::GROUP_BUYER){
+                $userInfo = $userModel->getInfoById($row->supplier);
+            }
+            $row['companyName']  = $userInfo ? $userInfo->real_name : '';
+            $row['groupId'] = $this->groupId;
 
             $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon','a.s_id'])->select();
             $specificationModel = new MallGoodsSpecifications();
@@ -340,11 +344,22 @@ class Order extends Base{
                 $goodsRow['icon'] = MallGoods::getFormatImg($goodsRow->icon);
                 $goodsRow['price'] = getFormatPrice($goodsRow->price);
 
+                $specifications_info = '';
                 if($goodsRow->s_id > 0){
-
+                     $specificationRow = $specificationModel->where(['id'=>$goodsRow->s_id])->find();
+                     if($specificationRow && $specificationRow->color_name){
+                         $specifications_info = $specificationRow->color_name;
+                         if($specificationRow->option_id > 0){
+                             $optionModel = new MallTypeOption();
+                             $optionRow = $optionModel->where(['id'=>$specificationRow->option_id])->find();
+                             if($optionRow && $optionRow->name){
+                                 $specifications_info .=','.$optionRow->name;
+                             }
+                         }
+                     }
+                     //查询规格
                 }
-
-                $goodsRow['specifications_info'] = '规格,颜色';
+                $goodsRow['specifications_info'] = $specifications_info;
 
             }
             $row['goods'] = $goodsRows;
@@ -489,4 +504,43 @@ class Order extends Base{
         return ['status'=>1,'data'=>0,'msg'=>'提交失败'];
     }
 
+    /**
+     * @desc 取消订单
+     * @param Request $request
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function cancel(Request $request){
+        $orderNo = $request->post('no','');
+        if(!$orderNo){
+            return ['status'=>1,'data'=>[],'msg'=>'订单号不能为空'];
+        }
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        if($this->groupId != IndexGroup::GROUP_BUYER){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
+        }
+
+        //查询数据
+        $model = new MallOrder();
+        $where['out_id'] = $orderNo;
+        $where['buyer_id'] = $this->userId;
+        $row = $model->where($where)->field(['id','state',])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
+        }
+        if($row->state != MallOrder::STATE_PRICING && $row->state != MallOrder::STATE_SIGN && $row->state != MallOrder::STATE_REMITTANCE){
+            return ['status'=>1,'data'=>[],'msg'=>'当前订单状态无法取消'];
+        }
+
+        $result = $model->save(['state'=>MallOrder::STATE_CLOSED],$where);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'订单取消成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'订单取消失败'];
+    }
 }
