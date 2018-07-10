@@ -437,6 +437,7 @@ class Order extends Base{
             'expressCode' => $row->express_code ? $row->express_code : '', //物流单号
             'sendDate' => $row->send_time > 0 ? date('Y-m-d',$row->send_time) : '', //发货日期
             'estimatedDate' => $row->estimated_time > 0 ? date('Y-m-d',$row->estimated_time) : '',  //到达日期
+            'serviceType' => $row->service_type,
             'goods' => $goodsRows,
         ];
 
@@ -559,6 +560,7 @@ class Order extends Base{
      */
     public function service(Request $request){
         $orderNo = $request->post('no','');
+        $goodsId = $request->post('goodsId',0,'intval');
         $type = $request->post('type',0,'intval');
 
         if(!$orderNo){
@@ -584,10 +586,13 @@ class Order extends Base{
             return ['status'=>1,'data'=>[],'msg'=>'当前订单状态无法申请售后'];
         }
 
-        $result = $model->save(['service_type'=>$type],$where);
+        $goodsModel = new MallOrderGoods();
+        $result = $goodsModel->save(['service_type'=>$type],['order_id'=>$row->id,'goods_id'=>$goodsId]);
         if($result !== false){
+            $model->save(['state'=>MallOrder::STATE_PROBLEM_CONFIRM],$where);
             return ['status'=>0,'data'=>[],'msg'=>'服务申请成功'];
         }
+
         return ['status'=>1,'data'=>[],'msg'=>'服务申请失败'];
     }
 
