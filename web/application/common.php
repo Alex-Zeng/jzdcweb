@@ -125,6 +125,8 @@ function getImgUrl($content="",$suffix = ''){
     $content = htmlspecialchars_decode($content);
     $pregRule = "/src=\\\"program\/mall\/attachd\/image/";
     $content = preg_replace($pregRule,"src=\"{$suffix}/program/mall/attachd/image", $content);
+    $pregRule2 = "/src=\\\"\/web\/public\/uploads\/attached\/image\//";
+    $content = preg_replace($pregRule2,"src=\"{$suffix}/web/public/uploads/attached/image/",$content);
     return $content;
 }
 

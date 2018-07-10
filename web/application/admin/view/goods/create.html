@@ -568,7 +568,6 @@
             $(this).closest('tr').remove();
 
             //更新check选中值
-
             updateChecked();
         });
 
@@ -577,9 +576,7 @@
                 var selectedColorId = [];
                 $(".option_color_id").each(function () {
                     selectedColorId.push($(this).val());
-                })
-
-                //
+                });
                 $(".color_select").each(function () {
                     $(this).prop("checked",false);
                     if($.inArray($(this).val(),selectedColorId) >= 0){
@@ -587,11 +584,12 @@
                     }
                 })
                 //删除
-                // $("#color-container").find("tr").each(function () {
-                //    if($.inArray($(this).val(),selectedColorId) == -1){
-                //        $(this).remove();
-                //    }
-                // })
+                $("#color-container").find("tr").each(function () {
+                    var t = $(this).data('id');
+                    if($.inArray(t+'',selectedColorId) == -1){
+                        $(this).remove();
+                    }
+                })
             }
             if(g_option){
                 var selectedOptionId = [];
