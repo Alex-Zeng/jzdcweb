@@ -117,7 +117,16 @@
                                         <tr>
                                             <td width="40px" style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">#{$key+1}</td>
                                             <td width="80px" style="vertical-align: middle;border-bottom: 1px solid #dee2e6;"><img width="60px" height="60px" src="{$goods.icon}"  /></td>
-                                            <td style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">{$goods.title}</td>
+                                            <td style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">
+                                                {if $goods.service_type == 1}
+                                                <span class="label label-primary">退货</span>
+                                                {elseif $goods.service_type == 2}
+                                                <span class="label label-info">换货</span>
+                                                {elseif $goods.service_type == 3}
+                                                <span class="label label-danger">维修</span>
+                                                {/if}
+                                                {$goods.title}
+                                            </td>
                                             <td style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">原价: {$goods.price|floatval}*{$goods.quantity|intval}{$goods.unit}={$goods.price*$goods.quantity}元</td>
                                         </tr>
                                         {/foreach}
@@ -168,6 +177,9 @@
                                     {elseif $order.state == 3}<!-- 待发货-->
                                     {elseif $order.state == 4}<!-- 订单关闭-->
                                     {elseif $order.state == 6} <!-- 待收货-->
+                                    {if $order.service_type == 1}
+                                    <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">待收货售后</a>
+                                    {/if}
                                     {elseif $order.state == 7} <!-- 待质检-->
                                     {elseif $order.state == 8} <!-- 问题确认中-->
                                     <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-primary"  data-toggle="modal" data-target="#problem-modal">问题解决</a>
@@ -178,7 +190,9 @@
                                     {elseif $order.state == 11}<!-- 转账-->
                                     <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#transfer-modal">转账</a>
                                     {elseif $order.state == 12}<!-- 交易完成-->
-
+                                    {if $order.service_type == 1}
+                                    <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">交易售后</a>
+                                    {/if}
                                     {/if}
                                 </td>
                             </tr>
