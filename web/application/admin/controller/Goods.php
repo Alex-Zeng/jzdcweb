@@ -371,7 +371,6 @@ class Goods extends Base{
         $specificationModel = new MallGoodsSpecifications();
 
         $colorRows = $specificationModel->where(['goods_id'=>$goodsId,'type'=>$typeId,'color_id'=>['gt',0]])->field(['color_id','color_name','color_img'])->group('color_id')->select();
-
         foreach ($colorRows as &$colorRow){
             $colorRow['color_path'] = MallColor::getFormatImg($colorRow->color_id);
             $colorRow['color_img_path'] = MallGoodsSpecifications::getFormatPath($colorRow->color_img);
