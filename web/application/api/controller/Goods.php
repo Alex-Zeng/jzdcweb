@@ -279,7 +279,7 @@ class Goods  extends Base {
             }
         }
         if($mallTypeRow && $mallTypeRow->diy_option == 1){
-            $optionRows =  $goodsSpecificationsModel->alias('a')->join(config('prefix').'mall_type_option b','a.option_id=b.id','left')->where(['a.goods_id'=>$row->id])->field(['a.option_id','b.name as option_name'])->group('a.option_id')->select();
+            $optionRows =  $goodsSpecificationsModel->alias('a')->join(config('prefix').'mall_type_option b','a.option_id=b.id','left')->where(['a.goods_id'=>$row->id,'a.option_id'=>['gt',0]])->field(['a.option_id','b.name as option_name'])->group('a.option_id')->select();
             $optionName = $mallTypeRow->option_name ? $mallTypeRow->option_name : '二级规格';
             if($optionRows){
                 $standards[] = [

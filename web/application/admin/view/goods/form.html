@@ -246,9 +246,7 @@
     KindEditor.ready(function(K) {
         var editor1 = K.create('#goods-content', {
             cssPath : '__STATIC__/js/plugins/kindeditor/plugins/code/prettify.css',
-            //uploadJson : '/kindeditordemo/php/upload_json.php',
             uploadJson : '/?s=admin/file/upload2',
-            //  fileManagerJson : '/kindeditordemo/php/file_manager_json.php',
             allowFileManager : true,
             afterCreate : function() {
                 var self = this;
@@ -256,20 +254,19 @@
         });
     });
     $(function () {
-        var  specification = null;
+        var specification = null;
         $('#goods_type').change(function () {
             var typeId = $('select[name="type"]').val();
             $.ajax({
                 type:'get',
-                url:'?s=admin/goods/getType&typeId='+typeId+'&goodsId={$row.id}',
+                url:'/?s=admin/goods/getType&typeId='+typeId+'&goodsId={$row.id}',
                 data:{},
                 dataType:'json',
                 success:function (data) {
                     if(data.status == 0){
                         var color_rows = data.data.color_row;
                         var specification = data.data.specification;
-
-                        if(data.data.color == 1 || data.data.diy_option == 1){
+                        if(data.data.color == 1 || data.data.option == 1){
                             //
                             var colorIds = data.data.colorIds;
                             var optionIds = data.data.optionIds;
@@ -277,7 +274,6 @@
                             var json_data = {color:data.data.color,color_list:data.data.color_list,option:data.data.option,option_list:data.data.option_list,option_name:data.data.option_name,colorIds:colorIds,optionIds:optionIds}; //
                             var html = template('standard-container',json_data);
                             $('#standard_container').html(html);
-
                             //
                             if(color_rows.length > 0){
                                 for(var i=0; i < color_rows.length;i++){

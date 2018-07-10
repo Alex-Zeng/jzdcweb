@@ -245,7 +245,7 @@ class Goods extends Base{
         $this->assign('unitRows',$unitRows);
         $this->assign('row',$row);
         $this->assign('id',$id);
-        return $this->fetch();
+        return $this->fetch('goods/form');
     }
 
 

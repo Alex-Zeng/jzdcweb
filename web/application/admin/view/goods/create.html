@@ -180,15 +180,21 @@
 <script id="custom-template" type="text/html">
     <tr data-color="{{color_id}}" data-option="{{option_id}}">
         <td>
-            <input type="hidden" name="standard[{{index}}][color_id]"   value="{{color_id}}" />
-            <input type="hidden" name="standard[{{index}}][option_id]"  value="{{option_id}}"  />
-            <input type="hidden" name="standard[{{index}}][color_name]"  value="{{color_name}}"  />
+            <input type="hidden"  class="option_color_id" name="standard[{{index}}][color_id]"   value="{{color_id}}" />
+            <input type="hidden"  class="option_option_id" name="standard[{{index}}][option_id]"  value="{{option_id}}"  />
+            <input type="hidden"  class="option_color_name" name="standard[{{index}}][color_name]"  value="{{color_name}}"  />
+        </td>
+        {{ if color}}
+        <td>
             {{ if path}}<img src="{{path}}" width="30px" height="30px"  />{{/if}}{{color_name}}
         </td>
+        {{/if}}
+        {{ if option}}
         <td>{{option_name}}</td>
-        <td><input type="number"    class="form-control" value=""  name="standard[{{index}}][cost_price]" /></td>
-        <td><input type="number" class="form-control" value=""  name="standard[{{index}}][e_price]" /></td>
-        <td><input type="number" class="form-control"  value="" name="standard[{{index}}][w_price]" /></td>
+        {{ /if}}
+        <td><input type="number"    class="form-control" value="0.00"  name="standard[{{index}}][cost_price]" /></td>
+        <td><input type="number" class="form-control" value="0.00"  name="standard[{{index}}][e_price]" /></td>
+        <td><input type="number" class="form-control"  value="0.00" name="standard[{{index}}][w_price]" /></td>
         <td><input type="number" class="form-control" value=""  name="standard[{{index}}][barcode]" /></td>
         <td><input type="number" class="form-control" value=""  name="standard[{{index}}][store_code]" /></td>
         <td><i class="fa fa-trash-o" style="cursor: pointer" title="删除"></i></td>
@@ -197,6 +203,7 @@
 <script id="standard-container" type="text/html">
     <label  class="col-md-2 pull-right">规格</label>
     <div class="col-md-9 no-padding">
+        {{ if color}}
         <div class="row"><p>颜色</p></div>
         <div class="row">
             {{each color_list as value}}
@@ -207,6 +214,7 @@
             </div>
             {{/each}}
         </div>
+        {{/if}}
         {{ if option}}
         <div class="row"><p>{{option_name}}</p></div>
         <div class="row">
@@ -236,8 +244,13 @@
             <table class="table table table-striped">
                 <thead>
                 <tr>
+                    <th></th>
+                    {{ if color}}
                     <th  width="110px">颜色</th>
+                    {{/if}}
+                    {{ if option}}
                     <th>规格</th>
+                    {{/if}}
                     <th>成本价</th>
                     <th>实体店售价</th>
                     <th>网点售价</th>
@@ -291,6 +304,9 @@
         return false;
     }
 
+    //定义全局变量
+      var g_color = 0;
+      var g_option = 0;
     KindEditor.ready(function(K) {
         var editor1 = K.create('#goods-content', {
             cssPath : '__STATIC__/js/plugins/kindeditor/plugins/code/prettify.css',
@@ -311,8 +327,10 @@
                 dataType:'json',
                 success:function (data) {
                      if(data.status == 0){
-                         if(data.data.color == 1 || data.data.option == 1){
-                             var data = {color:data.data.color,color_list:data.data.color_list,option:data.data.option,option_list:data.data.option_list,option_name:data.data.option_name}; //
+                            g_color = data.data.color;
+                            g_option = data.data.option;
+                         if(g_color == 1 || g_option == 1){
+                             var data = {color:g_color,color_list:data.data.color_list,option:g_option,option_list:data.data.option_list,option_name:data.data.option_name}; //
                              var html = template('standard-container',data);
                              $('#standard_container').html(html);
                          }
@@ -443,20 +461,20 @@
             if(color.length > 0 && option.length > 0){
                 for(var i=0; i< color.length; i++){
                     for(var j=0;j<option.length; j++){
-                        html +=template('custom-template',{index:index,color_id:color[i].id,color_name:color[i].name,path:color[i].path,option_id:option[j].id,option_name:option[j].name});
+                        html +=template('custom-template',{index:index,color:g_color,option:g_option, color_id:color[i].id,color_name:color[i].name,path:color[i].path,option_id:option[j].id,option_name:option[j].name});
                         index++;
                     }
                 }
             }
             if(color.length == 0 && option.length > 0){
                 for(var j=0;j<option.length; j++){
-                    html +=template('custom-template',{index:index,color_id:0,color_name:'',option_id:option[j].id,option_name:option[j].name});
+                    html +=template('custom-template',{index:index,color:g_color,option:g_option,color_id:0,color_name:'',option_id:option[j].id,option_name:option[j].name});
                     index++;
                 }
             }
             if(color.length > 0 && option.length == 0){
                 for(var i=0; i< color.length; i++){
-                    html +=template('custom-template',{index:index,color_id:color[i].id,color_name:color[i].name,path:color[i].path,option_id:0,option_name:''});
+                    html +=template('custom-template',{index:index,color:g_color,option:g_option,color_id:color[i].id,color_name:color[i].name,path:color[i].path,option_id:0,option_name:''});
                     index++;
                 }
             }
@@ -544,5 +562,50 @@
                 // }
             }
         });
+
+        $(document).delegate('.fa-trash-o','click',function () {
+            //删除当前
+            $(this).closest('tr').remove();
+
+            //更新check选中值
+
+            updateChecked();
+        });
+
+        var updateChecked = function () {
+            if(g_color){
+                var selectedColorId = [];
+                $(".option_color_id").each(function () {
+                    selectedColorId.push($(this).val());
+                })
+
+                //
+                $(".color_select").each(function () {
+                    $(this).prop("checked",false);
+                    if($.inArray($(this).val(),selectedColorId) >= 0){
+                        $(this).prop("checked",true);
+                    }
+                })
+                //删除
+                // $("#color-container").find("tr").each(function () {
+                //    if($.inArray($(this).val(),selectedColorId) == -1){
+                //        $(this).remove();
+                //    }
+                // })
+            }
+            if(g_option){
+                var selectedOptionId = [];
+                $(".option_option_id").each(function () {
+                    selectedOptionId.push($(this).val());
+                })
+
+                $(".option_select").each(function () {
+                    $(this).prop("checked",false);
+                    if($.inArray($(this).val(),selectedOptionId) >= 0){
+                        $(this).prop("checked",true);
+                    }
+                })
+            }
+        }
     })
 </script>
