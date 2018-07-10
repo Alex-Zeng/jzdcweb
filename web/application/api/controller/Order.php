@@ -589,7 +589,7 @@ class Order extends Base{
         $goodsModel = new MallOrderGoods();
         $result = $goodsModel->save(['service_type'=>$type],['order_id'=>$row->id,'goods_id'=>$goodsId]);
         if($result !== false){
-            $model->save(['state'=>MallOrder::STATE_PROBLEM_CONFIRM],$where);
+            $model->save(['service_type'=>1],$where);
             return ['status'=>0,'data'=>[],'msg'=>'服务申请成功'];
         }
 
