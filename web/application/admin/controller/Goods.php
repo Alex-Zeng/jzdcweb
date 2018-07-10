@@ -429,6 +429,14 @@ class Goods extends Base{
         ];
     }
 
+    /**
+     * @desc 预览
+     * @param $id
+     * @return mixed
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public function preview($id){
         $model = new MallGoods();
         $row = $model->where(['id'=>$id])->find();
