@@ -9,6 +9,7 @@
 namespace app\api\controller;
 
 use app\common\model\IndexUser;
+use app\common\model\IndexGroup;
 use app\common\model\MallGoods;
 use app\common\model\MallGoodsSpecifications;
 use app\common\model\MallTypeOption;
