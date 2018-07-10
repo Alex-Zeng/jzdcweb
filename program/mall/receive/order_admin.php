@@ -307,7 +307,8 @@ switch ($act){
             goods_count,
             buyer_remark,
             buyer_order_code,
-            pay_date
+            pay_date,
+            buyer_comment
              from jzdc_mall_order od where `shop_id`=1 and `seller_del`=0;";
 
         $r=$pdo->query($sql,2);
@@ -324,6 +325,7 @@ switch ($act){
             $list.=floor($v['goods_count'])."\t,";
             $list.=str_replace(',',' ',trim($v['buyer_remark']))."\t,";
             $list.=str_replace(',',' ',trim($v['buyer_order_code']))."\t,";
+            $list.=str_replace(array("\r\n", "\r", "\n"),' ',trim($v['buyer_comment']))."\t,";
             if (!empty($v['pay_date'])){
                 $list.=str_replace(',',' ',trim($v['pay_date']))."";
             }else{

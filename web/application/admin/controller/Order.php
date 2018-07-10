@@ -43,6 +43,9 @@ class Order extends Base{
             $model->where(['add_time'=>['lt',strtotime($end.' 23:59:59')]]);
         }
 
+        //查询总价
+        $totalMoney = $model->field(['sum(`actual_money`) AS money'])->find();
+
         $rows = $model->order('id','desc')->paginate(10,false,['query'=>request()->param()]);
         $userModel = new IndexUser();
         $goodsModel = new MallOrderGoods();
@@ -85,6 +88,7 @@ class Order extends Base{
         $this->assign('k',$k);
         $this->assign('stateList',MallOrder::getStateList());
         $this->assign('page',$rows->render());
+        $this->assign('total',$totalMoney->money);
         return $this->fetch();
     }
 

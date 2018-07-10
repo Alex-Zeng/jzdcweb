@@ -50,6 +50,9 @@ class MallCart extends Base{
         if($auth){
             return $auth;
         }
+        if($this->groupId != IndexGroup::GROUP_BUYER){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限操作'];
+        }
 
         //查询是否
         $model = new MallGoods();

@@ -129,7 +129,7 @@ foreach($r as $v){
         $priceHtml.='<div class=line><span class=m_label>数量</span><span class=value><input style="height: 31px" type="number" min="1"  value="'.self::format_quantity($v2['quantity']).'" id="p_amount_'.$v['id'].'" /></span></div>';
 
 	}
-	if($v['buyer_remark']!=''){$v['buyer_remark']="<div class=buyer_remark>".self::$language['buyer_remark'].': '.$v['buyer_remark'].'</div>';}
+	if($v['buyer_remark']!=''){$v['buyer_remark']="<div class=buyer_remark>物料规格: ".$v['buyer_remark'].'</div>';}
     if($v['buyer_order_code']!=''){$v['buyer_remark']=$v['buyer_remark']."<div class=buyer_remark>".self::$language['buyer_order_code'].': '.$v['buyer_order_code'].'</div>';}
 
     if($v['state']<1){$actual="<div class=actual_money>".self::$language['actual_pay'].": <span class=value>".$v['actual_money']."</span> <a href=# class=edit_a d_id=".$v['id']." act='actual_money'></a></div>";}else{$actual="<div class=actual_money>".self::$language['actual_pay'].": <span class=value>".$v['actual_money']."</span></div>";}

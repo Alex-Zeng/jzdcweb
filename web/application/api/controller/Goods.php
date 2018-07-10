@@ -84,9 +84,7 @@ class Goods  extends Base {
     public function getRecommend(Request $request){
         $pageNumber = $request->post('pageNumber',1,'intval');
         $pageSize = $request->post('pageSize',10,'intval');
-
         $start = ($pageNumber - 1)*$pageSize;
-        $end = $pageNumber*$pageSize;
 
         $typeModel = new MallType();
         $typeIdArr = $typeModel->getAllIds();
@@ -102,7 +100,7 @@ class Goods  extends Base {
         ];
         $total = $model->where($where)->count();
 
-        $rows = $model->where($where)->order('id desc, bidding_show desc')->limit($start,$end)->field(['id','icon','title','w_price','min_price','max_price','w_price','discount','bidding_show'])->select();
+        $rows = $model->where($where)->order('id desc, bidding_show desc')->limit($start,$pageSize)->field(['id','icon','title','w_price','min_price','max_price','w_price','discount','bidding_show'])->select();
         $list = [];
         foreach ($rows as $row){
             $list[] = [
@@ -281,7 +279,7 @@ class Goods  extends Base {
             }
         }
         if($mallTypeRow && $mallTypeRow->diy_option == 1){
-            $optionRows =  $goodsSpecificationsModel->alias('a')->join(config('prefix').'mall_type_option b','a.option_id=b.id','left')->where(['a.goods_id'=>$row->id])->field(['a.option_id','b.name as option_name'])->group('a.option_id')->select();
+            $optionRows =  $goodsSpecificationsModel->alias('a')->join(config('prefix').'mall_type_option b','a.option_id=b.id','left')->where(['a.goods_id'=>$row->id,'a.option_id'=>['gt',0]])->field(['a.option_id','b.name as option_name'])->group('a.option_id')->select();
             $optionName = $mallTypeRow->option_name ? $mallTypeRow->option_name : '二级规格';
             if($optionRows){
                 $standards[] = [
