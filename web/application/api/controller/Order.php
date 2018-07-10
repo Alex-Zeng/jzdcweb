@@ -413,7 +413,7 @@ class Order extends Base{
 
         //查询产品
         $goodsModel = new MallOrderGoods();
-        $goodsRows = $goodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','a.service_type','b.icon'])->select();
+        $goodsRows = $goodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.icon'])->select();
 
         foreach($goodsRows as &$goodsRow){
             $goodsRow['quantity'] = intval($goodsRow->quantity);
