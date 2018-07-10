@@ -210,7 +210,8 @@ class Goods extends Base{
                         'color_name' => isset($color[$colorId]) ? $color[$colorId]['name'] : '',
                         'color_img' => isset($color[$colorId]) ? $color[$colorId]['path'] : '',
                         'option_id' => $standard[$i]['option_id'],
-                        'goods_id' => $goodsModel->id,
+                        'goods_id' => $id,
+                        'cost_price' =>$standard[$i]['cost_price'],
                         'e_price' => $standard[$i]['e_price'],
                         'w_price' => $standard[$i]['w_price'],
                         'quantity' => 1000000,
@@ -219,7 +220,6 @@ class Goods extends Base{
                         'store_code' => $standard[$i]['store_code']
                     ];
                 }
-
                 //商品规格处理
                 $specificationModel = new MallGoodsSpecifications();
                 //删除规格数据
@@ -245,7 +245,7 @@ class Goods extends Base{
         $this->assign('unitRows',$unitRows);
         $this->assign('row',$row);
         $this->assign('id',$id);
-        return $this->fetch('goods/form');
+        return $this->fetch();
     }
 
 
