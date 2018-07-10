@@ -606,6 +606,12 @@ class User extends Base
         return ['status' => 0, 'data' => $data, 'msg' => ''];
     }
 
+    //
+    public function getCertificationExt(){
+        $url = config('jzdc_domain').'/web/public/static/doc/template_attorney.docx';
+        return ['status'=>0,'data'=>['attorney'=>$url],'msg'=>''];
+    }
+
     /**
      * @desc 添加收货地址标签
      * @return array|void
