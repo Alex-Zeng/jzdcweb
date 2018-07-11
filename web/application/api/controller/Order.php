@@ -15,6 +15,7 @@ use app\common\model\MallGoods;
 use app\common\model\MallGoodsSpecifications;
 use app\common\model\MallOrder;
 use app\common\model\MallOrderGoods;
+use app\common\model\MallOrderPay;
 use app\common\model\MallReceiver;
 use app\common\model\MallTypeOption;
 use app\common\model\OrderMsg;
@@ -379,7 +380,7 @@ class Order extends Base{
      * @throws \think\exception\DbException
      */
     public function detail(Request $request){
-        $no = $request->post('no','');
+        $no = $request->post('no','H100000000190');
         $auth = $this->auth();
         if($auth){
             return $auth;
@@ -422,6 +423,10 @@ class Order extends Base{
             $goodsRow['icon'] = MallGoods::getFormatImg($goodsRow->icon);
         }
 
+        //查询支付凭证
+        $payModel = new MallOrderPay();
+        $payRow = $payModel->where(['order_id'=>$row->id,'pay_type'=>['in',[1,2]]])->order('id','desc')->find();
+
         //express expressCode sendDate estimatedDate
         $data = [
             'orderNo' => $row->out_id,
@@ -434,7 +439,10 @@ class Order extends Base{
             'time' => date('Y-m-d H:i',$row->add_time),
             'date' => date('Y-m-d',$row->delivery_time),
             'remark' => $row->buyer_comment,
-            'payMethod' => $row->pay_date ? '账期支付': '',
+            'payMethod' => $row->pay_date && !$payRow ? '账期支付': ($payRow->pay_type == 1 ? '汇款' : '转账'),
+            'payNumber' => $payRow ? $payRow->number : '',
+            'payImg' => $payRow ? MallOrderPay::getFormatPicture($payRow->picture) : '',
+            'payDate' => $payRow && $payRow->pay_time ? substr($payRow->pay_time,0,10) : '',
             'express' => $row->express_name ? $row->express_name : '',   //物流
             'expressCode' => $row->express_code ? $row->express_code : '', //物流单号
             'sendDate' => $row->send_time > 0 ? date('Y-m-d',$row->send_time) : '', //发货日期
