@@ -286,11 +286,10 @@ class Order extends Base{
 
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();
-                $content = "尊敬的供应商用户，订单号：{$row->out_id}的款项已经汇出,实际到账时间依您的银行通知为准，详细汇款信息请进入\"用户中心-待收款\"中查看，谢谢。";
-                $msgData = ['title'=>"打款给供应商",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
+                $content = "订单号：{$row->out_id} 金额：{$row->actual_money},已完成付款。";
+                $msgData = ['title'=>"订单款已付",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
                 $orderMsgModel->save($msgData);
                 $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
-
             }
             return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
         }
@@ -303,7 +302,7 @@ class Order extends Base{
      * @return array
      */
     public function cancel($id){
-       //查询订单
+        //查询订单
         $model = new MallOrder();
         $row = $model->where(['id'=>$id])->find();
         if(!$row){
@@ -318,16 +317,15 @@ class Order extends Base{
             $userModel = new IndexUser();
             //更新消息通知
             $orderMsgModel = new OrderMsg();
-            $content = "尊敬的用户，经与您确认，订单号：{$row->out_id}现已取消交易，感谢您的使用。";
+            $content = "订单号：{$row->out_id}【$row->goods_names】已取消该笔订单。";
             //采购商
-            $msgData = ['title'=>"关闭订单",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
-            $orderMsgModel->save($msgData);
-            $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+            $msgData = ['title'=>"订单取消",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+//            $orderMsgModel->save($msgData);
+//            $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
             //供应商
             $msgData['user_id'] = $row->supplier;
             $orderMsgModel->save($msgData);
             $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
-
             return ['status'=>0,'data'=>[],'msg'=>'成功取消订单'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'失败取消订单'];

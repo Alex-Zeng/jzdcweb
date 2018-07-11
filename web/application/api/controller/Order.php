@@ -547,8 +547,8 @@ class Order extends Base{
         //更新状态
         if($row->pay_date){ //有账期
             $state = MallOrder::STATE_ACCOUNT_PERIOD;
-        }else{ //无账期
-            $state = MallOrder::STATE_FINISH;
+        }else{ //无账期 =>
+            $state = MallOrder::STATE_REMITTANCE_SUPPLIER;
         }
 
         $result = $model->save(['state'=>$state],$where);
@@ -560,7 +560,9 @@ class Order extends Base{
             $msgData = ['title'=>'买家已确认收货','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
             $orderMsgModel->save($msgData);
             $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
+            return ['status'=>0,'data'=>[],'msg'=>'确认收货成功'];
         }
+        return ['status'=>1,'data'=>0,'msg'=>'确认收货失败'];
     }
 
 
