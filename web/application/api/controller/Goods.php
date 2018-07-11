@@ -228,7 +228,7 @@ class Goods  extends Base {
         //更新搜索历史
         if($keywords && $this->userId){
             $searchModel = new UserSearchLog();
-            $searchRow = $searchModel->where(['user_id'=>$this->userId,'keyword'=>$keywords,'type'=>$type])->find();
+            $searchRow = $searchModel->where(['user_id'=>$this->userId,'keyword'=>$keywords])->find();
             if($searchRow){
                 $searchModel->save(['times'=>$searchRow->times+1,'update_time'=>time()],['user_id'=>$this->userId,'keyword'=>$keywords,'type'=>$type]);
             }else{
