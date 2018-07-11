@@ -385,6 +385,9 @@ class Order extends Base{
      * @desc 导出订单
      */
     public function export(Request $request){
+        $t = $request->get();
+
+
         $k = $request->get('k','','trim');
         $state = $request->get('state','-1');
         $start = $request->get('start','');
@@ -404,7 +407,7 @@ class Order extends Base{
             $where['add_time'] = ['gt',strtotime($end.' 23:59:59')];
         }
 
-      //  print_r($where); exit;
+        print_r($where); exit;
 
         vendor('PHPExcel.PHPExcel');
         $objPHPExcel = new \PHPExcel();

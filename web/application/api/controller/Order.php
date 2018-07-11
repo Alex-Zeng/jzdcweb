@@ -549,11 +549,11 @@ class Order extends Base{
         }
         $model = new MallOrder();
         $where['out_id'] = $orderNo;
-        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','goods_names','state','pay_date','out_id','buyer_comment','buyer_id','supplier'])->find();
+        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','goods_names','state','pay_date','out_id','buyer_comment','buyer_id','supplier','service_type'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
         }
-        if($row->state != MallOrder::STATE_RECEIVE){
+        if($row->state != MallOrder::STATE_RECEIVE || $row->service_type == 1){
             return ['status'=>1,'data'=>[],'msg'=>'订单状态操作错误'];
         }
 
