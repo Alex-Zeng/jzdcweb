@@ -17,6 +17,7 @@ use app\common\model\MallOrder;
 use app\common\model\MallOrderGoods;
 use app\common\model\MallReceiver;
 use app\common\model\MallTypeOption;
+use app\common\model\OrderMsg;
 use app\common\model\UserGoodsSpecifications;
 use think\Request;
 
@@ -349,15 +350,16 @@ class Order extends Base{
                      $specificationRow = $specificationModel->where(['id'=>$goodsRow->s_id])->find();
                      if($specificationRow && $specificationRow->color_name){
                          $specifications_info = $specificationRow->color_name;
-                         if($specificationRow->option_id > 0){
-                             $optionModel = new MallTypeOption();
-                             $optionRow = $optionModel->where(['id'=>$specificationRow->option_id])->find();
-                             if($optionRow && $optionRow->name){
-                                 $specifications_info .=','.$optionRow->name;
-                             }
-                         }
+
                      }
                      //查询规格
+                    if($specificationRow->option_id > 0){
+                        $optionModel = new MallTypeOption();
+                        $optionRow = $optionModel->where(['id'=>$specificationRow->option_id])->find();
+                        if($optionRow && $optionRow->name){
+                            $specifications_info .=','.$optionRow->name;
+                        }
+                    }
                 }
                 $goodsRow['specifications_info'] = $specifications_info;
 
@@ -487,7 +489,7 @@ class Order extends Base{
             return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
         }
         $where['supplier'] = $this->userId;
-        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','state','pay_date','out_id','buyer_comment','buyer_id','supplier'])->find();
+        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','goods_names','state','pay_date','out_id','buyer_comment','buyer_id','supplier'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
         }
@@ -505,10 +507,65 @@ class Order extends Base{
 
         $result = $model->save($data,$where);
         if($result !== false){
+            //消息通知
+            $orderMsgModel = new OrderMsg();
+            $userModel = new IndexUser();
+            $content = "订单号：{$row->out_id}【{$row->goods_names}】供应商已经发货。";
+            $msgData = ['title'=>'订单已发货','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+            $orderMsgModel->save($msgData);
+            $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
             return ['status'=>0,'data'=>[],'msg'=>'提交成功'];
         }
         return ['status'=>1,'data'=>0,'msg'=>'提交失败'];
     }
+
+    /**
+     * @desc 确认收货
+     * @param Request $request
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function receipt(Request $request){
+        $orderNo = $request->post('no','');
+        if(!$orderNo){
+            return ['status'=>1,'data'=>[],'msg'=>'订单号不能为空'];
+        }
+        if($this->groupId != IndexGroup::GROUP_BUYER){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限操作'];
+        }
+        $model = new MallOrder();
+        $where['out_id'] = $orderNo;
+        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','goods_names','state','pay_date','out_id','buyer_comment','buyer_id','supplier'])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
+        }
+        if($row->state != MallOrder::STATE_RECEIVE){
+            return ['status'=>1,'data'=>[],'msg'=>'订单状态操作错误'];
+        }
+
+        //更新状态
+        if($row->pay_date){ //有账期
+            $state = MallOrder::STATE_ACCOUNT_PERIOD;
+        }else{ //无账期 =>
+            $state = MallOrder::STATE_REMITTANCE_SUPPLIER;
+        }
+
+        $result = $model->save(['state'=>$state],$where);
+        if($result !== false){
+            //消息通知
+            $orderMsgModel = new OrderMsg();
+            $userModel = new IndexUser();
+            $content = "订单号：{$row->out_id}【{$row->goods_names}】买家已经确认收货。";
+            $msgData = ['title'=>'买家已确认收货','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
+            $orderMsgModel->save($msgData);
+            $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
+            return ['status'=>0,'data'=>[],'msg'=>'确认收货成功'];
+        }
+        return ['status'=>1,'data'=>0,'msg'=>'确认收货失败'];
+    }
+
 
     /**
      * @desc 取消订单
@@ -545,6 +602,12 @@ class Order extends Base{
 
         $result = $model->save(['state'=>MallOrder::STATE_CLOSED],$where);
         if($result !== false){
+            $orderMsgModel = new OrderMsg();
+            $userModel = new IndexUser();
+            $content = "订单号：{$row->out_id}【{$row->goods_names}】已取消该笔订单。";
+            $msgData = ['title'=>'订单取消','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
+            $orderMsgModel->save($msgData);
+            $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
             return ['status'=>0,'data'=>[],'msg'=>'订单取消成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'订单取消失败'];
@@ -595,6 +658,7 @@ class Order extends Base{
 
         return ['status'=>1,'data'=>[],'msg'=>'服务申请失败'];
     }
+
 
 
 }

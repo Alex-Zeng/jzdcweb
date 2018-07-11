@@ -123,8 +123,13 @@ class Order extends Base{
 
                     //更新消息通知
                     $orderMsgModel = new OrderMsg();
-                    $content = "您好，订单号：{$row->out_id}现可安排发货，发货完成后，请在\"用户中心-待发货\"发布物流信息，谢谢。";
+                    $content = "订单号：{$row->out_id}【{$row->goods_names}】工作人员已完成订单审核，下一步等待签约。";
+                    //采购商
                     $msgData = ['title'=>"待发货",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+                    $orderMsgModel->save($msgData);
+                    $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+                    //供应商
+                    $msgData = ['title'=>"待发货",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
                     $orderMsgModel->save($msgData);
                     $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
                 }
@@ -134,6 +139,18 @@ class Order extends Base{
             $data = ['sum_money'=>$sumMoney,'state'=>MallOrder::STATE_SIGN];
             $result = $model->save($data,['id'=>$id]);
             if($result == true){
+                //更新消息通知
+                $orderMsgModel = new OrderMsg();
+                $content = "订单号：{$row->out_id}【{$row->goods_names}】工作人员已完成订单审核，下一步等待签约。";
+                //采购商
+                $msgData = ['title'=>"已核单",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+                $orderMsgModel->save($msgData);
+                $userModel = new IndexUser();
+                $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+                //供应商
+                $msgData = ['title'=>"已核单",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
+                $orderMsgModel->save($msgData);
+                $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
                 return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
             }
         }
@@ -163,23 +180,29 @@ class Order extends Base{
         }
         $result = $model->save($data,['id'=>$id]);
         if($result == true){
+            $userModel = new IndexUser();
             if($payDate){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
-                $userModel = new IndexUser();
                 $user = $userModel->getInfoById($row->supplier);
                 $yunpian = new Yunpian();
                 $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
 
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();
-                $statusList = MallOrder::getStateList();
-                $content = "您好，订单号：{$row->out_id}现可安排发货，发货完成后，请在\"用户中心-待发货\"发布物流信息，谢谢。";
-                $msgData = ['title'=>$statusList[$row->state],'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+                $content = "订单号：{$row->out_id}【{$row->goods_names}】,现已完成签约，请尽快安排发货。";
+                $msgData = ['title'=>'待发货提醒','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
+                $orderMsgModel->save($msgData);
+                $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
+            }else{
+                //更新消息通知
+                $orderMsgModel = new OrderMsg();
+                $content = "订单号：{$row->out_id}【{$row->goods_names}】现已完成签约。";
+                $msgData = ['title'=>'订单已签约','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
                 $orderMsgModel->save($msgData);
                 $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
             }
-            return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
+            return ['status'=>0,'data'=>[],'msg'=>'签约成功'];
         }
-        return ['status'=>1,'data'=>[],'msg'=>'失败核价'];
+        return ['status'=>1,'data'=>[],'msg'=>'签约失败'];
     }
 
     /**
@@ -214,7 +237,6 @@ class Order extends Base{
 
         $result = $model->save($data,['id'=>$id]);
         if($result == true){
-            //jzdc_mall_order_pay
             $payModel = new MallOrderPay();
             $data =['order_id'=>$id,'pay_type'=>$payType,'number'=>$number,'picture'=>$picture,'create_time'=>date('Y-m-d H:i:s')];
             if($payType == 3){ //转账
@@ -232,10 +254,10 @@ class Order extends Base{
 
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();
-                $statusList = MallOrder::getStateList();
-                $content = "您好，订单号：{$row->out_id}现可安排发货，发货完成后，请在\"用户中心-待发货\"发布物流信息，谢谢。";
-                $msgData = ['title'=>$statusList[$row->state],'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+                $content = "订单号：{$row->out_id}【{$row->goods_names}】已完成签约，请尽快安排发货。";
+                $msgData = ['title'=>'待发货提醒','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
                 $orderMsgModel->save($msgData);
+                $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
             }
             if($flag == 3){
                  //更新店铺财务记录
@@ -264,11 +286,10 @@ class Order extends Base{
 
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();
-                $content = "尊敬的供应商用户，订单号：{$row->out_id}的款项已经汇出,实际到账时间依您的银行通知为准，详细汇款信息请进入\"用户中心-待收款\"中查看，谢谢。";
-                $msgData = ['title'=>"打款给供应商",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
+                $content = "订单号：{$row->out_id} 金额：{$row->actual_money},已完成付款。";
+                $msgData = ['title'=>"订单款已付",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
                 $orderMsgModel->save($msgData);
                 $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
-
             }
             return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
         }
@@ -281,7 +302,7 @@ class Order extends Base{
      * @return array
      */
     public function cancel($id){
-       //查询订单
+        //查询订单
         $model = new MallOrder();
         $row = $model->where(['id'=>$id])->find();
         if(!$row){
@@ -296,16 +317,15 @@ class Order extends Base{
             $userModel = new IndexUser();
             //更新消息通知
             $orderMsgModel = new OrderMsg();
-            $content = "尊敬的用户，经与您确认，订单号：{$row->out_id}现已取消交易，感谢您的使用。";
+            $content = "订单号：{$row->out_id}【$row->goods_names】已取消该笔订单。";
             //采购商
-            $msgData = ['title'=>"关闭订单",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
-            $orderMsgModel->save($msgData);
-            $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+            $msgData = ['title'=>"订单取消",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+//            $orderMsgModel->save($msgData);
+//            $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
             //供应商
             $msgData['user_id'] = $row->supplier;
             $orderMsgModel->save($msgData);
             $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
-
             return ['status'=>0,'data'=>[],'msg'=>'成功取消订单'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'失败取消订单'];
@@ -333,6 +353,34 @@ class Order extends Base{
         return ['status'=>1,'data'=>[],'msg'=>'操作失败'];
     }
 
+
+    /**
+     * @desc 售后处理
+     * @param $id
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function service($id){
+        $model = new MallOrder();
+        $row = $model->where(['id'=>$id])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
+        }
+        if($row->service_type != 1){
+            return ['status'=>1,'data'=>[],'msg'=>'不能操作该订单'];
+        }
+
+        $result = $model->save(['service_type'=>2],['id'=>$id]);
+        if($result == true){
+            //更新子订单
+            $goodsModel = new MallOrderGoods();
+            $goodsModel->save(['service_type'=>0],['order_id'=>$id]);
+            return ['status'=>0,'data'=>[],'msg'=>'操作成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'操作失败'];
+    }
 
     /**
      * @desc 导出订单

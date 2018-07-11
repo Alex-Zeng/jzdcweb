@@ -187,9 +187,9 @@ class Goods  extends Base {
 
         $start = ($pageNumber - 1)*$pageSize;
 
-        if(!$keywords) {
-            return ['status'=>1,'data'=>[],'msg'=>'搜索关键词不能为空'];
-        }
+//        if(!$keywords) {
+//            return ['status'=>1,'data'=>[],'msg'=>'搜索关键词不能为空'];
+//        }
 
         $this->noauth();
 
