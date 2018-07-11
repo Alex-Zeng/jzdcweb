@@ -186,8 +186,10 @@ class Goods  extends Base {
         if($pageSize > 12){ $pageSize = 12;}
 
         $start = ($pageNumber - 1)*$pageSize;
-        $end = $pageNumber*$pageSize;
 
+        if(!$keywords) {
+            return ['status'=>1,'data'=>[],'msg'=>'搜索关键词不能为空'];
+        }
 
         $this->noauth();
 
@@ -207,7 +209,7 @@ class Goods  extends Base {
             }
             $total = $model->where($where)->count();
 
-            $rows = $model->where($where)->order('w_price',$sort)->limit($start,$end)->field(['id','icon','title','w_price','min_price','max_price','w_price','discount','bidding_show'])->select();
+            $rows = $model->where($where)->order('w_price',$sort)->limit($start,$pageSize)->field(['id','icon','title','w_price','min_price','max_price','w_price','discount','bidding_show'])->select();
         }else{ //供应商搜索
             $total =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where(['a.state'=>2,'a.mall_state'=>1])->where('b.real_name','like','%'.$keywords.'%')->count();
             $rows =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where(['a.state'=>2,'a.mall_state'=>1])->where('b.real_name','like','%'.$keywords.'%')->order('a.w_price',$sort)->field(['a.id','a.icon','a.title','a.w_price','a.min_price','a.max_price','a.discount','a.bidding_show'])->select();
@@ -233,6 +235,7 @@ class Goods  extends Base {
                 $searchModel->save(['user_id'=>$this->userId,'keyword'=>$keywords,'type'=>$type,'times'=>1,'create_time'=>time(),'update_time'=>time()]);
             }
         }
+
 
         return ['status'=>0,'data'=>['total'=> $total,'list'=>$list],'msg'=>''];
     }

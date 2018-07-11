@@ -30,23 +30,25 @@ class Order extends Base{
         $start = Request::instance()->get('start','');
         $end = Request::instance()->get('end','');
         $model = new MallOrder();
+
+        $where = [];
         if(isset($k) && $k){
-            $model->where('out_id|buyer','like','%'.$k.'%');
+            $where['out_id|buyer'] = ['like','%'.$k.'%'];
         }
         if(isset($state) && $state >= 0){
-            $model->where(['state' => $state]);
+            $where['state'] = $state;
         }
         if(isset($start) && $start){
-            $model->where(['add_time'=>['gt',strtotime($start)]]);
+            $where['add_time'] = ['gt',strtotime($start)];
         }
         if(isset($end) && $end){
-            $model->where(['add_time'=>['lt',strtotime($end.' 23:59:59')]]);
+            $where['add_time'] = ['gt',strtotime($end.' 23:59:59')];
         }
 
         //查询总价
-        $totalMoney = $model->field(['sum(`actual_money`) AS money'])->find();
+        $totalMoney = $model->where($where)->field(['sum(`actual_money`) AS money'])->find();
 
-        $rows = $model->order('id','desc')->paginate(10,false,['query'=>request()->param()]);
+        $rows = $model->where($where)->order('id','desc')->paginate(10,false,['query'=>request()->param()]);
         $userModel = new IndexUser();
         $goodsModel = new MallOrderGoods();
         foreach($rows as &$row){
@@ -88,7 +90,7 @@ class Order extends Base{
         $this->assign('k',$k);
         $this->assign('stateList',MallOrder::getStateList());
         $this->assign('page',$rows->render());
-        $this->assign('total',$totalMoney->money);
+        $this->assign('total',$totalMoney ? ($totalMoney->money ? $totalMoney->money : '0.00'  ): '0.00');
         return $this->fetch();
     }
 

@@ -44,7 +44,7 @@
                                         {foreach name=":getTypeLevelList(3)" id="type"}
                                         <option value="{$type.id}"   {$row.type == $type.id ? 'selected="selected"' : ''}>
                                             {if $type.level == 2}&nbsp;&nbsp;&nbsp;&nbsp;|-&nbsp;{elseif $type.level == 3}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|-&nbsp;{/if}{$type.name}</option>
-                                        {/foreach}
+                                            {/foreach}
                                     </select>
                                     </span>
                                 </div>
@@ -155,12 +155,18 @@
 <script id="custom-template" type="text/html">
     <tr data-color="{{color_id}}" data-option="{{option_id}}">
         <td>
-            <input type="hidden" name="standard[{{index}}][color_id]"   value="{{color_id}}" />
-            <input type="hidden" name="standard[{{index}}][option_id]"  value="{{option_id}}"  />
-            <input type="hidden" name="standard[{{index}}][color_name]"  value="{{color_name}}"  />
+            <input type="hidden" class="option_color_id"  name="standard[{{index}}][color_id]"   value="{{color_id}}" />
+            <input type="hidden" class="option_option_id" name="standard[{{index}}][option_id]"  value="{{option_id}}"  />
+            <input type="hidden" class="option_color_name" name="standard[{{index}}][color_name]"  value="{{color_name}}"  />
+        </td>
+        {{ if color}}
+        <td>
             {{ if path}}<img src="{{path}}" width="30px" height="30px"  />{{/if}}{{color_name}}
         </td>
+        {{/if}}
+        {{ if option}}
         <td>{{option_name}}</td>
+        {{/if}}
         <td><input type="number"    class="form-control" value="{{cost_price}}"  name="standard[{{index}}][cost_price]" /></td>
         <td><input type="number" class="form-control" value="{{e_price}}"  name="standard[{{index}}][e_price]" /></td>
         <td><input type="number" class="form-control"  value="{{w_price}}" name="standard[{{index}}][w_price]" /></td>
@@ -172,6 +178,7 @@
 <script id="standard-container" type="text/html">
     <label for="" class="col-md-2 pull-right">规格</label>
     <div class="col-md-9">
+        {{ if color}}
         <div class="row"><p>颜色</p></div>
         <div class="row">
             {{each color_list as value}}
@@ -182,6 +189,7 @@
             </div>
             {{/each}}
         </div>
+        {{/if}}
         {{ if option}}
         <div class="row"><p>{{option_name}}</p></div>
         <div class="row">
@@ -211,8 +219,13 @@
             <table class="table table table-striped">
                 <thead>
                 <tr>
+                    <th></th>
+                    {{ if color}}
                     <th  width="110px">颜色</th>
+                    {{/if}}
+                    {{ if option}}
                     <th>规格</th>
+                    {{/if}}
                     <th>成本价</th>
                     <th>实体店售价</th>
                     <th>网点售价</th>
@@ -237,18 +250,41 @@
     var url = '{:url("admin/goods/index")}';
     $('a[href="'+url+'"]').addClass('active');
     $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
-    function validateSubmit(){
-        if ($("#edit-form").data('bootstrapValidator').isValid()) {
+    function validateSubmit() {
+        $('#cover-upload-file').closest('.form-group').removeClass('has-error');
+        $('#cover-upload-file').closest('.form-group').find('.help-block').html('');
+        $('#multi-upload-file').closest('.form-group').removeClass('has-error');
+        $('#multi-upload-file').closest('.form-group').find('.help-block').html('');
+
+        //  $("#add-form").data('bootstrapValidator').validate();
+        var valid = true;
+        //图片验证
+        // alert($('#cover-upload-file').val());
+        if ($('#cover-upload-file').val() == '') {
+            $('#cover-upload-file').closest('.form-group').addClass('has-error');
+            $('#cover-upload-file').closest('.form-group').find('.help-block').html('请上传封面图片');
+            valid = false;
+        }
+
+        if ($('#multi-upload-file').val() == '') {
+            $('#multi-upload-file').closest('.form-group').addClass('has-error');
+            $('#multi-upload-file').closest('.form-group').find('.help-block').html('请上传多视角图片');
+            valid = false;
+        }
+
+        var result = $("#edit-form").data('bootstrapValidator').isValid();
+        if (result && valid) {
             return true;
         }
         return false;
     }
+    var g_color = 0;
+    var g_option = 0;
+
     KindEditor.ready(function(K) {
         var editor1 = K.create('#goods-content', {
             cssPath : '__STATIC__/js/plugins/kindeditor/plugins/code/prettify.css',
-            //uploadJson : '/kindeditordemo/php/upload_json.php',
             uploadJson : '/?s=admin/file/upload2',
-            //  fileManagerJson : '/kindeditordemo/php/file_manager_json.php',
             allowFileManager : true,
             afterCreate : function() {
                 var self = this;
@@ -256,28 +292,27 @@
         });
     });
     $(function () {
-      var  specification = null;
+        var specification = null;
         $('#goods_type').change(function () {
             var typeId = $('select[name="type"]').val();
             $.ajax({
                 type:'get',
-                url:'?s=admin/goods/getType&typeId='+typeId+'&goodsId={$row.id}',
+                url:'/?s=admin/goods/getType&typeId='+typeId+'&goodsId={$row.id}',
                 data:{},
                 dataType:'json',
                 success:function (data) {
                     if(data.status == 0){
                         var color_rows = data.data.color_row;
                         var specification = data.data.specification;
-
-                        if(data.data.color == 1 || data.data.diy_option == 1){
+                        if(data.data.color == 1 || data.data.option == 1){
                             //
                             var colorIds = data.data.colorIds;
                             var optionIds = data.data.optionIds;
-
-                            var json_data = {color:data.data.color,color_list:data.data.color_list,option:data.data.option,option_list:data.data.option_list,option_name:data.data.option_name,colorIds:colorIds,optionIds:optionIds}; //
+                            g_color = data.data.color;
+                            g_option = data.data.option;
+                            var json_data = {color:g_color,color_list:data.data.color_list,option:g_option,option_list:data.data.option_list,option_name:data.data.option_name,colorIds:colorIds,optionIds:optionIds}; //
                             var html = template('standard-container',json_data);
                             $('#standard_container').html(html);
-
                             //
                             if(color_rows.length > 0){
                                 for(var i=0; i < color_rows.length;i++){
@@ -320,14 +355,16 @@
                                 var shtml = '';
                                 for(var j=0;j<data.data.specification.length; j++){
                                     shtml +=template('custom-template',{
-                                         index:index,color_id:data.data.specification[j].color_id,
-                                         color_name:data.data.specification[j].color_name,
-                                         path:data.data.specification[j].path,
-                                         option_id:data.data.specification[j].option_id,
-                                         option_name:data.data.specification[j].option_name,
-                                         cost_price:data.data.specification[j].cost_price,
-                                         e_price: data.data.specification[j].e_price,
-                                         w_price:data.data.specification[j].w_price,
+                                        color:g_color,
+                                        option:g_option,
+                                        index:index,color_id:data.data.specification[j].color_id,
+                                        color_name:data.data.specification[j].color_name,
+                                        path:data.data.specification[j].path,
+                                        option_id:data.data.specification[j].option_id,
+                                        option_name:data.data.specification[j].option_name,
+                                        cost_price:data.data.specification[j].cost_price,
+                                        e_price: data.data.specification[j].e_price,
+                                        w_price:data.data.specification[j].w_price,
                                         barcode:data.data.specification[j].barcode,
                                         store_code:data.data.specification[j].store_code,
                                     });
@@ -476,24 +513,67 @@
             if(color.length > 0 && option.length > 0){
                 for(var i=0; i< color.length; i++){
                     for(var j=0;j<option.length; j++){
-                        html +=template('custom-template',{index:index,color_id:color[i].id,color_name:color[i].name,path:color[i].path,option_id:option[j].id,option_name:option[j].name});
+                        html +=template('custom-template',{ color:g_color, option:g_option,index:index,color_id:color[i].id,color_name:color[i].name,path:color[i].path,option_id:option[j].id,option_name:option[j].name});
                         index++;
                     }
                 }
             }
             if(color.length == 0 && option.length > 0){
                 for(var j=0;j<option.length; j++){
-                    html +=template('custom-template',{index:index,color_id:0,color_name:'',option_id:option[j].id,option_name:option[j].name});
+                    html +=template('custom-template',{color:g_color, option:g_option,index:index,color_id:0,color_name:'',option_id:option[j].id,option_name:option[j].name});
                     index++;
                 }
             }
             if(color.length > 0 && option.length == 0){
                 for(var i=0; i< color.length; i++){
-                    html +=template('custom-template',{index:index,color_id:color[i].id,color_name:color[i].name,path:color[i].path,option_id:0,option_name:''});
+                    html +=template('custom-template',{color:g_color, option:g_option,index:index,color_id:color[i].id,color_name:color[i].name,path:color[i].path,option_id:0,option_name:''});
                     index++;
                 }
             }
             $('#custom-container').html(html);
+        }
+
+        $(document).delegate('.fa-trash-o','click',function () {
+            //删除当前
+            $(this).closest('tr').remove();
+
+            //更新check选中值
+            updateChecked();
+        });
+
+        var updateChecked = function () {
+            if(g_color){
+                var selectedColorId = [];
+                $(".option_color_id").each(function () {
+                    selectedColorId.push($(this).val());
+                });
+                $(".color_select").each(function () {
+                    $(this).prop("checked",false);
+                    if($.inArray($(this).val(),selectedColorId) >= 0){
+                        $(this).prop("checked",true);
+                    }
+                })
+                //删除
+                $("#color-container").find("tr").each(function () {
+                    var t = $(this).data('id');
+                    if($.inArray(t+'',selectedColorId) == -1){
+                        $(this).remove();
+                    }
+                })
+            }
+            if(g_option){
+                var selectedOptionId = [];
+                $(".option_option_id").each(function () {
+                    selectedOptionId.push($(this).val());
+                })
+
+                $(".option_select").each(function () {
+                    $(this).prop("checked",false);
+                    if($.inArray($(this).val(),selectedOptionId) >= 0){
+                        $(this).prop("checked",true);
+                    }
+                })
+            }
         }
 
         $("#edit-form").bootstrapValidator({
@@ -544,38 +624,6 @@
                         notEmpty: {
                             message: '请上传多视角图片'
                         }
-                    }
-                },
-                w_price:{
-                    message: '无效的价格',
-                    validators: {
-                        notEmpty: {
-                            message: '售价不能为空'
-                        },
-                        regexp: {
-                            regexp: /^([1-9][0-9]*)+(.[0-9]{1,2})?$/,
-                            message: '无效的价格'
-                        }
-                    }
-                },
-                cost_price:{
-                    message: '无效的价格',
-                    validators: {
-                        notEmpty: {
-                            message: '成本价不能为空'
-                        },
-                        regexp: {
-                            regexp: /^([1-9][0-9]*)+(.[0-9]{1,2})?$/,
-                            message: '无效的价格'
-                        }
-                    }
-                },
-                content:{
-                    message: 'The content is not valid',
-                    validators: {
-                        notEmpty: {
-                            message: '商品详情不能为空'
-                        },
                     }
                 }
             }
