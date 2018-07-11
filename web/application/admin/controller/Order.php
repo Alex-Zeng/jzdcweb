@@ -355,6 +355,34 @@ class Order extends Base{
 
 
     /**
+     * @desc 售后处理
+     * @param $id
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function service($id){
+        $model = new MallOrder();
+        $row = $model->where(['id'=>$id])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
+        }
+        if($row->service_type != 1){
+            return ['status'=>1,'data'=>[],'msg'=>'不能操作该订单'];
+        }
+
+        $result = $model->save(['service_type'=>2],['id'=>$id]);
+        if($result == true){
+            //更新子订单
+            $goodsModel = new MallOrderGoods();
+            $goodsModel->save(['service_type'=>0],['order_id'=>$id]);
+            return ['status'=>0,'data'=>[],'msg'=>'操作成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'操作失败'];
+    }
+
+    /**
      * @desc 导出订单
      */
     public function export(){
