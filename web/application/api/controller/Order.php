@@ -380,7 +380,7 @@ class Order extends Base{
      * @throws \think\exception\DbException
      */
     public function detail(Request $request){
-        $no = $request->post('no','H100000000190');
+        $no = $request->post('no','');
         $auth = $this->auth();
         if($auth){
             return $auth;
