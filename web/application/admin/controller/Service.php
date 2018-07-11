@@ -20,19 +20,27 @@ class Service extends Base {
     public function index(){
         $model = new FormFinService();
         $k = Request::instance()->get('k','');
+        $type = Request::instance()->get('type',-1,'intval');
         if(isset($k) && $k){
             $model->where('comment|phone','like','%'.$k.'%');
         }
+        if($type > -1){
+            $model->where(['type'=>$type]);
+        }
         $rows = $model->order(['id'=>'desc'])->paginate(20,false,['query'=>request()->param()]);
         $userModel = new IndexUser();
+        $typeList = FormFinService::getTypeList();
         foreach ($rows as &$row){
             $user = $userModel->getInfoById($row['writer']);
             $row['writer_name'] = $user ? $user->username : '';
+            $row['type_name'] = $typeList[$row->type];
         }
 
         $this->assign('k',$k);
         $this->assign('list',$rows);
         $this->assign('page',$rows->render());
+        $this->assign('typeList',$typeList);
+        $this->assign('type',$type);
         return $this->fetch();
     }
 

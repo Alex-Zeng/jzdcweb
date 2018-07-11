@@ -66,7 +66,7 @@
 
                             <div class="form-inline form-group">
                                 <label for="" class="col-md-2">封面图片</label>
-                                <a href="{$goods.icon}" target="_blank"><img src="{$goods.icon}"  width="150px" height="150px" /></a>
+                                <a href="{$goods.icon}" target="_blank"><img src="{$goods.icon}"  max-width="150px" max-height="150px" /></a>
                             </div>
                             <div class="form-inline form-group">
                                 <label for="" class="col-md-2">多视角图片</label>
@@ -74,7 +74,7 @@
                                     <div class="row">
                                         {foreach name="$goods.multiImg" id="imgpath"}
                                         <div class="col-md-3 col-sm-6" style="padding-bottom: 15px;padding-left: 0px">
-                                            <a href="{$imgpath}" target="_blank"> <img src="{$imgpath}" width="200px" height="200px"  /> </a>
+                                            <a href="{$imgpath}" target="_blank"> <img src="{$imgpath}" max-width="200px" max-height="200px"  /> </a>
                                         </div>
                                         {/foreach}
                                     </div>
@@ -127,13 +127,12 @@
                                 <span class="">{:getImgUrl($goods.detail)}</span>
                             </div>
                         </div>
-
-                        <div class="form-inline">
-                             <a href="javascript:void(0);"  class="btn btn-primary"  data-toggle="modal"   data-target="#view-modal">预览</a>
-                        </div>
-
                     </div>
                 </div>
+            </div>
+
+            <div class="row" style="position:fixed; bottom:0;right:0">
+                <img src="__STATIC__/img/iphone.png"  data-toggle="modal"   data-target="#view-modal"  style="cursor: pointer"/>
             </div>
         </div>
     </section>
