@@ -439,7 +439,7 @@ class Order extends Base{
             'time' => date('Y-m-d H:i',$row->add_time),
             'date' => date('Y-m-d',$row->delivery_time),
             'remark' => $row->buyer_comment,
-            'payMethod' => $row->pay_date && !$payRow ? '账期支付': ($payRow->pay_type == 1 ? '汇款' : '转账'),
+            'payMethod' => !$payRow && isset($row->pay_date) ? '账期支付': ($payRow->pay_type == 1 ? '汇款' : '转账'),
             'payNumber' => $payRow ? $payRow->number : '',
             'payImg' => $payRow ? MallOrderPay::getFormatPicture($payRow->picture) : '',
             'payDate' => $payRow && $payRow->pay_time ? substr($payRow->pay_time,0,10) : '',
