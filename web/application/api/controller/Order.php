@@ -416,11 +416,29 @@ class Order extends Base{
 
         //查询产品
         $goodsModel = new MallOrderGoods();
-        $goodsRows = $goodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.icon'])->select();
+        $goodsRows = $goodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.s_id','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.icon'])->select();
+        $specificationModel = new MallGoodsSpecifications();
 
         foreach($goodsRows as &$goodsRow){
             $goodsRow['quantity'] = intval($goodsRow->quantity);
             $goodsRow['icon'] = MallGoods::getFormatImg($goodsRow->icon);
+            $specifications_info = '';
+            if($goodsRow->s_id > 0){
+                $specificationRow = $specificationModel->where(['id'=>$goodsRow->s_id])->find();
+                if($specificationRow && $specificationRow->color_name){
+                    $specifications_info = $specificationRow->color_name;
+
+                }
+                //查询规格
+                if($specificationRow->option_id > 0){
+                    $optionModel = new MallTypeOption();
+                    $optionRow = $optionModel->where(['id'=>$specificationRow->option_id])->find();
+                    if($optionRow && $optionRow->name){
+                        $specifications_info ? $specifications_info .=','.$optionRow->name : $specifications_info .=$optionRow->name;
+                    }
+                }
+            }
+            $goodsRow['specifications_info'] = $specifications_info;
         }
 
         //查询支付凭证
