@@ -48,7 +48,7 @@ class Login{
        $where = [];
 
        //判断账户类型
-        $field = ['id','username','password','group','nickname','icon','state'];
+        $field = ['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email'];
         if(stripos( $name,'@')){
             $row = $model->where(['email'=>$name])->field($field)->find();
         }else{
@@ -66,7 +66,15 @@ class Login{
             return ['status'=>1,'data'=>[],'msg'=>'密码不正确'];
         }
 
-        $data = [];
+        $data = [
+            'contact' => $row->contact,
+            'tel' => $row->tel ? $row->tel : '',
+            'icon' => $row->icon ? $row->icon : '',
+            'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : '',
+            'phone' => $row->phone,
+            'email' => $row->email,
+            'username' => $row->username
+        ];
         //生成token
         $key = config('jzdc_token_key');
         $token = [
@@ -116,20 +124,8 @@ class Login{
 
         //查询user表是否存在
         $model = new IndexUser();
-        $row = $model->where(['phone'=>$phone])->field(['id','username','password','group','nickname','icon','state'])->find();
+        $row = $model->where(['phone'=>$phone])->field(['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email'])->find();
         if(!$row){
-            //插入新用户
-//            $user = ['group'=>6,'phone'=>$phone,'state'=>1,'username'=>$phone];
-//            $result = IndexUser::create($user);
-//            if(!$result){
-//                return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
-//            }
-//            $token = [
-//                "id" => $result->id,
-//                "group" => $user['group'],
-//                "time" => time(),
-//                "expire" => time() + 5*3600   //过期时间
-//            ];
             return ['status'=>-3,'data'=>[],'msg'=>'用户未注册'];
         }else{
             if($row->state != 1){
@@ -143,7 +139,15 @@ class Login{
             ];
         }
 
-        $data = [];
+        $data = [
+            'contact' => $row->contact,
+            'tel' => $row->tel ? $row->tel : '',
+            'icon' => $row->icon ? $row->icon : '',
+            'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : '',
+            'phone' => $row->phone,
+            'email' => $row->email,
+            'username' => $row->username
+        ];
         //生成token
         $key = config('jzdc_token_key');
         $jwt = JWT::encode($token,$key);
