@@ -79,7 +79,7 @@ class MallCart extends Base{
                 'key' => 0,
                 'goods_id' => $id,
                 'quantity'=>$number,
-                'price' => $specificationsRow ? getFormatPrice($specificationsRow->w_price) : getFormatPrice($row->w_price),
+                'price' => $specificationsRow ? $specificationsRow->w_price : $row->w_price,
                 'time' => time(),
                 'goods_specifications_id' => $specificationsRow ? $specificationsRow->id : 0
             ];
