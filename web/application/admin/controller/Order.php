@@ -384,18 +384,11 @@ class Order extends Base{
     /**
      * @desc 导出订单
      */
-    public function export(Request $request){
-        $t = $request->get();
-
-
-        $k = $request->get('k','','trim');
-        $state = $request->get('state','-1');
-        $start = $request->get('start','');
-        $end = $request->get('end','');
+    public function export($state = -1, $start = '',$k = '',$end = ''){
         $model = new MallOrder();
         $where = [];
         if(isset($k) && $k){
-            $where['out_id|buyer'] = ['like','%'.$k.'%'];
+            $where['out_id|buyer'] = ['like','%'.trim($k).'%'];
         }
         if(isset($state) && $state >= 0){
             $where['state'] = $state;
@@ -406,9 +399,6 @@ class Order extends Base{
         if(isset($end) && $end){
             $where['add_time'] = ['gt',strtotime($end.' 23:59:59')];
         }
-
-        print_r($where); exit;
-
         vendor('PHPExcel.PHPExcel');
         $objPHPExcel = new \PHPExcel();
         $objPHPExcel->setActiveSheetIndex(0);
@@ -427,6 +417,7 @@ class Order extends Base{
             ->setCellValue('K1','账期截止日');
         //查询数据
         $total = $model->where($where)->count();
+
         $pageSize = 100;
         $page = ceil($total/$pageSize);
 
