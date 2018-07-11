@@ -537,6 +537,10 @@ class Order extends Base{
      */
     public function receipt(Request $request){
         $orderNo = $request->post('no','');
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
         if(!$orderNo){
             return ['status'=>1,'data'=>[],'msg'=>'订单号不能为空'];
         }
