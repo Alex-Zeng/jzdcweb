@@ -30,7 +30,6 @@ class Order extends Base{
         $start = Request::instance()->get('start','');
         $end = Request::instance()->get('end','');
         $model = new MallOrder();
-
         $where = [];
         if(isset($k) && $k){
             $where['out_id|buyer'] = ['like','%'.$k.'%'];
@@ -385,7 +384,21 @@ class Order extends Base{
     /**
      * @desc 导出订单
      */
-    public function export(){
+    public function export($state = -1, $start = '',$k = '',$end = ''){
+        $model = new MallOrder();
+        $where = [];
+        if(isset($k) && $k){
+            $where['out_id|buyer'] = ['like','%'.trim($k).'%'];
+        }
+        if(isset($state) && $state >= 0){
+            $where['state'] = $state;
+        }
+        if(isset($start) && $start){
+            $where['add_time'] = ['gt',strtotime($start)];
+        }
+        if(isset($end) && $end){
+            $where['add_time'] = ['gt',strtotime($end.' 23:59:59')];
+        }
         vendor('PHPExcel.PHPExcel');
         $objPHPExcel = new \PHPExcel();
         $objPHPExcel->setActiveSheetIndex(0);
@@ -403,8 +416,8 @@ class Order extends Base{
             ->setCellValue('J1','买家留言')
             ->setCellValue('K1','账期截止日');
         //查询数据
-        $model = new MallOrder();
-        $total = $model->where([])->count();
+        $total = $model->where($where)->count();
+
         $pageSize = 100;
         $page = ceil($total/$pageSize);
 
@@ -412,7 +425,7 @@ class Order extends Base{
         $userModel = new IndexUser();
         for($i =0; $i < $page; $i++){
             $start = $page*$i;
-            $rows = $model->where([])->limit($start,$pageSize)->order('add_time','desc')->select();
+            $rows = $model->where($where)->limit($start,$pageSize)->order('add_time','desc')->select();
             foreach ($rows as $row){
                 $buyerInfo = $userModel->getInfoById($row->buyer_id);
                 $supplier = $userModel->getInfoById($row->supplier);

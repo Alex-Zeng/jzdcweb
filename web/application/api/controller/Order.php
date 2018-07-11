@@ -15,6 +15,7 @@ use app\common\model\MallGoods;
 use app\common\model\MallGoodsSpecifications;
 use app\common\model\MallOrder;
 use app\common\model\MallOrderGoods;
+use app\common\model\MallOrderPay;
 use app\common\model\MallReceiver;
 use app\common\model\MallTypeOption;
 use app\common\model\OrderMsg;
@@ -422,6 +423,10 @@ class Order extends Base{
             $goodsRow['icon'] = MallGoods::getFormatImg($goodsRow->icon);
         }
 
+        //查询支付凭证
+        $payModel = new MallOrderPay();
+        $payRow = $payModel->where(['order_id'=>$row->id,'pay_type'=>['in',[1,2]]])->order('id','desc')->find();
+
         //express expressCode sendDate estimatedDate
         $data = [
             'orderNo' => $row->out_id,
@@ -434,7 +439,10 @@ class Order extends Base{
             'time' => date('Y-m-d H:i',$row->add_time),
             'date' => date('Y-m-d',$row->delivery_time),
             'remark' => $row->buyer_comment,
-            'payMethod' => $row->pay_date ? '账期支付': '',
+            'payMethod' => !$payRow && isset($row->pay_date) ? '账期支付': ($payRow->pay_type == 1 ? '汇款' : '转账'),
+            'payNumber' => $payRow ? $payRow->number : '',
+            'payImg' => $payRow ? MallOrderPay::getFormatPicture($payRow->picture) : '',
+            'payDate' => $payRow && $payRow->pay_time ? substr($payRow->pay_time,0,10) : '',
             'express' => $row->express_name ? $row->express_name : '',   //物流
             'expressCode' => $row->express_code ? $row->express_code : '', //物流单号
             'sendDate' => $row->send_time > 0 ? date('Y-m-d',$row->send_time) : '', //发货日期
@@ -529,6 +537,10 @@ class Order extends Base{
      */
     public function receipt(Request $request){
         $orderNo = $request->post('no','');
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
         if(!$orderNo){
             return ['status'=>1,'data'=>[],'msg'=>'订单号不能为空'];
         }
@@ -537,11 +549,11 @@ class Order extends Base{
         }
         $model = new MallOrder();
         $where['out_id'] = $orderNo;
-        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','goods_names','state','pay_date','out_id','buyer_comment','buyer_id','supplier'])->find();
+        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','goods_names','state','pay_date','out_id','buyer_comment','buyer_id','supplier','service_type'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
         }
-        if($row->state != MallOrder::STATE_RECEIVE){
+        if($row->state != MallOrder::STATE_RECEIVE || $row->service_type == 1){
             return ['status'=>1,'data'=>[],'msg'=>'订单状态操作错误'];
         }
 
