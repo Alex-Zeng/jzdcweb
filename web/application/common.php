@@ -164,7 +164,7 @@ function SendMail($tomail, $subject = '', $body = ''){
 }
 
 function getFormatPrice($price,$length = 2){
-    return number_format(round($price,$length),$length);
+    return number_format($price,$length,'.','');
 }
 
 
