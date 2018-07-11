@@ -204,8 +204,9 @@ function getTypeLevel($typeId = 0){
     $model = new \app\common\model\MallType();
     $row = $model->where(['id'=>$typeId])->field(['id','name','parent'])->find();
     $list = [];
-
-    $list[] = $row->name;
+    if($row){
+        $list[] = $row->name;
+    }
     if($row->parent > 0){
         $row2 = $model->where(['id'=>$row->parent])->field(['id','name','parent'])->find();
         $list[] = $row2->name;

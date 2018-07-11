@@ -37,11 +37,12 @@ class Order extends Base{
         if(isset($state) && $state >= 0){
             $where['state'] = $state;
         }
-        if(isset($start) && $start){
+        if(isset($start) && $start && isset($end) && $end){
+           $where['add_time'] = ['between',[strtotime($start),strtotime($end.' 23:59:59')]];
+        }elseif (isset($start) && $start){
             $where['add_time'] = ['gt',strtotime($start)];
-        }
-        if(isset($end) && $end){
-            $where['add_time'] = ['gt',strtotime($end.' 23:59:59')];
+        }elseif (isset($end) && $end){
+            $where['add_time'] = ['lt',strtotime($end.' 23:59:59')];
         }
 
         //查询总价

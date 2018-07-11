@@ -29,10 +29,13 @@
                         <div class="col-md-6">
                             <form class="form-inline ml-3" action="{:url()}"  method="get">
                                 <div class="input-group">
-                                    <select class="form-control">
-                                        <option value="0">全部</option>
+                                    <select class="form-control" name="type"  placeholder="">
+                                        <option value="-1" {if $type eq -1}selected{/if}>全部类型</option>
+                                        {volist name="typeList"  id='vo'}
+                                        <option  {if $type eq $key}selected{/if} value="{$key}">{$vo}</option>
+                                        {/volist}
                                     </select>
-                                </div>
+                                </div>&nbsp;&nbsp;
                                 <div class="input-group">
                                     <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="留言/手机号" aria-label="Search">
                                     <div class="input-group-append">
@@ -64,8 +67,8 @@
                             <tr>
                                 <td>{$service.name}</td>
                                 <td>{$service.sex}</td>
-                                <td></td>
                                 <td>{$service.phone}</td>
+                                <td>{$service.type_name}</td>
                                 <td>{$service.writer_name}#{$service.writer}</td>
                                 <td>{:date('Y-m-d H:i',$service.write_time)}</td>
                                 <td>{$service.comment}</td>
