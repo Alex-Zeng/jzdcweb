@@ -455,7 +455,7 @@ class Order extends Base{
             'phone' => $row->receiver_phone,
             'address' => $row->receiver_area_name. $row->receiver_detail,
             'time' => date('Y-m-d H:i',$row->add_time),
-            'date' => $row->delivery > 0 ? date('Y-m-d',$row->delivery_time) : '',
+            'date' => $row->delivery_time > 0 ? date('Y-m-d',$row->delivery_time) : '',
             'remark' => $row->buyer_comment,
             'payMethod' => !$payRow && isset($row->pay_date) ? '账期支付': ($payRow->pay_type == 1 ? '汇款' : '转账'),
             'payNumber' => $payRow ? $payRow->number : '',
