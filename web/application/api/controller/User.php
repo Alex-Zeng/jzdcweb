@@ -11,6 +11,7 @@ namespace app\api\controller;
 use app\common\model\EmailCode;
 use app\common\model\FormUserCert;
 use app\common\model\IndexArea;
+use app\common\model\IndexGroup;
 use app\common\model\IndexUser;
 use app\common\model\MallFavorite;
 use app\common\model\MallGoods;
@@ -321,6 +322,9 @@ class User extends Base
         if ($auth) {
             return $auth;
         }
+        if($this->groupId != IndexGroup::GROUP_SUPPLIER){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
+        }
         //
         $model = new MallOrder();
 
@@ -331,7 +335,7 @@ class User extends Base
         $yesterdayCount = $model->where(['supplier' => $this->userId])->where('add_time', '>', $startTime)->where('add_time', '<', $endTime)->count();
         $total = $model->where(['supplier' => $this->userId])->count();
         $pendingNumber = $model->where(['supplier' => $this->userId, 'state' => MallOrder::STATE_DELIVER])->count();
-        $serviceNumber = $model->where(['supplier'=> $this->userId])->count();
+        $serviceNumber = $model->where(['supplier'=> $this->userId,'state'=>MallOrder::STATE_RECEIVE,'service_type'=>1])->order(['supplier'=> $this->userId,'state'=>MallOrder::STATE_FINISH,'service_type'=>1])->count();
         return ['status' => 0, 'data' => ['yesterday' => $yesterdayCount, 'total' => $total, 'pending' => $pendingNumber,'service'=>$serviceNumber], 'msg' => ''];
     }
 
@@ -346,11 +350,14 @@ class User extends Base
             return $auth;
         }
         //
+        if($this->groupId != IndexGroup::GROUP_BUYER){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
+        }
         $model = new MallOrder();
-        $payCount = $model->where(['buyer_id' => $this->userId])->count();
-        $recieveNumber = $model->where(['buyer_id' => $this->userId])->count();
-        $pendingNumber = $model->where(['buyer_id' => $this->userId])->count();
-        $serviceNumber = $model->where(['buyer_id'=> $this->userId])->count();
+        $payCount = $model->where(['buyer_id' => $this->userId,'state'=>MallOrder::STATE_REMITTANCE])->count();
+        $recieveNumber = $model->where(['buyer_id' => $this->userId,'state'=>MallOrder::STATE_RECEIVE])->count();
+        $pendingNumber = $model->where(['buyer_id' => $this->userId,'state'=>MallOrder::STATE_DELIVER])->count();
+        $serviceNumber = $model->where(['buyer_id'=> $this->userId,'state'=>MallOrder::STATE_RECEIVE,'service_type'=>1])->order(['buyer_id'=> $this->userId,'state'=>MallOrder::STATE_FINISH,'service_type'=>1])->count();
         return ['status' => 0, 'data' => ['pay' => $payCount, 'recieve' => $recieveNumber, 'deliver' => $pendingNumber,'service'=>$serviceNumber], 'msg' => ''];
     }
 
