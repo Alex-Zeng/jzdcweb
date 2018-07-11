@@ -357,7 +357,7 @@ class Order extends Base{
                         $optionModel = new MallTypeOption();
                         $optionRow = $optionModel->where(['id'=>$specificationRow->option_id])->find();
                         if($optionRow && $optionRow->name){
-                            $specifications_info .=','.$optionRow->name;
+                            $specifications_info ? $specifications_info .=','.$optionRow->name : $specifications_info .=$optionRow->name;
                         }
                     }
                 }
