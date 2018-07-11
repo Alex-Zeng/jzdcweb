@@ -350,15 +350,16 @@ class Order extends Base{
                      $specificationRow = $specificationModel->where(['id'=>$goodsRow->s_id])->find();
                      if($specificationRow && $specificationRow->color_name){
                          $specifications_info = $specificationRow->color_name;
-                         if($specificationRow->option_id > 0){
-                             $optionModel = new MallTypeOption();
-                             $optionRow = $optionModel->where(['id'=>$specificationRow->option_id])->find();
-                             if($optionRow && $optionRow->name){
-                                 $specifications_info .=','.$optionRow->name;
-                             }
-                         }
+
                      }
                      //查询规格
+                    if($specificationRow->option_id > 0){
+                        $optionModel = new MallTypeOption();
+                        $optionRow = $optionModel->where(['id'=>$specificationRow->option_id])->find();
+                        if($optionRow && $optionRow->name){
+                            $specifications_info .=','.$optionRow->name;
+                        }
+                    }
                 }
                 $goodsRow['specifications_info'] = $specifications_info;
 
