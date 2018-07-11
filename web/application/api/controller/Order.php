@@ -362,7 +362,7 @@ class Order extends Base{
                         }
                     }
                 }
-                $goodsRow['specifications_info'] = $specifications_info;
+                $goodsRow['s_info'] = $specifications_info;
 
             }
             $row['goods'] = $goodsRows;
@@ -438,7 +438,7 @@ class Order extends Base{
                     }
                 }
             }
-            $goodsRow['specifications_info'] = $specifications_info;
+            $goodsRow['s_info'] = $specifications_info;
         }
 
         //查询支付凭证
