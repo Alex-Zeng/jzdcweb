@@ -96,7 +96,7 @@ class Order extends Base{
             if($row['option_id'] > 0){
                 $typeOptionRow = $typeOptionModel->where(['id'=>$row['option_id']])->find();
                 if($typeOptionRow){
-                    $specificationsInfo ? $specificationsInfo .=','.$typeOptionRow->name : $specificationsInfo .=$typeOptionRow->name;
+                    $specificationsInfo .=$specificationsInfo ?  ','.$typeOptionRow->name : $typeOptionRow->name;
                 }
             }
 
