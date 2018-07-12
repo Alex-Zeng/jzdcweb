@@ -419,6 +419,7 @@ class Order extends Base{
             'groupId' => $this->groupId,
             'state' => $row->state,
             'money' => $row->actual_money,
+            'goods_money'=> $row->goods_money,
             'name' => $row->receiver_name,
             'phone' => $row->receiver_phone,
             'address' => $row->receiver_area_name. $row->receiver_detail,

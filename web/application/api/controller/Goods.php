@@ -474,6 +474,6 @@ class Goods  extends Base {
         $row = $model->find(['id'=>$id]);
 
         $view = new View();
-        return $view->fetch('index/goods_detail',['detail'=>$row ? getImgUrl($row->detail) : '']);
+        echo $view->fetch('index/goods_detail',['detail'=>$row ? getImgUrl($row->detail) : '']);
     }
 }
