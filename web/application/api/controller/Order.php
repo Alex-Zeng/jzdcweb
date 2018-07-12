@@ -203,7 +203,7 @@ class Order extends Base{
                         'icon' => $goodsList['icon'],
                         'title' => $goodsList['title'],
                         'price' => $goodsList['price'],
-                        's_id' => $goodsList['s_id'],
+                        's_info' => $goodsList['specificationsInfo'],
                         'shop_id' =>1,
                         'snapshot_id' => 0,
                         'quantity' => $goodsList['quantity'],
@@ -338,32 +338,12 @@ class Order extends Base{
             $row['companyName']  = $userInfo ? $userInfo->real_name : '';
             $row['groupId'] = $this->groupId;
 
-            $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon','a.s_id'])->select();
-            $specificationModel = new MallGoodsSpecifications();
+            $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon','a.s_info'])->select();
 
             foreach($goodsRows as &$goodsRow){
                 $goodsRow['quantity'] = intval($goodsRow->quantity);
                 $goodsRow['icon'] = MallGoods::getFormatImg($goodsRow->icon);
                 $goodsRow['price'] = getFormatPrice($goodsRow->price);
-
-                $specifications_info = '';
-                if($goodsRow->s_id > 0){
-                     $specificationRow = $specificationModel->where(['id'=>$goodsRow->s_id])->find();
-                     if($specificationRow && $specificationRow->color_name){
-                         $specifications_info = $specificationRow->color_name;
-
-                     }
-                     //查询规格
-                    if($specificationRow->option_id > 0){
-                        $optionModel = new MallTypeOption();
-                        $optionRow = $optionModel->where(['id'=>$specificationRow->option_id])->find();
-                        if($optionRow && $optionRow->name){
-                            $specifications_info ? $specifications_info .=','.$optionRow->name : $specifications_info .=$optionRow->name;
-                        }
-                    }
-                }
-                $goodsRow['s_info'] = $specifications_info;
-
             }
             $row['goods'] = $goodsRows;
         }
@@ -416,29 +396,11 @@ class Order extends Base{
 
         //查询产品
         $goodsModel = new MallOrderGoods();
-        $goodsRows = $goodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.s_id','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.icon'])->select();
-        $specificationModel = new MallGoodsSpecifications();
+        $goodsRows = $goodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.s_info','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.icon'])->select();
 
         foreach($goodsRows as &$goodsRow){
             $goodsRow['quantity'] = intval($goodsRow->quantity);
             $goodsRow['icon'] = MallGoods::getFormatImg($goodsRow->icon);
-            $specifications_info = '';
-            if($goodsRow->s_id > 0){
-                $specificationRow = $specificationModel->where(['id'=>$goodsRow->s_id])->find();
-                if($specificationRow && $specificationRow->color_name){
-                    $specifications_info = $specificationRow->color_name;
-
-                }
-                //查询规格
-                if($specificationRow->option_id > 0){
-                    $optionModel = new MallTypeOption();
-                    $optionRow = $optionModel->where(['id'=>$specificationRow->option_id])->find();
-                    if($optionRow && $optionRow->name){
-                        $specifications_info ? $specifications_info .=','.$optionRow->name : $specifications_info .=$optionRow->name;
-                    }
-                }
-            }
-            $goodsRow['s_info'] = $specifications_info;
         }
 
         //查询支付凭证
