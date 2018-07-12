@@ -96,7 +96,7 @@ class Order extends Base{
             if($row['option_id'] > 0){
                 $typeOptionRow = $typeOptionModel->where(['id'=>$row['option_id']])->find();
                 if($typeOptionRow){
-                    $specificationsInfo ? $specificationsInfo .=','.$typeOptionRow->name : $specificationsInfo .=$typeOptionRow->name;
+                    $specificationsInfo .=$specificationsInfo ?  ','.$typeOptionRow->name : $typeOptionRow->name;
                 }
             }
 
@@ -584,7 +584,7 @@ class Order extends Base{
         $model = new MallOrder();
         $where['out_id'] = $orderNo;
         $where['buyer_id'] = $this->userId;
-        $row = $model->where($where)->field(['id','state',])->find();
+        $row = $model->where($where)->field(['id','state','out_id'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
         }
