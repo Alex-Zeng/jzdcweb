@@ -8,6 +8,7 @@
 
 namespace app\admin\controller;
 
+use app\common\model\IndexGroup;
 use app\common\model\IndexUser;
 use app\common\model\MallGoods;
 use app\common\model\MallOrder;
@@ -19,6 +20,16 @@ use sms\Yunpian;
 use think\Request;
 
 class Order extends Base{
+
+    public function __construct(Request $request = null)
+    {
+        parent::__construct($request);
+        $groupId = getGroupId();
+        if($groupId != IndexGroup::GROUP_OPERATION){
+            $this->errorTips();
+        }
+    }
+
 
     /**
      * @desc 订单列表

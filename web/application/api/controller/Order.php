@@ -323,10 +323,14 @@ class Order extends Base{
         }
 
         if($status != '-1'){
-            $where['state'] = $status;
+            if($status == 8){
+                $where['service_type'] = 1;
+            }else{
+                $where['state'] = $status;
+            }
         }
         $count = $orderModel->where($where)->count();
-        $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','receiver_name','supplier','buyer_id','service_type'])->select();
+        $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','actual_money','receiver_name','supplier','buyer_id','service_type'])->select();
         $userModel = new IndexUser();
         foreach ($rows as &$row){
             $userInfo = [];
@@ -337,6 +341,7 @@ class Order extends Base{
             }
             $row['companyName']  = $userInfo ? $userInfo->real_name : '';
             $row['groupId'] = $this->groupId;
+            $row['money'] = $row->actual_money;
 
             $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon','a.s_info'])->select();
 
@@ -379,7 +384,7 @@ class Order extends Base{
             $where['supplier'] = $this->userId;
         }
 
-        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','express_name','express_code','state','send_time','estimated_time','pay_date','out_id','buyer_comment','buyer_id','supplier','service_type'])->find();
+        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','actual_money','receiver_name','receiver_phone','receiver_detail','express_name','express_code','state','send_time','estimated_time','pay_date','out_id','buyer_comment','buyer_id','supplier','service_type'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
         }
@@ -413,6 +418,7 @@ class Order extends Base{
             'companyName' => $userInfo ? $userInfo->real_name : '',
             'groupId' => $this->groupId,
             'state' => $row->state,
+            'money' => $row->actual_money,
             'name' => $row->receiver_name,
             'phone' => $row->receiver_phone,
             'address' => $row->receiver_area_name. $row->receiver_detail,
