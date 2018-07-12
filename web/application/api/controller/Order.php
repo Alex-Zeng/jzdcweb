@@ -323,7 +323,11 @@ class Order extends Base{
         }
 
         if($status != '-1'){
-            $where['state'] = $status;
+            if($status == 8){
+                $where['service_type'] = 1;
+            }else{
+                $where['state'] = $status;
+            }
         }
         $count = $orderModel->where($where)->count();
         $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','receiver_name','supplier','buyer_id','service_type'])->select();
