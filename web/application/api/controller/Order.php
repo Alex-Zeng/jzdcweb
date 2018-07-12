@@ -584,7 +584,7 @@ class Order extends Base{
         $model = new MallOrder();
         $where['out_id'] = $orderNo;
         $where['buyer_id'] = $this->userId;
-        $row = $model->where($where)->field(['id','state',])->find();
+        $row = $model->where($where)->field(['id','state','out_id'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
         }
