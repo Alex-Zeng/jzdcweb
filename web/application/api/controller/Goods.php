@@ -16,6 +16,7 @@ use app\common\model\MallType;
 use app\common\model\MallTypeOption;
 use app\common\model\MenuMenu;
 use think\Request;
+use think\View;
 
 
 class Goods  extends Base {
@@ -321,6 +322,7 @@ class Goods  extends Base {
             'standardPrice' => $standardsPrice,
             'imgList' => $imgList, //视图图片
             'detail' => getImgUrl($row->m_detail),
+            'detailUrl' =>config('jzdc_domain').url('api/goods/detail',['id'=>$id]),
             'isFavorite' => $isFavorite //是否收藏
         ];
 
@@ -460,4 +462,18 @@ class Goods  extends Base {
         return ['status'=>0,'data'=>['list'=>$return],'msg'=>''];
     }
 
+
+    /**
+     * @desc 商品详情展示
+     * @param $id
+     * @throws \think\Exception
+     */
+    public function detail($id){
+
+        $model = new MallGoods();
+        $row = $model->find(['id'=>$id]);
+
+        $view = new View();
+        echo $view->fetch('index/goods_detail',['detail'=>$row ? getImgUrl($row->detail) : '']);
+    }
 }

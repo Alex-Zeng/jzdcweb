@@ -293,6 +293,7 @@
     });
     $(function () {
         var specification = null;
+        var specificationObj = {};
         $('#goods_type').change(function () {
             var typeId = $('select[name="type"]').val();
             $.ajax({
@@ -318,7 +319,7 @@
                                 for(var i=0; i < color_rows.length;i++){
                                     var temp_data = {id:color_rows[i].color_id,name:color_rows[i].color_name,path:color_rows[i].color_path,img_path:color_rows[i].color_img};
                                     var html = template('color-template', temp_data);
-                                    var imgTag = "<img width='300px' height='300px' src='"+color_rows[i].color_img_path+"' class='file-preview-image' alt='' title=''>";
+                                    var imgTag = "<img max-width='300px'  max-height='300px' src='"+color_rows[i].color_img_path+"' class='file-preview-image' alt='' title=''>";
                                     $('#color-container').append(html);
                                     $(".color_file").fileinput({
                                         language: 'zh', //设置语言
@@ -354,7 +355,7 @@
                                 var index = 0;
                                 var shtml = '';
                                 for(var j=0;j<data.data.specification.length; j++){
-                                    shtml +=template('custom-template',{
+                                    var data = {
                                         color:g_color,
                                         option:g_option,
                                         index:index,color_id:data.data.specification[j].color_id,
@@ -367,7 +368,9 @@
                                         w_price:data.data.specification[j].w_price,
                                         barcode:data.data.specification[j].barcode,
                                         store_code:data.data.specification[j].store_code,
-                                    });
+                                    };
+                                    specificationObj.push(data);
+                                    shtml +=template('custom-template',data);
                                     index++;
                                 }
                                 $('#custom-container').html(shtml);
@@ -628,5 +631,29 @@
                 }
             }
         });
+
+
+        var compare = function () {
+            var array1 = [ {"Num": "A "  },{"Num": "B" }];
+            var array2 = [ {"Num": "A ","Name": "t1 " }, {"Num": "B","Name": "t2"}, {"Num": "C " ,"Name": "t3 "}];
+            var result = [];
+            for(var i = 0; i < array2.length; i++){
+                var obj = array2[i];
+                var num = obj.Num;
+                var isExist = false;
+                for(var j = 0; j < array1.length; j++){
+                    var aj = array1[j];
+                    var n = aj.Num;
+                    if(n == num){
+                        isExist = true;
+                        break;
+                    }
+                }
+                if(!isExist){
+                    result.push(obj);
+                }
+            }
+            console.log(result);
+        }
     })
 </script>
