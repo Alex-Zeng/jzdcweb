@@ -98,7 +98,7 @@
                                         {foreach name="$rows" id="standard"}
                                         <tr>
                                             <td>{$key+1}</td>
-                                            <td>{$standard.color_name ? $standard.color_name : ''}</td>
+                                            <td><img src="{$standard.color_img}"  width="80px" /> {$standard.color_name ? $standard.color_name : ''}</td>
                                             <td>
                                                 {$standard.name ? $standard.name : ''}
                                             </td>
