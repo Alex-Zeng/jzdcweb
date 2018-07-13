@@ -98,7 +98,7 @@
                                 <td colspan="4" >
                                     {:date('Y-m-d',$order.add_time)}&nbsp&nbsp;
                                     订单号: {$order.out_id}&nbsp;&nbsp;
-                                    采购商: {$order.buyer}&nbsp;&nbsp;
+                                    采购商: {$order.buyerName}&nbsp;&nbsp;
                                     供应商: {$order.supplierName}&nbsp;&nbsp;
                                     账期截止日: {:substr($order.pay_date,0,10)}
                                 </td>
@@ -240,7 +240,7 @@
                                 <div class="form-group form-inline">
                                     <label class="col-md-3">核实总价</label>
                                     <div class="input-group">
-                                        <input class="form-control form-control-navbar"  min="0" name="sum_money" type="number"  value="" placeholder="" aria-label="Search">
+                                        <input class="form-control form-control-navbar"  min="0" name="sum_money" type="text"  value="" placeholder="" aria-label="Search">
                                         <div class="input-group-append" style="padding-left: 5px;padding-top: 5px;">元</div>
                                     </div>
                                 </div>
@@ -463,11 +463,14 @@
         message: 'This value is not valid',
         fields: {
             sum_money: {
-                message: 'The name is not valid',
                 validators: {
                     notEmpty: {
                         message: '总价必须填写'
                     },
+                    regexp: {
+                        regexp: /^([1-9][0-9]*)+(.[0-9]{1,2})?$/,
+                        message: '无效的价格'
+                    }
                 }
             }
         }

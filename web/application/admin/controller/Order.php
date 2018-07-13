@@ -65,6 +65,8 @@ class Order extends Base{
         foreach($rows as &$row){
             $goodsRows = $goodsModel->where(['order_id'=>$row->id])->order('time','desc')->select();
             $userInfo = $userModel->getInfoById($row->supplier);
+            $buyerInfo = $userModel->getInfoById($row->buyer_id);
+
             $total = 0;
             foreach ($goodsRows as & $goodsRow){
                 $productModel = new MallGoods();
@@ -90,6 +92,7 @@ class Order extends Base{
                 }
             }
             $row['supplierName'] = $userInfo ? $userInfo->real_name : '';
+            $row['buyerName'] = $buyerInfo ? $buyerInfo->real_name : '';
             $row['buyerPayInfo'] = $buyerPayInfo;
             $row['supplierPayInfo'] = $supplierPayInfo;
         }

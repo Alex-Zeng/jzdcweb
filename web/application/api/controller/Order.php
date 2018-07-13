@@ -401,7 +401,7 @@ class Order extends Base{
 
         //查询产品
         $goodsModel = new MallOrderGoods();
-        $goodsRows = $goodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.s_info','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.icon'])->select();
+        $goodsRows = $goodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.id','a.title','a.price','a.quantity','a.s_info','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.icon'])->select();
 
         foreach($goodsRows as &$goodsRow){
             $goodsRow['quantity'] = intval($goodsRow->quantity);
@@ -622,7 +622,7 @@ class Order extends Base{
      */
     public function service(Request $request){
         $orderNo = $request->post('no','');
-        $goodsId = $request->post('goodsId',0,'intval');
+        $goodsId = $request->post('goodsId',0,'intval'); //商品主键ID
         $type = $request->post('type',0,'intval');
 
         if(!$orderNo){
@@ -644,12 +644,12 @@ class Order extends Base{
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
         }
-        if($row->state != MallOrder::STATE_RECEIVE && $row->state != MallOrder::STATE_FINISH ){
+        if($row->state != MallOrder::STATE_RECEIVE && $row->state != MallOrder::STATE_FINISH  && $row->state != MallOrder::STATE_OVERDUE && $row->state != MallOrder::STATE_ACCOUNT_PERIOD && $row->state != MallOrder::STATE_REMITTANCE_SUPPLIER){
             return ['status'=>1,'data'=>[],'msg'=>'当前订单状态无法申请售后'];
         }
 
         $goodsModel = new MallOrderGoods();
-        $result = $goodsModel->save(['service_type'=>$type],['order_id'=>$row->id,'goods_id'=>$goodsId]);
+        $result = $goodsModel->save(['service_type'=>$type],['order_id'=>$row->id,'id'=>$goodsId]);
         if($result !== false){
             $model->save(['service_type'=>1],$where);
             return ['status'=>0,'data'=>[],'msg'=>'服务申请成功'];

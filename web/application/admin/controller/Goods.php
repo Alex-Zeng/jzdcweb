@@ -339,9 +339,9 @@ class Goods extends Base{
         $typeRow = $typeModel->where(['id'=>$row->type])->find();
         $rows = [];
         if($typeRow->color == 1 || $typeRow->diy_option){
-           $rows = $specificationModel->alias('a')->join(config('prefix').'mall_type_option b','a.option_id=b.id','left')->where(['a.goods_id'=>$id])->field(['a.color_name','a.color_img','a.e_price','a.w_price','a.cost_price','a.barcode','a.store_code','b.name'])->select();
+           $rows = $specificationModel->alias('a')->join(config('prefix').'mall_type_option b','a.option_id=b.id','left')->where(['a.goods_id'=>$id])->field(['a.color_name','a.color_id','a.color_img','a.e_price','a.w_price','a.cost_price','a.barcode','a.store_code','b.name'])->select();
            foreach ($rows as &$row2){
-               $row2['color_img'] = $row2->color_img ? MallGoodsSpecifications::getFormatPath($row2->color_img) : '';
+               $row2['color_img'] = $row2->color_img ? MallGoodsSpecifications::getFormatPath($row2->color_img) : ($row2->color_id > 0 ? MallColor::getFormatImg($row2->color_id) : '');
            }
         }
 
