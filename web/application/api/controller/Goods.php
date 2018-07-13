@@ -8,6 +8,7 @@
 
 namespace app\api\controller;
 use app\common\model\IndexUser;
+use app\common\model\MallColor;
 use app\common\model\MallFavorite;
 use app\common\model\MallGoods;
 use app\common\model\MallGoodsSpecifications;
@@ -16,6 +17,7 @@ use app\common\model\MallType;
 use app\common\model\MallTypeOption;
 use app\common\model\MenuMenu;
 use think\Request;
+use think\View;
 
 
 class Goods  extends Base {
@@ -272,7 +274,10 @@ class Goods  extends Base {
 
         $goodsSpecificationsModel = new MallGoodsSpecifications();
         if($mallTypeRow && $mallTypeRow->color == 1){
-            $colorRows =  $goodsSpecificationsModel->where(['goods_id'=>$row->id])->field(['color_id','color_name'])->group('color_id')->select();
+            $colorRows =  $goodsSpecificationsModel->where(['goods_id'=>$row->id])->field(['color_id','color_name','color_img'])->group('color_id')->select();
+            foreach ($colorRows as &$colorRow){
+                $colorRow['color_img'] = $colorRow->color_img ? MallGoodsSpecifications::getFormatPath($colorRow->color_img) : ($colorRow->color_id > 0 ? MallColor::getFormatImg($colorRow->color_id) : '');
+            }
             $colorList = $colorRows;
             if($colorList){
                 $standards[] = [
@@ -321,6 +326,7 @@ class Goods  extends Base {
             'standardPrice' => $standardsPrice,
             'imgList' => $imgList, //视图图片
             'detail' => getImgUrl($row->m_detail),
+            'detailUrl' =>config('jzdc_domain').url('api/goods/detail',['id'=>$id]),
             'isFavorite' => $isFavorite //是否收藏
         ];
 
@@ -460,4 +466,18 @@ class Goods  extends Base {
         return ['status'=>0,'data'=>['list'=>$return],'msg'=>''];
     }
 
+
+    /**
+     * @desc 商品详情展示
+     * @param $id
+     * @throws \think\Exception
+     */
+    public function detail($id){
+
+        $model = new MallGoods();
+        $row = $model->find(['id'=>$id]);
+
+        $view = new View();
+        echo $view->fetch('index/goods_detail',['detail'=>$row ? getImgUrl($row->detail) : '']);
+    }
 }

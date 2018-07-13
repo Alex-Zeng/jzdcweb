@@ -9,6 +9,7 @@ namespace app\admin\controller;
 
 use think\Controller;
 use think\Request;
+use think\View;
 
 class Base extends Controller{
 
@@ -34,5 +35,31 @@ class Base extends Controller{
        $this->assign('groupId',$groupId);
     }
 
+
+    /**
+     * @desc 错误提示
+     * @param $data
+     * @return mixed
+     */
+    public function errorTips($data = []){
+        if(Request::instance()->isAjax()){
+
+        }
+        $view = new View();
+        echo $view->fetch('tips/error',$data);
+        exit;
+    }
+
+
+    /**
+     * @desc 成功提示
+     * @return mixed
+     */
+    public function successTips(){
+        if(Request::instance()->isAjax()){
+
+        }
+        return $this->fetch('tips/error',$data);
+    }
 
 }

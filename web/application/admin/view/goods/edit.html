@@ -161,7 +161,7 @@
         </td>
         {{ if color}}
         <td>
-            {{ if path}}<img src="{{path}}" width="30px" height="30px"  />{{/if}}{{color_name}}
+            {{ if path}}<img src="{{path}}" width="30px" height="30px"  />{{/if}}&nbsp;{{color_name}}
         </td>
         {{/if}}
         {{ if option}}
@@ -293,6 +293,7 @@
     });
     $(function () {
         var specification = null;
+        var specificationObj = [];
         $('#goods_type').change(function () {
             var typeId = $('select[name="type"]').val();
             $.ajax({
@@ -318,7 +319,7 @@
                                 for(var i=0; i < color_rows.length;i++){
                                     var temp_data = {id:color_rows[i].color_id,name:color_rows[i].color_name,path:color_rows[i].color_path,img_path:color_rows[i].color_img};
                                     var html = template('color-template', temp_data);
-                                    var imgTag = "<img width='300px' height='300px' src='"+color_rows[i].color_img_path+"' class='file-preview-image' alt='' title=''>";
+                                    var imgTag = "<img max-width='300px'  max-height='300px' src='"+color_rows[i].color_img_path+"' class='file-preview-image' alt='' title=''>";
                                     $('#color-container').append(html);
                                     $(".color_file").fileinput({
                                         language: 'zh', //设置语言
@@ -353,21 +354,23 @@
                             if(data.data.specification.length > 0){
                                 var index = 0;
                                 var shtml = '';
-                                for(var j=0;j<data.data.specification.length; j++){
-                                    shtml +=template('custom-template',{
+                                for(var j=0;j<specification.length; j++){
+                                    var data = {
                                         color:g_color,
                                         option:g_option,
-                                        index:index,color_id:data.data.specification[j].color_id,
-                                        color_name:data.data.specification[j].color_name,
-                                        path:data.data.specification[j].path,
-                                        option_id:data.data.specification[j].option_id,
-                                        option_name:data.data.specification[j].option_name,
-                                        cost_price:data.data.specification[j].cost_price,
-                                        e_price: data.data.specification[j].e_price,
-                                        w_price:data.data.specification[j].w_price,
-                                        barcode:data.data.specification[j].barcode,
-                                        store_code:data.data.specification[j].store_code,
-                                    });
+                                        index:index,color_id:specification[j].color_id,
+                                        color_name:specification[j].color_name,
+                                        path:specification[j].path,
+                                        option_id:specification[j].option_id,
+                                        option_name:specification[j].option_name,
+                                        cost_price:specification[j].cost_price,
+                                        e_price:specification[j].e_price,
+                                        w_price:specification[j].w_price,
+                                        barcode:specification[j].barcode,
+                                        store_code:specification[j].store_code,
+                                    };
+                                    specificationObj.push(data);
+                                    shtml +=template('custom-template',data);
                                     index++;
                                 }
                                 $('#custom-container').html(shtml);
@@ -508,25 +511,51 @@
                 }
             });
 
+
             var html = '';
             var index = 0;
             if(color.length > 0 && option.length > 0){
                 for(var i=0; i< color.length; i++){
                     for(var j=0;j<option.length; j++){
-                        html +=template('custom-template',{ color:g_color, option:g_option,index:index,color_id:color[i].id,color_name:color[i].name,path:color[i].path,option_id:option[j].id,option_name:option[j].name});
+                           var t_data = { color:g_color, option:g_option,index:index,color_id:color[i].id,color_name:color[i].name,path:color[i].path,option_id:option[j].id,option_name:option[j].name,cost_price:0.00,e_price:0.00,w_price:0.00,barcode:'',store_code:0.00};
+                        for(var k =0; k < specificationObj.length; k++){
+                            var obj = specificationObj[k];
+                            if(color[i].id == obj.color_id && option[j].id == obj.option_id){
+                                t_data = { color:g_color, option:g_option,index:index,color_id:color[i].id,color_name:color[i].name,path:color[i].path,option_id:option[j].id,option_name:option[j].name,cost_price:specificationObj[k].cost_price,e_price:specificationObj[k].e_price, w_price:specificationObj[k].w_price, barcode:specificationObj[k].barcode,store_code:specificationObj[k].store_code,};
+                                break;
+                            }
+                        }
+                        html +=template('custom-template',t_data);
                         index++;
                     }
                 }
             }
             if(color.length == 0 && option.length > 0){
                 for(var j=0;j<option.length; j++){
-                    html +=template('custom-template',{color:g_color, option:g_option,index:index,color_id:0,color_name:'',option_id:option[j].id,option_name:option[j].name});
+                    console.log(option[j].id);
+                    var t_data = { color:g_color, option:g_option,index:index,color_id:0,color_name:'',path:'',option_id:option[j].id,option_name:option[j].name,cost_price:0.00,e_price:0.00,w_price:0.00,barcode:'',store_code:0.00};
+                    for(var i =0; i < specificationObj.length; i++){
+                        var obj = specificationObj[i];
+                        if(0 == obj.color_id && option[j].id == obj.option_id){
+                            t_data = { color:g_color, option:g_option,index:index,color_id:0,color_name:specificationObj[j].name,path:specificationObj[j].path,option_id:option[j].id,option_name:option[j].name,cost_price:specificationObj[i].cost_price,e_price:specificationObj[i].e_price, w_price:specificationObj[i].w_price, barcode:specificationObj[i].barcode,store_code:specificationObj[i].store_code,};
+                            break;
+                        }
+                    }
+                    html +=template('custom-template',t_data);
                     index++;
                 }
             }
             if(color.length > 0 && option.length == 0){
-                for(var i=0; i< color.length; i++){
-                    html +=template('custom-template',{color:g_color, option:g_option,index:index,color_id:color[i].id,color_name:color[i].name,path:color[i].path,option_id:0,option_name:''});
+                for(var j=0; j< color.length; j++){
+                    var t_data = { color:g_color, option:g_option,index:index,color_id:color[j].id,color_name:color[j].name,path:color[j].path,option_id:0,option_name:'',cost_price:0.00,e_price:0.00,w_price:0.00,barcode:'',store_code:0.00};
+                    for(var i =0; i < specificationObj.length; i++){
+                        var obj = specificationObj[i];
+                        if(color[j].id == obj.color_id && 0 == obj.option_id){
+                            t_data = { color:g_color, option:g_option,index:index,color_id:color[j].id,color_name:color[j].name,path:color[j].path,option_id:0,option_name:specificationObj[j].name,cost_price:specificationObj[i].cost_price,e_price:specificationObj[i].e_price, w_price:specificationObj[i].w_price, barcode:specificationObj[i].barcode,store_code:specificationObj[i].store_code,};
+                            break;
+                        }
+                    }
+                    html +=template('custom-template',t_data);
                     index++;
                 }
             }
@@ -628,5 +657,61 @@
                 }
             }
         });
+
+        var getIndex = function (_arr,_obj) {
+            if(_arr.length == 0){
+                return;
+            }
+            for(var i =0; i < _arr.length; i++){
+                var obj = _arr[i];
+                var color = obj.color_id;
+                var option = obj.option_id;
+                if(color == _obj.color_id && option == _obj.option_id){
+
+                }
+            }
+
+
+            var array1 = [ {"Num": "A "  },{"Num": "B" }];
+            var array2 = [ {"Num": "A ","Name": "t1 " }, {"Num": "B","Name": "t2"}, {"Num": "C " ,"Name": "t3 "}];
+            var result = [];
+            for(var i = 0; i < array2.length; i++){
+                var obj = array2[i];
+                var num = obj.Num;
+                var isExist = false;
+                for(var j = 0; j < array1.length; j++){
+                    var aj = array1[j];
+                    var n = aj.Num;
+                    if(n == num){
+                        isExist = true;
+                        break;
+                    }
+                }
+                if(!isExist){
+                    result.push(obj);
+                }
+            }
+            console.log(result);
+        }
+
+        var removeObj = function (_arr, _obj) {
+            var length = _arr.length;
+            for (var i = 0; i < length; i++) {
+                if (_arr[i] == _obj) {
+                    if (i == 0) {
+                        _arr.shift(); //删除并返回数组的第一个元素
+                        return _arr;
+                    }
+                    else if (i == length - 1) {
+                        _arr.pop();  //删除并返回数组的最后一个元素
+                        return _arr;
+                    }
+                    else {
+                        _arr.splice(i, 1); //删除下标为i的元素
+                        return _arr;
+                    }
+                }
+            }
+        }
     })
 </script>

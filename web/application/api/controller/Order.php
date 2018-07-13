@@ -96,7 +96,7 @@ class Order extends Base{
             if($row['option_id'] > 0){
                 $typeOptionRow = $typeOptionModel->where(['id'=>$row['option_id']])->find();
                 if($typeOptionRow){
-                    $specificationsInfo .=','.$typeOptionRow->name;
+                    $specificationsInfo .=$specificationsInfo ?  ','.$typeOptionRow->name : $typeOptionRow->name;
                 }
             }
 
@@ -203,7 +203,7 @@ class Order extends Base{
                         'icon' => $goodsList['icon'],
                         'title' => $goodsList['title'],
                         'price' => $goodsList['price'],
-                        's_id' => $goodsList['s_id'],
+                        's_info' => $goodsList['specificationsInfo'],
                         'shop_id' =>1,
                         'snapshot_id' => 0,
                         'quantity' => $goodsList['quantity'],
@@ -323,10 +323,14 @@ class Order extends Base{
         }
 
         if($status != '-1'){
-            $where['state'] = $status;
+            if($status == 8){
+                $where['service_type'] = 1;
+            }else{
+                $where['state'] = $status;
+            }
         }
         $count = $orderModel->where($where)->count();
-        $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','receiver_name','supplier','buyer_id','service_type'])->select();
+        $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','actual_money','goods_money','receiver_name','supplier','buyer_id','service_type'])->select();
         $userModel = new IndexUser();
         foreach ($rows as &$row){
             $userInfo = [];
@@ -337,33 +341,14 @@ class Order extends Base{
             }
             $row['companyName']  = $userInfo ? $userInfo->real_name : '';
             $row['groupId'] = $this->groupId;
+            $row['money'] = $row->actual_money;
 
-            $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon','a.s_id'])->select();
-            $specificationModel = new MallGoodsSpecifications();
+            $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon','a.s_info'])->select();
 
             foreach($goodsRows as &$goodsRow){
                 $goodsRow['quantity'] = intval($goodsRow->quantity);
                 $goodsRow['icon'] = MallGoods::getFormatImg($goodsRow->icon);
                 $goodsRow['price'] = getFormatPrice($goodsRow->price);
-
-                $specifications_info = '';
-                if($goodsRow->s_id > 0){
-                     $specificationRow = $specificationModel->where(['id'=>$goodsRow->s_id])->find();
-                     if($specificationRow && $specificationRow->color_name){
-                         $specifications_info = $specificationRow->color_name;
-
-                     }
-                     //查询规格
-                    if($specificationRow->option_id > 0){
-                        $optionModel = new MallTypeOption();
-                        $optionRow = $optionModel->where(['id'=>$specificationRow->option_id])->find();
-                        if($optionRow && $optionRow->name){
-                            $specifications_info ? $specifications_info .=','.$optionRow->name : $specifications_info .=$optionRow->name;
-                        }
-                    }
-                }
-                $goodsRow['specifications_info'] = $specifications_info;
-
             }
             $row['goods'] = $goodsRows;
         }
@@ -399,7 +384,7 @@ class Order extends Base{
             $where['supplier'] = $this->userId;
         }
 
-        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','express_name','express_code','state','send_time','estimated_time','pay_date','out_id','buyer_comment','buyer_id','supplier','service_type'])->find();
+        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','actual_money','goods_money','receiver_name','receiver_phone','receiver_detail','express_name','express_code','state','send_time','estimated_time','pay_date','out_id','buyer_comment','buyer_id','supplier','service_type'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
         }
@@ -416,7 +401,7 @@ class Order extends Base{
 
         //查询产品
         $goodsModel = new MallOrderGoods();
-        $goodsRows = $goodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.icon'])->select();
+        $goodsRows = $goodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.id','a.title','a.price','a.quantity','a.s_info','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.icon'])->select();
 
         foreach($goodsRows as &$goodsRow){
             $goodsRow['quantity'] = intval($goodsRow->quantity);
@@ -433,11 +418,13 @@ class Order extends Base{
             'companyName' => $userInfo ? $userInfo->real_name : '',
             'groupId' => $this->groupId,
             'state' => $row->state,
+            'money' => $row->actual_money,
+            'goods_money'=> $row->goods_money,
             'name' => $row->receiver_name,
             'phone' => $row->receiver_phone,
             'address' => $row->receiver_area_name. $row->receiver_detail,
             'time' => date('Y-m-d H:i',$row->add_time),
-            'date' => date('Y-m-d',$row->delivery_time),
+            'date' => $row->delivery_time > 0 ? date('Y-m-d',$row->delivery_time) : '',
             'remark' => $row->buyer_comment,
             'payMethod' => !$payRow && isset($row->pay_date) ? '账期支付': ($payRow->pay_type == 1 ? '汇款' : '转账'),
             'payNumber' => $payRow ? $payRow->number : '',
@@ -604,7 +591,7 @@ class Order extends Base{
         $model = new MallOrder();
         $where['out_id'] = $orderNo;
         $where['buyer_id'] = $this->userId;
-        $row = $model->where($where)->field(['id','state',])->find();
+        $row = $model->where($where)->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
         }
@@ -635,7 +622,7 @@ class Order extends Base{
      */
     public function service(Request $request){
         $orderNo = $request->post('no','');
-        $goodsId = $request->post('goodsId',0,'intval');
+        $goodsId = $request->post('goodsId',0,'intval'); //商品主键ID
         $type = $request->post('type',0,'intval');
 
         if(!$orderNo){
@@ -657,12 +644,12 @@ class Order extends Base{
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
         }
-        if($row->state != MallOrder::STATE_RECEIVE && $row->state != MallOrder::STATE_FINISH ){
+        if($row->state != MallOrder::STATE_RECEIVE && $row->state != MallOrder::STATE_FINISH  && $row->state != MallOrder::STATE_OVERDUE && $row->state != MallOrder::STATE_ACCOUNT_PERIOD && $row->state != MallOrder::STATE_REMITTANCE_SUPPLIER){
             return ['status'=>1,'data'=>[],'msg'=>'当前订单状态无法申请售后'];
         }
 
         $goodsModel = new MallOrderGoods();
-        $result = $goodsModel->save(['service_type'=>$type],['order_id'=>$row->id,'goods_id'=>$goodsId]);
+        $result = $goodsModel->save(['service_type'=>$type],['order_id'=>$row->id,'id'=>$goodsId]);
         if($result !== false){
             $model->save(['service_type'=>1],$where);
             return ['status'=>0,'data'=>[],'msg'=>'服务申请成功'];

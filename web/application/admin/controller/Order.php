@@ -8,6 +8,7 @@
 
 namespace app\admin\controller;
 
+use app\common\model\IndexGroup;
 use app\common\model\IndexUser;
 use app\common\model\MallGoods;
 use app\common\model\MallOrder;
@@ -19,6 +20,16 @@ use sms\Yunpian;
 use think\Request;
 
 class Order extends Base{
+
+    public function __construct(Request $request = null)
+    {
+        parent::__construct($request);
+        $groupId = getGroupId();
+        if($groupId != IndexGroup::GROUP_OPERATION){
+            $this->errorTips();
+        }
+    }
+
 
     /**
      * @desc 订单列表
@@ -37,11 +48,12 @@ class Order extends Base{
         if(isset($state) && $state >= 0){
             $where['state'] = $state;
         }
-        if(isset($start) && $start){
+        if(isset($start) && $start && isset($end) && $end){
+           $where['add_time'] = ['between',[strtotime($start),strtotime($end.' 23:59:59')]];
+        }elseif (isset($start) && $start){
             $where['add_time'] = ['gt',strtotime($start)];
-        }
-        if(isset($end) && $end){
-            $where['add_time'] = ['gt',strtotime($end.' 23:59:59')];
+        }elseif (isset($end) && $end){
+            $where['add_time'] = ['lt',strtotime($end.' 23:59:59')];
         }
 
         //查询总价
@@ -53,6 +65,8 @@ class Order extends Base{
         foreach($rows as &$row){
             $goodsRows = $goodsModel->where(['order_id'=>$row->id])->order('time','desc')->select();
             $userInfo = $userModel->getInfoById($row->supplier);
+            $buyerInfo = $userModel->getInfoById($row->buyer_id);
+
             $total = 0;
             foreach ($goodsRows as & $goodsRow){
                 $productModel = new MallGoods();
@@ -78,6 +92,7 @@ class Order extends Base{
                 }
             }
             $row['supplierName'] = $userInfo ? $userInfo->real_name : '';
+            $row['buyerName'] = $buyerInfo ? $buyerInfo->real_name : '';
             $row['buyerPayInfo'] = $buyerPayInfo;
             $row['supplierPayInfo'] = $supplierPayInfo;
         }
@@ -111,7 +126,7 @@ class Order extends Base{
         }
         if($contract_type == 2){
             //有账期 =》 待发货，没账期 => 待采购商打款
-            $data = ['contract_number'=>$contractNumber,'pay_date'=>$payDate,'sum_money'=>$sumMoney,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
+            $data = ['contract_number'=>$contractNumber,'pay_date'=>$payDate,'actual_money'=>$sumMoney,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
             $result = $model->save($data,['id'=>$id]);
             if($result == true){
                 if($payDate){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
@@ -135,7 +150,7 @@ class Order extends Base{
                 return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
             }
         }else{ //待签约
-            $data = ['sum_money'=>$sumMoney,'state'=>MallOrder::STATE_SIGN];
+            $data = ['actual_money'=>$sumMoney,'state'=>MallOrder::STATE_SIGN];
             $result = $model->save($data,['id'=>$id]);
             if($result == true){
                 //更新消息通知
