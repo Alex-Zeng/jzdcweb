@@ -330,7 +330,7 @@ class Order extends Base{
             }
         }
         $count = $orderModel->where($where)->count();
-        $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','actual_money','receiver_name','supplier','buyer_id','service_type'])->select();
+        $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','actual_money','goods_money','receiver_name','supplier','buyer_id','service_type'])->select();
         $userModel = new IndexUser();
         foreach ($rows as &$row){
             $userInfo = [];
@@ -384,7 +384,7 @@ class Order extends Base{
             $where['supplier'] = $this->userId;
         }
 
-        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','actual_money','receiver_name','receiver_phone','receiver_detail','express_name','express_code','state','send_time','estimated_time','pay_date','out_id','buyer_comment','buyer_id','supplier','service_type'])->find();
+        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','actual_money','goods_money','receiver_name','receiver_phone','receiver_detail','express_name','express_code','state','send_time','estimated_time','pay_date','out_id','buyer_comment','buyer_id','supplier','service_type'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
         }
@@ -419,6 +419,7 @@ class Order extends Base{
             'groupId' => $this->groupId,
             'state' => $row->state,
             'money' => $row->actual_money,
+            'goods_money'=> $row->goods_money,
             'name' => $row->receiver_name,
             'phone' => $row->receiver_phone,
             'address' => $row->receiver_area_name. $row->receiver_detail,
