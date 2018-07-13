@@ -206,13 +206,13 @@ function getTypeLevel($typeId = 0){
     $list = [];
     if($row){
         $list[] = $row->name;
-    }
-    if($row->parent > 0){
-        $row2 = $model->where(['id'=>$row->parent])->field(['id','name','parent'])->find();
-        $list[] = $row2->name;
-        if($row2->parent > 0){
-            $row3 = $model->where(['id'=>$row2->parent])->field(['id','name','parent'])->find();
-            $list[] = $row3->name;
+        if($row->parent > 0){
+            $row2 = $model->where(['id'=>$row->parent])->field(['id','name','parent'])->find();
+            $list[] = $row2->name;
+            if($row2->parent > 0){
+                $row3 = $model->where(['id'=>$row2->parent])->field(['id','name','parent'])->find();
+                $list[] = $row3->name;
+            }
         }
     }
 
