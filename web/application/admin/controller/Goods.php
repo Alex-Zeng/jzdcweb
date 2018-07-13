@@ -316,6 +316,10 @@ class Goods extends Base{
         $model = new MallGoods();
         $row = $model->where(['id'=>$id])->find();
 
+        if(!$row){
+            $this->errorTips([]);
+        }
+
         $row['icon'] = MallGoods::getFormatImg($row->icon);
         $multiImgArr = $row->multi_angle_img ? explode('|',$row->multi_angle_img) : [];
         $multiImgs = [];
