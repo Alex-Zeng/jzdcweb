@@ -259,9 +259,14 @@ class Goods  extends Base {
         //格式化图片 multi_angle_img
         $imgList = [];
         $imgArr = $row->multi_angle_img ? explode('|',$row->multi_angle_img) : [];
-        for($i = 0; $i < count($imgArr); $i++){
-            $imgList[] =["img"=>MallGoods::getFormatMultiImg($imgArr[$i])];
+        if($imgArr){  //取多图
+            for($i = 0; $i < count($imgArr); $i++){
+                $imgList[] =["img"=>MallGoods::getFormatMultiImg($imgArr[$i])];
+            }
+        }else{  //取封面图
+            $imgList[] =["img"=>MallGoods::getFormatImg($row->icon)];
         }
+
 
         //商家
         $userModel = new IndexUser();
