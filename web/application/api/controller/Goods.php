@@ -8,6 +8,7 @@
 
 namespace app\api\controller;
 use app\common\model\IndexUser;
+use app\common\model\MallColor;
 use app\common\model\MallFavorite;
 use app\common\model\MallGoods;
 use app\common\model\MallGoodsSpecifications;
@@ -273,7 +274,10 @@ class Goods  extends Base {
 
         $goodsSpecificationsModel = new MallGoodsSpecifications();
         if($mallTypeRow && $mallTypeRow->color == 1){
-            $colorRows =  $goodsSpecificationsModel->where(['goods_id'=>$row->id])->field(['color_id','color_name'])->group('color_id')->select();
+            $colorRows =  $goodsSpecificationsModel->where(['goods_id'=>$row->id])->field(['color_id','color_name','color_img'])->group('color_id')->select();
+            foreach ($colorRows as &$colorRow){
+                $colorRow['color_img'] = $colorRow->color_img ? MallGoodsSpecifications::getFormatPath($colorRow->color_img) : ($colorRow->color_id > 0 ? MallColor::getFormatImg($colorRow->color_id) : '');
+            }
             $colorList = $colorRows;
             if($colorList){
                 $standards[] = [
