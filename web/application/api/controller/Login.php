@@ -73,7 +73,8 @@ class Login{
             'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : '',
             'phone' => $row->phone,
             'email' => $row->email,
-            'username' => $row->username
+            'username' => $row->username,
+            'group' => $row->group
         ];
         //生成token
         $key = config('jzdc_token_key');
@@ -146,7 +147,8 @@ class Login{
             'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : '',
             'phone' => $row->phone,
             'email' => $row->email,
-            'username' => $row->username
+            'username' => $row->username,
+            'group' => $row->group
         ];
         //生成token
         $key = config('jzdc_token_key');
