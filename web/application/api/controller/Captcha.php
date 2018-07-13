@@ -24,6 +24,4 @@ class Captcha{
         $http = config('jzdc_domain');
         return ['status'=>0,'data'=>['src'=>$http.$src,'id'=>$id],'msg'=>''];
     }
-
-
 }
