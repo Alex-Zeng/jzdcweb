@@ -4,7 +4,8 @@ class ConnectPDO extends PDO{
 	private $port='3306';
 	private $user='jzdcadm';
 	private $password='Jzdc@2018';
-	public $dbname='jzdcprd';
+//	public $dbname='jzdcprd';
+	public $dbname='jzdcprd_test';
 	public $sys_pre='jzdc_';
 	public $index_pre='jzdc_index_';
 	function __construct(){
