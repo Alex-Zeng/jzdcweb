@@ -39,12 +39,21 @@ class Member extends Base{
         return $this->fetch();
     }
 
+    /**
+     * @desc 新增
+     * @param Request $request
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public function create(Request $request){
         $username = $request->post('username','');
         $phone = $request->post('phone','');
         $realName = $request->post('real_name','');
         $email = $request->post('email','');
         $password = $request->post('password','');
+        $role = $request->post('role','6','intval');
         //
         if(!$username){
             return ['status'=>1,'data'=>[],'msg'=>'用户名不能为空'];
@@ -83,7 +92,7 @@ class Member extends Base{
             }
         }
 
-        $row = ['username'=>$username,'password'=>md5($password),'phone'=>$phone,'nickname'=>$username,'reg_time'=>time(),'group'=>IndexGroup::GROUP_MEMBER,'state'=>1,'email'=>$email,'real_name'=>$realName];
+        $row = ['username'=>$username,'password'=>md5($password),'phone'=>$phone,'nickname'=>$username,'reg_time'=>time(),'group'=>$role,'state'=>1,'email'=>$email,'real_name'=>$realName];
         $result = $model->save($row);
         if($result == true){
             return ['status'=>0,'data'=>[],'msg'=>'添加成功'];
@@ -91,9 +100,19 @@ class Member extends Base{
         return ['status'=>1,'data'=>[],'msg'=>'添加失败'];
     }
 
+    /**
+     * @desc 修改
+     * @param Request $request
+     * @param $id
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public function edit(Request $request, $id){
         $nickName = $request->post('nickname','');
         $password = $request->post('password','');
+        $state = $request->post('state',2,'intval');
 
         $model = new IndexUser();
 
@@ -103,6 +122,7 @@ class Member extends Base{
         }
 
         $data['nickname'] = $nickName;
+        $data['state'] = $state;
         if($password){
             $data['password'] = md5($password);
         }
