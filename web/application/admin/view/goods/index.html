@@ -76,7 +76,7 @@
                             <tbody>
                             {volist name='list' id='goods'}
                             <tr>
-                                <td><img src="{$goods.icon_path}"   style="cursor: pointer;max-width: 100px;" /></td>
+                                <td>{if $goods.icon_path}<img src="{$goods.icon_path}"   style="cursor: pointer;max-width: 100px;" />{/if}</td>
                                 <td>{$goods.title}</td>
                                 <td>{$goods.supplier_name}</td>
                                 <td>{$goods.sold}</td>

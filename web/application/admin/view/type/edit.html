@@ -54,7 +54,7 @@
                                     <label  class="col-md-2 pull-right">图标:</label>
                                     <div class="">
                                         <input id="edit-file" name="file" type="file" data-show-caption="true">
-                                        <input  type="hidden" name="path" id="edit-upload-file"  value="{$row.path}" />
+                                        <input  type="hidden" name="path" id="edit-upload-file"  value="{$row.path}"  data-path="{$preview_path}"/>
                                         <p class="help-block">支持jpg、jpeg、png格式，大小不超过2.0M</p>
                                     </div>
                                 </div>
@@ -97,7 +97,7 @@
     var url = '{:url("admin/type/index")}';
     $('a[href="'+url+'"]').addClass('active');
     $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
-  //  var imgTag = "<img width='100px' height='100px' src='"+data.data.preview+"' class='file-preview-image' alt='' title=''>";
+    var imgPath = $('#edit-upload-file').data('path');
     $("#edit-file").fileinput({
         language: 'zh', //设置语言
         uploadUrl: '?s=admin/file/upload',  //上传地址
@@ -116,7 +116,7 @@
             return obj;
         },
         initialPreview: [
-            "<img width='150px' height='150px' src='{$preview_path}' class='file-preview-image' alt='' title=''>"
+            "<img width='150px' height='150px' src='"+imgPath+"' class='file-preview-image' alt='' title=''>"
         ],
         previewSettings: {
             image: {width: "200", height: "200"},
@@ -161,6 +161,7 @@
     });
 
     function validateSubmit() {
+        $("#edit-form").data('bootstrapValidator').validate();
         if ($("#edit-form").data('bootstrapValidator').isValid()) {
             return true;
         }

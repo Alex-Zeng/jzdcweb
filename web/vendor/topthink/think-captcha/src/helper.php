@@ -10,6 +10,7 @@
 // +----------------------------------------------------------------------
 
 \think\Route::get('captcha/[:id]', "\\think\\captcha\\CaptchaController@index");
+\think\Route::get('captchaDb/[:id]', "\\think\\captcha\\CaptchaController@indexDb");
 
 \think\Validate::extend('captcha', function ($value, $id = "") {
     return captcha_check($value, $id, (array)\think\Config::get('captcha'));
@@ -62,3 +63,6 @@ function captcha_check($value, $id = "", $config = [])
     return $captcha->check($value, $id);
 }
 
+function captcha_db_src($id = ""){
+    return \think\Url::build('/captchaDb' . ($id ? "/{$id}" : ''));
+}

@@ -29,7 +29,7 @@ class Member extends Base{
         }
         $rows = $model->where([])->order(['id'=>'desc'])->paginate();
         foreach ($rows as &$row){
-            $row->icon = IndexUser::getFormatIcon($row->icon);
+            $row->icon = $row->icon ? IndexUser::getFormatIcon($row->icon) : '';
         }
 
         $this->assign('k',$k);

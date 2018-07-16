@@ -43,7 +43,7 @@ class Goods extends Base{
         $userModel = new IndexUser();
         foreach ($rows as &$row){
             $user = $userModel->getInfoById($row->supplier);
-            $row['icon_path'] = MallGoods::getFormatImg($row->icon);
+            $row['icon_path'] = $row->icon ? MallGoods::getFormatImg($row->icon) : '';
             $row['supplier_name'] = $user ? $user->real_name : '';
         }
 

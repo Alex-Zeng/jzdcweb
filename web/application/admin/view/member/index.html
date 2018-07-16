@@ -57,7 +57,7 @@
                             <thead>
                             <tr>
                                 <!--<th><input type="checkbox" /> </th>-->
-                                <th>图像</th>
+                                <th width="120px">图像</th>
                                 <th>用户名</th>
                                 <th>用户组</th>
                                 <th>注册时间</th>
@@ -69,7 +69,7 @@
                             {volist name='list' id='member'}
                             <tr>
                                 <!--<td><input type="checkbox" /> </td>-->
-                                <td><img src="{$member.icon}"  width="100px" height="100px"/></td>
+                                <td>{if $member.icon}<img src="{$member.icon}"  width="100px" height="100px"/>{/if}</td>
                                 <td>{$member.username}<br />{$member.phone}<br/>{$member.real_name}<br />{$member.email}</td>
                                 <td>{:getMemberGroup($member.group)}</td>
                                 <td>{:date('Y-m-d H:i',$member.reg_time)}</td>
