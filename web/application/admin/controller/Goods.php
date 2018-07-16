@@ -26,7 +26,7 @@ class Goods extends Base{
      */
     public function index(){
         $model = new MallGoods();
-        $k = Request::instance()->get('k','');
+        $k = Request::instance()->get('k','','trim');
         $supplier = Request::instance()->get('supplier',0);
         $state = Request::instance()->get('state','-1','intval');
         if(isset($k) && $k){
@@ -111,21 +111,21 @@ class Goods extends Base{
 
             $result = $goodsModel->save($goods);
             if($result == true){
-                for($i =0; $i < count($standard); $i++){
-                    $colorId = $standard[$i]['color_id'];
+                foreach ($standard as $index => $item){
+                    $colorId = $item['color_id'];
                     $standardArr[] = [
-                        'color_id' => $standard[$i]['color_id'],
+                        'color_id' => $item['color_id'],
                         'color_name' => isset($color[$colorId]) ? $color[$colorId]['name'] : '',
                         'color_img' => isset($color[$colorId]) ? $color[$colorId]['path'] : '',
-                        'option_id' => $standard[$i]['option_id'],
+                        'option_id' => $item['option_id'],
                         'goods_id' => $goodsModel->id,
-                        'e_price' => $standard[$i]['e_price'],
-                        'w_price' => $standard[$i]['w_price'],
-                        'cost_price' => $standard[$i]['cost_price'],
+                        'e_price' => $item['e_price'],
+                        'w_price' => $item['w_price'],
+                        'cost_price' => $item['cost_price'],
                         'quantity' => 1000000,
-                        'barcode' => $standard[$i]['barcode'],
+                        'barcode' => $item['barcode'],
                         'type' => $type,
-                        'store_code' => $standard[$i]['store_code']
+                        'store_code' => $item['store_code']
                     ];
                 }
 
@@ -203,21 +203,21 @@ class Goods extends Base{
 
             $result = $goodsModel->save($goods,['id'=>$id]);
             if($result !== false){
-                for($i =0; $i < count($standard); $i++){
-                    $colorId = $standard[$i]['color_id'];
+                foreach ($standard as $index => $item){
+                    $colorId = $item['color_id'];
                     $standardArr[] = [
-                        'color_id' => $standard[$i]['color_id'],
+                        'color_id' => $item['color_id'],
                         'color_name' => isset($color[$colorId]) ? $color[$colorId]['name'] : '',
                         'color_img' => isset($color[$colorId]) ? $color[$colorId]['path'] : '',
-                        'option_id' => $standard[$i]['option_id'],
+                        'option_id' => $item['option_id'],
                         'goods_id' => $id,
-                        'cost_price' =>$standard[$i]['cost_price'],
-                        'e_price' => $standard[$i]['e_price'],
-                        'w_price' => $standard[$i]['w_price'],
+                        'cost_price' =>$item['cost_price'],
+                        'e_price' => $item['e_price'],
+                        'w_price' => $item['w_price'],
                         'quantity' => 1000000,
-                        'barcode' => $standard[$i]['barcode'],
+                        'barcode' => $item['barcode'],
                         'type' => $type,
-                        'store_code' => $standard[$i]['store_code']
+                        'store_code' => $item['store_code']
                     ];
                 }
                 //商品规格处理

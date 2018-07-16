@@ -25,7 +25,7 @@ class Certification extends Base{
      */
     public function index(Request $request){
         $model = new FormUserCert();
-        $k = Request::instance()->get('k','');
+        $k = Request::instance()->get('k','','trim');
         $type = Request::instance()->get('type','');
         $status = Request::instance()->get('status',0,'intval');
         $where = [];
