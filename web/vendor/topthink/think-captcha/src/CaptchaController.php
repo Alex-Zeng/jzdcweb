@@ -18,6 +18,11 @@ class CaptchaController
     public function index($id = "")
     {
         $captcha = new Captcha((array)Config::get('captcha'));
+        return $captcha->entry($id);
+    }
+
+    public function indexDb($id = ""){
+        $captcha = new Captcha((array)Config::get('captcha'));
         return $captcha->entryDb($id);
     }
 }
