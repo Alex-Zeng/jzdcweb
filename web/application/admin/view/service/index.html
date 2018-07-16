@@ -69,7 +69,7 @@
                                 <td>{$service.sex}</td>
                                 <td>{$service.phone}</td>
                                 <td>{$service.type_name}</td>
-                                <td>{$service.writer_name}#{$service.writer}</td>
+                                <td>{$service.writer_name}{if $service.writer}#{$service.writer}{/if}</td>
                                 <td>{:date('Y-m-d H:i',$service.write_time)}</td>
                                 <td>{$service.comment}</td>
                             </tr>

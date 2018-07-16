@@ -291,6 +291,11 @@ return [
             'path' => ROOT_PATH.'public'.DS.'uploads/user_icon',
             'size' => 5*1024*1024,
             'ext' => 'jpg,jpeg,png',
+        ],
+        'type_index_icon' => [
+            'path' => ROOT_PATH.'public'.DS.'uploads/type_index_icon',
+            'size' => 2*1024*1024,
+            'ext' => 'jpg,jpeg,png',
         ]
     ],
     'jzdc_doc_path' => 'http://'.$_SERVER['HTTP_HOST'].'/web/public/uploads/',
