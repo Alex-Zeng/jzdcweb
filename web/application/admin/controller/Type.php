@@ -97,7 +97,6 @@ class Type extends Base{
                 $this->redirect(url('admin/type/index'));
             }
         }
-
         $this->assign('row',$row);
         $this->assign('preview_path',MallType::getFormatIcon($row->path));
         return $this->fetch();

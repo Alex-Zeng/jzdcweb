@@ -154,12 +154,11 @@
             },
         }
     });
-
     function validateSubmit() {
-        if ($("#add-form").data('bootstrapValidator').isValid()) {
+        $("#add-form").data('bootstrapValidator').validate();
+        if($("#add-form").data('bootstrapValidator').isValid()) {
             return true;
         }
         return false;
     }
-
 </script>
