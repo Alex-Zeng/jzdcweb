@@ -98,10 +98,20 @@ class Register{
             'group' => 6,
             'state' => 1
         ];
+
         $userResult = $model->save($data);
         //返回token
         if($userResult){
-            $data = [];
+            $data = [
+                'contact' => '',
+                'tel' => '',
+                'icon' => '',
+                'path' => '',
+                'phone' => $phone,
+                'email' => '',
+                'username' => $username,
+                'group' => 6
+            ];
             //生成token
             $key = config('jzdc_token_key');
             $token = [
