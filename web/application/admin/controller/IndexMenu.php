@@ -14,7 +14,7 @@ use think\Request;
 class IndexMenu extends Base{
    //列表
     public function index(Request $request){
-        $k = $request->post('k','');
+        $k = $request->get('k','','trim');
         $model = new MenuMenu();
         if(isset($k) && $k){
             $model->where('name','like','%'.$k.'%');

@@ -521,7 +521,7 @@
                         for(var k =0; k < specificationObj.length; k++){
                             var obj = specificationObj[k];
                             if(color[i].id == obj.color_id && option[j].id == obj.option_id){
-                                t_data = { color:g_color, option:g_option,index:index,color_id:color[i].id,color_name:color[i].name,path:color[i].path,option_id:option[j].id,option_name:option[j].name,cost_price:specificationObj[k].cost_price,e_price:specificationObj[k].e_price, w_price:specificationObj[k].w_price, barcode:specificationObj[k].barcode,store_code:specificationObj[k].store_code,};
+                                t_data = { color:g_color, option:g_option,index:index,color_id:color[i].id,color_name:specificationObj[k].color_name,path:color[i].path,option_id:option[j].id,option_name:specificationObj[k].option_name,cost_price:specificationObj[k].cost_price,e_price:specificationObj[k].e_price, w_price:specificationObj[k].w_price, barcode:specificationObj[k].barcode,store_code:specificationObj[k].store_code,};
                                 break;
                             }
                         }
@@ -532,12 +532,12 @@
             }
             if(color.length == 0 && option.length > 0){
                 for(var j=0;j<option.length; j++){
-                    console.log(option[j].id);
                     var t_data = { color:g_color, option:g_option,index:index,color_id:0,color_name:'',path:'',option_id:option[j].id,option_name:option[j].name,cost_price:0.00,e_price:0.00,w_price:0.00,barcode:'',store_code:0.00};
                     for(var i =0; i < specificationObj.length; i++){
                         var obj = specificationObj[i];
                         if(0 == obj.color_id && option[j].id == obj.option_id){
-                            t_data = { color:g_color, option:g_option,index:index,color_id:0,color_name:specificationObj[j].name,path:specificationObj[j].path,option_id:option[j].id,option_name:option[j].name,cost_price:specificationObj[i].cost_price,e_price:specificationObj[i].e_price, w_price:specificationObj[i].w_price, barcode:specificationObj[i].barcode,store_code:specificationObj[i].store_code,};
+                            console.log(option[j].id);
+                            t_data = { color:g_color, option:g_option,index:index,color_id:0,color_name:specificationObj[i].color_name,path:specificationObj[i].path,option_id:option[j].id,option_name:specificationObj[i].option_name,cost_price:specificationObj[i].cost_price,e_price:specificationObj[i].e_price, w_price:specificationObj[i].w_price, barcode:specificationObj[i].barcode,store_code:specificationObj[i].store_code,};
                             break;
                         }
                     }
@@ -551,7 +551,7 @@
                     for(var i =0; i < specificationObj.length; i++){
                         var obj = specificationObj[i];
                         if(color[j].id == obj.color_id && 0 == obj.option_id){
-                            t_data = { color:g_color, option:g_option,index:index,color_id:color[j].id,color_name:color[j].name,path:color[j].path,option_id:0,option_name:specificationObj[j].name,cost_price:specificationObj[i].cost_price,e_price:specificationObj[i].e_price, w_price:specificationObj[i].w_price, barcode:specificationObj[i].barcode,store_code:specificationObj[i].store_code,};
+                            t_data = { color:g_color, option:g_option,index:index,color_id:color[j].id,color_name:color[j].name,path:color[j].path,option_id:0,option_name:specificationObj[i].option_name,cost_price:specificationObj[i].cost_price,e_price:specificationObj[i].e_price, w_price:specificationObj[i].w_price, barcode:specificationObj[i].barcode,store_code:specificationObj[i].store_code,};
                             break;
                         }
                     }

@@ -20,7 +20,7 @@ class Captcha{
     public function img(Request $request){
         startSession();
         $id = session_id();
-        $src = captcha_src($id);
+        $src = captcha_db_src($id);
         $http = config('jzdc_domain');
         return ['status'=>0,'data'=>['src'=>$http.$src,'id'=>$id],'msg'=>''];
     }
