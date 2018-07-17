@@ -173,6 +173,7 @@ function getFormatPrice($price,$length = 2){
  */
 function getOrderShowStatus(){
     $list = [
+        -1 => '全部',
         1 => '待确认',
         2 => '待付款',
         3 => '待发货',
