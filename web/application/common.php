@@ -167,4 +167,21 @@ function getFormatPrice($price,$length = 2){
     return number_format($price,$length,'.','');
 }
 
+/**
+ * @desc 返回状态列表
+ * @return array
+ */
+function getOrderShowStatus(){
+    $list = [
+        1 => '待确认',
+        2 => '待付款',
+        3 => '待发货',
+        4 => '待收货',
+        5 => '订单关闭',
+        6 => '售后处理',
+    ];
+    return $list;
+}
+
+
 
