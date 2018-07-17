@@ -445,7 +445,12 @@ class Goods extends Base{
         $row = $model->where(['id'=>$id])->find();
 
         $row['icon'] = MallGoods::getFormatImg($row->icon);
+        //查询供应商
+        $userModel = new IndexUser();
+        $supplierInfo = $userModel->getInfoById($row->supplier);
 
+        $row['supplierLogo'] = $supplierInfo->icon ? IndexUser::getFormatIcon($supplierInfo->icon) : '';
+        $row['supplierName'] = $supplierInfo->real_name;
         $this->assign('goods',$row);
         return $this->fetch();
     }

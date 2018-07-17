@@ -64,6 +64,7 @@ class Goods  extends Base {
             foreach ($rows2 as &$row2){
                 $row2['path'] = MallType::getFormatIcon($row2->path);
                 $rows3 = $model->where(['visible'=>1,'parent'=>$row2->id])->order('sequence','desc')->field($field)->select();
+              //  echo $model->getLastSql();
                 foreach ($rows3 as &$row3){
                     $row3['path'] = MallType::getFormatIcon($row3->path);
                 }

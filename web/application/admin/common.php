@@ -5,11 +5,15 @@
  */
 function getUserId()
 {
+    /*
+    建立在外包系统兼容性写法
     if(!isset($_SESSION)){
         session_start();
     }
     $jzdc = isset($_SESSION['jzdc']) ? $_SESSION['jzdc'] : [];
     return isset($jzdc['id']) ? $jzdc['id'] : 0;
+     */
+    return session('?admin_id')?session('admin_id'):0;
 }
 
 /**
@@ -17,8 +21,12 @@ function getUserId()
  * @return int|mixed
  */
 function getUserName(){
+    /*
+    建立在外包系统兼容性写法
     $jzdc = isset($_SESSION['jzdc']) ? $_SESSION['jzdc'] : [];
     return isset($jzdc['nickname']) ? $jzdc['nickname'] : 0;
+    */
+  return session('?nick_name')?session('nick_name'):0;
 }
 
 /**
@@ -26,11 +34,14 @@ function getUserName(){
  * @return int|mixed
  */
 function getGroupId(){
-    //session_start();
-    $jzdc = isset($_SESSION['jzdc']) ? $_SESSION['jzdc'] : [];
-    return isset($jzdc['group_id']) ? $jzdc['group_id'] : 0;
+    /*
+      建立在外包系统兼容性写法
+      //session_start();
+      $jzdc = isset($_SESSION['jzdc']) ? $_SESSION['jzdc'] : [];
+      return isset($jzdc['group_id']) ? $jzdc['group_id'] : 0;
+     */
+    return session('?group_id')?session('group_id'):0;
 }
-
 /**
  * @desc 返回设备
  * @param int $type
@@ -245,4 +256,26 @@ function getServiceList($type = -1){
         5 => '知识产权',
         6 => '自动'
     ];return isset($list[$type]) ? $list[$type] : '';
+}
+
+/**
+ * [allLateToString 将返回结果的所有值类型转换为字符串]
+ * @param  [array] $data [数组]
+ * @return [array]       [数组]
+ */
+function allLateToString($data){
+  foreach ($data as $key => $val) {
+    if(is_array($val)){
+      if(count($val)>0){
+        $data[$key] = allLateToString($val);
+      }
+    }else{
+      if(is_numeric($val)){
+        $data[$key] = (string)$val;
+      }else if(empty($val)){
+        $data[$key] = '';
+      }
+    }
+  }
+  return $data;
 }
