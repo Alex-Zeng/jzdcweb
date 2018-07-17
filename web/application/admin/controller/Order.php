@@ -126,7 +126,10 @@ class Order extends Base{
         }
         if($contract_type == 2){
             //有账期 =》 待发货，没账期 => 待采购商打款
-            $data = ['contract_number'=>$contractNumber,'pay_date'=>$payDate,'actual_money'=>$sumMoney,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
+            $data = ['contract_number'=>$contractNumber,'actual_money'=>$sumMoney,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
+            if($payDate){
+                $data['pay_date']=$payDate;
+            }
             $result = $model->save($data,['id'=>$id]);
             if($result == true){
                 if($payDate){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
