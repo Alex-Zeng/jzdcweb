@@ -340,7 +340,7 @@ class Order extends Base{
                     $where .=' AND state=4';
                     break;
                 case 6: //售后处理
-                    $where .=' AND ( state IN(11,13) OR (state IN (6,9,10,) AND service_type=1))';
+                    $where .=' AND ( state IN(11,13) OR (state IN (6,9,10) AND service_type=1))';
                     break;
                 default:
             }
