@@ -76,6 +76,7 @@ class Goods extends Base{
             $e_price = $request->post('e_price',0);
 
             $content = $request->post('content','');
+            $web_content = $request->post('web_content','');
             $state = $request->post('state',0,'intval');
             $standardArr =  [];
 
@@ -103,7 +104,8 @@ class Goods extends Base{
                 'title' => $title,
                 'icon' => $cover_path,
                 'multi_angle_img' => $multi_path,
-                'detail' => $content,
+                'm_detail' => $content,
+                'detail' => $web_content,
                 'm_detail' => $content,
                 'limit_cycle' => '',
                 'time' => time()
@@ -169,6 +171,7 @@ class Goods extends Base{
             $e_price = $request->post('e_price',0);
 
             $content = $request->post('content','');
+            $web_content = $request->post('web_content','');
             $state = $request->post('state',0,'intval');
             $standardArr =  [];
 
@@ -195,7 +198,7 @@ class Goods extends Base{
                 'title' => $title,
                 'icon' => $cover_path,
                 'multi_angle_img' => $multi_path,
-                'detail' => $content,
+                'detail' => $web_content,
                 'm_detail' => $content,
                 'limit_cycle' => '',
                 'time'=> time()
