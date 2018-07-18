@@ -327,7 +327,8 @@ class Order extends Base{
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
         }
-        if(!($row->state == MallOrder::STATE_PRICING || $row->state == MallOrder::STATE_SIGN || $row->state ==MallOrder::STATE_REMITTANCE)){
+
+        if(!in_array($row->state,[MallOrder::STATE_PRICING,MallOrder::STATE_SIGN,MallOrder::STATE_REMITTANCE])){
             return ['status'=>1,'data'=>[],'msg'=>'不能取消该订单'];
         }
 
