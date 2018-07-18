@@ -119,11 +119,11 @@
                                             <td width="80px" style="vertical-align: middle;border-bottom: 1px solid #dee2e6;"><img width="60px" height="60px" src="{$goods.icon}"  /></td>
                                             <td style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">
                                                 {if $goods.service_type == 1}
-                                                <span class="label label-primary">退货</span>
+                                                <span class="label label-primary" style="padding: 0;border-radius: 3px">退货</span>
                                                 {elseif $goods.service_type == 2}
-                                                <span class="label label-info">换货</span>
+                                                <span class="label label-info" style="padding: 0 3px;3border-radius: 3px">换货</span>
                                                 {elseif $goods.service_type == 3}
-                                                <span class="label label-danger">维修</span>
+                                                <span class="label label-danger" style="padding: 0 3px">维修</span>
                                                 {/if}
                                                 {$goods.title}
                                             </td>
@@ -186,13 +186,19 @@
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary"  data-toggle="modal" data-target="#problem-modal">问题解决</a>
                                     {elseif $order.state == 9}<!-- 账期中-->
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary" data-tag="2" data-toggle="modal" data-target="#remittance-modal">收款</a>
+                                    {if $order.service_type == 1}
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#service-modal">售后</a>
+                                    {/if}
                                     {elseif $order.state == 10}<!-- 逾期中-->
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary" data-tag="3" data-toggle="modal" data-target="#remittance-modal">收款</a>
+                                    {if $order.service_type == 1}
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#service-modal">售后</a>
+                                    {/if}
                                     {elseif $order.state == 11}<!-- 转账-->
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#transfer-modal">转账</a>
-                                    {elseif $order.state == 12}<!-- 交易完成-->
+                                    {elseif $order.state == 13}<!-- 交易完成-->
                                     {if $order.service_type == 1}
-                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">交易售后</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#service-modal">售后</a>
                                     {/if}
                                     {/if}
                                 </td>
@@ -684,7 +690,7 @@
 
     $('#cancel-modal').on('show.bs.modal', function (event) {
         var id = $(event.relatedTarget).data('id');
-        $("#delete-request").data('id',id);
+        $("#cancel-request").data('id',id);
     });
     $("#cancel-request").click(function () {
         var id = $(this).data('id');
