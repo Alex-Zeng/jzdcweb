@@ -690,7 +690,7 @@
 
     $('#cancel-modal').on('show.bs.modal', function (event) {
         var id = $(event.relatedTarget).data('id');
-        $("#delete-request").data('id',id);
+        $("#cancel-request").data('id',id);
     });
     $("#cancel-request").click(function () {
         var id = $(this).data('id');
