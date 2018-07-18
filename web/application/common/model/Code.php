@@ -22,6 +22,8 @@ class Code extends Model{
     const TYPE_PHONE_FORGET_PASSWORD = 3; //忘记密码发送短信
     const TYPE_PHONE_BIND_OLD = 4; //原手机号发送短信
     const TYPE_PHONE_BIND_NEW = 5; //新手机号发送短信
+    const TYPE_PHONE_ADMIN_OLD = 6; //后台原手机号发送短信
+    const TYPE_PHONE_ADMIN_NEW = 7; //后台新手机号发送短信
 
 
 

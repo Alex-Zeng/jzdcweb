@@ -8,7 +8,7 @@ class IndexUser extends validate
 
     protected $rule=[
         'username'=>'require',
-        'password'=>'require'
+        'password'=>'require',
     ];
     protected $message = [
         'username.require'   => '账号必填',
