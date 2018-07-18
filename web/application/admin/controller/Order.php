@@ -337,7 +337,7 @@ class Order extends Base{
             $userModel = new IndexUser();
             //更新消息通知
             $orderMsgModel = new OrderMsg();
-            $content = "订单号：{$row->out_id}【$row->goods_names】已取消该笔订单。";
+            $content = "订单号：{$row->out_id}【{$row->goods_names}】已取消该笔订单。";
             //采购商
             $msgData = ['title'=>"订单取消",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
             $orderMsgModel->save($msgData);
