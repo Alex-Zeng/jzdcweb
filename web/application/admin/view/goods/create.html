@@ -142,10 +142,18 @@
                                     </div>
                                 </div>
                                 <div class="form-inline form-group">
-                                    <label class="col-md-2">商品详情</label>
+                                    <label class="col-md-2">商品详情APP/H5</label>
                                     <div class="col-md-7 no-padding">
                                         <div class="row">
                                             <textarea id="goods-content" class="textarea goods-content" placeholder="商品详情..."  name="content"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-inline form-group">
+                                    <label class="col-md-2">商品详情Web</label>
+                                    <div class="col-md-7 no-padding">
+                                        <div class="row">
+                                            <textarea id="web-goods-content" class="textarea goods-content" placeholder="商品详情..."  name="web_content"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -313,7 +321,13 @@
             uploadJson : '/?s=admin/file/upload2',
             allowFileManager : true,
             afterCreate : function() {
-                var self = this;
+            }
+        });
+        var editor2 = K.create('#web-goods-content', {
+            cssPath : '__STATIC__/js/plugins/kindeditor/plugins/code/prettify.css',
+            uploadJson : '/?s=admin/file/upload2',
+            allowFileManager : true,
+            afterCreate : function() {
             }
         });
     })
