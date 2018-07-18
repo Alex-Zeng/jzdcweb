@@ -315,18 +315,34 @@ class Order extends Base{
             return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
         }
 
-        $where = [];
+        $where = '';
         if($this->groupId == IndexGroup::GROUP_BUYER){
-            $where['buyer_id'] = $this->userId;
+            $where.= 'buyer_id='.$this->userId;
         }else{
-            $where['supplier'] = $this->userId;
+            $where .='supplier='.$this->userId;
         }
 
         if($status != '-1'){
-            if($status == 8){
-                $where['service_type'] = 1;
-            }else{
-                $where['state'] = $status;
+            switch ($status){
+                case 1:  //待确认
+                    $where .= ' AND state IN (0,1)';
+                    break;
+                case 2: //待付款
+                    $where .=' AND state IN (2,9,10) AND service_type IN (0,2)';
+                    break;
+                case 3: //待发货
+                    $where .=' AND state = 3';
+                    break;
+                case 4: //待收货
+                    $where .=' AND state=6 AND service_type IN(0,2)';
+                    break;
+                case 5: //订单关闭
+                    $where .=' AND state=4';
+                    break;
+                case 6: //售后处理
+                    $where .=' AND ( state IN(11,13) OR (state IN (6,9,10) AND service_type=1))';
+                    break;
+                default:
             }
         }
         $count = $orderModel->where($where)->count();
@@ -656,6 +672,15 @@ class Order extends Base{
         }
 
         return ['status'=>1,'data'=>[],'msg'=>'服务申请失败'];
+    }
+
+    /**
+     * @desc 返回交易状态列表
+     * @return array
+     */
+    public function showStatusList(){
+        $list = getOrderShowStatus();
+        return ['status'=>0,'data'=>$list,'msg'=>''];
     }
 
 
