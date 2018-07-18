@@ -332,8 +332,8 @@ class Order extends Base{
             return ['status'=>1,'data'=>[],'msg'=>'不能取消该订单'];
         }
 
-        $result = $model->save(['state'=>MallOrder::STATE_SIGN],['id'=>$id]);
-        if($result == true){
+        $result = $model->save(['state'=>MallOrder::STATE_CLOSED],['id'=>$id]);
+        if($result !== false){
             $userModel = new IndexUser();
             //更新消息通知
             $orderMsgModel = new OrderMsg();
