@@ -72,4 +72,15 @@ class Index extends Base
             return ['status' => 0, 'data' => ['list' => $list], 'msg' => '返回成功'];
         }
     }
+
+    /**
+     * [turnover 成交额]
+     * @return [json] [格式化后的本月成交额&累计成交额]
+     */
+    public function turnover(){
+        $turnoverMonth = number_format(model('MallOrder')->getTurnover('month'),2,',',' ');//本月成交额
+        $turnoverAll = number_format(model('MallOrder')->getTurnover('all'),2,',',' ');//累计成交额
+        return ['status'=>0,'data'=>['turnoverMonth'=>$turnoverMonth,'turnoverAll'=>$turnoverAll],'msg'=>'返回成功'];
+    }
+
 }

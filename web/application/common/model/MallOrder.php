@@ -41,4 +41,27 @@ class MallOrder extends Model{
         ];
     }
 
+    /**
+     * [getTurnover 获取累计成交额]
+     * @param  [string] $type [获取的类型：all所有month本月]
+     * @return [string]       [格式化后成交额]
+     */
+    public function getTurnover($type){
+        $where = [];
+        switch ($type) {
+            case 'all':
+                $where['confirm_delivery_time'] = ['>',0];
+                break;
+            case 'month':
+                $monthStart = mktime(0,0,0,date('m'),1,date('Y'));
+                $monthEnd = mktime(23,59,59,date('m'),date('t'),date('Y'));
+                $where['confirm_delivery_time'] = ['between',[$monthStart,$monthEnd]];
+                break;
+            default:
+                return '0.00';
+                break;
+        }
+        return $this->where($where)->sum('actual_money');//number_format(
+    }
+
 }
