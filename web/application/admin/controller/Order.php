@@ -400,7 +400,7 @@ class Order extends Base{
         $result = $model->save(['service_type'=>2],['id'=>$id]);
         if($result == true){
             //更新子订单
-            $model->save(['service_type'=>0],['order_id'=>$id]);
+            $model->save(['service_type'=>0],['id'=>$id]);
             $goodsModel = new MallOrderGoods();
             $goodsModel->save(['service_type'=>0],['order_id'=>$id]);
             return ['status'=>0,'data'=>[],'msg'=>'操作成功'];
