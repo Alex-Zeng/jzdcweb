@@ -2,6 +2,7 @@
 namespace app\api\controller;
 
 use app\common\model\IndexArea;
+use app\common\model\MallOrder;
 use think\Request;
 
 class Index extends Base
@@ -78,8 +79,9 @@ class Index extends Base
      * @return [json] [格式化后的本月成交额&累计成交额]
      */
     public function turnover(){
-        $turnoverMonth = number_format(model('MallOrder')->getTurnover('month'),2,',',' ');//本月成交额
-        $turnoverAll = number_format(model('MallOrder')->getTurnover('all'),2,',',' ');//累计成交额
+        $model = new MallOrder();
+        $turnoverMonth = number_format($model->getTurnover('month'),2,',',' ');//本月成交额
+        $turnoverAll = number_format($model->getTurnover('all'),2,',',' ');//累计成交额
         return ['status'=>0,'data'=>['turnoverMonth'=>$turnoverMonth,'turnoverAll'=>$turnoverAll],'msg'=>'返回成功'];
     }
 
