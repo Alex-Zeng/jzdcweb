@@ -47,7 +47,7 @@ class Order extends Base{
         }
         if(isset($state) && $state >= 0){
             if($state == 8){
-                $where['service_type'] = ['in','(1,2,3)'];
+                $where['service_type'] = ['in',[1,2,3]];
             }else{
                 $where['state'] = $state;
             }
