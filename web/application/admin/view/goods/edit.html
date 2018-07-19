@@ -261,8 +261,8 @@
     function validateSubmit() {
         $('#cover-upload-file').closest('.form-group').removeClass('has-error');
         $('#cover-upload-file').closest('.form-group').find('.help-block').html('');
-        $('#multi-upload-file').closest('.form-group').removeClass('has-error');
-        $('#multi-upload-file').closest('.form-group').find('.help-block').html('');
+        // $('#multi-upload-file').closest('.form-group').removeClass('has-error');
+        // $('#multi-upload-file').closest('.form-group').find('.help-block').html('');
 
         //  $("#add-form").data('bootstrapValidator').validate();
         var valid = true;
@@ -274,11 +274,11 @@
             valid = false;
         }
 
-        if ($('#multi-upload-file').val() == '') {
-            $('#multi-upload-file').closest('.form-group').addClass('has-error');
-            $('#multi-upload-file').closest('.form-group').find('.help-block').html('请上传多视角图片');
-            valid = false;
-        }
+        // if ($('#multi-upload-file').val() == '') {
+        //     $('#multi-upload-file').closest('.form-group').addClass('has-error');
+        //     $('#multi-upload-file').closest('.form-group').find('.help-block').html('请上传多视角图片');
+        //     valid = false;
+        // }
 
         var result = $("#edit-form").data('bootstrapValidator').isValid();
         if (result && valid) {
@@ -661,14 +661,14 @@
                         }
                     }
                 },
-                multi_path:{
-                    message: 'The cover_path is not valid',
-                    validators: {
-                        notEmpty: {
-                            message: '请上传多视角图片'
-                        }
-                    }
-                }
+                // multi_path:{
+                //     message: 'The cover_path is not valid',
+                //     validators: {
+                //         notEmpty: {
+                //             message: '请上传多视角图片'
+                //         }
+                //     }
+                // }
             }
         });
 

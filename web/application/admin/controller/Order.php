@@ -135,8 +135,8 @@ class Order extends Base{
                 if($payDate){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
                     $userModel = new IndexUser();
                     $user = $userModel->getInfoById($row->supplier);
-//                    $yunpian = new Yunpian();
-//                    $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
+                    $yunpian = new Yunpian();
+                    $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
 
                     //更新消息通知
                     $orderMsgModel = new OrderMsg();
@@ -398,6 +398,43 @@ class Order extends Base{
             //更新子订单
             $goodsModel = new MallOrderGoods();
             $goodsModel->save(['service_type'=>0],['order_id'=>$id]);
+            return ['status'=>0,'data'=>[],'msg'=>'操作成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'操作失败'];
+    }
+
+    /**
+     * @desc 账期--->逾期
+     * @param $id
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function overdue($id){
+        $model = new MallOrder();
+        $row = $model->where(['id'=>$id])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
+        }
+        if($row->state != MallOrder::STATE_ACCOUNT_PERIOD){
+            return ['status'=>1,'data'=>[],'msg'=>'不能设置为逾期'];
+        }
+
+        $result = $model->save(['state'=>MallOrder::STATE_OVERDUE],['id'=>$id]);
+        if($result == true){
+            $userModel = new IndexUser();
+            //发送短信
+            $user = $userModel->getInfoById($row->buyer_id);
+            $yunpian = new Yunpian();
+            $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_OUT_DATE);
+
+            //更新消息通知
+            $orderMsgModel = new OrderMsg();
+            $content = "订单号：{$row->out_id} 金额：{$row->actual_money},已逾期支付，请尽快付款。";
+            $msgData = ['title'=>'逾期中','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+            $orderMsgModel->save($msgData);
+            $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
             return ['status'=>0,'data'=>[],'msg'=>'操作成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'操作失败'];

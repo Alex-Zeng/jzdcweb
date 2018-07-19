@@ -201,7 +201,8 @@ class Goods extends Base{
                 'detail' => $web_content,
                 'm_detail' => $content,
                 'limit_cycle' => '',
-                'time'=> time()
+                'time'=> time(),
+                'mall_state' => 0 //待审核
             ];
 
             $result = $goodsModel->save($goods,['id'=>$id]);

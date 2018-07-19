@@ -186,6 +186,9 @@
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary"  data-toggle="modal" data-target="#problem-modal">问题解决</a>
                                     {elseif $order.state == 9}<!-- 账期中-->
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary" data-tag="2" data-toggle="modal" data-target="#remittance-modal">收款</a>
+                                    {if $order.pay_date}
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#overdue-modal">改为逾期</a>
+                                    {/if}
                                     {if $order.service_type == 1}
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#service-modal">售后</a>
                                     {/if}
@@ -440,6 +443,18 @@
         </div>
     </div>
 </div>
+<!-- 逾期-->
+<div class="modal fade" id="overdue-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">该订单改为逾期?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="overdue-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
 {include file="layout/footer" title="$title" keywords="" /}
 <script src="__STATIC__/js/plugins/bootstrap-fileinput/js/fileinput.js" type="text/javascript"></script>
 <script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
@@ -579,6 +594,32 @@
                 type: 'post',
                 url: '?s=admin/order/service&id=' + id,
                 data: $('#sign-form').serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    if (data.status == 0) {
+                        window.location.reload();
+                    } else {
+                        alert(data.msg);
+                    }
+                }
+            })
+        }
+    });
+    //逾期
+    $('#overdue-modal').on('show.bs.modal', function (event) {
+        var id = $(event.relatedTarget).data('id');
+        $("#overdue-request").data('id',id);
+    });
+    $("#overdue-request").click(function () {
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        if (confirm('确认要提交？')) {
+            $.ajax({
+                type: 'post',
+                url: '?s=admin/order/overdue&id=' + id,
+                data: {},
                 dataType: 'json',
                 success: function (data) {
                     if (data.status == 0) {
