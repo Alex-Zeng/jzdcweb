@@ -426,7 +426,7 @@ class Order extends Base{
 
         //查询支付凭证
         $payModel = new MallOrderPay();
-        $payRow = $payModel->where(['order_id'=>$row->id,'pay_type'=>['in',[1,2]]])->order('id','desc')->find();
+        $payRow = $payModel->where(['order_id'=>$row->id,'pay_type'=>['in',[3,4]]])->order('id','desc')->find();
 
         //express expressCode sendDate estimatedDate
         $data = [
@@ -442,17 +442,26 @@ class Order extends Base{
             'time' => date('Y-m-d H:i',$row->add_time),
             'date' => $row->delivery_time > 0 ? date('Y-m-d',$row->delivery_time) : '',
             'remark' => $row->buyer_comment,
-            'payMethod' => !$payRow && isset($row->pay_date) ? '账期支付': ($payRow->pay_type == 1 ? '汇款' : '转账'),
-            'payNumber' => $payRow ? $payRow->number : '',
-            'payImg' => $payRow ? MallOrderPay::getFormatPicture($payRow->picture) : '',
-            'payDate' => $payRow && $payRow->pay_time ? substr($payRow->pay_time,0,10) : '',
             'express' => $row->express_name ? $row->express_name : '',   //物流
             'expressCode' => $row->express_code ? $row->express_code : '', //物流单号
             'sendDate' => $row->send_time > 0 ? date('Y-m-d',$row->send_time) : '', //发货日期
             'estimatedDate' => $row->estimated_time > 0 ? date('Y-m-d',$row->estimated_time) : '',  //到达日期
             'serviceType' => $row->service_type,
             'goods' => $goodsRows,
+            'overDate' => $row->pay_date ? substr($row->pay_date,0,10) : ''
         ];
+
+        if($this->groupId == IndexGroup::GROUP_SUPPLIER){
+            $data['payMethod'] = !$payRow && isset($row->pay_date) ? '账期支付': ($payRow->pay_type == 4 ? '汇票' : '转账');
+            $data['payNumber'] = $payRow ? $payRow->number : '';
+            $data['payImg'] = $payRow ? MallOrderPay::getFormatPicture($payRow->picture) : '';
+            $data['payDate'] = $payRow && $payRow->pay_time ? substr($payRow->pay_time,0,10) : '';
+        }else{
+            $data['payMethod'] = '';
+            $data['payNumber'] = '';
+            $data['payImg'] = '';
+            $data['payDate'] =  '';
+        }
 
         return ['status'=>0,'data'=>$data,'msg'=>''];
     }
