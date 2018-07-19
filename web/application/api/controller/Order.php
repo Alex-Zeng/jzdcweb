@@ -513,6 +513,7 @@ class Order extends Base{
             'express_code' => $express_code,
             'send_time' => strtotime($send_time),
             'estimated_time' => strtotime($estimated_time),
+            'confirm_delivery_time' => time(),
             'state' => MallOrder::STATE_RECEIVE
         ];
 
