@@ -46,7 +46,11 @@ class Order extends Base{
             $where['out_id|buyer'] = ['like','%'.$k.'%'];
         }
         if(isset($state) && $state >= 0){
-            $where['state'] = $state;
+            if($state == 8){
+                $where['service_type'] = ['in','(1,2,3)'];
+            }else{
+                $where['state'] = $state;
+            }
         }
         if(isset($start) && $start && isset($end) && $end){
            $where['add_time'] = ['between',[strtotime($start),strtotime($end.' 23:59:59')]];
