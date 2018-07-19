@@ -340,7 +340,7 @@ class Order extends Base{
                     $where .=' AND state=4';
                     break;
                 case 6: //售后处理
-                    $where .=' AND ( state IN(11,13) OR (state IN (6,9,10) AND service_type=1))';
+                    $where .=' AND ( state IN(11,13) OR (state IN (6,9,10) AND service_type IN(1,2))';
                     break;
                 default:
             }
@@ -513,6 +513,7 @@ class Order extends Base{
             'express_code' => $express_code,
             'send_time' => strtotime($send_time),
             'estimated_time' => strtotime($estimated_time),
+            'confirm_delivery_time' => time(),
             'state' => MallOrder::STATE_RECEIVE
         ];
 
