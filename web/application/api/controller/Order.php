@@ -763,6 +763,21 @@ class Order extends Base{
         $counter = 2;
         $userModel = new IndexUser();
         $goodsModel = new MallOrderGoods();
+
+
+        $objPHPExcel->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
+
+        //设置宽度
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('A')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('B')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('B')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('D')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('E')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('F')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('G')->setWidth(25);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('H')->setWidth(15);
+
+
         for($i =0; $i < $page; $i++){
             $start = $page*$i;
             $rows = $model->where($where)->limit($start,$pageSize)->order('add_time','desc')->select();
@@ -774,6 +789,7 @@ class Order extends Base{
                 $goodsCount = count($goodsRows);
                 $orderStart = $counter;
                 $orderEnd = $counter + $goodsCount -1;
+
                 //合并单元格
                 if($orderEnd > $orderStart){
                     $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A'.$orderStart.':A'.$orderEnd);
@@ -799,13 +815,13 @@ class Order extends Base{
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('B'.$counter, $row->out_id);
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('C'.$counter, $row->state);
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('D'.$counter, $buyerInfo ? $buyerInfo->real_name : '');
-                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('E'.$counter,'采购商联系人' );
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('E'.$counter, $buyerInfo ? $buyerInfo->contact : '');
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('F'.$counter, $supplier ? $supplier->real_name : '');
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('G'.$counter, $goodsRow->title);
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('H'.$counter, $goodsRow->s_info);
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('I'.$counter, $goodsRow->quantity);
-                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('J'.$counter, $goodsRow->price);
-                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('K'.$counter, $goodsRow->quantity*$goodsRow->price);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('J'.$counter, '¥'.$goodsRow->price);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('K'.$counter, '¥'.$goodsRow->quantity*$goodsRow->price);
 
                     if($this->groupId == IndexGroup::GROUP_BUYER){
                         $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('L'.$counter, $goodsRow->specifications_no);
@@ -823,7 +839,10 @@ class Order extends Base{
 
                     $counter++;
                 }
+                unset($goodsRows);
             }
+
+            unset($rows);
         }
 
         $filename = 'order_'.date('YmdHi',time()).'.xls';

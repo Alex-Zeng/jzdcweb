@@ -197,3 +197,5 @@ alter table jzdc_mall_type add push tinyint not null default 0 comment '推荐�
 alter table jzdc_mall_goods add push tinyint not null default 0 comment '推荐，数值越高推荐级别越高';
 
 
+-- 更新联系人字段
+UPDATE `jzdc_index_user` AS A LEFT JOIN jzdc_form_user_cert AS B ON A.id =   B.writer SET A.contact = B.contact_point WHERE B.id is not null;
