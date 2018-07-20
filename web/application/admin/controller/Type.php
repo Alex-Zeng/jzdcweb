@@ -19,20 +19,20 @@ class Type extends Base{
     public function index(){
         $model = new MallType();
         $k = Request::instance()->get('k','');
-        $fields = ['id','name','parent','sequence','path'];
+        $fields = ['id','name','parent','sequence','path','push'];
         $rows = $model->where(['parent'=>0])->field($fields)->select();
 
         $list = [];
         //查询第二层  program/mall/type_icon/34.png
         foreach($rows as $row){
-            $list[] = ['id'=>$row->id,'name'=>$row->name,'parent'=>$row->parent,'sequence'=>$row->sequence,'level'=>0,'icon'=>MallType::getFormatIcon($row->path)];
+            $list[] = ['id'=>$row->id,'name'=>$row->name,'parent'=>$row->parent,'sequence'=>$row->sequence,'level'=>0,'push'=>$row->push,'icon'=>MallType::getFormatIcon($row->path)];
             //查询第二层
             $rows2 = $model->where(['parent'=>$row->id])->field($fields)->select();
             foreach ($rows2 as $row2){
-                $list[] = ['id'=>$row2->id,'name'=>$row2->name,'parent'=>$row2->parent,'sequence'=>$row2->sequence,'level'=>1,'icon'=>MallType::getFormatIcon($row2->path)];
+                $list[] = ['id'=>$row2->id,'name'=>$row2->name,'parent'=>$row2->parent,'sequence'=>$row2->sequence,'level'=>1,'push'=>$row2->push,'icon'=>MallType::getFormatIcon($row2->path)];
                 $rows3 = $model->where(['parent'=>$row2->id])->field($fields)->select();
                 foreach ($rows3 as $row3){
-                    $list[] = ['id'=>$row3->id,'name'=>$row3->name,'parent'=>$row3->parent,'sequence'=>$row3->sequence,'level'=>2,'icon'=>MallType::getFormatIcon($row3->path)];
+                    $list[] = ['id'=>$row3->id,'name'=>$row3->name,'parent'=>$row3->parent,'sequence'=>$row3->sequence,'level'=>2,'push'=>$row3->push,'icon'=>MallType::getFormatIcon($row3->path)];
                 }
             }
         }
@@ -150,6 +150,52 @@ class Type extends Base{
         }
 
         return ['status'=>1,'data'=>[],'msg'=>'更新失败'];
+    }
+
+    //设为推荐
+    public function pushUp(){
+        $id = input('post.id',0,'intval');
+
+        $mallType = model('mall_type');
+        //查询是否存在
+        $data = $mallType->field('push')->where(['id'=>$id])->find();
+
+        if(!$data){
+            return $this->errorMsg('100400');//不存在你所需改的分类
+        }
+
+        if($data['push']>0){
+            return $this->errorMsg('100401');//当前已经是推荐状态
+        }
+
+        if($mallType->where(['id'=>$id])->update(['push'=>1])){
+            return $this->successMsg('reload',['msg'=>'推荐成功']);
+        }else{
+            return $this->errorMsg('100402');
+        }
+    }
+
+    //取消推荐
+    public function pushDown(){
+        $id = input('post.id',0,'intval');
+
+        $mallType = model('mall_type');
+        //查询是否存在
+        $data = $mallType->field('push')->where(['id'=>$id])->find();
+
+        if(!$data){
+            return $this->errorMsg('100500');//不存在你所需改的分类
+        }
+
+        if($data['push']==0){
+            return $this->errorMsg('100501');//当前不是推荐状态无需取消
+        }
+
+        if($mallType->where(['id'=>$id])->update(['push'=>0])){
+            return $this->successMsg('reload',['msg'=>'取消推荐成功']);
+        }else{
+            return $this->errorMsg('100502');
+        }
     }
 
 }
