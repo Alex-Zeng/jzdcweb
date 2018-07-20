@@ -185,4 +185,19 @@ function getOrderShowStatus(){
 }
 
 
-
+/**
+ * @desc 递归获取子类Id
+ * param $array 包含子类的搜索的数组
+ * param $id 父类ID用于查询其子类
+ * @return array
+ */
+function getRecursionType($array,$id){
+    $arr = [];
+    foreach($array as $value){
+        if($value['parent']==$id){
+            $arr[] = $value['id'];
+            $arr = array_merge($arr,getRecursionType($array,$value['id']));
+        }
+    }
+    return $arr;
+}

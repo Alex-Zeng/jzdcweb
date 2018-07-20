@@ -85,4 +85,31 @@ class Index extends Base
         return ['status'=>0,'data'=>['turnoverMonth'=>$turnoverMonth,'turnoverAll'=>$turnoverAll],'msg'=>'返回成功'];
     }
 
+
+    //获取首页推荐分类及推荐商品
+    public function getPushTypeAndGoods(){
+        $mallType = model('mall_type');
+        $mallGoods = model('mall_goods');
+
+        //获取首级推荐分类
+        $dataType = $mallType->field('id,name')->where(['push'=>['>',0],'parent'=>0])->order('sequence','desc')->select();
+
+        foreach ($dataType as $key => $val) {
+            //获取二级推荐分类
+            $dataType[$key]['pushTypeNextLevel'] = $mallType->field('id,name')->where(['push'=>['>',0],'parent'=>$val['id']])->order('sequence','desc')->select();
+
+            //获取该首级分类及其子类的所以商品推荐   
+            $ids = $mallType->getChildIds($val['id'],true);
+            $dataGoods = $mallGoods->field('id,icon,min_price,max_price,title')->where(['id'=>['in',$ids],'push'=>['>',0]])->order('push','desc')->select();
+            foreach ($dataGoods as $k => $v) {
+                $dataGoods[$k]['icon'] = $mallGoods::getFormatImg($v['icon']);
+                $dataGoods[$k]['min_price'] = getFormatPrice($v['min_price']);
+                $dataGoods[$k]['max_price'] = getFormatPrice($v['max_price']);
+            }
+            $dataType[$key]['pushGoods'] = $dataGoods;
+        }
+
+        return $dataType;
+    }
+
 }

@@ -60,4 +60,23 @@ class MallType extends Model{
         return config('jzdc_domain').'/web/public/uploads/type_icon/'.$icon;
     }
 
+
+
+    /**
+     * @desc 返回子类的所有ID
+     * @return [array]
+     */
+    public function getChildIds($parentId,$parentIdIn=false){
+        $array = $this->field('id,parent')->select();
+        $data  = getRecursionType($array,$parentId);
+        if($parentIdIn===true){
+            return array_unshift($data,$parentId);
+        }
+        if(count($data)>0){
+            return $data;
+        }else{
+            return [];
+        }
+    }
+
 }
