@@ -502,4 +502,38 @@ class Goods  extends Base {
         $view = new View();
         echo $view->fetch('index/goods_detail',['detail'=>$row ? getImgUrl($row->detail) : '']);
     }
+
+    /**
+     * @desc 获取商品分类数据
+     * @param $id
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getPath($id){
+        $model = new MallGoods();
+        $row = $model->where(['id'=>$id,'state'=>2])->field(['id','title','min_price','max_price','w_price','state','type','w_price','supplier','icon','multi_angle_img','title','m_detail','option_enable'])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'商品不存在'];
+        }
+
+        //查询商品类型
+        $model = new \app\common\model\MallType();
+        $row = $model->where(['id'=>$row->type])->field(['id','name','parent'])->find();
+        $list = [];
+        if($row){
+            $list[] = ['id'=>$row->id,'name'=>$row->name];
+            if($row->parent > 0){
+                $row2 = $model->where(['id'=>$row->parent])->field(['id','name','parent'])->find();
+                $list[] = ['id'=>$row2->id,'name'=>$row2->name];
+                if($row2->parent > 0){
+                    $row3 = $model->where(['id'=>$row2->parent])->field(['id','name','parent'])->find();
+                    $list[] =['id'=>$row3->id,'name'=>$row3->name];
+                }
+            }
+        }
+
+        return ['status'=>0,'data'=>$list,'msg'=>''];
+    }
 }
