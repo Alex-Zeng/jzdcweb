@@ -12,6 +12,7 @@ use app\common\model\MallColor;
 use app\common\model\MallFavorite;
 use app\common\model\MallGoods;
 use app\common\model\MallGoodsSpecifications;
+use app\common\model\MallUnit;
 use app\common\model\UserSearchLog;
 use app\common\model\MallType;
 use app\common\model\MallTypeOption;
@@ -267,7 +268,7 @@ class Goods  extends Base {
      */
     public function get(Request $request, $id){
         $model = new MallGoods();
-        $row = $model->where(['id'=>$id,'state'=>2])->field(['id','title','min_price','max_price','w_price','state','type','w_price','supplier','icon','multi_angle_img','title','m_detail','option_enable'])->find();
+        $row = $model->where(['id'=>$id,'state'=>2])->field(['id','title','min_price','max_price','w_price','state','type','w_price','supplier','icon','multi_angle_img','unit','title','m_detail','option_enable'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'商品不存在'];
         }
@@ -337,11 +338,16 @@ class Goods  extends Base {
             $isFavorite = $exist ? 1 : 0;
         }
 
+        //单位
+        $unitModel = new MallUnit();
+        $unitRow = $unitModel->find(['id'=>$row->unit]);
+
         $data = [
             'title' => $row->title,  //商品标题
             'min_price' => getFormatPrice($row->min_price), //商品价格
             'max_price' => getFormatPrice($row->max_price),//
             'price' => getFormatPrice($row->w_price),
+            'unit' => $unitRow ? $unitRow->name : '',
             'supplier' => $user ? $user->real_name : '', //供应商
             'supplierLogo' => $user->icon ? IndexUser::getFormatIcon($user->icon) : '', //供应商logo
             'standard' => $standards ? $standards : [], //规格
