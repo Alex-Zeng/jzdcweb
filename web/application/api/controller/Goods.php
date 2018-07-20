@@ -218,6 +218,21 @@ class Goods  extends Base {
             $rows =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where(['a.state'=>2,'a.mall_state'=>1])->where('b.real_name','like','%'.$keywords.'%')->order('a.w_price',$sort)->field(['a.id','a.icon','a.title','a.w_price','a.min_price','a.max_price','a.discount','a.bidding_show'])->select();
         }
         $list = [];
+
+        $goodsIds = $goodsIdArr = [];
+        if($this->userId > 0){
+            foreach ($rows as $row){
+                $goodsIds[] = $row->id;
+            }
+            //查询
+            $favoriteModel = new MallFavorite();
+            $favoriteRows = $favoriteModel->where(['user_id'=>$this->userId,'goods_id'=>['in',$goodsIds]])->field(['goods_id'])->select();
+
+            foreach ($favoriteRows as $favoriteRow){
+                $goodsIdArr[] = $favoriteRow->goods_id;
+            }
+        }
+        
         foreach($rows as $row){
             $list[] = [
                 'id' => $row->id,
@@ -225,7 +240,8 @@ class Goods  extends Base {
                 'url' => MallGoods::getFormatImg($row->icon),
                 'min_price' => getFormatPrice($row->min_price),
                 'max_price' => getFormatPrice($row->max_price),
-                'w_price' => getFormatPrice($row->w_price)
+                'w_price' => getFormatPrice($row->w_price),
+                'isFavorite' => in_array($row->id,$goodsIdArr) ? 1 : 0
             ];
         }
         //更新搜索历史
