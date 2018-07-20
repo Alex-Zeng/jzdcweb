@@ -70,7 +70,8 @@ class MallType extends Model{
         $array = $this->field('id,parent')->select();
         $data  = getRecursionType($array,$parentId);
         if($parentIdIn===true){
-            return array_unshift($data,$parentId);
+            array_unshift($data,$parentId);
+            return  $data;
         }
         if(count($data)>0){
             return $data;
