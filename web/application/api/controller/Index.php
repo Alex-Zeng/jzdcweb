@@ -96,7 +96,7 @@ class Index extends Base
 
         foreach ($dataType as $key => $val) {
             //获取二级推荐分类
-            $dataType[$key]['pushTypeNextLevel'] = $mallType->field('id,name')->where(['push'=>['>',0],'parent'=>$val['id']])->order('sequence','desc')->select();
+            $dataType[$key]['pushTypeList'] = $mallType->field('id,name')->where(['push'=>['>',0],'parent'=>$val['id']])->order('sequence','desc')->select();
 
             //获取该首级分类及其子类的所以商品推荐   
             $ids = $mallType->getChildIds($val['id'],true);
@@ -106,7 +106,7 @@ class Index extends Base
                 $dataGoods[$k]['min_price'] = getFormatPrice($v['min_price']);
                 $dataGoods[$k]['max_price'] = getFormatPrice($v['max_price']);
             }
-            $dataType[$key]['pushGoods'] = $dataGoods;
+            $dataType[$key]['pushGoodsList'] = $dataGoods;
         }
 
         return $dataType;
