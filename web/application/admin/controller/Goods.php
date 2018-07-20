@@ -459,5 +459,49 @@ class Goods extends Base{
         return $this->fetch();
     }
 
+    //设为推荐
+    public function pushUp(){
+        $id = input('post.id',0,'intval');
 
+        $mallGoods = model('mall_goods');
+        //查询是否存在
+        $data = $mallGoods->field('push')->where(['id'=>$id])->find();
+
+        if(!$data){
+            return $this->errorMsg('100600');//不存在你所需改的分类
+        }
+
+        if($data['push']>0){
+            return $this->errorMsg('100601');//当前已经是推荐状态
+        }
+
+        if($mallGoods->where(['id'=>$id])->update(['push'=>1])){
+            return $this->successMsg('reload',['msg'=>'推荐成功']);
+        }else{
+            return $this->errorMsg('100602');
+        }
+    }
+
+    //取消推荐
+    public function pushDown(){
+        $id = input('post.id',0,'intval');
+
+        $mallGoods = model('mall_goods');
+        //查询是否存在
+        $data = $mallGoods->field('push')->where(['id'=>$id])->find();
+
+        if(!$data){
+            return $this->errorMsg('100700');//不存在你所需改的分类
+        }
+
+        if($data['push']==0){
+            return $this->errorMsg('100701');//当前不是推荐状态无需取消
+        }
+
+        if($mallGoods->where(['id'=>$id])->update(['push'=>0])){
+            return $this->successMsg('reload',['msg'=>'取消推荐成功']);
+        }else{
+            return $this->errorMsg('100702');
+        }
+    }
 }

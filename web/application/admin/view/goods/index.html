@@ -87,7 +87,12 @@
                                 <td>
                                     <a href="{:url('admin/goods/view','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-info"    >详情</a>
                                     {if $groupId == 2}
-                                    <a href="javascript:void(0)"  class="btn btn-sm btn-success"  data-id="{$goods.id}" data-toggle="modal"   data-target="#check-modal">审核</a>
+                                    <a href="javascript:void(0)"  class="btn btn-sm btn-secondary"  data-id="{$goods.id}" data-toggle="modal"   data-target="#check-modal">审核</a>
+                                        {if $goods.push==0}
+                                        <a href="javascript:void(0)"  class="btn btn-sm btn-success"  data-id="{$goods.id}" data-toggle="modal"  data-sure='#push-up-request'  data-target="#push-up-modal">设为推荐</a>
+                                        {else/}
+                                        <a href="javascript:void(0)"  class="btn btn-sm btn-success"  data-id="{$goods.id}" data-toggle="modal"  data-sure='#push-down-request'  data-target="#push-down-modal">取消推荐</a>
+                                        {/if}
                                     {/if}
                                     {if $groupId == 3}
                                     <a href="{:url('admin/goods/edit','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-primary"    >编辑</a>
@@ -183,8 +188,33 @@
     </div>
 </div>
 
+<div class="modal fade push" id="push-up-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">设为推荐吗？</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="push-up-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade push" id="push-down-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">取消推荐吗？</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="push-down-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {include file="layout/footer" title="$title" keywords="" /}
+<script src="__STATIC__/js/plugins/layer/layer.js"></script>
+<script src="__STATIC__/js/admin/admin.function.js"></script>
 <script  type="text/javascript">
     var url = '{:url("admin/goods/index")}';
     $('a[href="'+url+'"]').addClass('active');
@@ -293,4 +323,31 @@
     var url = '{:url("admin/goods/index")}';
     $('a[href="'+url+'"]').addClass('active');
     $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
+
+    $('.push').on('show.bs.modal', function (event) {
+        var id = $(event.relatedTarget).data('id');
+        $($(event.relatedTarget).data('sure')).data('id',id);
+    });
+
+    $('#push-up-request').click(function(){
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        var url = '{:url("Goods/pushUp")}';
+        $.post(url,{'id':id} ,function(res){
+            returnData(res);
+        });
+    })
+
+    $('#push-down-request').click(function(){
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        var url = '{:url("Goods/pushDown")}';
+        $.post(url,{'id':id} ,function(res){
+            returnData(res);
+        });
+    })
 </script>
