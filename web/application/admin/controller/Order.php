@@ -448,76 +448,137 @@ class Order extends Base{
     /**
      * @desc 导出订单
      */
-    public function export($state = -1, $start = '',$k = '',$end = ''){
+    public function export($state = -1, $start = '',$k = '',$end = '')
+    {
         $model = new MallOrder();
         $where = [];
-        if(isset($k) && $k){
-            $where['out_id|buyer'] = ['like','%'.trim($k).'%'];
+        if (isset($k) && $k) {
+            $where['out_id|buyer'] = ['like', '%' . trim($k) . '%'];
         }
-        if(isset($state) && $state >= 0){
+        if (isset($state) && $state >= 0) {
             $where['state'] = $state;
         }
-        if(isset($start) && $start){
-            $where['add_time'] = ['gt',strtotime($start)];
+        if (isset($start) && $start) {
+            $where['add_time'] = ['gt', strtotime($start)];
         }
-        if(isset($end) && $end){
-            $where['add_time'] = ['gt',strtotime($end.' 23:59:59')];
+        if (isset($end) && $end) {
+            $where['add_time'] = ['gt', strtotime($end . ' 23:59:59')];
         }
         vendor('PHPExcel.PHPExcel');
         $objPHPExcel = new \PHPExcel();
         $objPHPExcel->setActiveSheetIndex(0);
         //设置表头
         $objPHPExcel->setActiveSheetIndex(0)
-            ->setCellValue('A1', '创建时间')
+            ->setCellValue('A1', '下单时间')
             ->setCellValue('B1', '订单号')
-            ->setCellValue('C1', '商品')
-            ->setCellValue('D1','状态')
-            ->setCellValue('E1', '采购商')
+            ->setCellValue('C1', '订单状态')
+            ->setCellValue('D1', '采购商')
+            ->setCellValue('E1', '采购商联系人')
             ->setCellValue('F1', '供应商')
-            ->setCellValue('G1', '合同编号')
-            ->setCellValue('H1','总价')
-            ->setCellValue('I1','数量')
-            ->setCellValue('J1','买家留言')
-            ->setCellValue('K1','账期截止日');
+            ->setCellValue('G1', '商品名称')
+            ->setCellValue('H1', '商品规格')
+            ->setCellValue('I1', '数量')
+            ->setCellValue('J1', '单价')
+            ->setCellValue('K1', '小计')
+            ->setCellValue('L1', '物料编号')
+            ->setCellValue('M1', '物料规格')
+            ->setCellValue('N1', '买家留言')
+            ->setCellValue('O1', '合同编号')
+            ->setCellValue('P1', '是否账期支付')
+            ->setCellValue('Q1', '账期截止')
+            ->setCellValue('R1', '总价');
+
         //查询数据
         $total = $model->where($where)->count();
 
         $pageSize = 100;
-        $page = ceil($total/$pageSize);
+        $page = ceil($total / $pageSize);
 
         $counter = 2;
         $userModel = new IndexUser();
-        for($i =0; $i < $page; $i++){
-            $start = $page*$i;
-            $rows = $model->where($where)->limit($start,$pageSize)->order('add_time','desc')->select();
-            foreach ($rows as $row){
+        $goodsModel = new MallOrderGoods();
+
+        $objPHPExcel->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
+
+        //设置宽度
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('A')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('B')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('B')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('D')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('E')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('F')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('G')->setWidth(25);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('H')->setWidth(15);
+
+        for ($i = 0; $i < $page; $i++) {
+            $start = $page * $i;
+            $rows = $model->where($where)->limit($start, $pageSize)->order('add_time', 'desc')->select();
+            foreach ($rows as $row) {
                 $buyerInfo = $userModel->getInfoById($row->buyer_id);
                 $supplier = $userModel->getInfoById($row->supplier);
-                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('A'.$counter, date('Y-m-d H:i:s',$row->add_time));
-                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('B'.$counter, $row->out_id);
-                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('C'.$counter, $row->goods_names);
-                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('D'.$counter, getOrderState($row->state));
-                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('E'.$counter, $buyerInfo ? $buyerInfo->real_name : '');
-                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('F'.$counter, $supplier ? $supplier->real_name : '');
-                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('G'.$counter, $row->contract_number);
-                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('H'.$counter, $row->sum_money);
-                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('I'.$counter, $row->goods_count);
-                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('J'.$counter, $row->buyer_comment);
-                $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('K'.$counter, $row->pay_date ?substr($row->pay_date,0,10) : '');
-                $counter++;
+                //查询订单商品
+                $goodsRows = $goodsModel->where(['order_id' => $row->id])->select();
+                $goodsCount = count($goodsRows);
+                $orderStart = $counter;
+                $orderEnd = $counter + $goodsCount - 1;
+
+                //合并单元格
+                if ($orderEnd > $orderStart) {
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A' . $orderStart . ':A' . $orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B' . $orderStart . ':B' . $orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('C' . $orderStart . ':C' . $orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D' . $orderStart . ':D' . $orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('E' . $orderStart . ':E' . $orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F' . $orderStart . ':F' . $orderEnd);
+
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('N' . $orderStart . ':N' . $orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('O' . $orderStart . ':O' . $orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('P' . $orderStart . ':P' . $orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('Q' . $orderStart . ':Q' . $orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('R' . $orderStart . ':R' . $orderEnd);
+
+
+                    foreach ($goodsRows as $goodsRow) {
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('A' . $counter, date('Y-m-d H:i', $row->add_time));
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('B' . $counter, $row->out_id);
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('C' . $counter, $row->state);
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('D' . $counter, $buyerInfo ? $buyerInfo->real_name : '');
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('E' . $counter, $buyerInfo ? $buyerInfo->contact : '');
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('F' . $counter, $supplier ? $supplier->real_name : '');
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('G' . $counter, $goodsRow->title);
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('H' . $counter, $goodsRow->s_info);
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('I' . $counter, $goodsRow->quantity);
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('J' . $counter, '¥' . $goodsRow->price);
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('K' . $counter, '¥' . $goodsRow->quantity * $goodsRow->price);
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('L' . $counter, $goodsRow->specifications_no);
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('M' . $counter, $goodsRow->specifications_name);
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('N' . $counter, $row->buyer_comment);
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('O' . $counter, $row->contract_number);
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('P' . $counter, $row->pay_date ? '是' : '否');
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('Q' . $counter, $row->pay_date ? substr($row->pay_date, 0, 10) : '');
+                        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('R' . $counter, '¥' .$row->actual_money);
+
+                        $counter++;
+                        unset($goodsRows);
+                    }
+
+                    unset($rows);
+                }
+
             }
+
+
+            $filename = 'order_' . date('YmdHi', time()) . '.xls';
+            $objPHPExcel->getActiveSheet()->setTitle('商品订单信息');
+            header("Content-Type: application/force-download");
+            header("Content-Type: application/octet-stream");
+            header("Content-Type: application/download");
+            header('Content-Disposition:inline;filename="' . $filename . '"');
+            //生成excel文件
+            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+            $objWriter->save('php://output');
+            exit;
         }
 
-        $filename = 'order_'.date('YmdHi',time()).'.xls';
-        $objPHPExcel->getActiveSheet()->setTitle('商品订单信息');
-        header("Content-Type: application/force-download");
-        header("Content-Type: application/octet-stream");
-        header("Content-Type: application/download");
-        header('Content-Disposition:inline;filename="'.$filename.'"');
-        //生成excel文件
-        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-        $objWriter->save('php://output');
-        exit;
     }
-
 }
