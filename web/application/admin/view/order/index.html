@@ -155,8 +155,8 @@
                                             无
                                             {/if}
                                         </p>
-                                        <p>物料规格: {$order.buyer_remark}</p>
-                                        <p>买家留言: {$order.buyer_comment}</p>
+                                        <p style="word-break:break-all;">物料规格: {$order.buyer_remark}</p>
+                                        <p style="word-break:break-all;">买家留言: {$order.buyer_comment}</p>
                                         {if $order.delivery_time > 0} <p>交货日期: {:date('Y-m-d',$order.delivery_time)}</p>{/if}
                                     </div>
 
