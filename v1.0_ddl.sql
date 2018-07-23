@@ -199,3 +199,8 @@ alter table jzdc_mall_goods add push tinyint not null default 0 comment '推荐�
 
 -- 更新联系人字段
 UPDATE `jzdc_index_user` AS A LEFT JOIN jzdc_form_user_cert AS B ON A.id =   B.writer SET A.contact = B.contact_point WHERE B.id is not null;
+
+
+-- 收藏夹分类增加字段以及对已加入收藏夹数据进行一个更新操作
+alter table jzdc_mall_favorite add `type_id` int not null default 0 comment '分类Id';
+update jzdc_mall_favorite as f left join jzdc_mall_goods as g on f.goods_id=g.id set f.type_id=g.type where g.type>0
