@@ -13,6 +13,14 @@
         color:#A9A9A9;
         content:attr(placeholder);
     }
+
+    .spec{
+        word-break:break-all;
+    }
+
+    .comment{
+        word-break:break-all;
+    }
 </style>
 
 <!-- Content Wrapper. Contains page content -->
@@ -155,8 +163,8 @@
                                             无
                                             {/if}
                                         </p>
-                                        <p style="word-break:break-all;">物料规格: {$order.buyer_remark}</p>
-                                        <p style="word-break:break-all;">买家留言: {$order.buyer_comment}</p>
+                                        <p class='spec' >物料规格: 无</p>
+                                        <p class='comment' >买家留言: {$order.buyer_comment}</p>
                                         {if $order.delivery_time > 0} <p>交货日期: {:date('Y-m-d',$order.delivery_time)}</p>{/if}
                                     </div>
 
