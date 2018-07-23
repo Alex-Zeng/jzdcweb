@@ -562,7 +562,7 @@ class Goods  extends Base {
         }
 
         //获取九个热门
-        $dataGoods = $mallGoods->field('id,icon')->where(['id'=>['<>',$gid],'supplier'=>$goods['supplier'],'state'=>2])->limit(9)->select();
+        $dataGoods = $mallGoods->field('id,icon')->where(['id'=>['<>',$gid],'supplier'=>$goods['supplier'],'state'=>2])->order('time desc')->limit(9)->select();
         foreach ($dataGoods as $k => $v) {
             $dataGoods[$k]['icon'] = $mallGoods::getFormatImg($v['icon']);
         }
