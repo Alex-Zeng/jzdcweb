@@ -148,7 +148,12 @@ class Goods  extends Base {
             return ['status'=>1,'data'=>[],'msg'=>'商品已经收藏过'];
         }
 
-        $result = $model->save(['user_id'=>$userId,'username'=>$username,'goods_id'=>$productId,'time'=>time()]);
+        $goods = model('mall_goods')->field('type')->where(['state'=>2,'id'=>$productId])->find();
+        if(!$goods){
+            return ['status'=>1,'data'=>[],'msg'=>'商品处于非正常状态不能收藏'];
+        }
+
+        $result = $model->save(['user_id'=>$userId,'username'=>$username,'goods_id'=>$productId,'time'=>time(),'type_id'=>$goods['type']]);
         if($result == true){
             return ['status'=>0,'data'=>[],'msg'=>'收藏成功'];
         }
@@ -423,6 +428,16 @@ class Goods  extends Base {
             }
             $where['b.type'] = ['in',$targetIds];
         }
+
+        $mallType = model('mall_type');
+        $typeList = [['cont'=>0,'name'=>'全部','typeId'=>0]];
+        $parent = $mallType->where(['parent'=>0])->field('name,id')->order('sequence desc')->select();
+        foreach ($parent as $key => $val) {
+            $count =  $model->where(['user_id'=>$this->userId,'type_id'=>['in',$mallType->getChildIds($val['id'],true)]])->count();
+            $typeList[] = ['cont'=>$count,'name'=>$val['name'],'typeId'=>$val['id']];
+            $typeList[0]['cont'] += $count;
+        }
+
         $total = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where($where)->count();
         $rows = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where($where)->order('a.time','desc')->limit($start,$pageSize)->field(['b.id','b.title','b.icon','b.min_price','b.max_price'])->select();
 
@@ -432,7 +447,7 @@ class Goods  extends Base {
             $row['max_price'] = getFormatPrice($row->max_price);
         }
 
-        return ['status'=>0,'data'=>['total'=>$total,'list'=>$rows],'msg'=>''];
+        return ['status'=>0,'data'=>['total'=>$total,'typeList'=>$typeList,'list'=>$rows],'msg'=>''];
     }
 
     /**
