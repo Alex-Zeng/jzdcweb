@@ -13,6 +13,7 @@ use app\common\model\MallFavorite;
 use app\common\model\MallGoods;
 use app\common\model\MallGoodsSpecifications;
 use app\common\model\MallUnit;
+use app\common\model\UserGoodsSpecifications;
 use app\common\model\UserSearchLog;
 use app\common\model\MallType;
 use app\common\model\MallTypeOption;
@@ -541,5 +542,34 @@ class Goods  extends Base {
         }
 
         return ['status'=>0,'data'=>$list,'msg'=>''];
+    }
+
+    /**
+     * @desc 返回规格
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getSpecification(){
+        $goodsId = Request::instance()->get('goodsId',0,'intval');
+        $colorId = Request::instance()->get('colorId',0,'intval');
+        $optionId = Request::instance()->get('optionId',0,'intval');
+
+        //
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $goodsSpecificationModel = new MallGoodsSpecifications();
+        $row = $goodsSpecificationModel->where(['color_id'=>$colorId,'option_id'=>$optionId,'goods_id'=>$goodsId])->find();
+        if(!$row){
+            return ['status'=>0,'data'=>['no'=> '','name' => ''],'msg'=>'' ];
+        }
+
+        $userGoodsSpecificationModel = new UserGoodsSpecifications();
+        $userGoodsRow = $userGoodsSpecificationModel->where(['user_id'=>$this->userId,'goods_id'=>$goodsId,'specifications_id'=>$row->is])->find();
+        return ['status'=>0,'data'=>['no'=>$userGoodsRow ? $userGoodsRow->specifications_no : '' ,'name'=>$userGoodsRow ? $userGoodsRow->specifications_name :''],'msg'=>''];
     }
 }
