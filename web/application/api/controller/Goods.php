@@ -542,4 +542,32 @@ class Goods  extends Base {
 
         return ['status'=>0,'data'=>$list,'msg'=>''];
     }
+
+    /**
+     * [getSupplierNewest 获取供应商最新商品（热门）]
+     * @return [list] [查询集合]
+     */
+    public function getSupplierHot(){
+        //id是否合法
+        $gid = input('post.id',0,'intval');
+        if($gid==0){
+            return []['status'=>0,'data'=>[],'msg'=>''];
+        }
+
+        //商品是否存在
+        $mallGoods = model('mall_goods');
+        $goods = $mallGoods->field('supplier')->where(['id'=>$gid,'state'=>2])->find();
+        if(!$goods){
+            return ['status'=>0,'data'=>[],'msg'=>''];
+        }
+
+        //获取九个热门
+        $dataGoods = $mallGoods->field('id,icon')->where(['id'=>['<>',$gid],'supplier'=>$goods['supplier'],'state'=>2])->limit(9)->select();
+        foreach ($dataGoods as $k => $v) {
+            $dataGoods[$k]['icon'] = $mallGoods::getFormatImg($v['icon']);
+        }
+
+        return ['status'=>0,'data'=>$dataGoods,'msg'=>''];
+
+    }
 }
