@@ -552,7 +552,7 @@ class Goods  extends Base {
         //id是否合法
         $gid = input('post.id',0,'intval');
         if($gid==0){
-            return []['status'=>0,'data'=>[],'msg'=>''];
+            return ['status'=>0,'data'=>[],'msg'=>''];
         }
 
         //商品是否存在
@@ -569,6 +569,7 @@ class Goods  extends Base {
         }
 
         return ['status'=>0,'data'=>$dataGoods,'msg'=>''];
+    }
 
     /**
      * @desc 返回规格
