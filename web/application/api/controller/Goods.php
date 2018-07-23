@@ -540,7 +540,7 @@ class Goods  extends Base {
                 }
             }
         }
-
+        $list = $list ? array_reverse($list) : [];
         return ['status'=>0,'data'=>$list,'msg'=>''];
     }
 
