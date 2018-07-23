@@ -569,7 +569,7 @@ class Goods  extends Base {
         }
 
         $userGoodsSpecificationModel = new UserGoodsSpecifications();
-        $userGoodsRow = $userGoodsSpecificationModel->where(['user_id'=>$this->userId,'goods_id'=>$goodsId,'specifications_id'=>$row->is])->find();
+        $userGoodsRow = $userGoodsSpecificationModel->where(['user_id'=>$this->userId,'goods_id'=>$goodsId,'specifications_id'=>$row->id])->find();
         return ['status'=>0,'data'=>['no'=>$userGoodsRow ? $userGoodsRow->specifications_no : '' ,'name'=>$userGoodsRow ? $userGoodsRow->specifications_name :''],'msg'=>''];
     }
 }
