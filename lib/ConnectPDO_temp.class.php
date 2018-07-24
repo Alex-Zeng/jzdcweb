@@ -4,8 +4,7 @@ class ConnectPDO_temp extends PDO{
 	private $port='3306';
 	private $user='jzdcadm';
 	private $password='Jzdc@2018';
-    //	public $dbname='jzdcprd';
-    public $dbname='jzdcprd_test';
+	public $dbname='jzdcprd';
 	public $sys_pre='jzdc_';
 	public $index_pre='jzdc_index_';
 	function __construct(){

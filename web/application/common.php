@@ -22,10 +22,7 @@ function startSession(){
 
 
 function captchaDb_check($value, $id = "", $config = []){
-    if( $value == '6666'){
-        \think\Log::write('登录图形万能验证6666');
-        return true;
-    }
+
     $captcha = new \think\captcha\Captcha($config);
     return $captcha->checkDb($value, $id);
 }
@@ -41,9 +38,8 @@ function getVerificationCode($length = 4){
         $char=$code{rand(0, strlen($code)-1)};
         $string.=$char;
     }
-//    return $string;
-    \think\Log::write('短信接口万能验证6666');
-    return '6666';
+    return $string;
+
 }
 
 /**
@@ -189,4 +185,19 @@ function getOrderShowStatus(){
 }
 
 
-
+/**
+ * @desc 递归获取子类Id
+ * param $array 包含子类的搜索的数组
+ * param $id 父类ID用于查询其子类
+ * @return array
+ */
+function getRecursionType($array,$id){
+    $arr = [];
+    foreach($array as $value){
+        if($value['parent']==$id){
+            $arr[] = $value['id'];
+            $arr = array_merge($arr,getRecursionType($array,$value['id']));
+        }
+    }
+    return $arr;
+}

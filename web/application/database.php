@@ -15,8 +15,7 @@ return [
     // 服务器地址
     'hostname'        => '192.168.3.135',
     // 数据库名
-//    'database'        => 'jzdcprd',
-    'database'        => 'jzdcprd_test',
+    'database'        => 'jzdcprd',
     // 用户名
     'username'        => 'jzdcadm',
     // 密码
