@@ -253,7 +253,7 @@ class Goods  extends Base {
         $model = new MallGoods();
         $row = $model->where(['id'=>$id,'state'=>2])->field(['id','title','min_price','max_price','w_price','state','type','w_price','supplier','icon','multi_angle_img','title','m_detail','option_enable'])->find();
         if(!$row){
-            return ['status'=>1,'data'=>[],'msg'=>'商品不存在'];
+            return ['status'=>1,'data'=>[],'msg'=>'商品不存在或已下架'];
         }
         $this->noauth();
 

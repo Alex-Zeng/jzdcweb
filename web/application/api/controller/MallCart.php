@@ -59,7 +59,7 @@ class MallCart extends Base{
         $model = new MallGoods();
         $row = $model->where(['id'=>$id,'state'=>MallGoods::STATE_SALE])->find();
         if(!$row){
-            return ['status'=>1,'data'=>[],'msg'=>'商品不存在'];
+            return ['status'=>1,'data'=>[],'msg'=>'商品不存在或已下架'];
         }
         //
         $goodsSpecificationsModel = new MallGoodsSpecifications();
