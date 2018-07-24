@@ -121,7 +121,7 @@ class Index extends Base
             echo '<div style="font-size:60px;">温馨提示：如果您是iPhone用户通过微信、QQ打开该页面无法下载，请点右上角由浏览器打开（iPhone用户选择Safari打开）</div>';
             exit;
         }elseif(stripos($userAgent, 'iPhone')) {
-            echo '<div style="font-size:60px;">敬请期待IOS版本</div>';
+            echo '<div style="font-size:60px;text-align:center;margin-top:300px;">敬请期待IOS版本</div>';
             exit();
             // header('Location: https://itunes.apple.com/cn/app/dai-dai-wang/id1276128703');
             // exit();
@@ -137,7 +137,7 @@ class Index extends Base
                 // exit;
             }
         }else{ //微信下载
-            echo '<div style="font-size:60px;">应用宝还没上线呢！请点右上角由浏览器打开进行下载</div>';
+            echo '<div style="font-size:60px;text-align:center;margin-top:300px;">应用宝还没上线呢！请点右上角由浏览器打开进行下载</div>';
             exit();
             // header('Location: http://a.app.qq.com/o/simple.jsp?pkgname=com.zhongchuang.daidai');
             // exit;
