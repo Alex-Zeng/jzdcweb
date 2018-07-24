@@ -35,7 +35,7 @@ class User extends Base
     public function getGroup()
     {
         $this->noauth();
-        return ['status' => 0, 'data' => ['groupId' => $this->groupId], 'msg' => ''];
+        return ['status' => 0, 'data' => ['groupId' => intval($this->groupId)], 'msg' => ''];
     }
 
     /**
