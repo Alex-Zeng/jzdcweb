@@ -880,6 +880,7 @@
                     success: function (data) {
                         if (data.status == 0) {
                             window.location.reload();
+                            alert("修改为逾期状态成功")
                         } else {
                             alert(data.msg);
                         }

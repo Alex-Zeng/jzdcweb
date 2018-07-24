@@ -440,7 +440,7 @@ class Order extends Base{
             $msgData = ['title'=>'逾期中','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
             $orderMsgModel->save($msgData);
             $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
-            return ['status'=>0,'data'=>[],'msg'=>'操作成功'];
+            return ['status'=>0,'data'=>[],'msg'=>'操作逾期成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'操作失败'];
     }
