@@ -566,19 +566,16 @@ class Order extends Base{
                 }
 
             }
-
-
-            $filename = 'order_' . date('YmdHi', time()) . '.xls';
-            $objPHPExcel->getActiveSheet()->setTitle('商品订单信息');
-            header("Content-Type: application/force-download");
-            header("Content-Type: application/octet-stream");
-            header("Content-Type: application/download");
-            header('Content-Disposition:inline;filename="' . $filename . '"');
-            //生成excel文件
-            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-            $objWriter->save('php://output');
-            exit;
         }
-
+        $filename = 'order_' . date('YmdHi', time()) . '.xls';
+        $objPHPExcel->getActiveSheet()->setTitle('商品订单信息');
+        header("Content-Type: application/force-download");
+        header("Content-Type: application/octet-stream");
+        header("Content-Type: application/download");
+        header('Content-Disposition:inline;filename="' . $filename . '"');
+        //生成excel文件
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+        $objWriter->save('php://output');
+        exit;
     }
 }
