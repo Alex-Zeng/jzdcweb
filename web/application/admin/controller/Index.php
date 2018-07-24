@@ -11,6 +11,7 @@ class Index extends Base
         return $this->fetch();
     }
 
+    //版本发布
     public function version(){
     	$postType = input('post.postType','','trim');
     	switch ($postType) {

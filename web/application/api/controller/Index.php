@@ -112,6 +112,7 @@ class Index extends Base
         return $dataType;
     }
 
+    //版本下载
     public function downloadApp(){
         header("Content-type:text/html;charset=utf-8");
         //检查是来源客户端
