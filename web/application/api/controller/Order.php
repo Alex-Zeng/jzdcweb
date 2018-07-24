@@ -386,7 +386,7 @@ class Order extends Base{
             $row['companyName']  = $userInfo ? $userInfo->real_name : '';
             $row['groupId'] = $this->groupId;
             $row['money'] = $row->actual_money;
-            $row['orderDate'] = date('Y-m-d',$row->add_time);
+            $row['orderDate'] = date('Y-m-d H:i:s',$row->add_time);
 
             $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon','a.s_info'])->select();
 
