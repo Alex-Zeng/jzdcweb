@@ -473,7 +473,7 @@ class Order extends Base{
             ->setCellValue('B1', '订单号')
             ->setCellValue('C1', '订单状态')
             ->setCellValue('D1', '采购商')
-            ->setCellValue('E1', '采购商联系人')
+            ->setCellValue('E1', '用户名')
             ->setCellValue('F1', '供应商')
             ->setCellValue('G1', '商品名称')
             ->setCellValue('H1', '商品规格')
@@ -543,7 +543,7 @@ class Order extends Base{
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('B' . $counter, $row->out_id);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('C' . $counter, $row->state);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('D' . $counter, $buyerInfo ? $buyerInfo->real_name : '');
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('E' . $counter, $buyerInfo ? $buyerInfo->contact : '');
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('E' . $counter, $buyerInfo ? $buyerInfo->nickname : '');
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('F' . $counter, $supplier ? $supplier->real_name : '');
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('G' . $counter, $goodsRow->title);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('H' . $counter, $goodsRow->s_info);
