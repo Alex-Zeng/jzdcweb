@@ -28,6 +28,35 @@ window.onload = function (){
     });
 }
 
+function ajaxSubmit(formUp){
+    var thisFrom = formUp==undefined?'.formUp':formUp;
+    //异步提交
+    var option = {  
+        type:'post', 
+        dataType:'json', 
+        url:$(thisFrom).attr('action'),
+        success:function(data){
+            layer.close(shade);
+            returnData(data);
+        },  
+        error:function(XmlHttpRequest,textStatus,errorThrown){  
+            // console.log(XmlHttpRequest);  
+            // console.log(textStatus);  
+            // console.log(errorThrown);  
+        } 
+        
+    }
+    if (typeof beforeSubmit == "function" && option.beforeSubmit == undefined) {
+        option.beforeSubmit = beforeSubmit;
+    }
+    var shade = '';
+    if($(thisFrom).hasClass('shade')){
+        shade = layer.load(1,{shade: [0.3,'#000']});
+    }
+    $(thisFrom).ajaxSubmit(option);
+    return false;  
+}
+
 /**
  * [returnData 异步返回数据统一处理]
  * @param  {[type]} data [description]

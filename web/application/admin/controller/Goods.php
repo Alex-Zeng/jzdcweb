@@ -29,6 +29,7 @@ class Goods extends Base{
         $k = Request::instance()->get('k','','trim');
         $supplier = Request::instance()->get('supplier',0);
         $state = Request::instance()->get('state','-1','intval');
+        $push = Request::instance()->get('push','-1','intval');
         if(isset($k) && $k){
             $model->where('title','like','%'.$k.'%');
         }
@@ -37,6 +38,11 @@ class Goods extends Base{
         }
         if($state >= 0){
             $model->where(['mall_state'=>$state]);
+        }
+        if($push==0){
+            $model->where(['push'=>0]);
+        }elseif($push>0){
+            $model->where(['push'=>['>',0]]);
         }
 
         $rows = $model->order(['id'=>'desc'])->paginate(20,false,['query'=>request()->param()]);
@@ -52,6 +58,7 @@ class Goods extends Base{
         $this->assign('page',$rows->render());
         $this->assign('supplier',$supplier);
         $this->assign('state',$state);
+        $this->assign('push',$push);
         return $this->fetch();
     }
 
