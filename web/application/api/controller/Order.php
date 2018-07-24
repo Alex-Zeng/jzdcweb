@@ -299,6 +299,12 @@ class Order extends Base{
         $pageSize = $request->post('pageSize',10,'intval');
         $pageNumber = $request->post('pageNumber',1,'intval');
 
+        $goodsName = $request->post('goodsName','','trim|addslashes');
+        $companyName = $request->post('companyName','','trim|addslashes');
+        $startDate = $request->post('startDate','','filterDate');
+        $endDate = $request->post('endDate','','filterDate');
+
+
         if($pageSize > 12){ $pageSize = 12;}
         $start = ($pageNumber - 1)*$pageSize;
         $end = $pageNumber*$pageSize;
@@ -320,6 +326,28 @@ class Order extends Base{
             $where.= 'buyer_id='.$this->userId;
         }else{
             $where .='supplier='.$this->userId;
+        }
+        //
+        if($goodsName){
+            $where .=' AND goods_names LIKE %'.$goodsName.'%';
+        }
+        if($startDate){
+            $where .=' AND add_time >'.strtotime($startDate);
+        }
+        if($endDate){
+            $where .=' and add_time <'.strtotime($endDate.' 23:59:59');
+        }
+        $userModel = new IndexUser();
+        if($companyName){
+            $companyRows = $userModel->where(['real_name'=>['like','%'.$companyName.'%']])->find(['id'])->select();
+            $companyIds = '';
+            foreach($companyRows as $companyRow){
+                $companyIds .= $companyRow->id.',';
+            }
+            $companyIds = $companyIds ? substr($companyIds,0,strlen($companyIds)-1) : $companyIds;
+            if($companyIds){
+                $where .=' supplier IN('.$companyIds.')';
+            }
         }
 
         if($status != '-1'){
@@ -346,8 +374,8 @@ class Order extends Base{
             }
         }
         $count = $orderModel->where($where)->count();
-        $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','actual_money','goods_money','receiver_name','supplier','buyer_id','service_type'])->select();
-        $userModel = new IndexUser();
+        $rows = $orderModel->where($where)->order('add_time','desc')->limit($start,$end)->field(['id','state','out_id','add_time','actual_money','goods_money','receiver_name','supplier','buyer_id','service_type'])->select();
+
         foreach ($rows as &$row){
             $userInfo = [];
             if($this->groupId  == IndexGroup::GROUP_SUPPLIER){
@@ -358,6 +386,7 @@ class Order extends Base{
             $row['companyName']  = $userInfo ? $userInfo->real_name : '';
             $row['groupId'] = $this->groupId;
             $row['money'] = $row->actual_money;
+            $row['orderDate'] = date('Y-m-d',$row->add_time);
 
             $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon','a.s_info'])->select();
 
@@ -367,6 +396,7 @@ class Order extends Base{
                 $goodsRow['price'] = getFormatPrice($goodsRow->price);
             }
             $row['goods'] = $goodsRows;
+            unset($row->add_time);
         }
 
         return ['status'=>0,'data'=>['total'=>$count,'list'=>$rows],'msg'=>''];
