@@ -13,6 +13,14 @@
         color:#A9A9A9;
         content:attr(placeholder);
     }
+
+    .spec{
+        word-break:break-all;
+    }
+
+    .comment{
+        word-break:break-all;
+    }
 </style>
 
 <!-- Content Wrapper. Contains page content -->
@@ -93,8 +101,8 @@
 
                             <tbody>
                             {foreach name="list" id="order"}
-                             <tr style="background: rgb(0, 102, 153);color: #ffffff">
-                                 <!--<td></td>-->
+                            <tr style="background: rgb(0, 102, 153);color: #ffffff">
+                                <!--<td></td>-->
                                 <td colspan="4" >
                                     {:date('Y-m-d',$order.add_time)}&nbsp&nbsp;
                                     订单号: {$order.out_id}&nbsp;&nbsp;
@@ -102,10 +110,10 @@
                                     供应商: {$order.supplierName}&nbsp;&nbsp;
                                     账期截止日: {:substr($order.pay_date,0,10)}
                                 </td>
-                             </tr>
+                            </tr>
                             <tr style="background: #EFEFEF">
                                 <td colspan="4" >
-                                   {$order.receiver_name}&nbsp;&nbsp;{$order.receiver_phone}&nbsp;&nbsp;{$order.receiver_area_name}&nbsp;&nbsp;{$order.receiver_detail}&nbsp;&nbsp;{$order.receiver_post_code}
+                                    {$order.receiver_name}&nbsp;&nbsp;{$order.receiver_phone}&nbsp;&nbsp;{$order.receiver_area_name}&nbsp;&nbsp;{$order.receiver_detail}&nbsp;&nbsp;{$order.receiver_post_code}
                                 </td>
                             </tr>
                             <tr id="{$order.id}">
@@ -127,6 +135,14 @@
                                                 {/if}
                                                 {$goods.title}
                                             </td>
+                                            <td style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">
+                                                <span >规格: {$goods.s_info}</span>
+                                                <br>
+                                                <span >物料编号: {$goods.specifications_no}</span>
+                                                <br>
+                                                <span >物料规格: {$goods.specifications_name}</span>
+                                            </td>
+
                                             <td style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">原价: {$goods.price|floatval}*{$goods.quantity|intval}{$goods.unit}={$goods.price*$goods.quantity}元</td>
                                         </tr>
                                         {/foreach}
@@ -134,29 +150,29 @@
                                     </table>
                                     <div class="">
                                         <p>采购商支付:
-                                           {if $order.buyerPayInfo}
-                                                {foreach name="$order.buyerPayInfo" id="buyer"}
-                                                    {$buyer.pay_type == 1 ? '转账' : '汇款'},{$buyer.number},
-                                                    {$buyer.pay_type == 1 ? '支付日期:'.substr($buyer.pay_time,0,10): '汇款日期:'.substr($buyer.accept_time,0,10)},
-                                                    <a target="_blank" href="{$buyer.picture}">【回执照片】</a>
-                                                 {/foreach}
-                                            {else}
-                                             无
-                                            {/if}
-                                        </p>
-                                        <p>支付至供应商:
-                                            {if $order.supplierPayInfo}
-                                                {foreach name="$order.supplierPayInfo" id="supplierInfo"}
-                                                     {$supplierInfo.pay_type == 3 ? '转账' : '汇款'},{$supplierInfo.number},
-                                                     {$supplierInfo.pay_type == 4 ? '支付日期:'.substr($supplierInfo.pay_time,0,10): '汇款日期:'.substr($supplierInfo.accept_time,0,10)}
-                                                     <a target="_blank" href="{$supplierInfo.picture}">【回执照片】</a>
-                                                {/foreach}
+                                            {if $order.buyerPayInfo}
+                                            {foreach name="$order.buyerPayInfo" id="buyer"}
+                                            {$buyer.pay_type == 1 ? '转账' : '汇款'},{$buyer.number},
+                                            {$buyer.pay_type == 1 ? '支付日期:'.substr($buyer.pay_time,0,10): '汇款日期:'.substr($buyer.accept_time,0,10)},
+                                            <a target="_blank" href="{$buyer.picture}">【回执照片】</a>
+                                            {/foreach}
                                             {else}
                                             无
                                             {/if}
                                         </p>
-                                        <p>物料规格: {$order.buyer_remark}</p>
-                                        <p>买家留言: {$order.buyer_comment}</p>
+                                        <p>支付至供应商:
+                                            {if $order.supplierPayInfo}
+                                            {foreach name="$order.supplierPayInfo" id="supplierInfo"}
+                                            {$supplierInfo.pay_type == 3 ? '转账' : '汇款'},{$supplierInfo.number},
+                                            {$supplierInfo.pay_type == 4 ? '支付日期:'.substr($supplierInfo.pay_time,0,10): '汇款日期:'.substr($supplierInfo.accept_time,0,10)}
+                                            <a target="_blank" href="{$supplierInfo.picture}">【回执照片】</a>
+                                            {/foreach}
+                                            {else}
+                                            无
+                                            {/if}
+                                        </p>
+                                        <p class='spec' >物料规格: 无</p>
+                                        <p class='comment' >买家留言: {$order.buyer_comment}</p>
                                         {if $order.delivery_time > 0} <p>交货日期: {:date('Y-m-d',$order.delivery_time)}</p>{/if}
                                     </div>
 
@@ -631,7 +647,7 @@
             })
         }
     });
-   //收款
+    //收款
     $('#remittance-modal').on('show.bs.modal', function (event) {
         var id = $(event.relatedTarget).data('id');
         var tag = $(event.relatedTarget).data('tag');
@@ -658,7 +674,7 @@
             }
         }).on("fileuploaded", function(event, data) {
             if(data.response){
-              //  alert(data.response.data.filename);
+                //  alert(data.response.data.filename);
                 $('#remittance-upload-file').val(data.response.data.filename);
                 $('#remittance-upload-file').closest('.form-group').removeClass('has-error');
                 $('#remittance-upload-file').closest('.form-group').find('.help-block').html('');
