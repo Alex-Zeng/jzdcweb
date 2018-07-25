@@ -201,3 +201,22 @@ function getRecursionType($array,$id){
     }
     return $arr;
 }
+
+
+/**
+ * [getDevice 获取扫码源]
+ * @return [string] [iphoneWechat苹果微信iphoneNomal苹果普通androidNomal安卓普通androidWechat安卓微信]
+ */
+function getDevice(){
+    //检查是来源客户端
+    $userAgent = $_SERVER['HTTP_USER_AGENT'];
+    if(stripos($userAgent, 'iPhone') && stripos($userAgent, 'MicroMessenger')){
+        return 'iphoneWechat';
+    }elseif(stripos($userAgent, 'iPhone')) {
+        return 'iphoneNormal';
+    }elseif((stripos($userAgent, 'MicroMessenger') === false)&&strpos($userAgent, 'QQ') === false) { //浏览器下载或版本更新
+        return 'androidNormal';
+    }else{ //微信下载
+        return 'androidWechat';
+    }
+}

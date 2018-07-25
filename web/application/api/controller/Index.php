@@ -111,37 +111,4 @@ class Index extends Base
 
         return $dataType;
     }
-
-    //版本下载
-    public function downloadApp(){
-        header("Content-type:text/html;charset=utf-8");
-        //检查是来源客户端
-        $userAgent = $_SERVER['HTTP_USER_AGENT'];
-        if(stripos($userAgent, 'iPhone') && stripos($userAgent, 'MicroMessenger')){
-            echo '<div style="font-size:60px;">温馨提示：如果您是iPhone用户通过微信、QQ打开该页面无法下载，请点右上角由浏览器打开（iPhone用户选择Safari打开）</div>';
-            exit;
-        }elseif(stripos($userAgent, 'iPhone')) {
-            echo '<div style="font-size:60px;text-align:center;margin-top:300px;">敬请期待IOS版本</div>';
-            exit();
-            // header('Location: https://itunes.apple.com/cn/app/dai-dai-wang/id1276128703');
-            // exit();
-        }elseif((stripos($userAgent, 'MicroMessenger') === false)&&strpos($userAgent, 'QQ') === false) { //浏览器下载或版本更新
-             $version = db('version')->field('app_name')->where(['up_time'=>['elt',time()],'is_del'=>1])->order('version_id desc')->find();
-            if(empty($version)){
-                echo '<p style="font-size:60px;text-align:center;margin-top:300px;">敬请期待Android版本</p>';
-                exit;
-            }else{
-                echo '<p style="font-size:60px;text-align:center;margin-top:300px;">敬请期待Android版本</p>';
-                exit();
-                // header('Location: '.request()->domain().'/version/'.$version['app_name']);
-                // exit;
-            }
-        }else{ //微信下载
-            echo '<div style="font-size:60px;text-align:center;margin-top:300px;">应用宝还没上线呢！请点右上角由浏览器打开进行下载</div>';
-            exit();
-            // header('Location: http://a.app.qq.com/o/simple.jsp?pkgname=com.zhongchuang.daidai');
-            // exit;
-        }
-    }
-
 }
