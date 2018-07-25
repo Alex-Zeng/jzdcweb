@@ -217,3 +217,5 @@ create table `jzdc_version` (
   `add_time` int not null default '0' comment '添加时间',
   `is_del` tinyint(4) not null default '1' comment '是否删除1不删除2已删除'
 ) engine=innodb default charset=utf8 comment='版本日志表';
+insert into jzdc_version (`title`,`app_name`,`force_version`,`content`,`up_time`,`add_time`,`is_del`) values
+('集众电采1.0.0','jzdc_1.0.0.apk','1.0.0','H5版','1532512800','1532512800','1');
