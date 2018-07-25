@@ -109,9 +109,10 @@ class Index extends Base
             $dataType[$key]['pushGoodsList'] = $dataGoods;
         }
 
-        return $dataType;
+        return ['status' => 0, 'data' => ['dataType' => $dataType], 'msg' => '返回成功'];
     }
 
+    //版本更新
     public function versionUpdate(){
         //app版本号以后用 X.Y.Z 这种格式，大改版则改X，功能迭加则改Y，bug修复则改Z
         $version=input('param.version','','trim');  //用户版本
