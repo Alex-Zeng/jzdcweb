@@ -111,4 +111,58 @@ class Index extends Base
 
         return $dataType;
     }
+
+    public function versionUpdate(){
+        //app版本号以后用 X.Y.Z 这种格式，大改版则改X，功能迭加则改Y，bug修复则改Z
+        $version=input('param.version','','trim');  //用户版本
+        $now=time();
+        //获取最新app版本信息
+        $fileArr=db('version')
+                        ->field('app_name,force_version')
+                        ->where("up_time<={$now} and is_del=1")
+                        ->order('version_id desc')
+                        ->find();
+        if(!$fileArr){
+            return ['status'=>0,'data'=>['url'=>'','forced'=>0,'tips'=>'不需要版本更新'],'msg'=>'请求成功'];
+        }
+
+        //数据库版本
+        $explodeNowVersion = explode('.', strtr($fileArr['app_name'],['jzdc_'=>'','jizhongdiancai_'=>'','.apk'=>'']));
+        foreach ($explodeNowVersion as $key => $value) {
+            if($key>0){
+                $explodeNowVersion[$key] = str_pad($value, 2, "0", STR_PAD_LEFT);
+            }
+        }
+        $nowVersion = implode('', $explodeNowVersion);
+       
+        //用户所用版本
+        $explodeVersion = explode('.', $version);
+        foreach ($explodeVersion as $key => $value) {
+            if($key>0){
+                $explodeVersion[$key] = str_pad($value, 2, "0", STR_PAD_LEFT);
+            }
+        }
+        $version = implode('', $explodeVersion);
+
+        //强制更新版本
+        $explodeForceVersion = explode('.', $fileArr['force_version']);
+        foreach ($explodeForceVersion as $key => $value) {
+            if($key>0){
+                $explodeForceVersion[$key] = str_pad($value, 2, "0", STR_PAD_LEFT);
+            }
+        }
+        $forceVersion = implode('', $explodeForceVersion);
+        
+        // dump($version);dump($nowVersion);dump($forceVersion);exit();
+        if($version < $nowVersion){
+            if($version<$forceVersion){  //是否强制更新
+                $forced=1;//强制
+            }else{
+                $forced=2;//需要更新,不强制
+            }
+            return ['status'=>0,'data'=>['url'=>'http://download.jizhogndiancai.com','forced'=>$forced,'tips'=>'检测到新版本，是否更新'],'msg'=>'请求成功'];
+        }else{
+            return ['status'=>0,'data'=>['url'=>'','forced'=>0,'tips'=>'不需要版本更新'],'msg'=>'请求成功'];
+        }
+    }
 }
