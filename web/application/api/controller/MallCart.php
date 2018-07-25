@@ -13,6 +13,7 @@ use app\common\model\IndexGroup;
 use app\common\model\MallGoods;
 use app\common\model\MallGoodsSpecifications;
 use app\common\model\MallTypeOption;
+use app\common\model\MallUnit;
 use think\Request;
 
 class MallCart extends Base{
@@ -122,9 +123,10 @@ class MallCart extends Base{
             ->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')
             ->join(config('prefix').'mall_goods_specifications c','a.goods_specifications_id=c.id','left')
             ->where($where)
-            ->field(['b.id','b.icon','b.title','b.supplier','b.w_price','a.id as cart_id','a.quantity','c.w_price as goods_price','c.color_id','c.color_name','c.option_id'])->select();
+            ->field(['b.id','b.icon','b.title','b.supplier','b.w_price','a.id as cart_id','b.unit','a.quantity','c.w_price as goods_price','c.color_id','c.color_name','c.option_id'])->select();
         $supplierData = [];
         $typeOptionModel = new MallTypeOption();
+        $unitModel = new MallUnit();
         foreach ($rows as $row){
             $specificationsInfo = $row->color_name ? $row->color_name : '';
             if($row->option_id > 0){
@@ -133,6 +135,7 @@ class MallCart extends Base{
                     $specificationsInfo ? $specificationsInfo .=','.$typeOptionRow->name : $specificationsInfo .=$typeOptionRow->name;
                 }
             }
+            $unitRow = $unitModel->find(['id'=>$row->unit]);
 
             $supplierData[$row->supplier][] = [
                 'goodsId' => $row->id,
@@ -145,7 +148,8 @@ class MallCart extends Base{
                 'option_id' => $row->option_id ? $row->option_id : '',
                 'color_id' => $row->color_id ? $row->color_id : '',
                 'no' =>'',
-                'requirement' => ''
+                'requirement' => '',
+                'unit' => $unitRow ? $unitRow->name : ''
             ];
         }
         $data = [];
