@@ -235,6 +235,7 @@ class Order extends Base{
                     //返回数据
                     $return[] = [
                         'orderNo' =>  $orderNo,
+                        'totalPrice' => $order['total_price'],
                         'date' => $order['date'],
                         'goods' => $returnGoodsList,
                         'remark' => $order['remark'],
