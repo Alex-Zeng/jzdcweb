@@ -60,6 +60,17 @@ function checkEmail($email){
     return preg_match("/\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/",$email);
 }
 
+/**
+ * @desc 过滤日期
+ * @param $value
+ * @return string
+ */
+function filterDate($value){
+    if(date('Y-m-d',strtotime($value)) == $value){
+        return $value;
+    }
+    return '';
+}
 
 /**
  * @desc 验证密码
