@@ -80,8 +80,8 @@ class Index extends Base
      */
     public function turnover(){
         $model = new MallOrder();
-        $turnoverMonth = number_format($model->getTurnover('month'),2,',',' ');//本月成交额
-        $turnoverAll = number_format($model->getTurnover('all'),2,',',' ');//累计成交额
+        $turnoverMonth = number_format($model->getTurnover('month'),0,',',',');//本月成交额
+        $turnoverAll = number_format($model->getTurnover('all'),0,',',' ');//累计成交额
         return ['status'=>0,'data'=>['turnoverMonth'=>$turnoverMonth,'turnoverAll'=>$turnoverAll],'msg'=>'返回成功'];
     }
 
