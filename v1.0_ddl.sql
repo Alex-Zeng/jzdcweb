@@ -204,3 +204,16 @@ UPDATE `jzdc_index_user` AS A LEFT JOIN jzdc_form_user_cert AS B ON A.id =   B.w
 -- 收藏夹分类增加字段以及对已加入收藏夹数据进行一个更新操作
 alter table jzdc_mall_favorite add `type_id` int not null default 0 comment '分类Id';
 update jzdc_mall_favorite as f left join jzdc_mall_goods as g on f.goods_id=g.id set f.type_id=g.type where g.type>0
+
+
+-- 版本发布
+create table `jzdc_version` (
+  `version_id` int primary key auto_increment comment '日志id',
+  `title` varchar(20) not null default '' comment '标题',
+  `app_name` varchar(30) not null default '' comment 'app包名称',
+  `force_version` varchar(10) not null default '' comment '小于该版本号必须强制更新',
+  `content` varchar(2000) not null default '' comment '更新内容',
+  `up_time` int not null default '0' comment '上线时间',
+  `add_time` int not null default '0' comment '添加时间',
+  `is_del` tinyint(4) not null default '1' comment '是否删除1不删除2已删除'
+) engine=innodb default charset=utf8 comment='版本日志表';
