@@ -115,7 +115,7 @@ class Index extends Base
     //版本更新
     public function versionUpdate(){
         //app版本号以后用 X.Y.Z 这种格式，大改版则改X，功能迭加则改Y，bug修复则改Z
-        $version=input('param.version','','trim');  //用户版本
+        $version=input('post.version','','trim');  //用户版本
         $now=time();
         //获取最新app版本信息
         $fileArr=db('version')
