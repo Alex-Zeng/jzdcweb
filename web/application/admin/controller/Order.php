@@ -541,7 +541,7 @@ class Order extends Base{
                 foreach ($goodsRows as $goodsRow) {
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('A' . $counter, date('Y-m-d H:i', $row->add_time));
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('B' . $counter, $row->out_id);
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('C' . $counter, $row->state);
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('C' . $counter, getOrderState($row->state));
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('D' . $counter, $buyerInfo ? $buyerInfo->real_name : '');
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('E' . $counter, $buyerInfo ? $buyerInfo->nickname : '');
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('F' . $counter, $supplier ? $supplier->real_name : '');
