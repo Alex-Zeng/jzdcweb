@@ -91,10 +91,12 @@ class Factoring extends Base {
         
     	$data = db('factoring')->field('add_time,order_sn,need_account')->order('factoring_id desc')->where(['user_id'=>$userId])->select();
 		$factoringList = [];
+		$dt = [];
 		foreach ($data as $key => $value) {
-			$factoringList['dataTime'] = date('Y-m-d H:i:s',$value['add_time']); 
-			$factoringList['orderSn'] = $value['order_sn']; 
-			$factoringList['needAccount'] = $value['need_account']; 
+			$dt['dataTime'] = date('Y-m-d H:i:s',$value['add_time']); 
+			$dt['orderSn'] = $value['order_sn']; 
+			$dt['needAccount'] = $value['need_account']; 
+			$factoringList[] = $dt;
 		}
 		return ['status'=>0,'data'=>['factoringList'=>$factoringList],'msg'=>'申请提交成功'];
     }
