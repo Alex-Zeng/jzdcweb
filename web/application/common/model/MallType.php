@@ -57,7 +57,7 @@ class MallType extends Model{
      * @return string
      */
     public static function getFormatIcon($icon){
-        return config('jzdc_domain').'/web/public/uploads/type_icon/'.$icon;
+        return $icon ? config('jzdc_domain').'/web/public/uploads/type_icon/'.$icon : '';
     }
 
 

@@ -219,3 +219,6 @@ create table `jzdc_version` (
 ) engine=innodb default charset=utf8 comment='版本日志表';
 insert into jzdc_version (`title`,`app_name`,`force_version`,`content`,`up_time`,`add_time`,`is_del`) values
 ('集众电采1.0.0','jzdc_1.0.0.apk','1.0.0','H5版','1532512800','1532512800','1');
+
+-- 商品类型新增Web图标字段
+ALTER TABLE `jzdc_mall_type` ADD COLUMN `web_path` VARCHAR (255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT 'pc图标';
