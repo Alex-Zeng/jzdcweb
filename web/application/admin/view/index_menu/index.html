@@ -287,7 +287,7 @@
     $(function () {
         $("#add-file").fileinput({
             language: 'zh', //设置语言
-            uploadUrl: '?s=admin/file/upload',  //上传地址
+            uploadUrl: '/?s=admin/file/upload',  //上传地址
             showUpload: true, //是否显示上传按钮
             showRemove:true,
             dropZoneEnabled: false,
@@ -321,7 +321,7 @@
             var id = $(event.relatedTarget).data('id');
             $('#edit-request').data('id',id);
             $.ajax({
-                url:'?s=admin/index_menu/get&id='+id,
+                url:'/?s=admin/index_menu/get&id='+id,
                 data:{},
                 dataType:'json',
                 success:function (data) {
@@ -342,7 +342,7 @@
                     $('#edit-file').fileinput('destroy');
                     $("#edit-file").fileinput({
                         language: 'zh', //设置语言
-                        uploadUrl: '?s=admin/file/upload',  //上传地址
+                        uploadUrl: '/?s=admin/file/upload',  //上传地址
                         showUpload: true, //是否显示上传按钮
                         showRemove:true,
                         dropZoneEnabled: false,
