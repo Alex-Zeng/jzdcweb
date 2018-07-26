@@ -38,7 +38,7 @@ class Goods  extends Base {
                 'url' => $row->url,
                 'img' => MenuMenu::getFormatImg($row->path),
                 'type' => $row->type_id,
-                'flag' => $row->flag
+                'flag' => strval($row->flag)
             ];
         }
         return ['status'=>0,'data'=>$data,'msg'=>''];
