@@ -160,6 +160,7 @@
                             </div>
                             <div class="card-footer col-md-offset-2">
                                 <button type="submit" class="btn btn-primary">添加</button>
+                                <small class="submit-tip" style="padding-top: 6px;padding-left: 5px;color: #a94442"></small>
                             </div>
                         </form>
                     </div>
@@ -286,24 +287,21 @@
     function validateSubmit() {
         $('#cover-upload-file').closest('.form-group').removeClass('has-error');
         $('#cover-upload-file').closest('.form-group').find('.help-block').html('');
-        // $('#multi-upload-file').closest('.form-group').removeClass('has-error');
-        // $('#multi-upload-file').closest('.form-group').find('.help-block').html('');
+        $('.submit-tip').html('');
+       // custom-container
+        var customLength =  $('#custom-container').find('tr').length;
 
-      //  $("#add-form").data('bootstrapValidator').validate();
         var valid = true;
         //图片验证
-        // alert($('#cover-upload-file').val());
         if ($('#cover-upload-file').val() == '') {
             $('#cover-upload-file').closest('.form-group').addClass('has-error');
             $('#cover-upload-file').closest('.form-group').find('.help-block').html('请上传封面图片');
             valid = false;
         }
-
-        // if ($('#multi-upload-file').val() == '') {
-        //     $('#multi-upload-file').closest('.form-group').addClass('has-error');
-        //     $('#multi-upload-file').closest('.form-group').find('.help-block').html('请上传多视角图片');
-        //     valid = false;
-        // }
+        if(customLength == 0){
+            $('.submit-tip').html('请设置商品规格');
+            valid = false;
+        }
 
         var result = $("#add-form").data('bootstrapValidator').isValid();
         if (result && valid) {
@@ -347,6 +345,8 @@
                              var data = {color:g_color,color_list:data.data.color_list,option:g_option,option_list:data.data.option_list,option_name:data.data.option_name}; //
                              var html = template('standard-container',data);
                              $('#standard_container').html(html);
+                         }else{
+                             $('#standard_container').html('');
                          }
                      }
                 }
@@ -529,22 +529,6 @@
                         },
                     }
                 },
-                // cover_path:{
-                //     message: 'The cover_path is not valid',
-                //     validators: {
-                //         notEmpty: {
-                //             message: '请上传封面图片'
-                //         }
-                //     }
-                // },
-                // multi_path:{
-                //     message: 'The cover_path is not valid',
-                //     validators: {
-                //         notEmpty: {
-                //             message: '请上传多视角图片'
-                //         }
-                //     }
-                // },
                 w_price:{
                     validators: {
                         notEmpty: {
@@ -567,13 +551,6 @@
                         }
                     }
                 },
-                // content:{
-                //     validators: {
-                //         notEmpty: {
-                //             message: '商品详情不能为空'
-                //         },
-                //     }
-                // }
             }
         });
 
