@@ -40,7 +40,7 @@ class Goods  extends Base {
                 'url' => $row->url,
                 'img' => MenuMenu::getFormatImg($row->path),
                 'type' => $row->type_id,
-                'flag' => $row->flag
+                'flag' => strval($row->flag)
             ];
         }
         return ['status'=>0,'data'=>$data,'msg'=>''];
@@ -211,6 +211,7 @@ class Goods  extends Base {
 
         if($type == 0 ){  //商品搜索
             $where['state'] = 2;
+            $where['mall_state'] = 1;
             if($keywords){
                 $where['title'] = ['like','%'.$keywords.'%'];
             }

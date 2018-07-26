@@ -439,12 +439,9 @@ class Order extends Base{
         //采购商供应商
         $userModel = new IndexUser();
         $userInfo = [];
-        if($this->groupId == IndexGroup::GROUP_SUPPLIER){
-            $userInfo = $userModel->getInfoById($row->buyer_id);
-        }elseif ($this->groupId == IndexGroup::GROUP_BUYER){
-            $userInfo = $userModel->getInfoById($row->supplier);
-        }
 
+        $supplierInfo = $userModel->getInfoById($row->supplier);
+        $buyerInfo = $userModel->getInfoById($row->buyer_id);
 
         //查询产品
         $goodsModel = new MallOrderGoods();
@@ -462,7 +459,9 @@ class Order extends Base{
         //express expressCode sendDate estimatedDate
         $data = [
             'orderNo' => $row->out_id,
-            'companyName' => $userInfo ? $userInfo->real_name : '',
+            'companyName' => $this->groupId == IndexGroup::GROUP_SUPPLIER ? ($supplierInfo ? $supplierInfo->real_name : '') : ($buyerInfo ? $buyerInfo->real_name : '') ,
+            'supplierName' => $supplierInfo ? $supplierInfo->real_name : '',
+            'buyerName' => $buyerInfo ? $buyerInfo->real_name : '',
             'groupId' => $this->groupId,
             'state' => $row->state,
             'money' => $row->actual_money,

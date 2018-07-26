@@ -1,43 +1,4 @@
 $(function () {
-    $('#add-form').bootstrapValidator({
-        live: 'disabled',
-        message: 'This value is not valid',
-        fields: {
-            title: {
-                message: 'The username is not valid',
-                validators: {
-                    notEmpty: {
-                        message: '标题不能为空'
-                    },
-                    stringLength: {
-                        min: 2,
-                        max: 255,
-                        message: '最大长度为255个字符'
-                    },
-                }
-            },
-            link:{
-                message: '链接无效',
-                validators: {
-                    notEmpty: {
-                        message: '链接不能为空'
-                    },
-                    url: {
-                        message: '格式不正确'
-                    },
-                }
-            },
-            path:{
-                message: '请上传图片',
-                validators: {
-                    notEmpty: {
-                        message: '请上传图片'
-                    },
-                }
-            },
-        }
-    });
-
     $('#delete-modal').on('show.bs.modal', function (event) {
         var id = $(event.relatedTarget).data('id');
         //赋值
@@ -93,9 +54,6 @@ $(function () {
             link:{
                 message: '链接无效',
                 validators: {
-                    notEmpty: {
-                        message: '链接不能为空'
-                    },
                     url: {
                         message: '格式不正确'
                     },
@@ -206,9 +164,6 @@ $(function () {
             link:{
                 message: '链接无效',
                 validators: {
-                    notEmpty: {
-                        message: '链接不能为空'
-                    },
                     url: {
                         message: '格式不正确'
                     },
