@@ -14,9 +14,12 @@ class Factoring extends Base {
 		if($auth){
 			return $auth;
 		}
-        $userId = $this->userId;
+  		$userId = $this->userId;
         $data = db('index_user')->field('real_name as name')->where(['id'=>$userId])->find();
-        return ['status'=>0,'data'=>['name'=>$data['real_name']],'msg'=>'请求成功'];
+        if(!$data){
+        	$data['real_name'] = '';
+        }
+        return ['status'=>0,'data'=>['name'=>$data['name']],'msg'=>'请求成功'];
 
 	}
 
@@ -29,6 +32,9 @@ class Factoring extends Base {
 		}
 		$userId = $this->userId;
         $dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','0,4,13'],'buyer_id'=>$userId])->order('id desc')->select();
+        if(!$dataList){
+        	$dataList = [];
+        }
         return ['status'=>0,'data'=>['orderList'=>$dataList],'msg'=>'请求成功'];
 	}
 
