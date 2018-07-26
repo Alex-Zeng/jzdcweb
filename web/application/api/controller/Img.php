@@ -21,7 +21,7 @@ class Img
     {
         $type = $request->post('type',1,'intval');
         $model = new SliderImg();
-        $rows = $model->where(['group_id'=>27,'type'=>$type,'status'=>1])->field('id,name,url,target,path')->limit(3)->select();
+        $rows = $model->where(['group_id'=>27,'type'=>$type,'status'=>1])->order('sequence','desc')->field('id,name,url,target,path')->select();
         $data = [];
         foreach($rows as $row){
             $data[] = [

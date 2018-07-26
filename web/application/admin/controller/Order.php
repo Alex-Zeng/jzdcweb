@@ -52,6 +52,7 @@ class Order extends Base{
                 $where['state'] = $state;
             }
         }
+
         if(isset($start) && $start && isset($end) && $end){
            $where['add_time'] = ['between',[strtotime($start),strtotime($end.' 23:59:59')]];
         }elseif (isset($start) && $start){
@@ -61,7 +62,12 @@ class Order extends Base{
         }
 
         //查询总价
-        $totalMoney = $model->where($where)->field(['sum(`actual_money`) AS money'])->find();
+        if($state < 0){
+            $totalMoney = $model->where($where)->where(['state'=>['neq',4]])->field(['sum(`actual_money`) AS money'])->find();
+        }else{
+            $totalMoney = $model->where($where)->field(['sum(`actual_money`) AS money'])->find();
+        }
+
 
         $rows = $model->where($where)->order('id','desc')->paginate(10,false,['query'=>request()->param()]);
         $userModel = new IndexUser();
@@ -440,7 +446,7 @@ class Order extends Base{
             $msgData = ['title'=>'逾期中','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
             $orderMsgModel->save($msgData);
             $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
-            return ['status'=>0,'data'=>[],'msg'=>'操作成功'];
+            return ['status'=>0,'data'=>[],'msg'=>'操作逾期成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'操作失败'];
     }
@@ -458,11 +464,12 @@ class Order extends Base{
         if (isset($state) && $state >= 0) {
             $where['state'] = $state;
         }
-        if (isset($start) && $start) {
+        if(isset($state) && $start && isset($end) && $end){
+            $where['add_time'] =[['lt', strtotime($end . ' 23:59:59')],['gt', strtotime($start)],'and'] ;
+        }elseif (isset($state) && $start){
             $where['add_time'] = ['gt', strtotime($start)];
-        }
-        if (isset($end) && $end) {
-            $where['add_time'] = ['gt', strtotime($end . ' 23:59:59')];
+        }elseif (isset($end) && $end){
+            $where['add_time'] = ['lt', strtotime($end . ' 23:59:59')];
         }
         vendor('PHPExcel.PHPExcel');
         $objPHPExcel = new \PHPExcel();
@@ -473,7 +480,7 @@ class Order extends Base{
             ->setCellValue('B1', '订单号')
             ->setCellValue('C1', '订单状态')
             ->setCellValue('D1', '采购商')
-            ->setCellValue('E1', '采购商联系人')
+            ->setCellValue('E1', '用户名')
             ->setCellValue('F1', '供应商')
             ->setCellValue('G1', '商品名称')
             ->setCellValue('H1', '商品规格')
@@ -490,7 +497,6 @@ class Order extends Base{
 
         //查询数据
         $total = $model->where($where)->count();
-
         $pageSize = 100;
         $page = ceil($total / $pageSize);
 
@@ -511,7 +517,7 @@ class Order extends Base{
         $objPHPExcel->getActiveSheet(0)->getColumnDimension('H')->setWidth(15);
 
         for ($i = 0; $i < $page; $i++) {
-            $start = $page * $i;
+            $start = $pageSize * $i;
             $rows = $model->where($where)->limit($start, $pageSize)->order('add_time', 'desc')->select();
             foreach ($rows as $row) {
                 $buyerInfo = $userModel->getInfoById($row->buyer_id);
@@ -541,9 +547,9 @@ class Order extends Base{
                 foreach ($goodsRows as $goodsRow) {
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('A' . $counter, date('Y-m-d H:i', $row->add_time));
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('B' . $counter, $row->out_id);
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('C' . $counter, $row->state);
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('C' . $counter, getOrderState($row->state));
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('D' . $counter, $buyerInfo ? $buyerInfo->real_name : '');
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('E' . $counter, $buyerInfo ? $buyerInfo->contact : '');
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('E' . $counter, $buyerInfo ? $buyerInfo->nickname : '');
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('F' . $counter, $supplier ? $supplier->real_name : '');
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('G' . $counter, $goodsRow->title);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('H' . $counter, $goodsRow->s_info);
