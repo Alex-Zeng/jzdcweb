@@ -511,7 +511,7 @@ class Order extends Base{
         $objPHPExcel->getActiveSheet(0)->getColumnDimension('H')->setWidth(15);
 
         for ($i = 0; $i < $page; $i++) {
-            $start = $page * $i;
+            $start = $pageSize * $i;
             $rows = $model->where($where)->limit($start, $pageSize)->order('add_time', 'desc')->select();
             foreach ($rows as $row) {
                 $buyerInfo = $userModel->getInfoById($row->buyer_id);
