@@ -51,6 +51,8 @@ class Order extends Base{
             }else{
                 $where['state'] = $state;
             }
+        }else{
+            $where['state'] = array('neq',4);
         }
         if(isset($start) && $start && isset($end) && $end){
            $where['add_time'] = ['between',[strtotime($start),strtotime($end.' 23:59:59')]];
@@ -61,7 +63,7 @@ class Order extends Base{
         }
 
         //查询总价
-        $totalMoney = $model->where($where)->field(['sum(`actual_money`) AS money'])->find();
+        $totalMoney = $model->where($where)->where('state'!==4 )->field(['sum(`actual_money`) AS money'])->find();
 
         $rows = $model->where($where)->order('id','desc')->paginate(10,false,['query'=>request()->param()]);
         $userModel = new IndexUser();
