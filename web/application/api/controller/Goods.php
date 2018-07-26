@@ -430,12 +430,12 @@ class Goods  extends Base {
         }
 
         $mallType = model('mall_type');
-        $typeList = [['cont'=>0,'name'=>'全部','typeId'=>0]];
+        $typeList = [['count'=>0,'name'=>'全部','typeId'=>0]];
         $parent = $mallType->where(['parent'=>0])->field('name,id')->order('sequence desc')->select();
         foreach ($parent as $key => $val) {
             $count =  $model->where(['user_id'=>$this->userId,'type_id'=>['in',$mallType->getChildIds($val['id'],true)]])->count();
-            $typeList[] = ['cont'=>$count,'name'=>$val['name'],'typeId'=>$val['id']];
-            $typeList[0]['cont'] += $count;
+            $typeList[] = ['count'=>$count,'name'=>$val['name'],'typeId'=>$val['id']];
+            $typeList[0]['count'] += $count;
         }
 
         $total = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where($where)->count();
