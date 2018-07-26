@@ -458,11 +458,12 @@ class Order extends Base{
         if (isset($state) && $state >= 0) {
             $where['state'] = $state;
         }
-        if (isset($start) && $start) {
+        if(isset($state) && $start && isset($end) && $end){
+            $where['add_time'] =[['lt', strtotime($end . ' 23:59:59')],['gt', strtotime($start)],'and'] ;
+        }elseif (isset($state) && $start){
             $where['add_time'] = ['gt', strtotime($start)];
-        }
-        if (isset($end) && $end) {
-            $where['add_time'] = ['gt', strtotime($end . ' 23:59:59')];
+        }elseif (isset($end) && $end){
+            $where['add_time'] = ['lt', strtotime($end . ' 23:59:59')];
         }
         vendor('PHPExcel.PHPExcel');
         $objPHPExcel = new \PHPExcel();
@@ -490,7 +491,6 @@ class Order extends Base{
 
         //查询数据
         $total = $model->where($where)->count();
-
         $pageSize = 100;
         $page = ceil($total / $pageSize);
 
