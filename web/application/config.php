@@ -305,4 +305,9 @@ return [
     'JZDC_MAIL_SMTP' => 'smtp.exmail.qq.com',
     'JZDC_MAIL_LOGINNAME' => 'jzdc@jizhongdiancai.com',
     'JZDC_MAIL_PASSWORD' => '44339674abAB',
+    'Captcha'=>[
+        'fontSize'  => 38,
+        'length'    => 4,
+        'useCurve'  => false
+    ]
 ];
