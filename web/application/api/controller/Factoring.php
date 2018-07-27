@@ -31,10 +31,26 @@ class Factoring extends Base {
 			return $auth;
 		}
 		$userId = $this->userId;
-        $dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','4,13'],'buyer_id'=>$userId])->order('id desc')->select();
-        if(!$dataList){
-        	$dataList = [];
-        }
+		$groupId = $this->groupId;
+		$indexGroup = model('IndexGroup');
+		switch ($groupId) {
+			case $indexGroup::GROUP_BUYER:
+				$dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','4,13'],'buyer_id'=>$userId])->order('id desc')->select();
+		        if(!$dataList){
+		        	$dataList = [];
+		        }
+				break;
+			case $indexGroup::GROUP_SUPPLIER:
+				$dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','4,13'],'supplier'=>$userId])->order('id desc')->select();
+		        if(!$dataList){
+		        	$dataList = [];
+		        }
+				break;
+			default:
+				$dataList = [];
+				break;
+		}
+        
         return ['status'=>0,'data'=>['orderList'=>$dataList],'msg'=>'请求成功'];
 	}
 
@@ -46,7 +62,7 @@ class Factoring extends Base {
          return $auth;
         }
         $userId = $this->userId;
-
+        $groupId = $this->groupId;
         //接收参数
         $data['order_id'] = input('post.orderId',0,'intval');
         $data['contact_username']  = input('post.contactUsername','','trim');
@@ -61,8 +77,20 @@ class Factoring extends Base {
             return ['status'=>-2,'data'=>'','msg'=>$result];
         }
 
+        $indexGroup = model('IndexGroup');
+        $mallOrder = db('mall_order');
+		switch ($groupId) {
+			case $indexGroup::GROUP_BUYER:
+				$order = $mallOrder->field('out_id,actual_money')->wher(['state'=>['not in','4,13'],'buyer_id'=>$userId,'id'=>$data['order_id']])->order('id desc')->find();
+				break;
+			case $indexGroup::GROUP_SUPPLIER:
+				$order = $mallOrder->field('out_id,actual_money')->where(['state'=>['not in','4,13'],'supplier'=>$userId,'id'=>$data['order_id']])->order('id desc')->find();
+				break;
+			default:
+				$order = '';
+				break;
+		}
         //验证订单号及获取订单编号
-        $order = db('mall_order')->field('out_id,actual_money')->where(['state'=>['not in','4,13'],'buyer_id'=>$userId,'id'=>$data['order_id']])->find();
         if(!$order){
             return ['status'=>-2,'data'=>'','msg'=>'所选择的订单有误'];
         }
