@@ -100,7 +100,7 @@ class Index extends Base
 
             //获取该首级分类及其子类的所以商品推荐   
             $ids = $mallType->getChildIds($val['id'],true);
-            $dataGoods = $mallGoods->field('id,icon,min_price,max_price,title')->where(['id'=>['in',$ids],'push'=>['>',0],'state'=>2])->order('push','desc')->select();
+            $dataGoods = $mallGoods->field('id,icon,min_price,max_price,title')->where(['type'=>['in',$ids],'push'=>['>',0],'state'=>2])->order('push','desc')->select();
             foreach ($dataGoods as $k => $v) {
                 $dataGoods[$k]['icon'] = $mallGoods::getFormatImg($v['icon']);
                 $dataGoods[$k]['min_price'] = getFormatPrice($v['min_price']);
