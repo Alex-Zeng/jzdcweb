@@ -31,7 +31,7 @@ class Factoring extends Base {
 			return $auth;
 		}
 		$userId = $this->userId;
-        $dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','0,4,13'],'buyer_id'=>$userId])->order('id desc')->select();
+        $dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','4,13'],'buyer_id'=>$userId])->order('id desc')->select();
         if(!$dataList){
         	$dataList = [];
         }
