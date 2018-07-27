@@ -10,7 +10,7 @@ class Index
         // exit();
         
         // 没有上线用第三方公司则去指引页下载
-        $url = 'https://www.pgyer.com/vA5X';
+        $url = 'itms-services://?action=download-manifest&url=https://www.pgyer.com/app/plist/8f3fad7265f5359172788719080d3dbb/install/s.plist';
         return view('',['url'=>$url]);
     }
 
