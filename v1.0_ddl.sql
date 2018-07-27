@@ -222,3 +222,18 @@ insert into jzdc_version (`title`,`app_name`,`force_version`,`content`,`up_time`
 
 -- 商品类型新增Web图标字段
 ALTER TABLE `jzdc_mall_type` ADD COLUMN `web_path` VARCHAR (255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT 'pc图标';
+
+
+-- 保理业务申请
+create table jzdc_factoring(
+factoring_id int primary key auto_increment comment '主键',
+user_id int not null default 0 comment '用户ID',
+order_id int not null default 0 comment '订单Id',
+order_sn varchar(50) not null default '' comment '订单编号',
+contact_username varchar(30) not null default '' comment '联系人',
+contact_phone varchar(15) not null default '' comment '联系电话',
+need_account decimal(10,2) not null default '0.00' comment '融资金额',
+bank_corporate varchar(40) not null default '' comment '对公账号',
+bank_address varchar(50) not null default '' comment '开户支行',
+add_time int not null default 0 comment '添加时间'
+)engine innodb charset utf8 comment '保理业务申请';
