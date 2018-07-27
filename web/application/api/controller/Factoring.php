@@ -62,7 +62,7 @@ class Factoring extends Base {
         }
 
         //验证订单号及获取订单编号
-        $order = db('mall_order')->field('out_id,actual_money')->where(['state'=>['not in','0,4,13'],'buyer_id'=>$userId,'id'=>$data['order_id']])->find();
+        $order = db('mall_order')->field('out_id,actual_money')->where(['state'=>['not in','4,13'],'buyer_id'=>$userId,'id'=>$data['order_id']])->find();
         if(!$order){
             return ['status'=>-2,'data'=>'','msg'=>'所选择的订单有误'];
         }
