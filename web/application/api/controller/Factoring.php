@@ -62,9 +62,12 @@ class Factoring extends Base {
         }
 
         //验证订单号及获取订单编号
-        $order = db('mall_order')->field('out_id')->where(['state'=>['not in','0,4,13'],'buyer_id'=>$userId,'id'=>$data['order_id']])->find();
+        $order = db('mall_order')->field('out_id,actual_money')->where(['state'=>['not in','0,4,13'],'buyer_id'=>$userId,'id'=>$data['order_id']])->find();
         if(!$order){
             return ['status'=>-2,'data'=>'','msg'=>'所选择的订单有误'];
+        }
+        if($data['need_account']>$order['actual_money']){
+        	return ['status'=>-2,'data'=>'','msg'=>'融资申请金额不能大于订单金额'];
         }
 
         unset($data['bank_corporate_confirm']);
