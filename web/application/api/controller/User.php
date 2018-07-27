@@ -179,7 +179,7 @@ class User extends Base
         }
 
         $result = $model->save($data, ['id' => $id]);
-        if ($result == true) {
+        if ($result !== false) {
             //更新
             if ($default == 1) {
                 (new MallReceiver())->save(['is_default' => 0],['user_id'=>$this->userId,'id'=>['not in',$id]]);
