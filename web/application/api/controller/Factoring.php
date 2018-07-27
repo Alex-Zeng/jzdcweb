@@ -81,7 +81,7 @@ class Factoring extends Base {
         $mallOrder = db('mall_order');
 		switch ($groupId) {
 			case $indexGroup::GROUP_BUYER:
-				$order = $mallOrder->field('out_id,actual_money')->wher(['state'=>['not in','4,13'],'buyer_id'=>$userId,'id'=>$data['order_id']])->order('id desc')->find();
+				$order = $mallOrder->field('out_id,actual_money')->where(['state'=>['not in','4,13'],'buyer_id'=>$userId,'id'=>$data['order_id']])->order('id desc')->find();
 				break;
 			case $indexGroup::GROUP_SUPPLIER:
 				$order = $mallOrder->field('out_id,actual_money')->where(['state'=>['not in','4,13'],'supplier'=>$userId,'id'=>$data['order_id']])->order('id desc')->find();

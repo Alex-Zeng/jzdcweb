@@ -21,7 +21,7 @@ class Factoring extends validate
         'contact_username.require'     => '联系人必填',
         'contact_phone.require'     => '联系电话必填',
         'need_account.require'     => '融资信息必填',
-        'need_account.max'     => '融资金额零元起一亿以内',
+        'need_account.between'     => '融资金额零元起一亿以内',
         'bank_corporate.require'     => '对公账号必填',
         'bank_corporate.length'     => '对公账号长度最多40个字符',
         'bank_corporate_confirm.require'     => '再次输入对公账号必填',
