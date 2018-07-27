@@ -10,7 +10,7 @@ class Index
         // exit();
         
         // 没有上线用第三方公司则去指引页下载
-        $url = '/version/jzdc.ipa';
+        $url = 'https://www.pgyer.com/vA5X';
         return view('',['url'=>$url]);
     }
 
