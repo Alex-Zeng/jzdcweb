@@ -43,6 +43,13 @@ class Order extends Base{
         if($receiverId <= 0 || !$detailRows){
             return ['status'=>1,'data'=>[],'msg' => '数据异常'];
         }
+        foreach ($detailRows as $detailRow){
+            foreach ($detailRow['list'] as $detailList){
+                if($detailList['color_id'] == '' || $detailList['option_id'] == ''){
+                    return ['status'=>1,'data'=>[],'msg'=>'规格不能为空'];
+                }
+            }
+        }
 
         $auth = $this->auth();
         if($auth){
@@ -304,6 +311,7 @@ class Order extends Base{
         $companyName = $request->post('companyName','','trim|addslashes');
         $startDate = $request->post('startDate','','filterDate');
         $endDate = $request->post('endDate','','filterDate');
+        $orderNo = $request->post('orderNo','','addslashes');
 
 
         if($pageSize > 12){ $pageSize = 12;}
@@ -338,6 +346,10 @@ class Order extends Base{
         if($endDate){
             $where .=' and add_time <'.strtotime($endDate.' 23:59:59');
         }
+        if($orderNo){
+            $where .= ' AND out_id LIKE %'.$orderNo.'%';
+        }
+
         $userModel = new IndexUser();
         if($companyName){
             $companyRows = $userModel->where(['real_name'=>['like','%'.$companyName.'%']])->find(['id'])->select();
@@ -733,25 +745,81 @@ class Order extends Base{
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function export(){
+    public function export(Request $request){
+        $status = $request->post('status',-1,'intval');
+        $goodsName = $request->post('goodsName','','trim|addslashes');
+        $companyName = $request->post('companyName','','trim|addslashes');
+        $startDate = $request->post('startDate','','filterDate');
+        $endDate = $request->post('endDate','','filterDate');
+        $orderNo = $request->post('orderNo','','addslashes');
+
         $auth = $this->auth();
         if($auth){
             return $auth;
         }
         $model = new MallOrder();
-        $where = [];
-        if(isset($k) && $k){
-            $where['out_id|buyer'] = ['like','%'.trim($k).'%'];
+        
+        if($this->groupId != IndexGroup::GROUP_BUYER && $this->groupId != IndexGroup::GROUP_SUPPLIER && $this->groupId != IndexGroup::GROUP_MEMBER){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
         }
-        if(isset($state) && $state >= 0){
-            $where['state'] = $state;
+
+        $where = '';
+        if($this->groupId == IndexGroup::GROUP_BUYER){
+            $where.= 'buyer_id='.$this->userId;
+        }else{
+            $where .='supplier='.$this->userId;
         }
-        if(isset($start) && $start){
-            $where['add_time'] = ['gt',strtotime($start)];
+        //
+        if($goodsName){
+            $where .=' AND goods_names LIKE %'.$goodsName.'%';
         }
-        if(isset($end) && $end){
-            $where['add_time'] = ['gt',strtotime($end.' 23:59:59')];
+        if($startDate){
+            $where .=' AND add_time >'.strtotime($startDate);
         }
+        if($endDate){
+            $where .=' and add_time <'.strtotime($endDate.' 23:59:59');
+        }
+        if($orderNo){
+            $where .= ' AND out_id LIKE %'.$orderNo.'%';
+        }
+
+        $userModel = new IndexUser();
+        if($companyName){
+            $companyRows = $userModel->where(['real_name'=>['like','%'.$companyName.'%']])->find(['id'])->select();
+            $companyIds = '';
+            foreach($companyRows as $companyRow){
+                $companyIds .= $companyRow->id.',';
+            }
+            $companyIds = $companyIds ? substr($companyIds,0,strlen($companyIds)-1) : $companyIds;
+            if($companyIds){
+                $where .=' supplier IN('.$companyIds.')';
+            }
+        }
+
+        if($status != '-1'){
+            switch ($status){
+                case 1:  //待确认
+                    $where .= ' AND state IN (0,1)';
+                    break;
+                case 2: //待付款
+                    $where .=' AND state IN (2,9,10) AND service_type IN (0,2)';
+                    break;
+                case 3: //待发货
+                    $where .=' AND state = 3';
+                    break;
+                case 4: //待收货
+                    $where .=' AND state=6 AND service_type IN(0,2)';
+                    break;
+                case 5: //订单关闭
+                    $where .=' AND state=4';
+                    break;
+                case 6: //售后处理
+                    $where .=' AND ( state IN(11,13) OR (state IN (6,9,10) AND service_type IN(1,2)))';
+                    break;
+                default:
+            }
+        }
+
         vendor('PHPExcel.PHPExcel');
         $objPHPExcel = new \PHPExcel();
         $objPHPExcel->setActiveSheetIndex(0);
@@ -793,8 +861,6 @@ class Order extends Base{
         $counter = 2;
         $userModel = new IndexUser();
         $goodsModel = new MallOrderGoods();
-
-
         $objPHPExcel->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
 
         //设置宽度
@@ -806,7 +872,6 @@ class Order extends Base{
         $objPHPExcel->getActiveSheet(0)->getColumnDimension('F')->setWidth(20);
         $objPHPExcel->getActiveSheet(0)->getColumnDimension('G')->setWidth(25);
         $objPHPExcel->getActiveSheet(0)->getColumnDimension('H')->setWidth(15);
-
 
         for($i =0; $i < $page; $i++){
             $start = $page*$i;
@@ -843,7 +908,7 @@ class Order extends Base{
                 foreach($goodsRows as $goodsRow){
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('A'.$counter, date('Y-m-d H:i',$row->add_time));
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('B'.$counter, $row->out_id);
-                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('C'.$counter, $row->state);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('C'.$counter, getOrderStatusInfo($row->state,$row->service_type));
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('D'.$counter, $buyerInfo ? $buyerInfo->real_name : '');
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('E'.$counter, $buyerInfo ? $buyerInfo->contact : '');
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('F'.$counter, $supplier ? $supplier->real_name : '');
@@ -875,16 +940,14 @@ class Order extends Base{
             unset($rows);
         }
 
-        $filename = 'order_'.date('YmdHi',time()).'.xls';
+        $filename = 'order_'.$this->userId.'_'.date('YmdHis',time()).'.xls';
         $objPHPExcel->getActiveSheet()->setTitle('商品订单信息');
-        header("Content-Type: application/force-download");
-        header("Content-Type: application/octet-stream");
-        header("Content-Type: application/download");
-        header('Content-Disposition:inline;filename="'.$filename.'"');
+
+        //设置商品
         //生成excel文件
         $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-        $objWriter->save('php://output');
-        exit;
+        $objWriter->save(ROOT_PATH.'public/uploads/temp/'.$filename);
+        return ['status'=>0,'data'=>['url'=>config('jzdc_domain').'/web/public/uploads/temp/'.$filename],'msg'=>''];
     }
 
 

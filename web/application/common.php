@@ -196,6 +196,52 @@ function getOrderShowStatus(){
 }
 
 
+/*
+case 1:  //待确认
+                    $where .= ' AND state IN (0,1)';
+                    break;
+                case 2: //待付款
+                    $where .=' AND state IN (2,9,10) AND service_type IN (0,2)';
+                    break;
+                case 3: //待发货
+                    $where .=' AND state = 3';
+                    break;
+                case 4: //待收货
+                    $where .=' AND state=6 AND service_type IN(0,2)';
+                    break;
+                case 5: //订单关闭
+                    $where .=' AND state=4';
+                    break;
+                case 6: //售后处理
+                    $where .=' AND ( state IN(11,13) OR (state IN (6,9,10) AND service_type IN(1,2)))';
+                    break;
+                default:
+*/
+function getOrderStatusInfo($status = 0, $serviceType = 0){
+    if($status == 4){
+        return '订单关闭';
+    }
+    if($status == 3){
+        return '待发货';
+    }
+    if($status == 0 || $status == 1){
+        return '待确认';
+    }
+    if(in_array($status,[2,9,10])){
+        if(in_array($serviceType,[0,2])){
+            return '待付款';
+        }
+    }
+    if($status == 6 && in_array($serviceType,[0,2])){
+        return '待收货';
+    }
+    if(in_array($status,[11,13]) || (in_array($status,[6,9,10]) && in_array($serviceType,[1,2]))){
+        return '售后处理';
+    }
+    return '';
+}
+
+
 /**
  * @desc 递归获取子类Id
  * param $array 包含子类的搜索的数组

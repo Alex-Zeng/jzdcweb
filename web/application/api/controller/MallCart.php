@@ -47,6 +47,10 @@ class MallCart extends Base{
         $optionId = $request->post('optionId',0,'intval');
         $colorId = $request->post('colorId',0,'intval');
 
+        if($optionId == 0 && $colorId == 0){
+            return ['status'=>1,'data'=>[],'msg'=>'请选择商品规格'];
+        }
+
         //验证登录
         $auth = $this->auth();
         if($auth){
