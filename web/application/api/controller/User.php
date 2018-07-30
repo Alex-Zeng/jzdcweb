@@ -388,7 +388,7 @@ class User extends Base
         $data = [];
         foreach ($rows as &$row) {
             $orderModel = new MallOrder();
-            $orderRow = $orderModel->where(['out_id' => $row->order_no])->field('id')->find();
+            $orderRow = $orderModel->where(['out_id' => $row->order_no])->field('id','goods_name')->find();
 
             $orderGoodsModel = new MallOrderGoods();
             $orderGoodsRow = $orderGoodsModel->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['order_id' => $orderRow->id])->field(['b.icon'])->find();
@@ -400,6 +400,7 @@ class User extends Base
                 'title' => $row->title,
                 'content' => $row->content,
                 'orderNo' => $row->order_no,
+                'goodsName'=>$orderRow->goods_name,
                 'release_time' => date('Y', $time) . '年' . date('m', $time) . '月' . date('d', $time) . '日 ' . date('H:i', $time),
                 'icon' => $icon
             ];

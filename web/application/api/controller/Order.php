@@ -313,7 +313,6 @@ class Order extends Base{
         $endDate = $request->post('endDate','','filterDate');
         $orderNo = $request->post('orderNo','','addslashes');
 
-
         if($pageSize > 12){ $pageSize = 12;}
         $start = ($pageNumber - 1)*$pageSize;
         $end = $pageNumber*$pageSize;
@@ -347,7 +346,7 @@ class Order extends Base{
             $where .=' and add_time <'.strtotime($endDate.' 23:59:59');
         }
         if($orderNo){
-            $where .= ' AND out_id LIKE %'.$orderNo.'%';
+            $where .= ' AND out_id LIKE \'%'.$orderNo.'%\'';
         }
 
         $userModel = new IndexUser();
@@ -758,7 +757,7 @@ class Order extends Base{
             return $auth;
         }
         $model = new MallOrder();
-        
+
         if($this->groupId != IndexGroup::GROUP_BUYER && $this->groupId != IndexGroup::GROUP_SUPPLIER && $this->groupId != IndexGroup::GROUP_MEMBER){
             return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
         }
@@ -780,7 +779,7 @@ class Order extends Base{
             $where .=' and add_time <'.strtotime($endDate.' 23:59:59');
         }
         if($orderNo){
-            $where .= ' AND out_id LIKE %'.$orderNo.'%';
+            $where .= ' AND out_id LIKE \'%'.$orderNo.'%\'';
         }
 
         $userModel = new IndexUser();
@@ -946,7 +945,12 @@ class Order extends Base{
         //设置商品
         //生成excel文件
         $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-        $objWriter->save(ROOT_PATH.'public/uploads/temp/'.$filename);
+
+        //设置目录
+        $path = ROOT_PATH.'public/uploads/temp/';
+        if(!is_dir($path)){ mkdir($path,0777);}
+
+        $objWriter->save($path.$filename);
         return ['status'=>0,'data'=>['url'=>config('jzdc_domain').'/web/public/uploads/temp/'.$filename],'msg'=>''];
     }
 
