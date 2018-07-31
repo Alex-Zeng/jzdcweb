@@ -216,7 +216,10 @@ class Goods  extends Base {
                 $where['title'] = ['like','%'.$keywords.'%'];
             }
             if($categoryId > 0){
-                $where['type'] = $categoryId;
+                //查询子类包含的ID
+                 $typeIds = (new MallType())->getChildIds($categoryId);
+                 $typeIds = array_merge([$categoryId],$typeIds);
+                 $where['type'] = ['in',$typeIds];
             }
             $total = $model->where($where)->count();
 
