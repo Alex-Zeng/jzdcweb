@@ -391,7 +391,7 @@ class User extends Base
             $orderRow = $orderModel->where(['out_id' => $row->order_no])->field('id','goods_name')->find();
 
             $orderGoodsModel = new MallOrderGoods();
-            $orderGoodsRow = $orderGoodsModel->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['order_id' => $orderRow->id])->field(['b.icon'])->find();
+            $orderGoodsRow = $orderGoodsModel->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['order_id' => $row->order_id])->field(['b.icon'])->find();
             $icon = MallGoods::getFormatImg($orderGoodsRow ? $orderGoodsRow->icon : '');
             $time = strtotime($row['create_time']);
 
