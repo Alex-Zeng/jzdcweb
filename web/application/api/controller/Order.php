@@ -45,7 +45,7 @@ class Order extends Base{
         }
         foreach ($detailRows as $detailRow){
             foreach ($detailRow['list'] as $detailList){
-                if($detailList['color_id'] == '' || $detailList['option_id'] == ''){
+                if($detailList['color_id'] == '' && $detailList['option_id'] == ''){
                     return ['status'=>1,'data'=>[],'msg'=>'规格不能为空'];
                 }
             }
