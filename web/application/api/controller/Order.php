@@ -875,9 +875,27 @@ class Order extends Base{
         for($i =0; $i < $page; $i++){
             $start = $page*$i;
             $rows = $model->where($where)->limit($start,$pageSize)->order('add_time','desc')->select();
+
+            //查询
+            $supplierIds = $buyerIds = [];
+            foreach($rows as $row){
+                $supplierIds[] = $row->supplier;
+                $buyerIds[] = $row->buyer_id;
+            }
+
+            $supplierInfos = $userModel->where(['id'=>['in',$supplierIds]])->select();
+            $buyerInfos = $userModel->where(['id'=>['in',$buyerIds]])->select();
+            $supplierMap = $buyerMap = [];
+            //转化为key => value
+            foreach ($supplierInfos as $supplierInfo){
+                $supplierMap[$supplierInfo->id] = $supplierInfo->real_name;
+            }
+            foreach($buyerInfos as $buyerInfo){
+                $buyerMap[$buyerInfo->id]['name'] = $buyerInfo->real_name ? $buyerInfo->real_name : '';
+                $buyerMap[$buyerInfo->id]['contact'] = $buyerInfo->contact ? $buyerInfo->contact : '';
+            }
+
             foreach ($rows as $row){
-                $buyerInfo = $userModel->getInfoById($row->buyer_id);
-                $supplier = $userModel->getInfoById($row->supplier);
                 //查询订单商品
                 $goodsRows = $goodsModel->where(['order_id'=>$row->id])->select();
                 $goodsCount = count($goodsRows);
@@ -908,9 +926,9 @@ class Order extends Base{
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('A'.$counter, date('Y-m-d H:i',$row->add_time));
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('B'.$counter, $row->out_id);
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('C'.$counter, getOrderStatusInfo($row->state,$row->service_type));
-                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('D'.$counter, $buyerInfo ? $buyerInfo->real_name : '');
-                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('E'.$counter, $buyerInfo ? $buyerInfo->contact : '');
-                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('F'.$counter, $supplier ? $supplier->real_name : '');
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('D'.$counter, isset($buyerMap[$row->buyer_id]) ? $buyerMap[$row->buyer_id]['name'] : '');
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('E'.$counter,  isset($buyerMap[$row->buyer_id]) ? $buyerMap[$row->buyer_id]['contact'] : '');
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('F'.$counter, isset($supplierMap[$row->supplier]) ? $supplierMap[$row->supplier] : '');
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('G'.$counter, $goodsRow->title);
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('H'.$counter, $goodsRow->s_info);
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('I'.$counter, $goodsRow->quantity);
