@@ -384,11 +384,11 @@ class User extends Base
         $start = ($pageNumber - 1) * $pageSize;
         $model = new OrderMsg();
         $total = $model->where(['user_id' => $this->userId, 'is_delete' => 0])->order('create_time', 'desc')->count();
-        $rows = $model->where(['user_id' => $this->userId, 'is_delete' => 0])->order('create_time', 'desc')->field(['id', 'title', 'content', 'order_no', 'create_time'])->limit($start, $pageSize)->select();
+        $rows = $model->where(['user_id' => $this->userId, 'is_delete' => 0])->order('create_time', 'desc')->field(['id', 'title', 'content', 'order_no','order_id', 'create_time'])->limit($start, $pageSize)->select();
         $data = [];
         foreach ($rows as &$row) {
             $orderModel = new MallOrder();
-            $orderRow = $orderModel->where(['out_id' => $row->order_no])->field('id','goods_name')->find();
+            $orderRow = $orderModel->where(['out_id' => $row->order_no])->field(['id','goods_names'])->find();
 
             $orderGoodsModel = new MallOrderGoods();
             $orderGoodsRow = $orderGoodsModel->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['order_id' => $row->order_id])->field(['b.icon'])->find();
@@ -400,7 +400,7 @@ class User extends Base
                 'title' => $row->title,
                 'content' => $row->content,
                 'orderNo' => $row->order_no,
-                'goodsName'=>$orderRow->goods_name,
+                'goodsName'=>$orderRow->goods_names,
                 'release_time' => date('Y', $time) . '年' . date('m', $time) . '月' . date('d', $time) . '日 ' . date('H:i', $time),
                 'icon' => $icon
             ];
