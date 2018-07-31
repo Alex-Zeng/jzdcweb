@@ -56,18 +56,24 @@ class Goods  extends Base {
      */
     public function getCategoryList(Request $request){
         $model = new MallType();
-        $field =  ['id','name','path'];
+        $field =  ['id','name','path','web_path'];
         //获取一级分类
         $rows = $model->where(['visible'=>1,'parent'=>0])->order('sequence','desc')->field($field)->select();
         foreach ($rows as &$row){
+            $webPath = $row->web_path ? $row->web_path : $row->path;
+            $row['web_path'] = MallType::getFormatIcon($webPath);
             $row['path'] = MallType::getFormatIcon($row->path);
             //获取二级分类
             $rows2 = $model->where(['visible'=>1,'parent'=>$row->id])->order('sequence','desc')->field($field)->select();
             foreach ($rows2 as &$row2){
+                $webPath = $row2->web_path ? $row2->web_path : $row2->path;
+                $row2['web_path'] = MallType::getFormatIcon($webPath);
                 $row2['path'] = MallType::getFormatIcon($row2->path);
                 $rows3 = $model->where(['visible'=>1,'parent'=>$row2->id])->order('sequence','desc')->field($field)->select();
               //  echo $model->getLastSql();
                 foreach ($rows3 as &$row3){
+                    $webPath = $row3->web_path ? $row3->web_path : $row3->path;
+                    $row3['web_path'] = MallType::getFormatIcon($webPath);
                     $row3['path'] = MallType::getFormatIcon($row3->path);
                 }
                 $row2['child'] = $rows3;
