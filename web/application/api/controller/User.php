@@ -51,7 +51,7 @@ class User extends Base
         $areaId = $request->post('areaId', 0, 'intval');
         $detail = $request->post('detail', '');
         $postCode = $request->post('postCode', '');
-        $name = $request->post('name', '');
+        $name = $request->post('name', '','htmlspecialchars');
         $phone = $request->post('phone', '');
         $tag = $request->post('tag', '');
         $default = $request->post('is_default', 0, 'intval');
@@ -469,11 +469,11 @@ class User extends Base
     {
         $type = $request->post('type', 1, 'intval');
         $agent = $request->post('agent', 0, 'intval');
-        $companyName = $request->post('companyName', ''); //公司名称
-        $representative = $request->post('representative', ''); //代表人
+        $companyName = $request->post('companyName', '','htmlspecialchars'); //公司名称
+        $representative = $request->post('representative', '','htmlspecialchars'); //代表人
         $property = $request->post('property', 0, 'intval'); //企业性质
         $capital = $request->post('capital', ''); //资金
-        $detailAddress = $request->post('address', ''); //住址
+        $detailAddress = $request->post('address', '','htmlspecialchars'); //住址
 
         $businessPath = $request->post('business', '');  //营业执照
         $permitsAccounts = $request->post('permitsAccount'); //用户许可

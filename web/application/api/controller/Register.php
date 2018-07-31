@@ -24,7 +24,7 @@ class Register{
     public function phone(Request $request){
         $phone = $request->post('phone','');
         $code = $request->post('code','');
-        $username = $request->post('userName','');
+        $username = $request->post('userName','','htmlspecialchars');
         $channel = $request->post('channel',0,'intval');
 
         //判断手机号

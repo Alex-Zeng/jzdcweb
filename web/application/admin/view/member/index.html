@@ -70,7 +70,7 @@
                             <tr>
                                 <!--<td><input type="checkbox" /> </td>-->
                                 <td>{if $member.icon}<img src="{$member.icon}"  width="100px" height="100px"/>{/if}</td>
-                                <td>{$member.username}<br />{$member.phone}<br/>{$member.real_name}<br />{$member.email}</td>
+                                <td>{:htmlspecialchars($member.username)}<br />{$member.phone}<br/>{$member.real_name}<br />{$member.email}</td>
                                 <td>{:getMemberGroup($member.group)}</td>
                                 <td>{:date('Y-m-d H:i',$member.reg_time)}</td>
                                 <td>{$member.state == 1 ? '<span style="color:#28a745!important">正常</span>' : '<span style="color:#dc3545 !important">锁定</span>'}</td>
