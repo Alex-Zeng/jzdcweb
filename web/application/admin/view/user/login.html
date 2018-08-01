@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>集众电采管理系统</title>
+    <link rel="stylesheet" type="text/css" href="__STATIC__/css/admin/login-style.css" tppabs="css/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <script src="__STATIC__/js/plugins/jquery/jquery.js"></script>
+    <script src="__STATIC__/js/plugins/jquery/jquery.form.min.js"></script>
+    <script src="__STATIC__/js/plugins/layer/layer.js"></script>
+    <script src="__STATIC__/js/admin/admin.function.js"></script>
+</head>
+<body>
+    <iframe src="__STATIC__/html/code1.html"></iframe>
+    <form action="{:url()}" class="formUp" method="post">
+        <dl class="admin_login">
+            <dt>
+                <strong>站点后台管理系统</strong>
+                <em>Management System</em>
+            </dt>
+            <dd class="user_icon">
+                <input type="text" name="name" placeholder="账号" class="login_txtbx"/>
+            </dd>
+            <dd class="pwd_icon">
+                <input type="password" name="password" placeholder="密码" class="login_txtbx"/>
+            </dd>
+            <dd class="val_icon">
+                <div class="checkcode">
+                    <input type="text" name="captchaCode"  placeholder="验证码" maxlength="4" class="login_txtbx">
+                </div>
+                <div class="ver_btn">
+                    <img src="{:captcha_src()}" alt="captcha" id="captcha" onclick="this.src='{:captcha_src()}?'+Math.random();" width="100%" height="100%" />
+                </div> 
+            </dd>
+            <dd>
+                <input type="button" value="立即登陆" class="submit_btn submit"/>
+            </dd>
+            <dd>
+            <p>© 2018 津晶科技 版权所有</p>
+            <p>粤88888</p>
+            </dd>
+        </dl>
+    </form>
+</body>
+</html>

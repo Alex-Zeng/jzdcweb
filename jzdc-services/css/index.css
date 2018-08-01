@@ -1,0 +1,93 @@
+.index-1-wrap {
+    height: 100%;
+    width: 100%;
+    background-image: url("../images/index-wrap.jpg");
+    background-size: 100% 100%;
+    -webkit-background-size: 100% 100%;
+    height: 100vh;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.index-header {
+    padding: 0.532rem;
+}
+
+.index-header .index-logo {
+    width: 3.1255rem;
+    background: url("../images/index-logo.png");
+    background-size: 3.1255rem 0.8778rem;
+    -webkit-background-size: 2.35rem 0.66rem;
+    display: block;
+    height: 0.66rem;
+    float: left;
+}
+
+.index-header .close {
+    width: 0.5586rem;
+    background: url("../images/close.png");
+    background-size: 0.5586rem 0.5586rem;
+    -webkit-background-size: 0.5586rem 0.5586rem;
+    display: block;
+    height: 0.5586rem;
+    float: right;
+}
+
+.index-header .index-close{
+    float: right;
+    width: 0.5586rem;
+    height: 0.5586rem;
+    background: url("../images/close.png");
+    -webkit-background-size: 0.5586rem 0.5586rem;
+    background-size: 0.5586rem 0.5586rem;
+}
+
+.index-menu{
+    width:7.714rem;
+    margin: -2.394rem auto 0;
+}
+.index-menu .menu-row+.menu-row{
+    margin-top: 0.5985rem;
+}
+.menu-item-left{
+    float: left;
+}
+
+.menu-item-right{
+    float: right;
+}
+
+.icon{
+    width: 3.2984rem;
+    height: 2.5137rem;
+    -webkit-background-size: 3.2984rem 2.5137rem;
+    background-size: 3.2984rem 2.5137rem;
+    background-repeat: no-repeat;
+}
+
+.icon a{
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.icon1{
+    background-image: url("../images/index-icons_01.png");
+}
+
+.icon2{
+    background-image: url("../images/index-icons_02.png");
+}
+
+.icon3{
+    background-image: url("../images/index-icons_03.png");
+}
+.icon4{
+    background-image: url("../images/index-icons_04.png");
+}
+.icon5{
+    background-image: url("../images/index-icons_05.png");
+}
+.icon6{
+    background-image: url("../images/index-icons_06.png");
+}

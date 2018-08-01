@@ -1,6 +1,6 @@
-{include file="layout/header" title="$title" keywords="开源WEB开发框架" /}
+{include file="layout/header" title="$title" keywords="" /}
 <link rel="stylesheet" href="__STATIC__/js/plugins/bootstrapvalidator/css/bootstrapValidator.css"/>
-{include file="layout/left" groupId="$groupId" keywords="开源WEB开发框架" /}
+{include file="layout/left" groupId="$groupId" keywords="" /}
 <div class="content-wrapper">
     <div class="content-header">
         <div class="container-fluid">
@@ -44,12 +44,12 @@
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                             <tr>
-                                <th>标题</th>
+                                <th >标题</th>
                                 <th>摘要</th>
                                 <th>操作人</th>
-                                <th>发布时间</th>
-                                <th>状态</th>
-                                <th>操作</th>
+                                <th width="150px">发布时间</th>
+                                <th width="80px">状态</th>
+                                <th width="50px">操作</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -92,28 +92,42 @@
             <div class="modal-body ">
                 <div class="container-fluid">
                     <div class="row">
-                        <!-- left column -->
                         <div class="col-md-12">
-                            <!-- form start -->
                             <form role="form" class="" id="add-form">
-                                <div class="form-group">
-                                    <label for="">标题</label>
-                                    <input type="text" class="form-control"  name="title" placeholder="公告标题">
+                                <div class="form-group form-inline">
+                                    <label class="col-md-2">标题</label>
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <input type="text" class="form-control col-md-9"  name="title" placeholder="公告标题">
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="">摘要</label>
-                                    <textarea class="form-control" rows="3" placeholder="摘要..."  name="summary"></textarea>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-2">摘要</label>
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <textarea class="form-control col-md-9" rows="3" placeholder="摘要..."  name="summary"></textarea>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="">正文</label>
-                                    <textarea id="add-content" class="textarea" placeholder="公告内容..."  name="content"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-2">正文</label>
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <textarea id="add-content" class="textarea" placeholder="公告内容..."  name="content"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label >状态</label>
-                                    <select class="form-control">
-                                        <option value="1">显示</option>
-                                        <option value="0">屏蔽</option>
-                                    </select>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-2">状态</label>
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <select class="form-control col-md-3">
+                                                <option value="1">显示</option>
+                                                <option value="0">屏蔽</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -144,24 +158,40 @@
                         <div class="col-md-12">
                             <!-- form start -->
                             <form role="form" class="" id="edit-form">
-                                <div class="form-group">
-                                    <label for="">标题</label>
-                                    <input type="text" class="form-control"  name="title" placeholder="公告标题">
+                                <div class="form-group form-inline">
+                                    <label class="col-md-2">标题</label>
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <input type="text" class="form-control col-md-9"  name="title" placeholder="公告标题">
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="">摘要</label>
-                                    <textarea class="form-control" rows="3" placeholder="摘要..."  name="summary"></textarea>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-2">摘要</label>
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <textarea class="form-control col-md-9" rows="3" placeholder="摘要..."  name="summary"></textarea>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="">正文</label>
-                                    <textarea  id="edit-content" class="textarea2" placeholder="公告内容..."  name="content"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-2">正文</label>
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <textarea  id="edit-content" class="textarea2" placeholder="公告内容..."  name="content"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label >状态</label>
-                                    <select class="form-control" name="status">
-                                        <option value="1">显示</option>
-                                        <option value="0">屏蔽</option>
-                                    </select>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-2">状态</label>
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <select class="form-control col-md-3" name="status">
+                                                <option value="1">显示</option>
+                                                <option value="0">屏蔽</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -185,7 +215,12 @@
     </div>
 </div>
 
-{include file="layout/footer" title="$title" keywords="开源WEB开发框架" /}
+{include file="layout/footer" title="$title" keywords="" /}
 <script src="__STATIC__/js/plugins/ckeditor-4.8.0/ckeditor.js"></script>
 <script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
 <script type="text/javascript" src="__STATIC__/js/admin/notice.js"></script>
+<script type="text/javascript">
+    var url = '{:url("admin/notice/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+    $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
+</script>

@@ -1,7 +1,7 @@
-{include file="layout/header" title="投诉与建议" keywords="开源WEB开发框架" /}
+{include file="layout/header" title="" keywords="" /}
 <link href="__STATIC__/js/plugins/bootstrap-fileinput/css/fileinput.css" media="all" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="__STATIC__/js/plugins/bootstrapvalidator/css/bootstrapValidator.css"/>
-{include file="layout/left" groupId="$groupId" keywords="开源WEB开发框架" /}
+{include file="layout/left" groupId="$groupId" keywords="" /}
 
 <style type="text/css">
     .operator.fa {
@@ -9,6 +9,18 @@
         font-size: 20px;
     }
 
+    input[type="date"]:before{
+        color:#A9A9A9;
+        content:attr(placeholder);
+    }
+
+    .spec{
+        word-break:break-all;
+    }
+
+    .comment{
+        word-break:break-all;
+    }
 </style>
 
 <!-- Content Wrapper. Contains page content -->
@@ -36,17 +48,21 @@
                         <h3 class="card-title">订单列表</h3>
                     </div>
                     <div class="row" style="padding-top: 15px;padding-right: 15px">
-                        <div class="col-md-6">
+                        <div class="col-md-10">
                             <form class="form-inline ml-3" action="{:url()}"  method="get">
                                 <div class="input-group">
                                     <select class="form-control" name="state"  placeholder="订单状态">
-                                        <option value="" {if $state eq ""}selected{/if}>全部</option>
+                                        <option value="-1" {if $state eq -1}selected{/if}>全部</option>
                                         {foreach name="stateList"  key="sk" item='sv'}
                                         <option  {if $state eq $sk}selected{/if} value="{$sk}">{$sv}</option>
                                         {/foreach}
                                     </select>
-                                </div>
-
+                                </div>&nbsp;&nbsp;
+                                <div class = "input-group">
+                                    <input type = "date"  name="start" class = "form-control"  value="{$start}" placeholder="开始日期">
+                                    <span style="display: inline-block;vertical-align: middle;padding-top: 5px"><hr /></span>
+                                    <input type = "date" name="end" class = "form-control" value="{$end}" placeholder="结束日期">
+                                </div>&nbsp;
                                 <div class="input-group">
                                     <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="订单号/买家/收货人" aria-label="Search">
                                     <div class="input-group-append">
@@ -55,12 +71,17 @@
                                 </div>
                             </form>
                         </div>
-                        <div class="col-md-6">
-                            <a class="btn btn-primary pull-right"  target="_blank"  href="{:url('admin/goods/create')}" >导出</a>
+                        <div class="col-md-2">
+                            <a class="btn btn-primary pull-right"  target="_blank"  href="{:url('admin/order/export',['state'=>$state,'start'=>$start,'end'=>$end,'k'=>$k])}" >导出</a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-10">
+                            <p style="padding-left: 18px;padding-top: 5px;margin-bottom: 0px">总价: {$total}元</p>
                         </div>
                     </div>
                     <!-- /.card-header -->
-                    <div class="card-body">
+                    <div class="card-body" style="padding-top: 0px">
                         <table class="table list-table" id="list_table">
                             <colgroup>
                                 <!--<col width="40px">-->
@@ -71,8 +92,7 @@
                             </colgroup>
                             <thead>
                             <tr>
-                                <!--<th><input type="checkbox"  value="" /></th>-->
-                                <th>下单时间</th>
+                                <th>订单</th>
                                 <th>金额</th>
                                 <th>状态</th>
                                 <th>操作</th>
@@ -81,95 +101,124 @@
 
                             <tbody>
                             {foreach name="list" id="order"}
-                             <tr style="background: rgb(0, 102, 153);color: #ffffff">
-                                 <!--<td></td>-->
-                                <td colspan="4" >
-                                    {:date('Y-m-d',$order.add_time)}&nbsp&nbsp;
-                                    订单号： {$order.out_id}&nbsp;&nbsp;
-                                    采购商:  {$order.buyer}&nbsp;&nbsp;
-                                    供应商:  {$order.supplier}&nbsp;&nbsp;
-                                    账期截止日: {:substr($order.pay_date,0,10)}
-                                </td>
-
-                             </tr>
-                            <tr style="background: #EFEFEF">
+                            <tr style="background: rgb(0, 102, 153);color: #ffffff">
                                 <!--<td></td>-->
                                 <td colspan="4" >
-                                   {$order.receiver_name}&nbsp;&nbsp;{$order.receiver_phone}&nbsp;&nbsp;{$order.receiver_area_name}&nbsp;&nbsp;{$order.receiver_detail}&nbsp;&nbsp;
-                                    {$order.receiver_post_code}
+                                    {:date('Y-m-d',$order.add_time)}&nbsp&nbsp;
+                                    订单号: {$order.out_id}&nbsp;&nbsp;
+                                    采购商: {$order.buyerName}&nbsp;&nbsp;
+                                    供应商: {$order.supplierName}&nbsp;&nbsp;
+                                    账期截止日: {:substr($order.pay_date,0,10)}
                                 </td>
                             </tr>
-
+                            <tr style="background: #EFEFEF">
+                                <td colspan="4" >
+                                    {$order.receiver_name}&nbsp;&nbsp;{$order.receiver_phone}&nbsp;&nbsp;{$order.receiver_area_name}&nbsp;&nbsp;{$order.receiver_detail}&nbsp;&nbsp;{$order.receiver_post_code}
+                                </td>
+                            </tr>
                             <tr id="{$order.id}">
                                 <!--<td><input type="checkbox"  value="" /></td>-->
-                                <td>
-                                    {foreach name="order.goods" id="goods"}
-                                    <div class="row no-padding">
-                                         <div class="col-md-2 text-center" >
-                                             <img width="60px" height="60px" src="{$goods.icon}"  />
-                                         </div>
-                                        <div class="col-md-10">
-                                            <p>{$goods.title}</p>
-                                            <p>原价: {$goods.price|floatval}*{$goods.quantity|intval}{$goods.unit}={$goods.price*$goods.quantity}元</p>
-                                        </div>
-                                    </div>
-                                    {/foreach}
+                                <td style="border-right: 1px solid #dee2e6; ">
+                                    <table class="table no-border text-left" >
+                                        <tbody>
+                                        {foreach name="order.goods" id="goods"}
+                                        <tr>
+                                            <td width="40px" style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">#{$key+1}</td>
+                                            <td width="80px" style="vertical-align: middle;border-bottom: 1px solid #dee2e6;"><img width="60px" height="60px" src="{$goods.icon}"  /></td>
+                                            <td style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">
+                                                {if $goods.service_type == 1}
+                                                <span class="label label-primary" style="padding: 0;border-radius: 3px">退货</span>
+                                                {elseif $goods.service_type == 2}
+                                                <span class="label label-info" style="padding: 0 3px;3border-radius: 3px">换货</span>
+                                                {elseif $goods.service_type == 3}
+                                                <span class="label label-danger" style="padding: 0 3px">维修</span>
+                                                {/if}
+                                                {$goods.title}
+                                            </td>
+                                            <td style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">
+                                                <span >规格: {$goods.s_info}</span>
+                                                <br>
+                                                <span >物料编号: {$goods.specifications_no}</span>
+                                                <br>
+                                                <span >物料规格: {$goods.specifications_name}</span>
+                                            </td>
 
+                                            <td style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">原价: {$goods.price|floatval}*{$goods.quantity|intval}{$goods.unit}={$goods.price*$goods.quantity}元</td>
+                                        </tr>
+                                        {/foreach}
+                                        </tbody>
+                                    </table>
                                     <div class="">
                                         <p>采购商支付:
-                                           {if $order.buyerPayInfo}
-                                                {foreach name="$order.buyerPayInfo" id="buyer"}
-                                                    {$buyer.pay_type == 1 ? '转账' : '汇款'},{$buyer.number},
-                                                    {$buyer.pay_type == 1 ? '支付日期:'.substr($buyer.pay_time,0,10): '汇款日期:'.substr($buyer.accept_time,0,10)},
-                                                    <a target="_blank" href="{$buyer.picture}">【回执照片】</a>
-                                                 {/foreach}
-                                            {else}
-                                             无
-                                            {/if}
-                                        </p>
-                                        <p>支付至供应商:
-                                            {if $order.supplierPayInfo}
-                                                {foreach name="$order.buyerPayInfo" id="supplierInfo"}
-                                                     {$supplierInfo.pay_type == 3 ? '转账' : '汇款'},{$supplierInfo.number},
-                                                     {$supplierInfo.pay_type == 4 ? '支付日期:'.substr($supplierInfo.pay_time,0,10): '汇款日期:'.substr($supplierInfo.accept_time,0,10)}
-                                                     <a target="_blank" href="{$supplierInfo.picture}">【回执照片】</a>
-                                                {/foreach}
+                                            {if $order.buyerPayInfo}
+                                            {foreach name="$order.buyerPayInfo" id="buyer"}
+                                            {$buyer.pay_type == 1 ? '转账' : '汇款'},{$buyer.number},
+                                            {$buyer.pay_type == 1 ? '支付日期:'.substr($buyer.pay_time,0,10): '汇款日期:'.substr($buyer.accept_time,0,10)},
+                                            <a target="_blank" href="{$buyer.picture}">【回执照片】</a>
+                                            {/foreach}
                                             {else}
                                             无
                                             {/if}
                                         </p>
-                                        <p>买家留言:{$order.buyer_comment}</p>
+                                        <p>支付至供应商:
+                                            {if $order.supplierPayInfo}
+                                            {foreach name="$order.supplierPayInfo" id="supplierInfo"}
+                                            {$supplierInfo.pay_type == 3 ? '转账' : '汇款'},{$supplierInfo.number},
+                                            {$supplierInfo.pay_type == 4 ? '支付日期:'.substr($supplierInfo.pay_time,0,10): '汇款日期:'.substr($supplierInfo.accept_time,0,10)}
+                                            <a target="_blank" href="{$supplierInfo.picture}">【回执照片】</a>
+                                            {/foreach}
+                                            {else}
+                                            无
+                                            {/if}
+                                        </p>
+                                        <p class='spec' >物料规格: 无</p>
+                                        <p class='comment' >买家留言: {$order.buyer_comment}</p>
+                                        {if $order.delivery_time > 0} <p>交货日期: {:date('Y-m-d',$order.delivery_time)}</p>{/if}
                                     </div>
 
                                 </td>
-                                <td>
-                                    应付: {$order.sum_money|floatval}
+                                <td style="vertical-align: middle">
+                                    应付: {$order.actual_money|floatval}元
                                 </td>
-                                <td><span class="text-success">{:getOrderState($order.state)}</span></td>
-                                <td>
+                                <td style="vertical-align: middle">{:getOrderState($order.state,1)}</td>
+                                <td style="vertical-align: middle">
                                     {if $order.state == 0} <!-- 待核价-->
-                                    <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#pricing-modal">核价</a>
-                                    <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}"  data-date="{if $order.delivery_time > 0}{:date('Y-m-d',$order.delivery_time)}{/if}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#pricing-modal">核价</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
                                     {elseif $order.state == 1}<!-- 待签约-->
-                                    <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#sign-modal">签约</a>
-                                    <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}" data-date="{if $order.delivery_time > 0}{:date('Y-m-d',$order.delivery_time)}{/if}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#sign-modal">签约</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
                                     {elseif $order.state == 2}<!-- 待采购商打款-->
-                                    <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-primary" data-tag ="1" data-toggle="modal" data-target="#remittance-modal" >收款</a>
-                                    <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary" data-tag ="1" data-toggle="modal" data-target="#remittance-modal" >收款</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
                                     {elseif $order.state == 3}<!-- 待发货-->
                                     {elseif $order.state == 4}<!-- 订单关闭-->
                                     {elseif $order.state == 6} <!-- 待收货-->
+                                    {if $order.service_type == 1}
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#service-modal">待收货售后</a>
+                                    {/if}
                                     {elseif $order.state == 7} <!-- 待质检-->
                                     {elseif $order.state == 8} <!-- 问题确认中-->
-                                    <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-primary"  data-toggle="modal" data-target="#problem-modal">问题解决</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary"  data-toggle="modal" data-target="#problem-modal">问题解决</a>
                                     {elseif $order.state == 9}<!-- 账期中-->
-                                    <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-primary" data-tag="2" data-toggle="modal" data-target="#remittance-modal">收款</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary" data-tag="2" data-toggle="modal" data-target="#remittance-modal">收款</a>
+                                    {if $order.pay_date}
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#overdue-modal">改为逾期</a>
+                                    {/if}
+                                    {if $order.service_type == 1}
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#service-modal">售后</a>
+                                    {/if}
                                     {elseif $order.state == 10}<!-- 逾期中-->
-                                    <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-primary" data-tag="3" data-toggle="modal" data-target="#remittance-modal">收款</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary" data-tag="3" data-toggle="modal" data-target="#remittance-modal">收款</a>
+                                    {if $order.service_type == 1}
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#service-modal">售后</a>
+                                    {/if}
                                     {elseif $order.state == 11}<!-- 转账-->
-                                    <a href="javascript:void" data-id="{$order.id}" class="btn btn-sm btn-primary">转账</a>
-                                    {elseif $order.state == 12}<!-- 交易完成-->
-
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#transfer-modal">转账</a>
+                                    {elseif $order.state == 13}<!-- 交易完成-->
+                                    {if $order.service_type == 1}
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#service-modal">售后</a>
+                                    {/if}
                                     {/if}
                                 </td>
                             </tr>
@@ -203,29 +252,27 @@
                     <div class="row">
                         <div class="col-md-12">
                             <form role="form" class="" id="pricing-form">
-                                <div class="form-group">
-                                    <label >合同</label>
-                                    <select class="form-control" name="contract_type">
-                                        <option  value="1">已签订合同</option>
-                                        <option  value="2">未签订合同</option>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3">合同</label>
+                                    <select class="form-control contract_type" name="contract_type">
+                                        <option  value="2">已签订合同</option>
+                                        <option  value="1">未签订合同</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label >合同编号</label>
+                                <div class="form-group form-inline contract_container">
+                                    <label class="col-md-3">合同编号</label>
                                     <input type="text" class="form-control" name="contract_number" placeholder="">
                                 </div>
-                                <div class="form-group">
-                                    <label >核实总价</label>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3">核实总价</label>
                                     <div class="input-group">
-                                        <input class="form-control form-control-navbar"  name="sum_money" type="number"  value="" placeholder="" aria-label="Search">
-                                        <div class="input-group-append">
-                                            元
-                                        </div>
+                                        <input class="form-control form-control-navbar"  min="0" name="sum_money" type="text"  value="" placeholder="" aria-label="Search">
+                                        <div class="input-group-append" style="padding-left: 5px;padding-top: 5px;">元</div>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label >账期截止</label>
-                                    <input type="date" class="form-control" name="pay_date" placeholder="">
+                                <div class="form-group form-inline date_container">
+                                    <label class="col-md-3">账期截止</label>
+                                    <input type="date" class="form-control" name="pay_date" min="" />
                                 </div>
                             </form>
                         </div>
@@ -254,13 +301,13 @@
                     <div class="row">
                         <div class="col-md-12">
                             <form role="form" class="" id="sign-form">
-                                <div class="form-group">
-                                    <label >合同编号</label>
-                                    <input type="text" class="form-control" name="contract_number" placeholder="">
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3">合同编号</label>
+                                    <input type="text" class="form-control col-md-5" name="contract_number" placeholder="">
                                 </div>
-                                <div class="form-group">
-                                    <label >账期截止</label>
-                                    <input type="date" class="form-control" name="pay_date" placeholder="">
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3">账期截止</label>
+                                    <input type="date" class="form-control col-md-5" name="pay_date" min="">
                                 </div>
                             </form>
                         </div>
@@ -279,7 +326,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">订单核价</h5>
+                <h5 class="modal-title">订单收款</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -289,27 +336,27 @@
                     <div class="row">
                         <div class="col-md-12">
                             <form role="form" class="" id="remittance-form">
-                                <div class="form-group">
-                                    <label >打款类型</label>
-                                    <select class="form-control" name="pay_type">
-                                        <option  value="3">转账</option>
-                                        <option  value="4">汇款</option>
+                                <div class="form-group form-inline">
+                                    <label  class="col-md-4">打款类型</label>
+                                    <select class="form-control col-md-5" name="pay_type">
+                                        <option  value="1">转账</option>
+                                        <option  value="2">汇款</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label >流水号/票号</label>
-                                    <input type="text" class="form-control" name="number" placeholder="">
+                                <div class="form-group form-inline">
+                                    <label class="col-md-4">流水号/票号</label>
+                                    <input type="text" class="form-control col-md-5" name="number" placeholder="">
                                 </div>
-                                <div class="form-group">
-                                    <label >到账时间/承兑时间</label>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-4">到账/承兑时间</label>
                                     <input type="date" class="form-control" name="pay_time" placeholder="">
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-4 control-label">回执图片:</label>
-                                    <div class="col-sm-12">
+                                <div class="form-group form-inline">
+                                    <label class="col-md-4">回执图片</label>
+                                    <div class="col-md-8 no-padding">
                                         <input id="remittance-file" name="file" type="file" data-show-caption="true">
                                         <input  type="hidden" name="path" id="remittance-upload-file"  value="" />
-                                        <p class="help-block">支持jpg、jpeg、png格式，大小不超过2.0M</p>
+                                        <p class="help-block2">支持jpg、jpeg、png格式，大小不超过5M</p>
                                     </div>
                                 </div>
                                 <input type="hidden" class="form-control" name="tag" placeholder="">
@@ -325,7 +372,7 @@
         </div>
     </div>
 </div>
-<!-- 取消订单 -->
+<!-- 问题订单 -->
 <div class="modal fade" id="problem-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -337,7 +384,7 @@
         </div>
     </div>
 </div>
-
+<!--取消订单-->
 <div class="modal fade" id="cancel-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -349,98 +396,259 @@
         </div>
     </div>
 </div>
-
-{include file="layout/footer" title="$title" keywords="开源WEB开发框架" /}
+<!--待采购商打款-->
+<div class="modal fade" id="transfer-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">转账供应商</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form role="form" class="" id="transfer-form">
+                                <div class="form-group form-inline">
+                                    <label  class="col-md-3 no-padding">打款类型</label>
+                                    <select class="form-control col-md-5" name="pay_type">
+                                        <option  value="3">转账</option>
+                                        <option  value="4">汇款</option>
+                                    </select>
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 no-padding">流水号/票号</label>
+                                    <input type="text" class="form-control col-md-5" name="number" placeholder="">
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 no-padding">到账/承兑时间</label>
+                                    <input type="date" class="form-control" name="pay_time" placeholder="">
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3 no-padding">回执图片</label>
+                                    <div class="col-md-8 no-padding">
+                                        <input id="transfer-file" name="file" type="file" data-show-caption="true">
+                                        <input  type="hidden" name="path" id="transfer-upload-file"  value="" />
+                                        <p class="help-block2">支持jpg、jpeg、png格式，大小不超过5M</p>
+                                    </div>
+                                </div>
+                                <input type="hidden" class="form-control" name="tag" placeholder="">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-id="" id="transfer-request">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- service-->
+<div class="modal fade" id="service-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">该订单售后问题是否解决?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="service-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 逾期-->
+<div class="modal fade" id="overdue-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">该订单改为逾期?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="overdue-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
+{include file="layout/footer" title="$title" keywords="" /}
 <script src="__STATIC__/js/plugins/bootstrap-fileinput/js/fileinput.js" type="text/javascript"></script>
 <script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
 <script type="text/javascript">
-
-    //折叠展示
-    function displayData(_self)
-    {
-        if(_self.title == "关闭")
-        {
-            jqshow($(_self).parent().parent().attr('id'), 'hide');
-            $(_self).removeClass("fa-minus-square-o").addClass("fa-plus-square-o");
-            _self.title = '打开';
-        }
-        else
-        {
-            jqshow($(_self).parent().parent().attr('id'), 'show');
-            $(_self).removeClass("fa-plus-square-o").addClass("fa-minus-square-o");
-            _self.title = '关闭';
-        }
-    }
-
-    function jqshow(id,isshow) {
-        var obj = $("#list_table tr[parent='"+id+"']");
-        if (obj.length>0)
-        {
-            obj.each(function(i) {
-                jqshow($(this).attr('id'), isshow);
-            });
-            if (isshow=='hide')
-            {
-                obj.hide();
-            }
-            else
-            {
-                obj.show();
-            }
-        }
-    }
-
+    var url = '{:url("admin/order/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+    $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
+    //核价
     $('#pricing-modal').on('show.bs.modal', function (event) {
         var id = $(event.relatedTarget).data('id');
+        var date = $(event.relatedTarget).data('date');
+        $('.contract_type').trigger('change');
         $("#pricing-request").data('id',id);
+        $(this).find('input[name="pay_date"]').attr('min',date);
+    });
+    $('.contract_type').change(function () {
+        var value = $(this).val();
+        if(value == 2){
+            $('.contract_container').show();
+            $('.date_container').show();
+        }
+        if(value == 1){
+            $('.contract_container').hide();
+            $('.date_container').hide();
+        }
+    });
+    $("#pricing-form").bootstrapValidator({
+        excluded:[":disabled"],
+        live: 'disabled',
+        message: 'This value is not valid',
+        fields: {
+            sum_money: {
+                validators: {
+                    notEmpty: {
+                        message: '总价必须填写'
+                    },
+                    regexp: {
+                        regexp: /^([1-9][0-9]*)+(.[0-9]{1,2})?$/,
+                        message: '无效的价格'
+                    }
+                }
+            }
+        }
     });
     $("#pricing-request").click(function () {
         var id = $(this).data('id');
         if(id < 0){
             return;
         }
-        if(confirm('确认要提交？')){
-            $.ajax({
-                type:'post',
-                url:'?s=admin/order/pricing&id='+id,
-                data:$('#pricing-form').serialize(),
-                dataType:'json',
-                success:function (data) {
-                    if(data.status == 0){
-                        window.location.reload();
-                    }else{
-                        alert(data.msg);
+        //验证字段
+        $("#pricing-form").data('bootstrapValidator').validate();
+        if($("#pricing-form").data('bootstrapValidator').isValid()){
+            if(confirm('确认要提交？')){
+                $.ajax({
+                    type:'post',
+                    url:'?s=admin/order/pricing&id='+id,
+                    data:$('#pricing-form').serialize(),
+                    dataType:'json',
+                    success:function (data) {
+                        if(data.status == 0){
+                            window.location.reload();
+                        }else{
+                            alert(data.msg);
+                        }
                     }
-                }
-            })
+                })
+            }
         }
     });
     $('#sign-modal').on('show.bs.modal', function (event) {
         var id = $(event.relatedTarget).data('id');
+        var date = $(event.relatedTarget).data('date');
         $("#sign-request").data('id',id);
+        $(this).find('input[name="pay_date"]').attr('min',date);
+    });
+    $("#sign-form").bootstrapValidator({
+        excluded:[":disabled"],
+        live: 'disabled',
+        message: 'This value is not valid',
+        fields: {
+            contract_number: {
+                message: 'The name is not valid',
+                validators: {
+                    notEmpty: {
+                        message: '合同编号必须填写'
+                    },
+                }
+            },
+            pay_date:{
+                message: 'The pay_date is not valid',
+                validators: {
+                    date: {
+                        format: 'YYYY/MM/DD',
+                        message: '日期格式不正确'
+                    },
+                }
+            }
+        }
     });
     $("#sign-request").click(function () {
         var id = $(this).data('id');
         if(id < 0){
             return;
         }
-        if(confirm('确认要提交？')){
+        //验证字段
+        $("#sign-form").data('bootstrapValidator').validate();
+        if($("#sign-form").data('bootstrapValidator').isValid()) {
+            if (confirm('确认要提交？')) {
+                $.ajax({
+                    type: 'post',
+                    url: '?s=admin/order/sign&id=' + id,
+                    data: $('#sign-form').serialize(),
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.status == 0) {
+                            window.location.reload();
+                        } else {
+                            alert(data.msg);
+                        }
+                    }
+                })
+            }
+        }
+    });
+    //售后
+    $('#service-modal').on('show.bs.modal', function (event) {
+        var id = $(event.relatedTarget).data('id');
+        $("#service-request").data('id',id);
+    });
+    $("#service-request").click(function () {
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        if (confirm('确认要提交？')) {
             $.ajax({
-                type:'post',
-                url:'?s=admin/order/sign&id='+id,
-                data:$('#sign-form').serialize(),
-                dataType:'json',
-                success:function (data) {
-                    if(data.status == 0){
+                type: 'post',
+                url: '?s=admin/order/service&id=' + id,
+                data: $('#sign-form').serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    if (data.status == 0) {
                         window.location.reload();
-                    }else{
+                    } else {
                         alert(data.msg);
                     }
                 }
             })
         }
     });
-   //收款
+    //逾期
+    $('#overdue-modal').on('show.bs.modal', function (event) {
+        var id = $(event.relatedTarget).data('id');
+        $("#overdue-request").data('id',id);
+    });
+    $("#overdue-request").click(function () {
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        if (confirm('确认要提交？')) {
+            $.ajax({
+                type: 'post',
+                url: '?s=admin/order/overdue&id=' + id,
+                data: {},
+                dataType: 'json',
+                success: function (data) {
+                    if (data.status == 0) {
+                        alert("修改为逾期状态成功");
+                        window.location.reload();
+                    } else {
+                        alert(data.msg);
+                    }
+                }
+            })
+        }
+    });
+    //收款
     $('#remittance-modal').on('show.bs.modal', function (event) {
         var id = $(event.relatedTarget).data('id');
         var tag = $(event.relatedTarget).data('tag');
@@ -455,8 +663,8 @@
             showCaption: true,//是否显示标题
             allowedPreviewTypes: ['image'],
             allowedFileTypes: ['image'],
-            allowedFileExtensions: ['jpg', 'png'],
-            maxFileSize: 2000,
+            allowedFileExtensions: ['jpg', 'png','jpeg'],
+            maxFileSize: 5120,
             maxFileCount: 1,
             maxImageWidth: '1920',
             maxImageHeight: '1000',
@@ -466,38 +674,81 @@
                 return obj;
             }
         }).on("fileuploaded", function(event, data) {
-            if(data.response)
-            {
-                alert(data.response.data.filename);
+            if(data.response){
+                //  alert(data.response.data.filename);
                 $('#remittance-upload-file').val(data.response.data.filename);
+                $('#remittance-upload-file').closest('.form-group').removeClass('has-error');
+                $('#remittance-upload-file').closest('.form-group').find('.help-block').html('');
             }
         });
+        $("#remittance-file").on('fileclear',function(event, id){
+            $('#remittance-upload-file').val('');
+        });
+    });
+
+    $("#remittance-form").bootstrapValidator({
+        excluded:[":disabled"],
+        live: 'disabled',
+        message: 'This value is not valid',
+        fields: {
+            number: {
+                message: 'The name is not valid',
+                validators: {
+                    notEmpty: {
+                        message: '流水/票号不能为空'
+                    },
+                }
+            },
+            path: {
+                message: 'The name is not valid',
+                validators: {
+                    notEmpty: {
+                        message: '回执图片不能为空'
+                    },
+                }
+            },
+            pay_time:{
+                message: 'The pay_date is not valid',
+                validators: {
+                    notEmpty: {
+                        message: '到账/承兑时间不能为空'
+                    },
+                    date: {
+                        format: 'YYYY/MM/DD',
+                        message: '日期格式不正确'
+                    },
+                }
+            }
+        }
     });
     $("#remittance-request").click(function () {
         var id = $(this).data('id');
         if(id < 0){
             return;
         }
-        if(confirm('确认要提交？')){
-            $.ajax({
-                type:'post',
-                url:'?s=admin/order/remittance&id='+id,
-                data:$('#remittance-form').serialize(),
-                dataType:'json',
-                success:function (data) {
-                    if(data.status == 0){
-                        window.location.reload();
-                    }else{
-                        alert(data.msg);
+        $("#remittance-form").data('bootstrapValidator').validate();
+        if($("#remittance-form").data('bootstrapValidator').isValid()) {
+            if (confirm('确认要提交？')) {
+                $.ajax({
+                    type: 'post',
+                    url: '?s=admin/order/remittance&id=' + id,
+                    data: $('#remittance-form').serialize(),
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.status == 0) {
+                            window.location.reload();
+                        } else {
+                            alert(data.msg);
+                        }
                     }
-                }
-            })
+                })
+            }
         }
     });
 
     $('#cancel-modal').on('show.bs.modal', function (event) {
         var id = $(event.relatedTarget).data('id');
-        $("#delete-request").data('id',id);
+        $("#cancel-request").data('id',id);
     });
     $("#cancel-request").click(function () {
         var id = $(this).data('id');
@@ -542,18 +793,100 @@
             }
         })
     });
-    $(".sort").blur(function () {
-        var id =$(this).closest('tr').attr('id');
-        var value = $(this).val();
-        $.ajax({
-            type:'post',
-            url:'?s=admin/type/sequence',
-            data:{id:id,value:value},
-            dataType:'json',
-            success:function (data) {
-
+    //转账
+    $('#transfer-modal').on('show.bs.modal', function (event) {
+        var id = $(event.relatedTarget).data('id');
+        var tag = $(event.relatedTarget).data('tag');
+        $("#transfer-request").data('id',id);
+        $("#transfer-form").find("input[name=\"tag\"]").val(tag)
+        $("#transfer-file").fileinput({
+            language: 'zh', //设置语言
+            uploadUrl: '?s=admin/file/upload',  //上传地址
+            showUpload: true, //是否显示上传按钮
+            showRemove: true,
+            dropZoneEnabled: false,
+            showCaption: true,//是否显示标题
+            allowedPreviewTypes: ['image'],
+            allowedFileTypes: ['image'],
+            allowedFileExtensions: ['jpg', 'png','jpeg'],
+            maxFileSize: 5120,
+            maxFileCount: 1,
+            maxImageWidth: '1920',
+            maxImageHeight: '1000',
+            uploadExtraData: function (previewId, index) {   //额外参数的关键点
+                var obj = {};
+                obj.type = 'order';
+                return obj;
             }
-        })
+        }).on("fileuploaded", function(event, data) {
+            if(data.response){
+                //  alert(data.response.data.filename);
+                $('#transfer-upload-file').val(data.response.data.filename);
+                $('#transfer-upload-file').closest('.form-group').removeClass('has-error');
+                $('#transfer-upload-file').closest('.form-group').find('.help-block').html('');
+            }
+        });
+        $("#transfer-file").on('fileclear',function(event, id){
+            $('#transfer-upload-file').val('');
+        });
     });
-
+    $("#transfer-form").bootstrapValidator({
+        excluded:[":disabled"],
+        live: 'disabled',
+        message: 'This value is not valid',
+        fields: {
+            number: {
+                message: 'The name is not valid',
+                validators: {
+                    notEmpty: {
+                        message: '流水/票号不能为空'
+                    },
+                }
+            },
+            path: {
+                message: 'The name is not valid',
+                validators: {
+                    notEmpty: {
+                        message: '回执图片不能为空'
+                    },
+                }
+            },
+            pay_time:{
+                message: 'The pay_date is not valid',
+                validators: {
+                    notEmpty: {
+                        message: '到账/承兑时间不能为空'
+                    },
+                    date: {
+                        format: 'YYYY/MM/DD',
+                        message: '日期格式不正确'
+                    }
+                }
+            }
+        }
+    });
+    $("#transfer-request").click(function () {
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        $("#transfer-form").data('bootstrapValidator').validate();
+        if($("#transfer-form").data('bootstrapValidator').isValid()) {
+            if (confirm('确认要提交？')) {
+                $.ajax({
+                    type: 'post',
+                    url: '?s=admin/order/remittance&id=' + id,
+                    data: $('#transfer-form').serialize(),
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.status == 0) {
+                            window.location.reload();
+                        } else {
+                            alert(data.msg);
+                        }
+                    }
+                })
+            }
+        }
+    });
 </script>

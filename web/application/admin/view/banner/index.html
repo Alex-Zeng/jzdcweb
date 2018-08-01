@@ -74,8 +74,8 @@
                                 <td>{$banner.status == 1 ? '显示' : '隐藏'}</td>
                                 <td>{$banner.sequence}</td>
                                 <td>
-                                    <a href="javascript:void(0)"  class="btn btn-primary" data-id="{$banner.id}" data-toggle="modal" data-target="#edit-modal">编辑</a>
-                                    <a href="javascript:void(0)"  class="btn btn-danger"  data-id="{$banner.id}" data-toggle="modal" data-target="#delete-modal">删除</a>
+                                    <a href="javascript:void(0)"  class="btn btn-primary btn-sm" data-id="{$banner.id}" data-toggle="modal" data-target="#edit-modal">编辑</a>
+                                    <a href="javascript:void(0)"  class="btn btn-danger btn-sm"  data-id="{$banner.id}" data-toggle="modal" data-target="#delete-modal">删除</a>
                                 </td>
                             </tr>
                             {/volist}
@@ -115,43 +115,49 @@
                     <div class="row">
                         <div class="col-md-12">
                             <form role="form" class="" id="add-form">
-                                <div class="form-group">
-                                    <label class="control-label" >标题</label>
-                                    <input type="text" class="form-control" name="title" maxlength="200" placeholder="banner 标题">
+                                <div class="form-group form-inline">
+                                    <label class="control-label col-md-3" >标题</label>
+                                    <div class="col-md-9 no-padding">
+                                        <input type="text" class="form-control col-md-8" name="title" maxlength="200" placeholder="banner 标题">
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label  class="control-label" >链接</label>
-                                    <input type="url" class="form-control" name="link" placeholder="http://">
+                                <div class="form-group form-inline">
+                                    <label  class="control-label col-md-3" >链接</label>
+                                    <div class="col-md-9 no-padding">
+                                        <input type="url" class="form-control col-md-12" name="link" placeholder="http://">
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="control-label" >分组</label>
-                                    <select class="form-control" name="type">
+                                <div class="form-group form-inline">
+                                    <label class="control-label col-md-3" >分组</label>
+                                    <select class="form-control col-md-4" name="type">
                                         <option  value="1">PC端</option>
                                         <option  value="2">APP端</option>
                                         <option value="3">微信端</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label  class="control-label" >打开方式</label>
-                                    <select class="form-control" name="target">
+                                <div class="form-group form-inline">
+                                    <label  class="control-label col-md-3" >打开方式</label>
+                                    <select class="form-control col-md-4" name="target">
                                         <option  value="_self">新窗口打开</option>
                                         <option value="_blank">当前窗口打开</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label  class="control-label" >状态</label>
-                                    <select class="form-control" name="target">
+                                <div class="form-group form-inline">
+                                    <label  class="control-label col-md-3">状态</label>
+                                    <select class="form-control col-md-4" name="target">
                                         <option  value="1">显示</option>
                                         <option value="0">隐藏</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label class="control-label" >显示顺序</label>
-                                    <input type="number" min="0" class="form-control" value="0" name="sequence" placeholder="">
+                                <div class="form-group form-inline">
+                                    <label class="control-label col-md-3" >显示顺序</label>
+                                    <div class="col-md-9 no-padding">
+                                        <input type="number" min="0" class="form-control col-md-8" value="0" name="sequence" placeholder="">
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-4 control-label">图片上传:</label>
-                                    <div class="col-sm-12">
+                                <div class="form-inline form-group">
+                                    <label class="col-md-3 control-label">图片上传</label>
+                                    <div class="col-md-8 no-padding">
                                         <input id="add-file" name="file" type="file" data-show-caption="true">
                                         <input  type="hidden" name="path" id="add-upload-file"  value="" />
                                         <p class="help-block">支持jpg、jpeg、png格式，大小不超过5.0M</p>
@@ -185,46 +191,52 @@
                     <div class="row">
                         <div class="col-md-12">
                             <form role="form" class="" id="edit-form">
-                                <div class="form-group">
-                                    <label >标题</label>
-                                    <input type="text" class="form-control" name="title" placeholder="banner 标题">
+                                <div class="form-group form-inline">
+                                    <label  class="col-md-3">标题</label>
+                                    <div class="col-md-9 no-padding">
+                                        <input type="text" class="form-control" name="title" placeholder="banner 标题">
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label >链接</label>
-                                    <input type="url" class="form-control" name="link" placeholder="http://">
+                                <div class="form-group form-inline">
+                                    <label  class="col-md-3">链接</label>
+                                    <div class="col-md-9 no-padding">
+                                        <input type="url" class="form-control" name="link" placeholder="http://">
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label >分组</label>
+                                <div class="form-group form-inline">
+                                    <label  class="col-md-3">分组</label>
                                     <select class="form-control" name="type">
                                         <option  value="1">PC端</option>
                                         <option  value="2">APP端</option>
                                         <option value="3">微信端</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label >打开方式</label>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3">打开方式</label>
                                     <select class="form-control" name="target">
                                         <option  value="_self">新窗口打开</option>
                                         <option value="_blank">当前窗口打开</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label >状态</label>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3">状态</label>
                                     <select class="form-control" name="status">
                                         <option  value="1">显示</option>
                                         <option value="0">隐藏</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label >显示顺序</label>
-                                    <input type="number" min="0" class="form-control" value="0" name="sequence" placeholder="">
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3">显示顺序</label>
+                                    <div class="col-md-9 no-padding">
+                                        <input type="number" min="0" class="form-control" value="0" name="sequence" placeholder="">
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-4 control-label">图片上传:</label>
-                                    <div class="col-sm-12">
+                                <div class="form-group form-inline">
+                                    <label class="col-md-3">图片上传:</label>
+                                    <div class="col-md-9 no-padding">
                                         <input id="edit-file" name="file" type="file" data-show-caption="true">
                                         <input  type="hidden" name="path" id="edit-upload-file"  value="" />
-                                        <p class="help-block">支持jpg、jpeg、png格式，大小不超过2.0M</p>
+                                        <p class="help-block">支持jpg、jpeg、png格式，大小不超过5.0M</p>
                                     </div>
                                 </div>
                             </form>
@@ -257,3 +269,8 @@
 <script src="__STATIC__/js/plugins/bootstrap-fileinput/js/locales/zh.js"></script>
 <script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
 <script type="text/javascript" src="__STATIC__/js/admin/banner.js"></script>
+<script type="text/javascript">
+    var url = '{:url("admin/banner/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+    $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
+</script>

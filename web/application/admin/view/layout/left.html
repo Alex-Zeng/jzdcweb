@@ -57,7 +57,7 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="/index.php?jzdc=mall.m_goods_admin" class="nav-link">
+                            <a href="{:url('admin/goods/index')}" class="nav-link">
                                 <i class="fa fa-image nav-icon"></i>
                                 <p>全站商品</p>
                             </a>
@@ -82,9 +82,15 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{:url('admin/banner/index')}" class="nav-link">
+                            <a href="{:url('admin/index_menu/index')}" class="nav-link">
                                 <i class="fa fa-image nav-icon"></i>
-                                <p>菜单管理</p>
+                                <p>首页菜单</p>
+                            </a>
+                        </li>
+                         <li class="nav-item">
+                            <a href="{:url('admin/index/version')}" class="nav-link">
+                                <i class="fa fa-reorder nav-icon"></i>
+                                <p>版本发布</p>
                             </a>
                         </li>
                     </ul>
@@ -101,7 +107,7 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="/index.php?jzdc=index.admin_users" class="nav-link">
+                            <a href="{:url('admin/member/index')}" class="nav-link">
                                 <i class="fa fa-group nav-icon"></i>
                                 <p>管理会员</p>
                             </a>
@@ -146,25 +152,15 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="/index.php?jzdc=index.edit_user" class="nav-link">
-                                <i class="fa fa-user nav-icon"></i>
-                                <p>编辑个人资料</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/index.php?jzdc=index.edit_phone&relaod=15" class="nav-link">
+                            <!-- <a href="/index.php?jzdc=index.edit_phone&relaod=15" class="nav-link"> -->
+                            <a href="{:url('user/editPhone')}" class="nav-link">
                                 <i class="fa fa-phone nav-icon"></i>
                                 <p>修改手机号</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/index.php?jzdc=index.edit_email" class="nav-link">
-                                <i class="fa fa-envelope-o nav-icon"></i>
-                                <p>修改邮箱</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/index.php?jzdc=index.edit_user&field=password&relaod=25" class="nav-link">
+                            <!-- <a href="/index.php?jzdc=index.edit_user&field=password&relaod=25" class="nav-link"> -->
+                            <a href="{:url('user/changePassword')}" class="nav-link">
                                 <i class="fa fa-key nav-icon"></i>
                                 <p>修改登录密码</p>
                             </a>
@@ -174,7 +170,7 @@
 
                 {if $groupId ==3 }
                 <li class="nav-item has-treeview">
-                    <a href="/index.php?jzdc=form.data_show_list&table_id=37" class="nav-link">
+                    <a href="{:url('admin/certification/index')}" class="nav-link">
                         <i class="nav-icon fa fa-users"></i>
                         <p>企业认证</p>
                     </a>

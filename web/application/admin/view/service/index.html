@@ -1,6 +1,6 @@
-{include file="layout/header" title="投诉与建议" keywords="开源WEB开发框架" /}
+{include file="layout/header" title="金融服务" keywords="" /}
 
-{include file="layout/left" groupId="$groupId" keywords="开源WEB开发框架" /}
+{include file="layout/left" groupId="$groupId" keywords="" /}
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <div class="content-header">
@@ -29,6 +29,14 @@
                         <div class="col-md-6">
                             <form class="form-inline ml-3" action="{:url()}"  method="get">
                                 <div class="input-group">
+                                    <select class="form-control" name="type"  placeholder="">
+                                        <option value="-1" {if $type eq -1}selected{/if}>全部类型</option>
+                                        {volist name="typeList"  id='vo'}
+                                        <option  {if $type eq $key}selected{/if} value="{$key}">{$vo}</option>
+                                        {/volist}
+                                    </select>
+                                </div>&nbsp;&nbsp;
+                                <div class="input-group">
                                     <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="留言/手机号" aria-label="Search">
                                     <div class="input-group-append">
                                         <button class="btn btn-primary" id="search" type="submit">查找</button>
@@ -48,6 +56,7 @@
                                 <th width="150px">姓名</th>
                                 <th width="150px">性别</th>
                                 <th>手机号</th>
+                                <th>提交类型</th>
                                 <th>填写者</th>
                                 <th>提交时间</th>
                                 <th>留言</th>
@@ -59,7 +68,8 @@
                                 <td>{$service.name}</td>
                                 <td>{$service.sex}</td>
                                 <td>{$service.phone}</td>
-                                <td>{$service.writer_name}#{$service.writer}</td>
+                                <td>{$service.type_name}</td>
+                                <td>{$service.writer_name}{if $service.writer}#{$service.writer}{/if}</td>
                                 <td>{:date('Y-m-d H:i',$service.write_time)}</td>
                                 <td>{$service.comment}</td>
                             </tr>
@@ -87,4 +97,8 @@
     </div>
 </div>
 
-{include file="layout/footer" title="$title" keywords="开源WEB开发框架" /}
+{include file="layout/footer" title="$title" keywords="" /}
+<script type="text/javascript">
+    var url = '{:url("admin/service/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+</script>

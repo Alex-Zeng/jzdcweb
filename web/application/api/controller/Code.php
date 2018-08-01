@@ -10,7 +10,7 @@ namespace app\api\controller;
 use app\common\model\IndexUser;
 use think\Request;
 
-class Code{
+class Code extends Base {
 
     /**
      * @desc 发送注册短信验证码
@@ -161,6 +161,7 @@ class Code{
         $phone = $request->post('phone','');
         $captcha = $request->post('code','');
         $valid = $request->post('codeValid',0,'intval');
+        $id = $request->post('id','');
 
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
@@ -172,7 +173,7 @@ class Code{
             return ['status'=>1,'data'=>[],'msg'=>'图片验证码不能为空'];
         }
         if($valid){
-            if(!captchaDb_check($captcha)){
+            if(!captchaDb_check($captcha,$id)){
                 return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
             }
         }
@@ -188,6 +189,110 @@ class Code{
             $codeModel = new \app\common\model\Code();
             $time = time();
             $data = ['phone'=>$phone,'type'=>\app\common\model\Code::TYPE_PHONE_FORGET_PASSWORD,'code'=>$code,'create_time'=>$time,'expire_time'=>$time+300];
+            $result = $codeModel->save($data);
+            if($result){
+                return ['status'=>0,'data'=>[],'msg'=>'已成功发送验证码'];
+            }
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'发送短信失败'];
+    }
+
+
+    //解绑原手机号
+    public function oldPhoneSend(Request $request){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        //查询用户手机号
+        $userModel = new IndexUser();
+        $userInfo = $userModel->getInfoById($this->userId);
+        if(!$userInfo || !$userInfo->phone){
+            return ['status'=>1,'data'=>[],'msg'=>'用户数据异常'];
+        }
+        $phone = $userInfo->phone;
+        //发送短信
+        $code = getVerificationCode();
+        $param['code'] = $code;
+        $yunpian = new \sms\Yunpian();
+        //发送短信验证码
+        $result = $yunpian->send($phone,$param,\sms\Yunpian::CONTENT);
+        if($result){
+            //更新短信验证码
+            $codeModel = new \app\common\model\Code();
+            $time = time();
+            $data = ['phone'=>$phone,'type'=>\app\common\model\Code::TYPE_PHONE_BIND_OLD,'code'=>$code,'create_time'=>$time,'expire_time'=>$time+300];
+            $result = $codeModel->save($data);
+            if($result){
+                return ['status'=>0,'data'=>[],'msg'=>'已成功发送验证码'];
+            }
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'发送短信失败'];
+    }
+    //验证手机号
+    public function oldPhoneValid(Request $request){
+        $code = $request->post('code','');
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        if(!$code){
+            return ['status'=>1,'data'=>[],'msg'=>'验证码不能为空'];
+        }
+        //查询用户手机号
+        $userModel = new IndexUser();
+        $userInfo = $userModel->getInfoById($this->userId);
+        if(!$userInfo || !$userInfo->phone){
+            return ['status'=>1,'data'=>[],'msg'=>'用户数据异常'];
+        }
+        $phone = $userInfo->phone;
+        //验证短信
+        $codeModel = new \app\common\model\Code();
+        $codeRow = $codeModel->where(['phone' => $phone, 'type' => \app\common\model\Code::TYPE_PHONE_BIND_OLD])->order('id', 'desc')->find();
+        if (!$codeRow || $codeRow['code'] != $code) {
+            return ['status' => 1, 'data' => [], 'msg' => '短信验证码错误'];
+        }
+        if ($codeRow['expire_time'] < time()) {
+            return ['status' => 1, 'data' => [], 'msg' => '短信验证已过期'];
+        }
+
+        return ['status'=>0,'data'=>[],'msg'=>'短信验证成功'];
+    }
+
+    //解绑新手机号
+    public function newPhoneSend(Request $request){
+        $phone = $request->post('phone');
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        if(!$phone){
+            return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
+        }
+        if(!checkPhone($phone)){
+            return ['status'=>1,'data'=>[],'msg'=>'手机号格式错误'];
+        }
+
+        //查询用户手机号
+        $userModel = new IndexUser();
+        $userInfo = $userModel->getUserByPhone($phone);
+        if($userInfo){
+            return ['status'=>1,'data'=>[],'msg'=>'该号码已被其他用户绑定'];
+        }
+
+        //发送短信
+        $code = getVerificationCode();
+        $param['code'] = $code;
+        $yunpian = new \sms\Yunpian();
+        //发送短信验证码
+        $result = $yunpian->send($phone,$param,\sms\Yunpian::CONTENT);
+        if($result){
+            //更新短信验证码
+            $codeModel = new \app\common\model\Code();
+            $time = time();
+            $data = ['phone'=>$phone,'type'=>\app\common\model\Code::TYPE_PHONE_BIND_NEW,'code'=>$code,'create_time'=>$time,'expire_time'=>$time+300];
             $result = $codeModel->save($data);
             if($result){
                 return ['status'=>0,'data'=>[],'msg'=>'已成功发送验证码'];

@@ -24,7 +24,7 @@ class Register{
     public function phone(Request $request){
         $phone = $request->post('phone','');
         $code = $request->post('code','');
-        $username = $request->post('userName','');
+        $username = $request->post('userName','','htmlspecialchars');
         $channel = $request->post('channel',0,'intval');
 
         //判断手机号
@@ -40,15 +40,34 @@ class Register{
         if(!$username){
             return ['status'=>1,'data'=>[],'msg' => '用户名不能为空'];
         }
+        if(checkEmail($username)){
+            return ['status'=>1,'data'=>[],'msg' => '用户名不能为邮箱'];
+        }
+        if(checkPhone($username)){
+            return ['status'=>1,'data'=>[],'msg' => '用户名不能为手机号'];
+        }
+
 
         //检查账号是否已注册
         $model = new IndexUser();
         $user = $model->getUserByPhone($phone);
+
+
+
         if($user){
             return ['status'=>1,'data'=>[],'msg'=>'手机号已注册'];
         }
 
-        $u = (new IndexUser())->where(['username'=>$username])->find();
+        $u = (new IndexUser())->where(['username'=>$username])->whereOr(['phone'=>$username])->whereOr(['email'=>$username])->find();
+
+        if(checkPhone($username)){
+            return ['status'=>1,'data'=>[],'msg'=>'用户名不能为手机号码'];
+        }
+
+        if(checkEmail($username)){
+            return ['status'=>1,'data'=>[],'msg'=>'用户名不能为邮箱'];
+        }
+
         if($u){
             return ['status'=>1,'data'=>[],'msg'=>'用户名称已注册'];
         }
@@ -79,10 +98,20 @@ class Register{
             'group' => 6,
             'state' => 1
         ];
+
         $userResult = $model->save($data);
         //返回token
         if($userResult){
-            $data = [];
+            $data = [
+                'contact' => '',
+                'tel' => '',
+                'icon' => '',
+                'path' => '',
+                'phone' => $phone,
+                'email' => '',
+                'username' => $username,
+                'group' => 6
+            ];
             //生成token
             $key = config('jzdc_token_key');
             $token = [

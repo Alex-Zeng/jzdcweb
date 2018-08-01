@@ -7,6 +7,8 @@
  */
 namespace sms;
 
+use think\Log;
+
 class Yunpian{
 
 /*
@@ -75,6 +77,7 @@ class Yunpian{
         //添加发送短信日志
         //调用发送接口
         return $this->sendSms($mobile,$content);
+//        return true;
     }
 
 
@@ -114,6 +117,7 @@ class Yunpian{
         curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         $json_data = curl_exec($ch);
+        Log::write("sms json data -------->".$json_data);
         $r = json_decode($json_data,true);
         if(isset($r['sid'])){
             return true;

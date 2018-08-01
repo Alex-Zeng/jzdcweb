@@ -1,6 +1,6 @@
-{include file="layout/header" title="投诉与建议" keywords="开源WEB开发框架" /}
+{include file="layout/header" title="" keywords="" /}
 
-{include file="layout/left" groupId="$groupId" keywords="开源WEB开发框架" /}
+{include file="layout/left" groupId="$groupId" keywords="" /}
 
 <style type="text/css">
     .operator.fa {
@@ -39,9 +39,7 @@
 
                         </div>
                         <div class="col-md-6">
-                            <a class="btn btn-default pull-right" href="{:url('admin/type/create')}">
-                                <i class="fa fa-plus"></i> 添加分类
-                            </a>
+                            <a class="btn btn-primary pull-right"  target="_blank"  href="{:url('admin/type/create')}" >新增</a>
                         </div>
                     </div>
                     <!-- /.card-header -->
@@ -49,15 +47,16 @@
                         <table class="table list-table" id="list_table">
                             <colgroup>
                                 <col>
-                                <col width="80px">
                                 <col width="120px">
+                                <col width="200px">
                                 <col width="120px">
                                 <col width="300px">
                             </colgroup>
                             <thead>
                             <tr>
                                 <th>分类名称</th>
-                                <th>图标</th>
+                                <th>APP/H5图标</th>
+                                <th>Web图标</th>
                                 <th>排序</th>
                                 <th>首页显示</th>
                                 <th>操作</th>
@@ -68,16 +67,21 @@
                             {foreach name="list" id="type"}
                             <tr id="{$type.id}" parent="{$type.parent}">
                                 <td><i style="margin-left:{$type.level*30}px" class="operator fa fa-minus-square-o" onclick="displayData(this);" title="关闭"></i>{$type.name}</td>
-                                <td><img width="40px" src="{$type.icon}" /></td>
+                                <td>{if $type.icon}<img width="40px" src="{$type.icon}" />{/if}</td>
+                                <td>{if $type.web_icon}<img width="40px" src="{$type.web_icon}" />{/if}</td>
                                 <td><input class="form-control sort" id="s1" size="10" type="number"  value="{$type.sequence}"></td>
                                 <td><span class="text-success">是</span></td>
                                 <td>
-                                    <a class="btn btn-sm btn-primary" href="{:url('admin/type_attribute/index','id='.$type.id)}">属性</a>
-                                    <a class="btn btn-sm btn-primary" href="{:url('admin/type_option/index','id='.$type.id)}">规格</a>
-                                    <a class="btn btn-sm btn-primary" href="{:url('admin/type/edit','id='.$type.id)}">编辑</a>
-                                    <a  class="btn btn-sm btn-danger" href="javascript:void(0)" data-id="{$type.id}" data-toggle="modal" data-target="#delete-modal">删除</a>
+                                    <a class="btn btn-sm btn-warning" href="{:url('admin/type_option/index','id='.$type.id)}">规格</a>
+                                    <a class="btn btn-sm btn-info" href="{:url('admin/type/edit','id='.$type.id)}">编辑</a>
+                                    {if $type.push==0}
+                                        <a class="btn btn-sm btn-success" href="javascript:void(0)" data-id="{$type.id}" data-toggle="modal" data-sure='#push-up-request' data-target="#push-up-modal">设为推荐</a>
+                                    {else/}
+                                        <a class="btn btn-sm btn-success" href="javascript:void(0)" data-id="{$type.id}" data-toggle="modal" data-sure='#push-down-request' data-target="#push-down-modal">取消推荐</a>
+                                    {/if}
+                                    <a class="btn btn-sm btn-danger" href="javascript:void(0)" data-id="{$type.id}" data-toggle="modal" data-target="#delete-modal">删除</a>
                                     {if $type.level == 0 || $type.level == 1}
-                                    <a class="btn btn-sm btn-danger" href="{:url('admin/type/create','id='.$type.id)}">添加</a>
+                                    <a class="btn btn-sm btn-primary" href="{:url('admin/type/create','id='.$type.id)}">添加</a>
                                     {/if}
                                 </td>
                             </tr>
@@ -103,12 +107,39 @@
     </div>
 </div>
 
-{include file="layout/footer" title="$title" keywords="开源WEB开发框架" /}
-<script type="text/javascript">
+<div class="modal fade push" id="push-up-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">设为推荐吗？</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="push-up-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<div class="modal fade push" id="push-down-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">取消推荐吗？</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="push-down-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{include file="layout/footer" title="$title" keywords="" /}
+<script src="__STATIC__/js/plugins/layer/layer.js"></script>
+<script src="__STATIC__/js/admin/admin.function.js"></script>
+<script type="text/javascript">
+    var url = '{:url("admin/type/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+    $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
     //折叠展示
-    function displayData(_self)
-    {
+    function displayData(_self) {
         if(_self.title == "关闭")
         {
             jqshow($(_self).parent().parent().attr('id'), 'hide');
@@ -179,4 +210,30 @@
         })
     });
 
+    $('.push').on('show.bs.modal', function (event) {
+        var id = $(event.relatedTarget).data('id');
+        $($(event.relatedTarget).data('sure')).data('id',id);
+    });
+
+    $('#push-up-request').click(function(){
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        var url = '{:url("Type/pushUp")}';
+        $.post(url,{'id':id} ,function(res){
+            returnData(res);
+        });
+    })
+
+    $('#push-down-request').click(function(){
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        var url = '{:url("Type/pushDown")}';
+        $.post(url,{'id':id} ,function(res){
+            returnData(res);
+        });
+    })
 </script>

@@ -8,6 +8,12 @@
 
 namespace app\api\controller;
 
+use app\common\model\IndexUser;
+use app\common\model\IndexGroup;
+use app\common\model\MallGoods;
+use app\common\model\MallGoodsSpecifications;
+use app\common\model\MallTypeOption;
+use app\common\model\MallUnit;
 use think\Request;
 
 class MallCart extends Base{
@@ -38,22 +44,34 @@ class MallCart extends Base{
     public function add(Request $request){
         $id = $request->post('id',0);
         $number = $request->post('number',1);
+        $optionId = $request->post('optionId',0,'intval');
+        $colorId = $request->post('colorId',0,'intval');
+
+        if($optionId == 0 && $colorId == 0){
+            return ['status'=>1,'data'=>[],'msg'=>'请选择商品规格'];
+        }
 
         //验证登录
         $auth = $this->auth();
         if($auth){
             return $auth;
         }
+        if($this->groupId != IndexGroup::GROUP_BUYER){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限操作'];
+        }
 
         //查询是否
         $model = new MallGoods();
         $row = $model->where(['id'=>$id,'state'=>MallGoods::STATE_SALE])->find();
         if(!$row){
-            return ['status'=>1,'data'=>[],'msg'=>'商品不存在'];
+            return ['status'=>1,'data'=>[],'msg'=>'商品不存在或已下架'];
         }
-        //$
+        //
+        $goodsSpecificationsModel = new MallGoodsSpecifications();
+        $specificationsRow = $goodsSpecificationsModel->where(['color_id'=>$colorId,'option_id'=>$optionId,'goods_id'=>$id])->field(['id','w_price'])->find();
+
         $cartModel = new \app\common\model\MallCart();
-        $where = ['user_id'=>$this->userId,'goods_id'=>$id];
+        $where = ['user_id'=>$this->userId,'goods_id'=>$id,'goods_specifications_id'=>$specificationsRow ? $specificationsRow->id : 0];
         $cartRow = $cartModel->where($where)->find();
         if($cartRow){
             $result = $cartModel->where($where)->setInc('quantity',$number);
@@ -66,8 +84,9 @@ class MallCart extends Base{
                 'key' => 0,
                 'goods_id' => $id,
                 'quantity'=>$number,
-                'price' => $row->w_price,
-                'create_time' => time()
+                'price' => $specificationsRow ? $specificationsRow->w_price : $row->w_price,
+                'time' => time(),
+                'goods_specifications_id' => $specificationsRow ? $specificationsRow->id : 0
             ];
             $result = $cartModel->save($data);
         }
@@ -83,6 +102,7 @@ class MallCart extends Base{
      * @param Request $request
      */
     public function index(Request $request){
+        $ids = $request->get('ids','');
         //验证登录
         $auth = $this->auth();
         if($auth){
@@ -90,19 +110,63 @@ class MallCart extends Base{
         }
         //查询数据
         $model = new \app\common\model\MallCart();
-        $rows = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['user_id'=>$this->userId])->field(['b.id','b.icon','b.title','b.w_price','b.min_price','b.max_price','a.id as cart_id','a.quantity'])->select();
 
-        $data = [];
+        if($ids){
+           // $where['id'] = ['in',explode(',')];
+            $where = [
+              'a.id' => ['in',explode(',',$ids)],
+              'a.user_id' => $this->userId
+            ];
+        }else{
+           $where = [
+               'a.user_id' => $this->userId
+           ];
+        }
+
+        $rows = $model->alias('a')
+            ->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')
+            ->join(config('prefix').'mall_goods_specifications c','a.goods_specifications_id=c.id','left')
+            ->where($where)
+            ->field(['b.id','b.icon','b.title','b.supplier','b.w_price','a.id as cart_id','b.unit','a.quantity','c.w_price as goods_price','c.color_id','c.color_name','c.option_id'])->select();
+        $supplierData = [];
+        $typeOptionModel = new MallTypeOption();
+        $unitModel = new MallUnit();
         foreach ($rows as $row){
-            $data[] = [
+            $specificationsInfo = $row->color_name ? $row->color_name : '';
+            if($row->option_id > 0){
+                $typeOptionRow = $typeOptionModel->where(['id'=>$row->option_id])->find();
+                if($typeOptionRow){
+                    $specificationsInfo ? $specificationsInfo .=','.$typeOptionRow->name : $specificationsInfo .=$typeOptionRow->name;
+                }
+            }
+            $unitRow = $unitModel->find(['id'=>$row->unit]);
+
+            $supplierData[$row->supplier][] = [
                 'goodsId' => $row->id,
                 'cartId' => $row->cart_id,
-                'price' => $row->w_price,
+                'price' => $row->goods_price ?  getFormatPrice($row->goods_price) : getFormatPrice($row->w_price),
                 'title' => $row->title,
                 'icon' => MallGoods::getFormatImg($row->icon),
-                'quantity' => intval($row->quantity)
+                'quantity' => intval($row->quantity),
+                'specificationsInfo' => $specificationsInfo,
+                'option_id' => $row->option_id ? $row->option_id : '',
+                'color_id' => $row->color_id ? $row->color_id : '',
+                'no' =>'',
+                'requirement' => '',
+                'unit' => $unitRow ? $unitRow->name : ''
             ];
         }
+        $data = [];
+        foreach ($supplierData as $supplierId => $supplierRow){
+            $userModel = new IndexUser();
+            $userInfo = $userModel->getInfoById($supplierId);
+
+            $data[] = [
+                'supplierName' => $userInfo ? ($userInfo->real_name ? $userInfo->real_name : '') : '',
+                'list' => $supplierRow
+            ];
+        }
+
         return ['status'=>0,'data'=>$data,'msg'=>''];
     }
 
@@ -112,18 +176,44 @@ class MallCart extends Base{
      * @return array|void
      */
     public function delete(Request $request){
-        $id = $request->post('id',0);
+        $ids = $request->post('ids','');
         //验证登录
         $auth = $this->auth();
         if($auth){
             return $auth;
         }
+        $idsArr = explode(',',$ids);
+        if(!$idsArr){
+            return ['status'=>1,'data'=>[],'msg'=>'删除失败'];
+        }
+
         $cartModel = new \app\common\model\MallCart();
-        $result = $cartModel->where(['id'=>$id])->delete();
-        if($request !== false){
+        $result = $cartModel->where('id','in',$idsArr)->where(['user_id'=>$this->userId])->delete();
+        if($result !== false){
             return ['status'=>0,'data'=>[],'msg'=>'删除成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'删除失败'];
+    }
+
+    /**
+     * @desc 更细购物车数量
+     * @param Request $request
+     * @return array|void
+     */
+    public function update(Request $request){
+        $id = $request->post('id','');
+        $number = $request->post('number',1,'intval');
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $cartModel = new \app\common\model\MallCart();
+        $result = $cartModel->save(['quantity'=>$number],['user_id'=>$this->userId,'id'=>$id]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'更新成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'更细失败'];
     }
 
 

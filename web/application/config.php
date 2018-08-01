@@ -41,7 +41,7 @@ return [
     // 是否开启多语言
     'lang_switch_on'         => false,
     // 默认全局过滤方法 用逗号分隔多个
-    'default_filter'         => '',
+    'default_filter'         => 'trim',
     // 默认语言
     'default_lang'           => 'zh-cn',
     // 应用类库后缀
@@ -241,22 +241,73 @@ return [
 
     //自定义配置
     'jzdc_domain'=>'http://'.$_SERVER['HTTP_HOST'],
-  //  'jzdc_domain' => 'http://192.168.3.101',//
     'jzdc_token_key' => 'jzdc@12345',
     'jzdc_upload' => [  //上传图片配置参数
         'company' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/company',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
         ],
         'banner' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/banner',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
         ],
         'type_icon' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/type_icon',
+            'size' => 2*1024*1024,
+            'ext' => 'jpg,jpeg,png',
         ],
         'order' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/order',
-            'thumb' => ['width'=>100,'height'=>100]
+            'thumb' => ['width'=>100,'height'=>100],
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
+        ],
+        'certification' => [
+            'path' => ROOT_PATH.'public'.DS.'uploads/company_cert',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
+        ],
+        'goods_thumb' =>[
+            'path' => ROOT_PATH.'public'.DS.'uploads/goods_thumb',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
+        ],
+        'goods' => [
+            'path' => ROOT_PATH.'public'.DS.'uploads/goods',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
+        ],
+        'goods_color' => [
+            'path' => ROOT_PATH.'public'.DS.'uploads/goods_color',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
+        ],
+        'common' => [
+            'path' => ROOT_PATH.'public'.DS.'uploads/common',
+        ],
+        'user_icon' => [
+            'path' => ROOT_PATH.'public'.DS.'uploads/user_icon',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
+        ],
+        'type_index_icon' => [
+            'path' => ROOT_PATH.'public'.DS.'uploads/type_index_icon',
+            'size' => 2*1024*1024,
+            'ext' => 'jpg,jpeg,png',
         ]
     ],
-    'jzdc_doc_path' => 'http://192.168.3.101/web/public/uploads/'
+    'jzdc_doc_path' => 'http://'.$_SERVER['HTTP_HOST'].'/web/public/uploads/',
+
+    ////////////////////////邮件配置//////////////////////////////////////
+    'JZDC_MAIL_ADDRESS' => '',
+    'JZDC_MAIL_SMTP' => 'smtp.exmail.qq.com',
+    'JZDC_MAIL_LOGINNAME' => 'jzdc@jizhongdiancai.com',
+    'JZDC_MAIL_PASSWORD' => '44339674abAB',
+    'Captcha'=>[
+        'fontSize'  => 38,
+        'length'    => 4,
+        'useCurve'  => false
+    ]
 ];

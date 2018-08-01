@@ -87,8 +87,13 @@ foreach($r as $v){
 if($module['filter']!=''){$module['filter']=self::$language['content_filter'].'：'.$module['filter'].'<br /><br />';}
 $fields=trim($fields,',');
 $search_able=trim($search_able,'or ');
-$sql="select `publish`,`id`,`write_time`,`writer`,`sequence`,".$fields." from ".self::$table_pre.$table_name.
-    " f, (select u.id as uid,u.username as username from jzdc_index_user u) uu where uu.uid = f.writer ";
+if($table_name == 'fin_service'){
+    $module['head_field'].="<td><a href=# title=".self::$language['order']." class='sorting'  desc='type|desc' asc='type|asc'>预约服务</a></td>";
+    $sql = "select `publish`,`id`,`write_time`,`writer`,`sequence`,`type`,".$fields." from ".self::$table_pre.$table_name;
+}else{
+    $sql="select `publish`,`id`,`write_time`,`writer`,`sequence`,".$fields." from ".self::$table_pre.$table_name.
+        " f, (select u.id as uid,u.username as username from jzdc_index_user u) uu where uu.uid = f.writer ";
+}
 
 
 if($_GET['search']!=''){
@@ -104,9 +109,12 @@ if(@$_GET['order']==''){
 }
 $limit=" limit ".($_GET['current_page']-1)*$page_size.",".$page_size;
 	$sum_sql=$sql.$where;
-	$sum_sql=str_replace(" `publish`,`id`,`write_time`,`writer`,`sequence`,".$fields." "," count(id) as c ",$sum_sql);
+if($table_name == 'fin_service') {
+    $sum_sql = str_replace(" `publish`,`id`,`write_time`,`writer`,`sequence`,`type`," . $fields . " ", " count(id) as c ", $sum_sql);
+}else{
+    $sum_sql = str_replace(" `publish`,`id`,`write_time`,`writer`,`sequence`," . $fields . " ", " count(id) as c ", $sum_sql);
+}
 	$sum_sql=str_replace("_".$table_name." and","_".$table_name." where",$sum_sql);
-	//echo $sum_sql;
 	$r=$pdo->query($sum_sql,2)->fetch(2);
 	$sum=$r['c'];
 $sql=$sql.$where.$order.$limit;
@@ -215,11 +223,38 @@ foreach($r as $v){
 
 		$filed_data.='<td><span class='.$vv.'>&nbsp;'.$data.'</span></td>';
 	}
+
+    if (isset($v['type'])){
+        switch ($v['type']) {
+            case 0:
+                $data = '未设置';
+                break;
+            case 1:
+                $data = '保险';
+                break;
+            case 2:
+                $data = '法务';
+                break;
+            case 3:
+                $data = '金融';
+                break;
+            case 4:
+                $data = '售后';
+                break;
+            case 5:
+                $data = '知识产权';
+                break;
+            case 6:
+                $data = '自动化';
+                break;
+        }
+        $filed_data.='<td><span>&nbsp;'.$data.'</span></td>';
+    }
+
 if ($v["status"] == 1){
     $review = "<a href='index.php?jzdc=".$class.".data_show_detail&table_id=".$table_id."&id=".$v['id']."' target=_self  class='view'>"."审核"."</a>";
 }else{
     $review = "<a href='index.php?jzdc=".$class.".data_show_detail&table_id=".$table_id."&id=".$v['id']."' target=_blank  class='view'>"."查看"."</a>";
-
 }
 
 	$list.="<tr id='tr_".$v['id']."'>

@@ -9,4 +9,5 @@ program/mall/attachd/image/*
 program/mall/img/*
 program/form/img/*
 program/index/user_icon/*
+program/mall/cache/*
 temp/*

@@ -26,6 +26,16 @@ class Login{
     public function index(Request  $request){
        $name = $request->post('userName','');
        $password = $request->post('password','');
+       $code = $request->post('code','');
+       $id = $request->post('id','');
+
+       //图片验证
+       if($code && $id){
+           if(!captchaDb_check($code,$id)){
+               return ['status'=>1,'data'=>[],'msg'=>'图片验证码错误'];
+           }
+       }
+
        //测试数据
        if(!$name){
            return ['status'=>1,'data'=>[],'msg'=>'账户不能为空'];
@@ -38,7 +48,7 @@ class Login{
        $where = [];
 
        //判断账户类型
-        $field = ['id','username','password','group','nickname','icon','state'];
+        $field = ['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email'];
         if(stripos( $name,'@')){
             $row = $model->where(['email'=>$name])->field($field)->find();
         }else{
@@ -56,7 +66,16 @@ class Login{
             return ['status'=>1,'data'=>[],'msg'=>'密码不正确'];
         }
 
-        $data = [];
+        $data = [
+            'contact' => $row->contact,
+            'tel' => $row->tel ? $row->tel : '',
+            'icon' => $row->icon ? $row->icon : '',
+            'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : '',
+            'phone' => $row->phone,
+            'email' => $row->email,
+            'username' => $row->username,
+            'group' => $row->group
+        ];
         //生成token
         $key = config('jzdc_token_key');
         $token = [
@@ -106,21 +125,9 @@ class Login{
 
         //查询user表是否存在
         $model = new IndexUser();
-        $row = $model->where(['phone'=>$phone])->field(['id','username','password','group','nickname','icon','state'])->find();
+        $row = $model->where(['phone'=>$phone])->field(['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email'])->find();
         if(!$row){
-            //插入新用户
-//            $user = ['group'=>6,'phone'=>$phone,'state'=>1,'username'=>$phone];
-//            $result = IndexUser::create($user);
-//            if(!$result){
-//                return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
-//            }
-//            $token = [
-//                "id" => $result->id,
-//                "group" => $user['group'],
-//                "time" => time(),
-//                "expire" => time() + 5*3600   //过期时间
-//            ];
-            return ['status'=>-2,'data'=>[],'msg'=>'用户未注册'];
+            return ['status'=>-3,'data'=>[],'msg'=>'用户未注册'];
         }else{
             if($row->state != 1){
                 return ['status'=>1,'data'=>[],'msg'=>'用户已被禁用'];
@@ -133,7 +140,16 @@ class Login{
             ];
         }
 
-        $data = [];
+        $data = [
+            'contact' => $row->contact,
+            'tel' => $row->tel ? $row->tel : '',
+            'icon' => $row->icon ? $row->icon : '',
+            'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : '',
+            'phone' => $row->phone,
+            'email' => $row->email,
+            'username' => $row->username,
+            'group' => $row->group
+        ];
         //生成token
         $key = config('jzdc_token_key');
         $jwt = JWT::encode($token,$key);
