@@ -341,7 +341,7 @@ class User extends Base
         //在售商品访问量
         $goodsInfo = $goodsModel->where(['state'=>2,'mall_state'=>1,'supplier'=>$this->userId])->field(['count(*) as count','sum(visit) as visit'])->find();
         //
-        return ['status' => 0, 'data' => ['yesterday' => $yesterdayCount, 'total' => $total, 'pending' => $pendingNumber,'service'=>$serviceNumber,'goodsNumber'=>$goodsInfo->count,'visit'=>$goodsInfo->visit], 'msg' => ''];
+        return ['status' => 0, 'data' => ['yesterday' => $yesterdayCount, 'total' => $total, 'pending' => $pendingNumber,'service'=>$serviceNumber,'goodsNumber'=>$goodsInfo->count,'visit'=>$goodsInfo->visit ? $goodsInfo->visit : 0], 'msg' => ''];
     }
 
     /**
