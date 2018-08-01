@@ -354,6 +354,9 @@ class Goods  extends Base {
             $isFavorite = $exist ? 1 : 0;
         }
 
+        //更新商品访问量
+        $model->where(['id'=>$id])->setInc('visit',1);
+
         //单位
         $unitModel = new MallUnit();
         $unitRow = $unitModel->find(['id'=>$row->unit]);

@@ -336,7 +336,12 @@ class User extends Base
         $total = $model->where(['supplier' => $this->userId])->count();
         $pendingNumber = $model->where(['supplier' => $this->userId, 'state' => MallOrder::STATE_DELIVER])->count();
         $serviceNumber = $model->where(['supplier'=> $this->userId,'state'=>MallOrder::STATE_RECEIVE,'service_type'=>1])->order(['supplier'=> $this->userId,'state'=>MallOrder::STATE_FINISH,'service_type'=>1])->count();
-        return ['status' => 0, 'data' => ['yesterday' => $yesterdayCount, 'total' => $total, 'pending' => $pendingNumber,'service'=>$serviceNumber], 'msg' => ''];
+        //在售商品总数
+        $goodsModel = new MallGoods();
+        //在售商品访问量
+        $goodsInfo = $goodsModel->where(['state'=>2,'mall_state'=>1,'supplier'=>$this->userId])->field(['count(*) as count','sum(visit) as visit'])->find();
+        //
+        return ['status' => 0, 'data' => ['yesterday' => $yesterdayCount, 'total' => $total, 'pending' => $pendingNumber,'service'=>$serviceNumber,'goodsNumber'=>$goodsInfo->count,'visit'=>$goodsInfo->visit], 'msg' => ''];
     }
 
     /**
