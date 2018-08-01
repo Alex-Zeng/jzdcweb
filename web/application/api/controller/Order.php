@@ -973,4 +973,71 @@ class Order extends Base{
     }
 
 
+    /**
+     * @desc 采购商供应商订单
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getDeskList(){
+        $type = Request::instance()->get('type',1);
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        //
+        $model = new MallOrder();
+        $where = [];
+        if($this->groupId!= IndexGroup::GROUP_BUYER && $this->groupId != IndexGroup::GROUP_SUPPLIER){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
+        }
+        if($this->groupId == IndexGroup::GROUP_SUPPLIER){
+            $where['supplier'] = $this->userId;
+        }elseif ($this->groupId == IndexGroup::GROUP_BUYER){
+            $where['buyer_id'] = $this->userId;
+        }
+
+        switch ($type){
+            case 1:  //近期成交
+                break;
+            case 2: //待发货
+                $where['state'] = 3;
+                break;
+            case 3: //待售后
+                $where['service_type'] = 1;
+                break;
+            default:
+        }
+
+        $field = ['id','add_time','out_id','supplier','goods_count','actual_money','state','service_type'];
+        $rows = $model->where($where)->order('add_time','desc')->field($field)->select();
+        $supplierIds = [];
+        foreach ($rows as $row){
+            $supplierIds[] = $row->supplier;
+        }
+
+        $userModel = new IndexUser();
+        $supplierInfos = $userModel->where(['id'=>['in',$supplierIds]])->field(['id','real_name'])->select();
+
+        $supplierMap = [];
+        foreach ($supplierInfos as $supplierInfo){
+            $supplierMap[$supplierInfo->id] = $supplierInfo->real_name;
+        }
+
+        $data = [];
+        foreach ($rows as $row){
+            $data[] = [
+                'orderNo'=> $row->out_id,
+                'supplierName' => isset($supplierMap[$row->supplier]) ? $supplierMap[$row->supplier] : '',
+                'orderTime' => date('Y-m-d H:i',$row->add_time),
+                'goodsNumber' => intval($row->goods_count),
+                'totalMoney' => $row->actual_money,
+                'stateInfo'=> getOrderStatusInfo($row->state,$row->service_type)
+            ];
+        }
+        return ['status'=>0,'data'=>['list'=>$data],'msg'=>''];
+    }
+
 }
