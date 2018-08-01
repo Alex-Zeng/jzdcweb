@@ -309,5 +309,6 @@ return [
         'fontSize'  => 38,
         'length'    => 4,
         'useCurve'  => false
-    ]
+    ],
+    'JZDC_SERVICE_EMAIL' => 'fuwu@jizhongdiancai.com'
 ];
