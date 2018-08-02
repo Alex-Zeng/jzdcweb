@@ -758,7 +758,7 @@ class User extends Base
         //验证短信
         $codeModel = new \app\common\model\Code();
         $codeRow = $codeModel->where(['phone' => $oldInfo->phone, 'type' => \app\common\model\Code::TYPE_PHONE_BIND_OLD])->order('id', 'desc')->find();
-        if (!$codeRow || $codeRow['code'] != $code) {
+        if (!$codeRow || $codeRow['code'] != $oldCode) {
             return ['status' => 1, 'data' => [], 'msg' => '短信验证码错误'];
         }
         if ($codeRow['expire_time'] < time()) {
@@ -766,7 +766,7 @@ class User extends Base
         }
 
         $codeRow = $codeModel->where(['phone' => $phone, 'type' => \app\common\model\Code::TYPE_PHONE_BIND_NEW])->order('id', 'desc')->find();
-        if (!$codeRow || $codeRow['code'] != $code) {
+        if (!$codeRow || $codeRow['code'] != $newCode) {
             return ['status' => 1, 'data' => [], 'msg' => '短信验证码错误'];
         }
         if ($codeRow['expire_time'] < time()) {
