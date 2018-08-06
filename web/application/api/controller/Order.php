@@ -20,6 +20,7 @@ use app\common\model\MallReceiver;
 use app\common\model\MallTypeOption;
 use app\common\model\OrderMsg;
 use app\common\model\UserGoodsSpecifications;
+use sms\Yunpian;
 use think\Request;
 
 class Order extends Base{
@@ -569,13 +570,20 @@ class Order extends Base{
 
         $result = $model->save($data,$where);
         if($result !== false){
-            //消息通知
+            //消息通知采购商
             $orderMsgModel = new OrderMsg();
             $userModel = new IndexUser();
             $content = "订单号：{$row->out_id}【{$row->goods_names}】供应商已经发货。";
             $msgData = ['title'=>'订单已发货','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
             $orderMsgModel->save($msgData);
             $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+
+            //短信通知采购商
+            $buyerInfo = $userModel->getInfoById($row->buyer_id);
+            $supplierInfo = $userModel->getInfoById($row->supplier);
+            $yunpian = new Yunpian();
+            $yunpian->send($buyerInfo->phone,['order_id'=>$row->out_id,'express_code'=>$express_code,'express_name'=>$express_name,'supplier'=>$supplierInfo ? $supplierInfo->real_name : ''],Yunpian::TPL_ORDER_SEND);
+
             return ['status'=>0,'data'=>[],'msg'=>'提交成功'];
         }
         return ['status'=>1,'data'=>0,'msg'=>'提交失败'];
