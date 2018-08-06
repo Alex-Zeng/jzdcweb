@@ -708,7 +708,7 @@ class User extends Base
         }
 
         $model = new MallReceiverTag();
-        $row = $model->where(['user_id' => $this->userId])->whereOr(['is_default'=>1])->order('is_default','desc')->field(['tag', 'id'])->order('id', 'desc')->select();
+        $row = $model->where(['user_id' => $this->userId])->field(['tag', 'id'])->order('id', 'desc')->select();
 
         return ['status' => 0, 'data' => $row, 'msg' => ''];
     }
