@@ -91,7 +91,7 @@
                                 <td>{$goods.shop_sequence}</td>
                                 <td>{$goods.state == 2 ? '是' : '否'}</td>
                                 <td>{:getGoodsMallState($goods.mall_state,1)}</td>
-                                <td>
+                                <td class="list-action">
                                     <a href="{:url('admin/goods/view','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-info">详情</a>
                                     {if $groupId == 2}
                                     <a href="javascript:void(0)"  class="btn btn-sm btn-secondary"  data-id="{$goods.id}" data-toggle="modal"   data-target="#check-modal">审核</a>
@@ -102,7 +102,7 @@
                                         {if $goods.state == 2}
                                             <a href="{:url('admin/goods/edit','id='.$goods.id)}"  target="_blank" data-toggle="modal"  data-id="{$goods.id}"  data-state="1" data-target="#down-modal"  class="btn btn-sm btn-warning">下架</a>
                                         {else}
-                                            <a href="{:url('admin/goods/edit','id='.$goods.id)}"  target="_blank" data-toggle="modal" data-id="{$goods.id}"  data-state="2" data-target="#up-modal"  class="btn btn-sm btn-warning">上架</a>
+                                            <a href="{:url('admin/goods/edit','id='.$goods.id)}"  target="_blank" data-toggle="modal" data-id="{$goods.id}"  data-state="2" data-target="#up-modal"  class="btn btn-sm btn-secondary">上架</a>
                                         {/if}
                                         <a href="javascript:void(0)"  class="btn btn-sm btn-danger"  data-id="{$goods.id}" data-toggle="modal"   data-target="#delete-modal">删除</a>
                                         {if $goods.push==0}

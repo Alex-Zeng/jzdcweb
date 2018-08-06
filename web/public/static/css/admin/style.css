@@ -24,3 +24,6 @@
 .no-padding{
     padding: 0 !important;
 }
+.list-action a{
+    margin-bottom: 2px;
+}
