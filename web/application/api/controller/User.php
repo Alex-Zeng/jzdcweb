@@ -56,7 +56,7 @@ class User extends Base
         $tag = $request->post('tag', '');
         $default = $request->post('is_default', 0, 'intval');
         if (!checkPhone($phone)) {
-            return ['status' => 1, 'data' => [], 'msg' => '手机号格式不正确'];
+            return ['status' => 1, 'data' => [], 'msg' => '您输入的联系方式无效，请输入有效的手机号码！'];
         }
 
         if (!$detail) {
