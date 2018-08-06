@@ -82,7 +82,7 @@ class Login{
             "id" => $row->id,
             "group" => $row->group,
             "time" => time(),
-            "expire" => time() + 5*3600   //过期时间
+            "expire" => time() + config('JZDC_TOKEN_EXPIRE')   //过期时间
         ];
        $jwt = JWT::encode($token,$key);
        $data['token']= $jwt;
@@ -136,7 +136,7 @@ class Login{
                 "id" => $row->id,
                 "group" => $row->group,
                 "time" => time(),
-                "expire" => time() + 5*3600   //过期时间
+                "expire" => time() + config('JZDC_TOKEN_EXPIRE')   //过期时间
             ];
         }
 

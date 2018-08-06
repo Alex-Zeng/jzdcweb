@@ -118,7 +118,7 @@ class Register{
                 "id" => $model->id,
                 "group" => 6,
                 "time" => time(),
-                "expire" => time() + 5*3600   //过期时间
+                "expire" => time() + config('JZDC_TOKEN_EXPIRE')   //过期时间
             ];
             $jwt = JWT::encode($token,$key);
             $data['token']= $jwt;

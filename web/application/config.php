@@ -310,5 +310,6 @@ return [
         'length'    => 4,
         'useCurve'  => false
     ],
-    'JZDC_SERVICE_EMAIL' => 'fuwu@jizhongdiancai.com'
+    'JZDC_SERVICE_EMAIL' => 'fuwu@jizhongdiancai.com',
+    'JZDC_TOKEN_EXPIRE' => 30*24*3600,    //30天过期
 ];
