@@ -237,3 +237,6 @@ bank_corporate varchar(40) not null default '' comment '对公账号',
 bank_address varchar(50) not null default '' comment '开户支行',
 add_time int not null default 0 comment '添加时间'
 )engine innodb charset utf8 comment '保理业务申请';
+
+-- 收货地址标签新增默认
+ALTER TABLE `jzdc_mall_receiver_tag` ADD COLUMN `is_default`  tinyint(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '1=P平台默认 0=用户自定义';

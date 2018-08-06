@@ -43,7 +43,7 @@
                                         <option  {if $status eq 3}selected{/if} value="3">已拒绝</option>
                                     </select>
                                 </div> &nbsp;&nbsp;
-                                <div class="input-group">
+                                <div class="input-group" style="min-width: 280px">
                                     <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="企业名称/法人代表/联系人" aria-label="Search">
                                     <div class="input-group-append">
                                         <button class="btn btn-primary" id="search" type="submit">查找</button>
@@ -93,7 +93,7 @@
                             </tbody>
                             <tfoot>
                             <tr>
-                                <td colspan="5">{$page}</td>
+                                <td colspan="10">{$page}</td>
                             </tr>
                             </tfoot>
                         </table>
