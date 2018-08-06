@@ -266,7 +266,7 @@
                                 <div class="form-group form-inline">
                                     <label class="col-md-3">核实总价</label>
                                     <div class="input-group">
-                                        <input class="form-control form-control-navbar"  min="0" name="sum_money" type="text"  value="" placeholder="" aria-label="Search">
+                                        <input class="form-control form-control-navbar"  name="sum_money" type="text"  value="" placeholder="" aria-label="Search">
                                         <div class="input-group-append" style="padding-left: 5px;padding-top: 5px;">元</div>
                                     </div>
                                 </div>
@@ -508,9 +508,13 @@
                         message: '总价必须填写'
                     },
                     regexp: {
-                        regexp: /^([1-9][0-9]*)+(.[0-9]{1,2})?$/,
-                        message: '无效的价格'
-                    }
+                        regexp: /^([1-9]*)+(.[0-9]{1,2})?$/,
+                        message: '无效格式或总价不能输入小于1'
+                    },
+                    // greaterThan: {
+                    //     value: 1,
+                    //     message: ''
+                    // },
                 }
             }
         }
