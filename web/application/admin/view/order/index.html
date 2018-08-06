@@ -183,10 +183,10 @@
                                 <td style="vertical-align: middle">{:getOrderState($order.state,1)}</td>
                                 <td style="vertical-align: middle">
                                     {if $order.state == 0} <!-- 待核价-->
-                                    <a href="javascript:void(0)" data-id="{$order.id}"  data-date="{if $order.delivery_time > 0}{:date('Y-m-d',$order.delivery_time)}{/if}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#pricing-modal">核价</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}"  data-date="{:date('Y-m-d',strtotime('+1 day'))}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#pricing-modal">核价</a>
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
                                     {elseif $order.state == 1}<!-- 待签约-->
-                                    <a href="javascript:void(0)" data-id="{$order.id}" data-date="{if $order.delivery_time > 0}{:date('Y-m-d',$order.delivery_time)}{/if}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#sign-modal">签约</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}" data-date="{:date('Y-m-d',strtotime('+1 day'))}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#sign-modal">签约</a>
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
                                     {elseif $order.state == 2}<!-- 待采购商打款-->
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary" data-tag ="1" data-toggle="modal" data-target="#remittance-modal" >收款</a>
