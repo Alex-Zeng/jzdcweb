@@ -359,9 +359,10 @@ class User extends Base
             return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
         }
         $model = new MallOrder();
-        $payCount = $model->where(['buyer_id' => $this->userId,'state'=>MallOrder::STATE_REMITTANCE])->count();
-        $recieveNumber = $model->where(['buyer_id' => $this->userId,'state'=>MallOrder::STATE_RECEIVE])->count();
-        $pendingNumber = $model->where(['buyer_id' => $this->userId,'state'=>MallOrder::STATE_DELIVER])->count();
+        $condition = [MallOrder::STATE_REMITTANCE,MallOrder::STATE_ACCOUNT_PERIOD,MallOrder::STATE_OVERDUE];
+        $payCount = $model->where(['buyer_id' => $this->userId])->whereIn('state',$condition)->count();
+        $recieveNumber = $model->where(['buyer_id' => $this->userId,MallOrder::STATE_RECEIVE])->count();
+        $pendingNumber = $model->where(['buyer_id' => $this->userId,MallOrder::STATE_DELIVER])->count();
         $serviceNumber = $model->where(['buyer_id'=> $this->userId,'service_type'=>1])->count();
         return ['status' => 0, 'data' => ['pay' => $payCount, 'recieve' => $recieveNumber, 'deliver' => $pendingNumber,'service'=>$serviceNumber], 'msg' => ''];
     }
