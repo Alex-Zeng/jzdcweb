@@ -838,7 +838,7 @@ class User extends Base
         }
 
         if (!checkPassword($password) || !checkPassword($confirmPassword)){
-            return ['status'=>1,'data'=>[],'msg'=>'密码必须为4-20位的数字和字母组合'];
+            return ['status'=>1,'data'=>[],'msg'=>'密码必须为6-20位的数字和字母组合'];
         }
 
         if ($password != $confirmPassword) {

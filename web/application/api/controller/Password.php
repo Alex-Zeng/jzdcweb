@@ -106,14 +106,14 @@ class Password{
         if(!$password){
             return ['status'=>1,'data'=>[],'msg'=>'密码不能为空'];
         }elseif (!checkPassword($password)){
-            return ['status'=>1,'data'=>[],'msg'=>'密码必须为4-20位的数字和字母组合'];
+            return ['status'=>1,'data'=>[],'msg'=>'密码必须为6-20位的数字和字母组合'];
         }
 
 
         if(!$confirmPassword){
             return ['status'=>1,'data'=>[],'msg'=>'确认密码不能为空'];
         }elseif (!checkPassword($confirmPassword)){
-            return ['status'=>1,'data'=>[],'msg'=>'密码必须为4-20位的数字和字母组合'];
+            return ['status'=>1,'data'=>[],'msg'=>'密码必须为6-20位的数字和字母组合'];
         }
 
         if($password != $confirmPassword){
