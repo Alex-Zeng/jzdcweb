@@ -362,7 +362,7 @@ class User extends Base
         $payCount = $model->where(['buyer_id' => $this->userId,'state'=>MallOrder::STATE_REMITTANCE])->count();
         $recieveNumber = $model->where(['buyer_id' => $this->userId,'state'=>MallOrder::STATE_RECEIVE])->count();
         $pendingNumber = $model->where(['buyer_id' => $this->userId,'state'=>MallOrder::STATE_DELIVER])->count();
-        $serviceNumber = $model->where(['buyer_id'=> $this->userId,'state'=>MallOrder::STATE_RECEIVE,'service_type'=>1])->order(['buyer_id'=> $this->userId,'state'=>MallOrder::STATE_FINISH,'service_type'=>1])->count();
+        $serviceNumber = $model->where(['buyer_id'=> $this->userId,'service_type'=>1])->count();
         return ['status' => 0, 'data' => ['pay' => $payCount, 'recieve' => $recieveNumber, 'deliver' => $pendingNumber,'service'=>$serviceNumber], 'msg' => ''];
     }
 
