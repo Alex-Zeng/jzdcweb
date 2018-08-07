@@ -528,21 +528,21 @@ class Order extends Base{
                 $orderEnd = $counter + $goodsCount - 1;
 
                 //合并单元格
-                if ($orderEnd > $orderStart) {
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A' . $orderStart . ':A' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B' . $orderStart . ':B' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('C' . $orderStart . ':C' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D' . $orderStart . ':D' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('E' . $orderStart . ':E' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F' . $orderStart . ':F' . $orderEnd);
-
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('N' . $orderStart . ':N' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('O' . $orderStart . ':O' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('P' . $orderStart . ':P' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('Q' . $orderStart . ':Q' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('R' . $orderStart . ':R' . $orderEnd);
-
-                }
+//                if ($orderEnd > $orderStart) {
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A' . $orderStart . ':A' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B' . $orderStart . ':B' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('C' . $orderStart . ':C' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D' . $orderStart . ':D' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('E' . $orderStart . ':E' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F' . $orderStart . ':F' . $orderEnd);
+//
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('N' . $orderStart . ':N' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('O' . $orderStart . ':O' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('P' . $orderStart . ':P' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('Q' . $orderStart . ':Q' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('R' . $orderStart . ':R' . $orderEnd);
+//
+//                }
                 foreach ($goodsRows as $goodsRow) {
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('A' . $counter, date('Y-m-d H:i', $row->add_time));
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValueExplicit('B'.$counter,$row->out_id,\PHPExcel_Cell_DataType::TYPE_STRING);

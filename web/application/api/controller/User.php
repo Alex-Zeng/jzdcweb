@@ -338,10 +338,25 @@ class User extends Base
         $serviceNumber = $model->where(['supplier'=> $this->userId,'state'=>MallOrder::STATE_RECEIVE,'service_type'=>1])->order(['supplier'=> $this->userId,'state'=>MallOrder::STATE_FINISH,'service_type'=>1])->count();
         //在售商品总数
         $goodsModel = new MallGoods();
+        //交易金额   $where['confirm_delivery_time'] = ['>',0];
+        $moneyInfo = $model->where(['supplier'=>$this->userId,'confirm_delivery_time'=>['gt',0]])->field(['sum(`actual_money`) as money'])->find();
+
         //在售商品访问量
         $goodsInfo = $goodsModel->where(['state'=>2,'mall_state'=>1,'supplier'=>$this->userId])->field(['count(*) as count','sum(visit) as visit'])->find();
         //
-        return ['status' => 0, 'data' => ['yesterday' => $yesterdayCount, 'total' => $total, 'pending' => $pendingNumber,'service'=>$serviceNumber,'goodsNumber'=>$goodsInfo->count,'visit'=>$goodsInfo->visit ? $goodsInfo->visit : 0], 'msg' => ''];
+        return [
+            'status' => 0,
+            'data' => [
+                'yesterday' => $yesterdayCount,
+                'total' => $total,
+                'pending' => $pendingNumber,
+                'service'=>$serviceNumber,
+                'goodsNumber'=>$goodsInfo->count,
+                'visit'=>$goodsInfo->visit ? $goodsInfo->visit : 0,
+                'money' => $moneyInfo  && $moneyInfo->money ? $moneyInfo->money : 0
+            ],
+            'msg' => ''
+        ];
     }
 
     /**
@@ -364,7 +379,18 @@ class User extends Base
         $recieveNumber = $model->where(['buyer_id' => $this->userId,'state' => MallOrder::STATE_RECEIVE])->count();
         $pendingNumber = $model->where(['buyer_id' => $this->userId,'state' => MallOrder::STATE_DELIVER])->count();
         $serviceNumber = $model->where(['buyer_id'=> $this->userId,'service_type'=>1])->count();
-        return ['status' => 0, 'data' => ['pay' => $payCount, 'recieve' => $recieveNumber, 'deliver' => $pendingNumber,'service'=>$serviceNumber], 'msg' => ''];
+        $moneyInfo = $model->where(['buyer_id'=>$this->userId,'confirm_delivery_time'=>['gt',0]])->field(['sum(`actual_money`) as money'])->find();
+        return [
+            'status' => 0,
+            'data' => [
+                'pay' => $payCount,
+                'recieve' => $recieveNumber,
+                'deliver' => $pendingNumber,
+                'service'=>$serviceNumber,
+                'money'=>$moneyInfo && $moneyInfo->money ? $moneyInfo->money : 0
+            ],
+            'msg' => ''
+        ];
     }
 
 
@@ -1046,7 +1072,8 @@ class User extends Base
             'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : '',
             'phone' => $row->phone,
             'email' => $row->email,
-            'username' => $row->username
+            'username' => $row->username,
+            'companyName' => $row->real_name
         ];
 
         return ['status' => 0, 'data' => $return, 'msg' => ''];
