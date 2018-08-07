@@ -78,7 +78,7 @@ function filterDate($value){
  * @return false|int
  */
 function checkPassword($password){
-    return preg_match("/(?=.*[a-z])(?=.*[0-9])[A-Za-z0-9]{4,20}/",$password);
+    return preg_match("/^[a-zA-Z0-9]{6,20}$/",$password);
 }
 
 /**
