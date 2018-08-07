@@ -216,7 +216,7 @@
                                     {/if}
                                     {elseif $order.state == 11}<!-- 转账-->
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#transfer-modal">转账</a>
-                                    if $order.service_type == 1}
+                                    {if $order.service_type == 1}
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#service-modal">售后</a>
                                     {/if}
                                     {elseif $order.state == 13}<!-- 交易完成-->
