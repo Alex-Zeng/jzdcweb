@@ -353,7 +353,7 @@ class User extends Base
                 'service'=>$serviceNumber,
                 'goodsNumber'=>$goodsInfo->count,
                 'visit'=>$goodsInfo->visit ? $goodsInfo->visit : 0,
-                'money' => $moneyInfo  && $moneyInfo->money ? $moneyInfo->money : 0
+                'money' => $moneyInfo  && $moneyInfo->money ? number_format($moneyInfo->money) : 0
             ],
             'msg' => ''
         ];
@@ -387,7 +387,7 @@ class User extends Base
                 'recieve' => $recieveNumber,
                 'deliver' => $pendingNumber,
                 'service'=>$serviceNumber,
-                'money'=>$moneyInfo && $moneyInfo->money ? $moneyInfo->money : 0
+                'money'=>$moneyInfo && $moneyInfo->money ? number_format($moneyInfo->money) : 0
             ],
             'msg' => ''
         ];
