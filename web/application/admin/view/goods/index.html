@@ -25,9 +25,9 @@
                     <div class="card-header">
                         <h3 class="card-title">商品列表</h3>
                     </div>
-                    <div class="row" style="padding-top: 15px;padding-right: 15px">
-                        <div class="col-md-6">
-                            <form class="form-inline ml-3" action="{:url()}"  method="get">
+                    <div class="row" style="padding-top: 15px;padding-right: 15px;padding-left: 15px;">
+                        <div class="col-md-11">
+                            <form class="form-inline" action="{:url()}"  method="get">
                                 <div class="input-group">
                                     <select class="form-control" name="supplier"  placeholder="供应商">
                                         <option value="0" {if $supplier eq 0}selected{/if}>全部供应商</option>
@@ -45,14 +45,21 @@
                                     </select>
                                 </div>&nbsp;&nbsp;
                                 <div class="input-group">
+                                    <select class="form-control" name="push">
+                                        <option  {if $push eq -1} selected{/if} value="-1">是否推荐</option>
+                                        <option  {if $push eq 0} selected{/if} value="0">否</option>
+                                        <option  {if $push eq 1}selected{/if} value="1">是</option>
+                                    </select>
+                                </div>&nbsp;&nbsp;
+                                <div class="input-group">
                                     <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="商品名称" aria-label="Search">
                                     <div class="input-group-append">
                                         <button class="btn btn-primary" id="search" type="submit">查找</button>
                                     </div>
-                                </div>
+                                </div>&nbsp;&nbsp;
                             </form>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-1">
                             {if $groupId eq 3}
                             <a class="btn btn-primary pull-right"  target="_blank"  href="{:url('admin/goods/create')}" >新增</a>
                             {/if}
@@ -84,24 +91,25 @@
                                 <td>{$goods.shop_sequence}</td>
                                 <td>{$goods.state == 2 ? '是' : '否'}</td>
                                 <td>{:getGoodsMallState($goods.mall_state,1)}</td>
-                                <td>
-                                    <a href="{:url('admin/goods/view','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-info"    >详情</a>
+                                <td class="list-action">
+                                    <a href="{:url('admin/goods/view','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-info">详情</a>
                                     {if $groupId == 2}
                                     <a href="javascript:void(0)"  class="btn btn-sm btn-secondary"  data-id="{$goods.id}" data-toggle="modal"   data-target="#check-modal">审核</a>
-                                        {if $goods.push==0}
-                                        <a href="javascript:void(0)"  class="btn btn-sm btn-success"  data-id="{$goods.id}" data-toggle="modal"  data-sure='#push-up-request'  data-target="#push-up-modal">设为推荐</a>
-                                        {else/}
-                                        <a href="javascript:void(0)"  class="btn btn-sm btn-success"  data-id="{$goods.id}" data-toggle="modal"  data-sure='#push-down-request'  data-target="#push-down-modal">取消推荐</a>
-                                        {/if}
+                                        
                                     {/if}
                                     {if $groupId == 3}
-                                    <a href="{:url('admin/goods/edit','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-primary"    >编辑</a>
-                                    {if $goods.state == 2}
-                                    <a href="{:url('admin/goods/edit','id='.$goods.id)}"  target="_blank" data-toggle="modal"  data-id="{$goods.id}"  data-state="1" data-target="#down-modal"  class="btn btn-sm btn-warning">下架</a>
-                                    {else}
-                                    <a href="{:url('admin/goods/edit','id='.$goods.id)}"  target="_blank" data-toggle="modal" data-id="{$goods.id}"  data-state="2" data-target="#up-modal"  class="btn btn-sm btn-warning">上架</a>
-                                    {/if}
-                                    <a href="javascript:void(0)"  class="btn btn-sm btn-danger"  data-id="{$goods.id}" data-toggle="modal"   data-target="#delete-modal">删除</a>
+                                        <a href="{:url('admin/goods/edit','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-primary" >编辑</a>
+                                        {if $goods.state == 2}
+                                            <a href="{:url('admin/goods/edit','id='.$goods.id)}"  target="_blank" data-toggle="modal"  data-id="{$goods.id}"  data-state="1" data-target="#down-modal"  class="btn btn-sm btn-warning">下架</a>
+                                        {else}
+                                            <a href="{:url('admin/goods/edit','id='.$goods.id)}"  target="_blank" data-toggle="modal" data-id="{$goods.id}"  data-state="2" data-target="#up-modal"  class="btn btn-sm btn-secondary">上架</a>
+                                        {/if}
+                                        <a href="javascript:void(0)"  class="btn btn-sm btn-danger"  data-id="{$goods.id}" data-toggle="modal"   data-target="#delete-modal">删除</a>
+                                        {if $goods.push==0}
+                                            <a href="javascript:void(0)"  class="btn btn-sm btn-info"  data-id="{$goods.id}" data-toggle="modal"  data-sure='#push-up-request'  data-target="#push-up-modal">设为推荐</a>
+                                        {else/}
+                                            <a href="javascript:void(0)"  class="btn btn-sm btn-danger"  data-id="{$goods.id}" data-toggle="modal"  data-sure='#push-down-request'  data-target="#push-down-modal">取消推荐</a>
+                                        {/if}
                                     {/if}
                                 </td>
                             </tr>
@@ -350,4 +358,6 @@
             returnData(res);
         });
     })
+
+
 </script>

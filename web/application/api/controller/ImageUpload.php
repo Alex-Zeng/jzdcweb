@@ -22,6 +22,8 @@ class ImageUpload{
         if($file){
             $config = config('jzdc_upload.'.$type);
             $path = $config['path'];
+            //创建文件权限
+            if(!is_dir($path)){ mkdir($path,0777);}
             $info = $file->move($path);
             if($info){
                 $fileName = $info->getSaveName();

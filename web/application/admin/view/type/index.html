@@ -55,7 +55,8 @@
                             <thead>
                             <tr>
                                 <th>分类名称</th>
-                                <th>图标</th>
+                                <th>APP/H5图标</th>
+                                <th>Web图标</th>
                                 <th>排序</th>
                                 <th>首页显示</th>
                                 <th>操作</th>
@@ -66,7 +67,8 @@
                             {foreach name="list" id="type"}
                             <tr id="{$type.id}" parent="{$type.parent}">
                                 <td><i style="margin-left:{$type.level*30}px" class="operator fa fa-minus-square-o" onclick="displayData(this);" title="关闭"></i>{$type.name}</td>
-                                <td><img width="40px" src="{$type.icon}" /></td>
+                                <td>{if $type.icon}<img width="40px" src="{$type.icon}" />{/if}</td>
+                                <td>{if $type.web_icon}<img width="40px" src="{$type.web_icon}" />{/if}</td>
                                 <td><input class="form-control sort" id="s1" size="10" type="number"  value="{$type.sequence}"></td>
                                 <td><span class="text-success">是</span></td>
                                 <td>

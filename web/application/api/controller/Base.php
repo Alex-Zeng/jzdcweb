@@ -11,8 +11,9 @@ use app\common\model\IndexUser;
 use Firebase\JWT\JWT;
 use think\Exception;
 use think\Request;
+use think\Controller;
 
-class Base
+class Base extends Controller
 {
     protected $userId = 0;
     protected $groupId = 0;

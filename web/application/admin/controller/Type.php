@@ -19,20 +19,20 @@ class Type extends Base{
     public function index(){
         $model = new MallType();
         $k = Request::instance()->get('k','');
-        $fields = ['id','name','parent','sequence','path','push'];
+        $fields = ['id','name','parent','sequence','path','push','web_path'];
         $rows = $model->where(['parent'=>0])->field($fields)->select();
 
         $list = [];
         //查询第二层  program/mall/type_icon/34.png
         foreach($rows as $row){
-            $list[] = ['id'=>$row->id,'name'=>$row->name,'parent'=>$row->parent,'sequence'=>$row->sequence,'level'=>0,'push'=>$row->push,'icon'=>MallType::getFormatIcon($row->path)];
+            $list[] = ['id'=>$row->id,'name'=>$row->name,'parent'=>$row->parent,'sequence'=>$row->sequence,'level'=>0,'push'=>$row->push,'icon'=>MallType::getFormatIcon($row->path),'web_icon'=>MallType::getFormatIcon($row->web_path)];
             //查询第二层
             $rows2 = $model->where(['parent'=>$row->id])->field($fields)->select();
             foreach ($rows2 as $row2){
-                $list[] = ['id'=>$row2->id,'name'=>$row2->name,'parent'=>$row2->parent,'sequence'=>$row2->sequence,'level'=>1,'push'=>$row2->push,'icon'=>MallType::getFormatIcon($row2->path)];
+                $list[] = ['id'=>$row2->id,'name'=>$row2->name,'parent'=>$row2->parent,'sequence'=>$row2->sequence,'level'=>1,'push'=>$row2->push,'icon'=>MallType::getFormatIcon($row2->path),'web_icon'=>MallType::getFormatIcon($row2->web_path)];
                 $rows3 = $model->where(['parent'=>$row2->id])->field($fields)->select();
                 foreach ($rows3 as $row3){
-                    $list[] = ['id'=>$row3->id,'name'=>$row3->name,'parent'=>$row3->parent,'sequence'=>$row3->sequence,'level'=>2,'push'=>$row3->push,'icon'=>MallType::getFormatIcon($row3->path)];
+                    $list[] = ['id'=>$row3->id,'name'=>$row3->name,'parent'=>$row3->parent,'sequence'=>$row3->sequence,'level'=>2,'push'=>$row3->push,'icon'=>MallType::getFormatIcon($row3->path),'web_icon'=>MallType::getFormatIcon($row3->web_path)];
                 }
             }
         }
@@ -55,11 +55,13 @@ class Type extends Base{
             $parent = $request->post('parent',0);
             $sequence = $request->post('sequence',0);
             $path = $request->post('path','');
+            $webPath = $request->post('web_path','');
             $data = [
               'name' => $name,
               'parent' => $parent,
               'sequence' => $sequence,
-              'path' => $path
+              'path' => $path,
+              'web_path' => $webPath
             ];
             $result = $model->save($data);
             if($result){
@@ -79,18 +81,20 @@ class Type extends Base{
      */
     public function edit(Request$request,$id){
         $model = new MallType();
-        $field = ['id','name','parent','sequence','path'];
+        $field = ['id','name','parent','sequence','path','web_path'];
         $row = $model->where(['id'=>$id])->field($field)->find();
         if($request->isPost()){
             $name = $request->post('name','');
             $parent = $request->post('parent',0);
             $sequence = $request->post('sequence',0);
             $path = $request->post('path','');
+            $webPath = $request->post('web_path','');
             $data = [
                 'name' => $name,
                 'parent' => $parent,
                 'sequence' => $sequence,
-                'path' => $path
+                'path' => $path,
+                'web_path' => $webPath
             ];
             $result = $model->save($data,['id'=>$id]);
             if($result !== false){
@@ -99,6 +103,7 @@ class Type extends Base{
         }
         $this->assign('row',$row);
         $this->assign('preview_path',MallType::getFormatIcon($row->path));
+        $this->assign('preview_web_path',MallType::getFormatIcon($row->web_path));
         return $this->fetch();
     }
 

@@ -24,7 +24,7 @@ class Service extends Base{
         $name = $request->post('name','');
         $type = $request->post('type',0,'intval');
         $submitTime = time();
-        $dayTimestamp = 86400;  //表示一天的时间错
+        $dayTimestamp = 86400;  //表示一天的时间戳
 
         if(!$phone){
             return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
@@ -69,8 +69,7 @@ class Service extends Base{
         $result = $model->save($data);
         if($result == true){
             //发送邮件通知
-            $email = 'liangjiahui@jizhongdiancai.com';
-           // $email = 'songanwei@jizhongdiancai.com';
+            $email = config('JZDC_SERVICE_EMAIL');
             $subject='集众电采服务预约';
             $content='您好，当前有新的服务预约申请，请及时跟进处理。';
             $result = SendMail($email,$subject,$content);

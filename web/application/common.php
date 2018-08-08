@@ -60,6 +60,17 @@ function checkEmail($email){
     return preg_match("/\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/",$email);
 }
 
+/**
+ * @desc 过滤日期
+ * @param $value
+ * @return string
+ */
+function filterDate($value){
+    if(date('Y-m-d',strtotime($value)) == $value){
+        return $value;
+    }
+    return '';
+}
 
 /**
  * @desc 验证密码
@@ -67,7 +78,7 @@ function checkEmail($email){
  * @return false|int
  */
 function checkPassword($password){
-    return preg_match("/(?=.*[a-z])(?=.*[0-9])[A-Za-z0-9]{4,20}/",$password);
+    return preg_match("/^[a-zA-Z0-9]{6,20}$/",$password);
 }
 
 /**
@@ -185,6 +196,52 @@ function getOrderShowStatus(){
 }
 
 
+/*
+case 1:  //待确认
+                    $where .= ' AND state IN (0,1)';
+                    break;
+                case 2: //待付款
+                    $where .=' AND state IN (2,9,10) AND service_type IN (0,2)';
+                    break;
+                case 3: //待发货
+                    $where .=' AND state = 3';
+                    break;
+                case 4: //待收货
+                    $where .=' AND state=6 AND service_type IN(0,2)';
+                    break;
+                case 5: //订单关闭
+                    $where .=' AND state=4';
+                    break;
+                case 6: //售后处理
+                    $where .=' AND ( state IN(11,13) OR (state IN (6,9,10) AND service_type IN(1,2)))';
+                    break;
+                default:
+*/
+function getOrderStatusInfo($status = 0, $serviceType = 0){
+    if($status == 4){
+        return '订单关闭';
+    }
+    if($status == 3){
+        return '待发货';
+    }
+    if($status == 0 || $status == 1){
+        return '待确认';
+    }
+    if(in_array($status,[2,9,10])){
+        if(in_array($serviceType,[0,2])){
+            return '待付款';
+        }
+    }
+    if($status == 6 && in_array($serviceType,[0,2])){
+        return '待收货';
+    }
+    if(in_array($status,[11,13]) || (in_array($status,[6,9,10]) && in_array($serviceType,[1,2]))){
+        return '售后处理';
+    }
+    return '';
+}
+
+
 /**
  * @desc 递归获取子类Id
  * param $array 包含子类的搜索的数组
@@ -200,4 +257,23 @@ function getRecursionType($array,$id){
         }
     }
     return $arr;
+}
+
+
+/**
+ * [getDevice 获取扫码源]
+ * @return [string] [iphoneWechat苹果微信iphoneNomal苹果普通androidNomal安卓普通androidWechat安卓微信]
+ */
+function getDevice(){
+    //检查是来源客户端
+    $userAgent = $_SERVER['HTTP_USER_AGENT'];
+    if(stripos($userAgent, 'iPhone') && stripos($userAgent, 'MicroMessenger')){
+        return 'iphoneWechat';
+    }elseif(stripos($userAgent, 'iPhone')) {
+        return 'iphoneNormal';
+    }elseif((stripos($userAgent, 'MicroMessenger') === false)&&strpos($userAgent, 'QQ') === false) { //浏览器下载或版本更新
+        return 'androidNormal';
+    }else{ //微信下载
+        return 'androidWechat';
+    }
 }

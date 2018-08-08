@@ -41,7 +41,7 @@ return [
     // 是否开启多语言
     'lang_switch_on'         => false,
     // 默认全局过滤方法 用逗号分隔多个
-    'default_filter'         => '',
+    'default_filter'         => 'trim',
     // 默认语言
     'default_lang'           => 'zh-cn',
     // 应用类库后缀
@@ -305,4 +305,11 @@ return [
     'JZDC_MAIL_SMTP' => 'smtp.exmail.qq.com',
     'JZDC_MAIL_LOGINNAME' => 'jzdc@jizhongdiancai.com',
     'JZDC_MAIL_PASSWORD' => '44339674abAB',
+    'Captcha'=>[
+        'fontSize'  => 38,
+        'length'    => 4,
+        'useCurve'  => false
+    ],
+    'JZDC_SERVICE_EMAIL' => 'fuwu@jizhongdiancai.com',
+    'JZDC_TOKEN_EXPIRE' => 30*24*3600,    //30天过期
 ];

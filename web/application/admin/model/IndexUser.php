@@ -12,6 +12,11 @@ class IndexUser extends Model
      * @return [type]           [description]
      */
     public function getUserByUsername($username){
-        return $this->field('state,password,id,group,nickname')->where(['username'=>$username,'group'=>['in',IndexGroup::GROUP_ADMIN.','.IndexGroup::GROUP_OPERATION]])->find();
+    	if(is_numeric($username) && checkPhone($username)){
+    		$where['phone'] = $username;
+    	}else{
+    		$where['username'] = $username;
+    	}
+        return $this->field('state,password,id,group,nickname')->where($where)->where(['group'=>['in',IndexGroup::GROUP_ADMIN.','.IndexGroup::GROUP_OPERATION]])->find();
     }
 }

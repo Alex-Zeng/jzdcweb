@@ -27,7 +27,7 @@ class Member extends Base{
         if($group > 0){
             $model->where(['group'=>$group]);
         }
-        $rows = $model->where([])->order(['id'=>'desc'])->paginate();
+        $rows = $model->where([])->order(['id'=>'desc'])->paginate(null,false,['query'=>request()->param()]);
         foreach ($rows as &$row){
             $row->icon = $row->icon ? IndexUser::getFormatIcon($row->icon) : '';
         }

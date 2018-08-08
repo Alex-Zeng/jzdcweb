@@ -17,7 +17,7 @@ class MallOrder extends Model{
     const  STATE_CLOSED = 4; //关闭
     const  STATE_RECEIVE = 6; //收货
     const  STATE_QUALITY_CHECK = 7;//质检
-    const  STATE_PROBLEM_CONFIRM = 8; //问题确认
+    const  STATE_PROBLEM_CONFIRM = 8; //售后处理
     const  STATE_ACCOUNT_PERIOD = 9; //账期中
     const  STATE_OVERDUE = 10; //逾期中
     const  STATE_REMITTANCE_SUPPLIER = 11; //打款供应商
@@ -33,7 +33,7 @@ class MallOrder extends Model{
             self::STATE_CLOSED => '订单关闭',
             self::STATE_RECEIVE => '待收货',
             self::STATE_QUALITY_CHECK => '待质检',
-            self::STATE_PROBLEM_CONFIRM =>'问题确认中',
+            self::STATE_PROBLEM_CONFIRM =>'售后处理',
             self::STATE_ACCOUNT_PERIOD => '账期中',
             self::STATE_OVERDUE => '逾期中',
             self::STATE_REMITTANCE_SUPPLIER =>'待打款至供应商',

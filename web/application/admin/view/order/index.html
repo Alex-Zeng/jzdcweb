@@ -13,6 +13,14 @@
         color:#A9A9A9;
         content:attr(placeholder);
     }
+
+    .spec{
+        word-break:break-all;
+    }
+
+    .comment{
+        word-break:break-all;
+    }
 </style>
 
 <!-- Content Wrapper. Contains page content -->
@@ -93,8 +101,8 @@
 
                             <tbody>
                             {foreach name="list" id="order"}
-                             <tr style="background: rgb(0, 102, 153);color: #ffffff">
-                                 <!--<td></td>-->
+                            <tr style="background: rgb(0, 102, 153);color: #ffffff">
+                                <!--<td></td>-->
                                 <td colspan="4" >
                                     {:date('Y-m-d',$order.add_time)}&nbsp&nbsp;
                                     订单号: {$order.out_id}&nbsp;&nbsp;
@@ -102,10 +110,10 @@
                                     供应商: {$order.supplierName}&nbsp;&nbsp;
                                     账期截止日: {:substr($order.pay_date,0,10)}
                                 </td>
-                             </tr>
+                            </tr>
                             <tr style="background: #EFEFEF">
                                 <td colspan="4" >
-                                   {$order.receiver_name}&nbsp;&nbsp;{$order.receiver_phone}&nbsp;&nbsp;{$order.receiver_area_name}&nbsp;&nbsp;{$order.receiver_detail}&nbsp;&nbsp;{$order.receiver_post_code}
+                                    {$order.receiver_name}&nbsp;&nbsp;{$order.receiver_phone}&nbsp;&nbsp;{$order.receiver_area_name}&nbsp;&nbsp;{$order.receiver_detail}&nbsp;&nbsp;{$order.receiver_post_code}
                                 </td>
                             </tr>
                             <tr id="{$order.id}">
@@ -127,6 +135,14 @@
                                                 {/if}
                                                 {$goods.title}
                                             </td>
+                                            <td style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">
+                                                <span >规格: {$goods.s_info}</span>
+                                                <br>
+                                                <span >物料编号: {$goods.specifications_no}</span>
+                                                <br>
+                                                <span >物料规格: {$goods.specifications_name}</span>
+                                            </td>
+
                                             <td style="vertical-align: middle;border-bottom: 1px solid #dee2e6;">原价: {$goods.price|floatval}*{$goods.quantity|intval}{$goods.unit}={$goods.price*$goods.quantity}元</td>
                                         </tr>
                                         {/foreach}
@@ -134,29 +150,29 @@
                                     </table>
                                     <div class="">
                                         <p>采购商支付:
-                                           {if $order.buyerPayInfo}
-                                                {foreach name="$order.buyerPayInfo" id="buyer"}
-                                                    {$buyer.pay_type == 1 ? '转账' : '汇款'},{$buyer.number},
-                                                    {$buyer.pay_type == 1 ? '支付日期:'.substr($buyer.pay_time,0,10): '汇款日期:'.substr($buyer.accept_time,0,10)},
-                                                    <a target="_blank" href="{$buyer.picture}">【回执照片】</a>
-                                                 {/foreach}
-                                            {else}
-                                             无
-                                            {/if}
-                                        </p>
-                                        <p>支付至供应商:
-                                            {if $order.supplierPayInfo}
-                                                {foreach name="$order.supplierPayInfo" id="supplierInfo"}
-                                                     {$supplierInfo.pay_type == 3 ? '转账' : '汇款'},{$supplierInfo.number},
-                                                     {$supplierInfo.pay_type == 4 ? '支付日期:'.substr($supplierInfo.pay_time,0,10): '汇款日期:'.substr($supplierInfo.accept_time,0,10)}
-                                                     <a target="_blank" href="{$supplierInfo.picture}">【回执照片】</a>
-                                                {/foreach}
+                                            {if $order.buyerPayInfo}
+                                            {foreach name="$order.buyerPayInfo" id="buyer"}
+                                            {$buyer.pay_type == 1 ? '转账' : '汇票'},{$buyer.number},
+                                            {$buyer.pay_type == 1 ? '支付日期:'.substr($buyer.pay_time,0,10): '汇票日期:'.substr($buyer.accept_time,0,10)},
+                                            <a target="_blank" href="{$buyer.picture}">【回执照片】</a>
+                                            {/foreach}
                                             {else}
                                             无
                                             {/if}
                                         </p>
-                                        <p>物料规格: {$order.buyer_remark}</p>
-                                        <p>买家留言: {$order.buyer_comment}</p>
+                                        <p>支付至供应商:
+                                            {if $order.supplierPayInfo}
+                                            {foreach name="$order.supplierPayInfo" id="supplierInfo"}
+                                            {$supplierInfo.pay_type == 3 ? '转账' : '汇票'},{$supplierInfo.number},
+                                            {$supplierInfo.pay_type == 4 ? '支付日期:'.substr($supplierInfo.pay_time,0,10): '汇票日期:'.substr($supplierInfo.accept_time,0,10)}
+                                            <a target="_blank" href="{$supplierInfo.picture}">【回执照片】</a>
+                                            {/foreach}
+                                            {else}
+                                            无
+                                            {/if}
+                                        </p>
+                                        <p class='spec' >物料规格: 无</p>
+                                        <p class='comment' >买家留言: {:htmlspecialchars($order.buyer_comment)}</p>
                                         {if $order.delivery_time > 0} <p>交货日期: {:date('Y-m-d',$order.delivery_time)}</p>{/if}
                                     </div>
 
@@ -167,15 +183,16 @@
                                 <td style="vertical-align: middle">{:getOrderState($order.state,1)}</td>
                                 <td style="vertical-align: middle">
                                     {if $order.state == 0} <!-- 待核价-->
-                                    <a href="javascript:void(0)" data-id="{$order.id}"  data-date="{if $order.delivery_time > 0}{:date('Y-m-d',$order.delivery_time)}{/if}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#pricing-modal">核价</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}"  data-date="{:date('Y-m-d',strtotime('+1 day'))}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#pricing-modal">核价</a>
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
                                     {elseif $order.state == 1}<!-- 待签约-->
-                                    <a href="javascript:void(0)" data-id="{$order.id}" data-date="{if $order.delivery_time > 0}{:date('Y-m-d',$order.delivery_time)}{/if}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#sign-modal">签约</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}" data-date="{:date('Y-m-d',strtotime('+1 day'))}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#sign-modal">签约</a>
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
                                     {elseif $order.state == 2}<!-- 待采购商打款-->
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary" data-tag ="1" data-toggle="modal" data-target="#remittance-modal" >收款</a>
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
                                     {elseif $order.state == 3}<!-- 待发货-->
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
                                     {elseif $order.state == 4}<!-- 订单关闭-->
                                     {elseif $order.state == 6} <!-- 待收货-->
                                     {if $order.service_type == 1}
@@ -199,6 +216,9 @@
                                     {/if}
                                     {elseif $order.state == 11}<!-- 转账-->
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#transfer-modal">转账</a>
+                                    {if $order.service_type == 1}
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#service-modal">售后</a>
+                                    {/if}
                                     {elseif $order.state == 13}<!-- 交易完成-->
                                     {if $order.service_type == 1}
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#service-modal">售后</a>
@@ -239,8 +259,8 @@
                                 <div class="form-group form-inline">
                                     <label class="col-md-3">合同</label>
                                     <select class="form-control contract_type" name="contract_type">
-                                        <option  value="1">未签订合同</option>
                                         <option  value="2">已签订合同</option>
+                                        <option  value="1">未签订合同</option>
                                     </select>
                                 </div>
                                 <div class="form-group form-inline contract_container">
@@ -250,7 +270,7 @@
                                 <div class="form-group form-inline">
                                     <label class="col-md-3">核实总价</label>
                                     <div class="input-group">
-                                        <input class="form-control form-control-navbar"  min="0" name="sum_money" type="text"  value="" placeholder="" aria-label="Search">
+                                        <input class="form-control form-control-navbar"  name="sum_money" type="text"  value="" placeholder="" aria-label="Search">
                                         <div class="input-group-append" style="padding-left: 5px;padding-top: 5px;">元</div>
                                     </div>
                                 </div>
@@ -324,7 +344,7 @@
                                     <label  class="col-md-4">打款类型</label>
                                     <select class="form-control col-md-5" name="pay_type">
                                         <option  value="1">转账</option>
-                                        <option  value="2">汇款</option>
+                                        <option  value="2">汇票</option>
                                     </select>
                                 </div>
                                 <div class="form-group form-inline">
@@ -399,7 +419,7 @@
                                     <label  class="col-md-3 no-padding">打款类型</label>
                                     <select class="form-control col-md-5" name="pay_type">
                                         <option  value="3">转账</option>
-                                        <option  value="4">汇款</option>
+                                        <option  value="4">汇票</option>
                                     </select>
                                 </div>
                                 <div class="form-group form-inline">
@@ -492,9 +512,13 @@
                         message: '总价必须填写'
                     },
                     regexp: {
-                        regexp: /^([1-9][0-9]*)+(.[0-9]{1,2})?$/,
-                        message: '无效的价格'
-                    }
+                        regexp: /^([1-9]*)+(.[0-9]{1,2})?$/,
+                        message: '无效格式或总价不能输入小于1'
+                    },
+                    // greaterThan: {
+                    //     value: 1,
+                    //     message: ''
+                    // },
                 }
             }
         }
@@ -623,6 +647,7 @@
                 dataType: 'json',
                 success: function (data) {
                     if (data.status == 0) {
+                        alert("修改为逾期状态成功");
                         window.location.reload();
                     } else {
                         alert(data.msg);
@@ -631,7 +656,7 @@
             })
         }
     });
-   //收款
+    //收款
     $('#remittance-modal').on('show.bs.modal', function (event) {
         var id = $(event.relatedTarget).data('id');
         var tag = $(event.relatedTarget).data('tag');
@@ -658,7 +683,7 @@
             }
         }).on("fileuploaded", function(event, data) {
             if(data.response){
-              //  alert(data.response.data.filename);
+                //  alert(data.response.data.filename);
                 $('#remittance-upload-file').val(data.response.data.filename);
                 $('#remittance-upload-file').closest('.form-group').removeClass('has-error');
                 $('#remittance-upload-file').closest('.form-group').find('.help-block').html('');
