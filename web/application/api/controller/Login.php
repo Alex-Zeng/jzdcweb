@@ -48,7 +48,7 @@ class Login{
        $where = [];
 
        //判断账户类型
-        $field = ['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email'];
+        $field = ['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email', 'real_name'];
         if(stripos( $name,'@')){
             $row = $model->where(['email'=>$name])->field($field)->find();
         }else{
@@ -126,7 +126,7 @@ class Login{
 
         //查询user表是否存在
         $model = new IndexUser();
-        $row = $model->where(['phone'=>$phone])->field(['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email'])->find();
+        $row = $model->where(['phone'=>$phone])->field(['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email', 'real_name'])->find();
         if(!$row){
             return ['status'=>-3,'data'=>[],'msg'=>'用户未注册'];
         }else{
