@@ -74,7 +74,8 @@ class Login{
             'phone' => $row->phone,
             'email' => $row->email,
             'username' => $row->username,
-            'group' => $row->group
+            'group' => $row->group,
+            'companyName' => $row->real_name
         ];
         //生成token
         $key = config('jzdc_token_key');
@@ -148,7 +149,8 @@ class Login{
             'phone' => $row->phone,
             'email' => $row->email,
             'username' => $row->username,
-            'group' => $row->group
+            'group' => $row->group,
+            'companyName' => $row->real_name
         ];
         //生成token
         $key = config('jzdc_token_key');

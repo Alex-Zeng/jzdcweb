@@ -110,7 +110,8 @@ class Register{
                 'phone' => $phone,
                 'email' => '',
                 'username' => $username,
-                'group' => 6
+                'group' => 6,
+                'companyName' => ''
             ];
             //生成token
             $key = config('jzdc_token_key');
