@@ -26,6 +26,7 @@ class Register{
         $code = $request->post('code','');
         $username = $request->post('userName','','htmlspecialchars');
         $channel = $request->post('channel',0,'intval');
+        $password = $request->post('password','');
 
         //判断手机号
         if(!$phone){
@@ -45,6 +46,12 @@ class Register{
         }
         if(checkPhone($username)){
             return ['status'=>1,'data'=>[],'msg' => '用户名不能为手机号'];
+        }
+        if(!$password){
+            return ['status'=>1,'data'=>[],'msg' => '密码必须填写'];
+        }
+        if(!checkPassword($password)){
+            return ['status'=>1,'data'=>[],'msg'=>'密码必须为6-20位的数字和字母组合'];
         }
 
 
@@ -92,7 +99,7 @@ class Register{
             'username' => $username,
             'nickname' => $username,
             'phone' => $phone,
-            'password' => '',
+            'password' => md5($password),
             'reg_time' => time(),
             'reg_ip' => get_ip(),
             'group' => 6,
