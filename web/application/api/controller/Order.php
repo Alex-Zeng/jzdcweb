@@ -338,7 +338,7 @@ class Order extends Base{
         }
         //
         if($goodsName){
-            $where .=' AND goods_names LIKE %'.$goodsName.'%';
+            $where .=' AND goods_names LIKE \'%'.addslashes($goodsName).'%\'';
         }
         if($startDate){
             $where .=' AND add_time >'.strtotime($startDate);
@@ -347,12 +347,12 @@ class Order extends Base{
             $where .=' and add_time <'.strtotime($endDate.' 23:59:59');
         }
         if($orderNo){
-            $where .= ' AND out_id LIKE \'%'.$orderNo.'%\'';
+            $where .= ' AND out_id LIKE \'%'.addslashes($orderNo).'%\'';
         }
 
         $userModel = new IndexUser();
         if($companyName){
-            $companyRows = $userModel->where(['real_name'=>['like','%'.$companyName.'%']])->find(['id'])->select();
+            $companyRows = $userModel->where(['real_name'=>['like','%'.addslashes($companyName).'%']])->find(['id'])->select();
             $companyIds = '';
             foreach($companyRows as $companyRow){
                 $companyIds .= $companyRow->id.',';
