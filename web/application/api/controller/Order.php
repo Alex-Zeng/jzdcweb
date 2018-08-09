@@ -308,11 +308,11 @@ class Order extends Base{
         $pageSize = $request->post('pageSize',10,'intval');
         $pageNumber = $request->post('pageNumber',1,'intval');
 
-        $goodsName = $request->post('goodsName','','trim|addslashes');
-        $companyName = $request->post('companyName','','trim|addslashes');
+        $goodsName = $request->post('goodsName','','trim');
+        $companyName = $request->post('companyName','','trim');
         $startDate = $request->post('startDate','','filterDate');
         $endDate = $request->post('endDate','','filterDate');
-        $orderNo = $request->post('orderNo','','addslashes');
+        $orderNo = $request->post('orderNo','','trim');
 
         if($pageSize > 12){ $pageSize = 12;}
         $start = ($pageNumber - 1)*$pageSize;
