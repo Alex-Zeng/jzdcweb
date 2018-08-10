@@ -23,6 +23,7 @@ use app\common\model\OrderMsg;
 use app\common\model\MallReceiverTag;
 use sms\Yunpian;
 use think\Request;
+use think\View;
 
 class User extends Base
 {
@@ -467,6 +468,7 @@ class User extends Base
 
         foreach ($rows as &$row) {
             $row['release_time'] = date('Y', $row->release_time) . '年' . date('m', $row->release_time) . '月' . date('d', $row->release_time) . '日 ' . date('H:i', $row->release_time);
+            $row['contentUrl'] = config('jzdc_domain').url('api/user/noticeDetail',['id'=>$row->id]);
         }
         return ['status' => 0, 'data' => ['list' => $rows, 'total' => $total], 'msg' => ''];
     }
@@ -1080,4 +1082,11 @@ class User extends Base
     }
 
 
+    public function noticeDetail($id){
+        $model = new Notice();
+        $row = $model->find(['id'=>$id]);
+
+        $view = new View();
+        echo $view->fetch('index/notice_detail',['detail'=>$row ? getImgUrl($row->content) : '']);
+    }
 }
