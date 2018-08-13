@@ -110,7 +110,8 @@ img {
 	<div class="box_pop" style="display: none;"></div>
 </div>
 <script>
-	document.getElementsByTagName('html')[0].setAttribute('style','font-size:'+window.screen.availWidth/7.5+'px;');
+	var screenAvailWidth = (window.screen.availWidth/7.5)>80?80:(window.screen.availWidth/7.5);
+	document.getElementsByTagName('html')[0].setAttribute('style','font-size:'+screenAvailWidth+'px;');
 	function download(){
 		document.getElementById("download").innerHTML = '下载中...';
 	}
