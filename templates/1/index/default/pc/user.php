@@ -1,1 +1,0 @@
-<div class=newest_user_msg style="display:none;"><?php echo $module['msg'];?></div>

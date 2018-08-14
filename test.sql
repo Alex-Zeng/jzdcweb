@@ -1,1 +1,0 @@
-ALTER TABLE  jzdc_form_user_cert CHANGE `legal_identity_card` `legal_identity_card` varchar( 100 ) NULL DEFAULT  '' 

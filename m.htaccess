@@ -1,6 +1,0 @@
-RewriteEngine on
-RewriteBase /
-RewriteCond % !^$  
-RewriteRule templates/(.*).(php)$ – [F] 
-RewriteRule program/(.*).(php)$ – [F]
-ErrorDocument 404 http://{url}/index.php?jzdc=index.not_found

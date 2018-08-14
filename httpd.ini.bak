@@ -1,8 +1,0 @@
-php_flag display_errors On
-[ISAPI_Rewrite]
-CacheClockRate 3600
-RepeatLimit 32
-
- 
-RewriteCond Host: localhost/jzdc/
-RewriteRule ^(.*)$ /wap/$1 [I]
