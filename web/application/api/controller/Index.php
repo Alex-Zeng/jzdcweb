@@ -75,6 +75,16 @@ class Index extends Base
     }
 
     /**
+     * @desc 根据版本号获取资源
+     * @param Request $request
+     * @return array
+     */
+    public function getJsonArea(Request $request){
+        $url = config('jzdc_domain').'/web/public/static/doc/area.json';
+        return ['status'=>0,'data'=>['url'=>$url,'version'=>config('VERSION_AREA')],'msg'=>''];
+    }
+
+    /**
      * [turnover 成交额]
      * @return [json] [格式化后的本月成交额&累计成交额]
      */

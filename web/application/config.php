@@ -312,4 +312,5 @@ return [
     ],
     'JZDC_SERVICE_EMAIL' => 'fuwu@jizhongdiancai.com',
     'JZDC_TOKEN_EXPIRE' => 30*24*3600,    //30天过期
+    'VERSION_AREA' =>'v1.0', //省市区资源版本号
 ];
