@@ -409,6 +409,9 @@ class Order extends Base{
                 $goodsRow['price'] = getFormatPrice($goodsRow->price);
             }
             $row['goods'] = $goodsRows;
+            $row['statusMsg'] = getOrderMsg($this->groupId,$row->state,$row->service_type);
+            $row['cancelType'] = $this->groupId && ($row->state == 1 && $row->state == 0)   ? 1 : 0;
+            $row['confirmType'] = $this->groupId && $row->state == 6 && ($row->service_type == 0 || $row->service_type == 2) ? 1 : 0;
             unset($row->add_time);
         }
 
@@ -493,6 +496,9 @@ class Order extends Base{
             'overDate' => $row->pay_date ? substr($row->pay_date,0,10) : ''
         ];
 
+
+        $data['statusMsg'] = getOrderMsg($this->groupId,$row->state,$row->service_type);
+        $data['isService'] =  $this->groupId == 4 && $row->service_type == 0 && ($row->state == 6 || $row->state == 13 || $row->state == 9 || $row->state == 10 || $row->state == 11)  ? 1 : 0;
         if($this->groupId == IndexGroup::GROUP_SUPPLIER){
             $data['payMethod'] = !$payRow && isset($row->pay_date) ? '账期支付': ($payRow->pay_type == 4 ? '汇票' : '转账');
             $data['payNumber'] = $payRow ? $payRow->number : '';

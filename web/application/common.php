@@ -196,27 +196,6 @@ function getOrderShowStatus(){
 }
 
 
-/*
-case 1:  //待确认
-                    $where .= ' AND state IN (0,1)';
-                    break;
-                case 2: //待付款
-                    $where .=' AND state IN (2,9,10) AND service_type IN (0,2)';
-                    break;
-                case 3: //待发货
-                    $where .=' AND state = 3';
-                    break;
-                case 4: //待收货
-                    $where .=' AND state=6 AND service_type IN(0,2)';
-                    break;
-                case 5: //订单关闭
-                    $where .=' AND state=4';
-                    break;
-                case 6: //售后处理
-                    $where .=' AND ( state IN(11,13) OR (state IN (6,9,10) AND service_type IN(1,2)))';
-                    break;
-                default:
-*/
 function getOrderStatusInfo($status = 0, $serviceType = 0){
     if($status == 4){
         return '订单关闭';
@@ -240,6 +219,61 @@ function getOrderStatusInfo($status = 0, $serviceType = 0){
     }
     return '';
 }
+
+function getOrderMsg($groupId,$status,$serviceType){
+    if($serviceType == 1){
+        return '售后处理中';
+    }
+    if($serviceType == 2 && $status == 6){
+        return '售后完成';
+    }
+    switch ($status){
+        case -1:
+            return '全部';
+            break;
+        case 0:
+            return '待核价';
+            break;
+        case 1:
+            return '待签约';
+            break;
+        case 2:
+            return '待采购商打款';
+            break;
+        case 3:
+            return'待发货';
+            break;
+        case 4:
+            return '订单关闭';
+            break;
+        case 6:
+            return '待收货';
+            break;
+        case 7:
+            return '待质检';
+            break;
+        case 8:
+            return '售后处理';
+            break;
+        case 9:
+            return '账期中';
+            break;
+        case 10:
+            return '逾期中';
+            break;
+        case 11:
+            if($groupId == 4){
+                return '交易完成';
+            }else{
+                return '待结算';
+            }
+            break;
+        case 13:
+            return'交易完成';
+            break;
+    }
+}
+
 
 
 /**
