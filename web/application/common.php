@@ -220,13 +220,17 @@ function getOrderStatusInfo($status = 0, $serviceType = 0){
     return '';
 }
 
-function getOrderMsg($groupId,$status,$serviceType){
-    if($serviceType == 1){
-        return '售后处理中';
-    }
-    if($serviceType == 2 && $status == 6){
-        return '售后完成';
-    }
+//
+function getOrderMsg($groupId,$status,$serviceType,$show = true){
+    if($show == true){
+		if($serviceType == 1){
+           return '售后处理中';
+        }
+       if($serviceType == 2 && $status == 6){
+           return '售后完成';
+        }
+	}
+	
     switch ($status){
         case -1:
             return '全部';
