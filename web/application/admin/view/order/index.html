@@ -512,13 +512,13 @@
                         message: '总价必须填写'
                     },
                     regexp: {
-                        regexp: /^([1-9]*)+(.[0-9]{1,2})?$/,
-                        message: '无效格式或总价不能输入小于1'
+                        regexp: /^([0-9]*)+(.[0-9]{1,2})?$/,
+                        message: '填写两位小数'
                     },
-                    // greaterThan: {
-                    //     value: 1,
-                    //     message: ''
-                    // },
+                    greaterThan: {
+                         value: 1,
+                         message: '价格必须大于或等于1'
+                    },
                 }
             }
         }
