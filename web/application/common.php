@@ -226,7 +226,7 @@ function getOrderMsg($groupId,$status,$serviceType,$show = true){
 		if($serviceType == 1){
            return '售后处理中';
         }
-       if($serviceType == 2 && $status == 6){
+       if($serviceType == 2){
            return '售后完成';
         }
 	}
