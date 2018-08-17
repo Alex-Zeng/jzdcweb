@@ -221,7 +221,7 @@ function getOrderStatusInfo($status = 0, $serviceType = 0){
 }
 
 //
-function getOrderMsg($groupId,$status,$serviceType,$show = true){
+function getOrderMsg($groupId,$status,$serviceType,$show = false){
     if($show == true){
 		if($serviceType == 1){
            return '售后处理中';
