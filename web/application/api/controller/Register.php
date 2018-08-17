@@ -101,7 +101,7 @@ class Register{
             'phone' => $phone,
             'password' => md5($password),
             'reg_time' => time(),
-            'reg_ip' => get_ip(),
+           // 'reg_ip' => get_ip(),
             'group' => 6,
             'state' => 1
         ];
