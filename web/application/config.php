@@ -10,26 +10,31 @@
 // +----------------------------------------------------------------------
 
 //通过服务器IP地址自动使用对应配置文件
-switch ($_SERVER['SERVER_ADDR']) {
-    case '47.104.179.72':
+switch ($_SERVER['SERVER_NAME']) {
+    case 'scm.jizhongdiancai.com':
         $app_debug = false;
         $app_trace = false;
         $app_status = 'database_wan_scm';
         break;
-    case '39.104.54.76':
+    case 'jwapi-uat.jizhongdiancai.com':
         $app_debug = true;
         $app_trace = true;
         $app_status = 'database_wan_uat';
         break;
-    case '192.168.3.135'://内网测试
-        $app_debug = true;
-        $app_trace = true;
-        $app_status = 'database_lan_test';
-        break;
+    
     default://本地开发
-        $app_debug = true;
-        $app_trace = true;
-        $app_status = 'database_lan_dev';
+        switch ($_SERVER['SERVER_ADDR']) {
+            case '192.168.3.135'://内网测试
+                $app_debug = true;
+                $app_trace = true;
+                $app_status = 'database_lan_test';
+                break;
+            default:
+                $app_debug = true;
+                $app_trace = true;
+                $app_status = 'database_lan_dev';
+                break;
+        }
         break;
 }
 // var_dump($app_status);exit();
