@@ -11,12 +11,12 @@
 
 //通过服务器IP地址自动使用对应配置文件
 switch ($_SERVER['SERVER_NAME']) {
-    case 'jwapi-uat.jizhongdiancai.com':
+    case 'scm.jizhongdiancai.com':
         $app_debug = false;
         $app_trace = false;
         $app_status = 'database_wan_scm';
         break;
-    case 'scm.jizhongdiancai.com':
+    case 'jwapi-uat.jizhongdiancai.com':
         $app_debug = true;
         $app_trace = true;
         $app_status = 'database_wan_uat';
@@ -37,7 +37,7 @@ switch ($_SERVER['SERVER_NAME']) {
         }
         break;
 }
-var_dump($app_status);exit();
+// var_dump($app_status);exit();
 
 return [
     // +----------------------------------------------------------------------
