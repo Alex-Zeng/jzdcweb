@@ -9,17 +9,42 @@
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
 
+//通过服务器IP地址自动使用对应配置文件
+switch ($_SERVER['SERVER_ADDR']) {
+    case '47.104.179.72':
+        $app_debug = false;
+        $app_trace = false;
+        $app_status = 'database_wan_scm';
+        break;
+    case '39.104.54.76':
+        $app_debug = true;
+        $app_trace = true;
+        $app_status = 'database_wan_uat';
+        break;
+    case '192.168.3.135'://内网测试
+        $app_debug = true;
+        $app_trace = true;
+        $app_status = 'database_lan_test';
+        break;
+    default://本地开发
+        $app_debug = true;
+        $app_trace = true;
+        $app_status = 'database_lan_dev';
+        break;
+}
+// var_dump($app_status);exit();
+
 return [
     // +----------------------------------------------------------------------
     // | 应用设置
     // +----------------------------------------------------------------------
 
     // 应用调试模式
-    'app_debug'              => true,
+    'app_debug'              => $app_debug,
     // 应用Trace
-    'app_trace'              => false,
+    'app_trace'              => $app_trace,
     // 应用模式状态
-    'app_status'             => '',
+    'app_status'             => $app_status,
     // 是否支持多模块
     'app_multi_module'       => true,
     // 入口自动绑定模块
