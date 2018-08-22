@@ -23,8 +23,9 @@ switch ($_SERVER['SERVER_NAME']) {
         break;
     
     default://本地开发
-        switch ($_SERVER['SERVER_ADDR']) {
-            case '192.168.3.135'://内网测试
+        $serverHost =  $_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'];
+        switch ($serverHost) {
+            case '192.168.3.135:80'://内网测试
                 $app_debug = true;
                 $app_trace = true;
                 $app_status = 'database_lan_test';
