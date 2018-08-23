@@ -597,11 +597,9 @@ class Order extends Base{
         //获取总价
         $totalMoney = 0;
         foreach ($goods as $orderGoodsId => $item){
-            $totalMoney += $item['price'];
+            $totalMoney += $item['price']*$item['quantity'];
         }
         //提取数据
-
-
 
         $model = new MallOrder();
         $row = $model->where(['id'=>$id])->find();
@@ -609,13 +607,15 @@ class Order extends Base{
             return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
         }
 
-
-
         //更新order_goods数据
-
+        $goodsModel = new MallOrderGoods();
+        foreach($goods as $orderGoodsId => $item){
+            $goodsModel->save(['price'=> $item['price'],'quantity'=>$item['quantity']],['id'=>$orderGoodsId]);
+        }
         //更新order价格
-
-        return ['status'=>1,'data'=>[],'msg'=>'操作失败'];
+        $orderModel = new MallOrder();
+        $orderModel->save(['actual_money'=>$totalMoney,'sum_money'=>$totalMoney,'goods_money'=>$totalMoney],['id'=>$id]);
+        return ['status'=>0,'data'=>[],'msg'=>'操作失败'];
     }
 
     /**
