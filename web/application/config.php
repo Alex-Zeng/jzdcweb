@@ -23,7 +23,7 @@ switch ($_SERVER['SERVER_NAME']) {
         break;
     
     default://本地开发
-        $serverHost =  $_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'];
+        $serverHost =  $_SERVER['SERVER_ADDR'].':'.$_SERVER['SERVER_PORT'];
         switch ($serverHost) {
             case '192.168.3.135:80'://内网测试
                 $app_debug = true;
