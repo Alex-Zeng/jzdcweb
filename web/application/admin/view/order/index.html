@@ -4,20 +4,13 @@
 {include file="layout/left" groupId="$groupId" keywords="" /}
 
 <style type="text/css">
-    .operator.fa {
-        min-width: 28px;
-        font-size: 20px;
-    }
-
     input[type="date"]:before{
         color:#A9A9A9;
         content:attr(placeholder);
     }
-
     .spec{
         word-break:break-all;
     }
-
     .comment{
         word-break:break-all;
     }
@@ -129,7 +122,7 @@
                                                 {if $goods.service_type == 1}
                                                 <span class="label label-primary" style="padding: 0;border-radius: 3px">退货</span>
                                                 {elseif $goods.service_type == 2}
-                                                <span class="label label-info" style="padding: 0 3px;3border-radius: 3px">换货</span>
+                                                <span class="label label-info" style="padding: 0 3px;border-radius: 3px">换货</span>
                                                 {elseif $goods.service_type == 3}
                                                 <span class="label label-danger" style="padding: 0 3px">维修</span>
                                                 {/if}
@@ -222,9 +215,9 @@
                                     {/if}
                                     {if $order.state != 13 && $order.state != 4}
                                     {if $order.state !=1 && $order.state != 2 && $order.is_account_period == 1}
-                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-dark" data-toggle="modal" data-target="#pay-day-modal">账期设置</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-success" data-toggle="modal" data-target="#pay-day-modal">账期设置</a>
                                     {/if}
-                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-success" data-toggle="modal" data-target="#adjustPrice-modal">调价</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#adjustPrice-modal">调价</a>
                                     {/if}
                                 </td>
                             </tr>
