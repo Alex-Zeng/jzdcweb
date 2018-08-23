@@ -128,7 +128,6 @@ class Order extends Base{
         $contract_type = $request->post('contract_type',0,'intval');
         $contractNumber = $request->post('contract_number','');
         $payDate = $request->post('pay_date','');
-        $sumMoney = $request->post('sum_money',0);
         $model = new MallOrder();
         $row = $model->where(['id'=>$id])->find();
         if(!$row || $row->state != MallOrder::STATE_PRICING){
@@ -136,7 +135,7 @@ class Order extends Base{
         }
         if($contract_type == 2){
             //有账期 =》 待发货，没账期 => 待采购商打款
-            $data = ['contract_number'=>$contractNumber,'actual_money'=>$sumMoney,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
+            $data = ['contract_number'=>$contractNumber,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
             if($payDate){
                 $data['pay_date']=$payDate;
             }
@@ -164,7 +163,7 @@ class Order extends Base{
                 return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
             }
         }else{ //待签约
-            $data = ['actual_money'=>$sumMoney,'state'=>MallOrder::STATE_SIGN];
+            $data = ['state'=>MallOrder::STATE_SIGN];
             $result = $model->save($data,['id'=>$id]);
             if($result == true){
                 //更新消息通知
@@ -582,4 +581,67 @@ class Order extends Base{
         $objWriter->save('php://output');
         exit;
     }
+
+    /**
+     * @desc 调价
+     * @param $id
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function adjustPrice($id){
+        //接收参数
+        $goods = Request::instance()->post('goods/a');
+
+        //获取总价
+        $totalMoney = 0;
+        foreach ($goods as $orderGoodsId => $item){
+            $totalMoney += $item['price'];
+        }
+        //提取数据
+
+
+
+        $model = new MallOrder();
+        $row = $model->where(['id'=>$id])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
+        }
+
+
+
+        //更新order_goods数据
+
+        //更新order价格
+
+        return ['status'=>1,'data'=>[],'msg'=>'操作失败'];
+    }
+
+    /**
+     * @desc 获取订单商品列表
+     * @param $id
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getOrderProductList($id){
+        $model = new MallOrder();
+        $row = $model->where(['id'=>$id])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
+        }
+        $goodsModel = new MallOrderGoods();
+
+        $rows = $goodsModel->alias('a')->join('mall_goods b','a.goods_id=b.id','left')->where(['a.order_id'=>$id])->order('a.id','asc')->field(['b.icon','a.id','a.title','a.price','a.s_info','a.quantity'])->select();
+        foreach ($rows as &$row){
+            $row['iconPath'] = MallGoods::getFormatImg($row->icon);
+            $row['quantity'] = intval($row->quantity);
+        }
+
+        return ['status'=>0,'data'=>$rows,'msg'=>''];
+    }
+
+
 }

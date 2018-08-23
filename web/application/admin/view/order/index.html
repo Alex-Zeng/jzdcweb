@@ -183,7 +183,7 @@
                                 <td style="vertical-align: middle">{:getOrderState($order.state,1)}</td>
                                 <td style="vertical-align: middle">
                                     {if $order.state == 0} <!-- 待核价-->
-                                    <a href="javascript:void(0)" data-id="{$order.id}"  data-date="{if $order.delivery_time > 0}{:date('Y-m-d',$order.delivery_time)}{/if}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#pricing-modal">核价</a>
+                                    <a href="javascript:void(0)" data-id="{$order.id}"  data-date="{if $order.delivery_time > 0}{:date('Y-m-d',$order.delivery_time)}{/if}"   data-price="{$order.sum_money}"  class="btn btn-sm btn-primary" data-toggle="modal" data-target="#pricing-modal">核价</a>
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
                                     {elseif $order.state == 1}<!-- 待签约-->
                                     <a href="javascript:void(0)" data-id="{$order.id}" data-date="{if $order.delivery_time > 0}{:date('Y-m-d',$order.delivery_time)}{/if}" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#sign-modal">签约</a>
@@ -220,6 +220,8 @@
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#service-modal">售后</a>
                                     {/if}
                                     {/if}
+
+                                    <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-success" data-toggle="modal" data-target="#adjustPrice-modal">调价</a>
                                 </td>
                             </tr>
                             {/foreach}
@@ -266,7 +268,7 @@
                                 <div class="form-group form-inline">
                                     <label class="col-md-3">核实总价</label>
                                     <div class="input-group">
-                                        <input class="form-control form-control-navbar"  min="0" name="sum_money" type="text"  value="" placeholder="" aria-label="Search">
+                                        <input class="form-control form-control-navbar"   disabled  min="0" name="sum_money" type="text"  value="" placeholder="" aria-label="Search">
                                         <div class="input-group-append" style="padding-left: 5px;padding-top: 5px;">元</div>
                                     </div>
                                 </div>
@@ -471,9 +473,66 @@
         </div>
     </div>
 </div>
+
+<!--调价 -->
+<div class="modal fade" id="adjustPrice-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">订单调价</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form role="form" class="" id="adjust-price-form">
+                                <div class="card-body p-0">
+                                    <table class="table table-condensed">
+                                        <thead>
+                                        <tr>
+                                            <th>商品名称</th>
+                                            <th>规格</th>
+                                            <th width="180px">单价/加工费</th>
+                                            <th width="120px">数量</th>
+                                            <th width="130px">小计</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="adjust-price-body">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-id="" id="adjust-price-request">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
 {include file="layout/footer" title="$title" keywords="" /}
+
+
+<script id="price-template" type="text/html">
+    {{each goods_list as goods}}
+    <tr data-id="{{goods.id}}">
+        <td><img src="{{ goods.iconPath}}" /> {{goods.title}}</td><td>{{goods.s_info}}</td>
+        <td><input type="number" min="0.0000"  placeholder="0.0000"  name="goods[{{goods.id}}][price]"    value="{{goods.price}}" class="form-control price" /></td>
+        <td><input type="number" min="1" class="form-control quantity"  name="goods[{{goods.id}}][quantity]"   value="{{goods.quantity}}" /></td>
+        <td><input type="text" class="form-control total"  value="{{goods.price * goods.quantity}}"   disabled /></td>
+    </tr>
+    {{/each}}
+</script>
+
 <script src="__STATIC__/js/plugins/bootstrap-fileinput/js/fileinput.js" type="text/javascript"></script>
 <script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
+<script type="text/javascript" src="__STATIC__/js/template-web.js"></script>
 <script type="text/javascript">
     var url = '{:url("admin/order/index")}';
     $('a[href="'+url+'"]').addClass('active');
@@ -482,9 +541,11 @@
     $('#pricing-modal').on('show.bs.modal', function (event) {
         var id = $(event.relatedTarget).data('id');
         var date = $(event.relatedTarget).data('date');
+        var price = $(event.relatedTarget).data('price');
         $('.contract_type').trigger('change');
         $("#pricing-request").data('id',id);
         $(this).find('input[name="pay_date"]').attr('min',date);
+        $(this).find('input[name="sum_money"]').val(price)
     });
     $('.contract_type').change(function () {
         var value = $(this).val();
@@ -502,17 +563,7 @@
         live: 'disabled',
         message: 'This value is not valid',
         fields: {
-            sum_money: {
-                validators: {
-                    notEmpty: {
-                        message: '总价必须填写'
-                    },
-                    regexp: {
-                        regexp: /^([1-9][0-9]*)+(.[0-9]{1,2})?$/,
-                        message: '无效的价格'
-                    }
-                }
-            }
+
         }
     });
     $("#pricing-request").click(function () {
@@ -888,5 +939,51 @@
                 })
             }
         }
+    });
+
+    //调价
+    $('#adjustPrice-modal').on('show.bs.modal', function (event) {
+        var id = $(event.relatedTarget).data('id');
+        $("#adjust-price-request").data('id',id);
+        $.ajax({
+            url:'?s=admin/order/getOrderProductList&id='+id,
+            data:{},
+            dataType:'json',
+            success:function (data) {
+                if(data.status == 0){
+                    var html = template('price-template',{"goods_list":data.data});
+                    //模板渲染
+                    $('#adjust-price-body').html(html);
+                }else{
+                    alert('data error');
+                }
+            }
+        });
+    });
+    $('#adjust-price-request').click(function () {
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        $.ajax({
+            type: 'post',
+            url: '?s=admin/order/adjustPrice&id=' + id,
+            data: $('#adjust-price-form').serialize(),
+            dataType: 'json',
+            success: function (data) {
+                if (data.status == 0) {
+                    window.location.reload();
+                } else {
+                    alert(data.msg);
+                }
+            }
+        });
+    });
+
+    $("#adjust-price-body").delegate('input','change',function () {
+        //获取当前域值
+        var price = $(this).closest('tr').find('.price').val();
+        var quantity = $(this).closest('tr').find('.quantity').val();
+        $(this).closest('tr').find('.total').val(price*quantity);
     });
 </script>
