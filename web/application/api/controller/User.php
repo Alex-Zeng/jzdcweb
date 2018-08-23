@@ -628,6 +628,7 @@ class User extends Base
             'property' => $row->ent_property,
             'role' => $row->reg_role,
             'status' => $row->status,
+            'isAgent' => $row->agent_identity_card ? 1 : 0,
             'business' => $row->business_license ? $row->business_license : '',
             'permitsAccount' => $row->permits_accounts ? $row->permits_accounts : '',
             'legalIdentityCard' => $row->legal_identity_card ? $row->legal_identity_card : '',
