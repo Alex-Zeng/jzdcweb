@@ -609,7 +609,7 @@ class Order extends Base{
         }
         //更新order价格
         $orderModel = new MallOrder();
-        $orderModel->save(['actual_money'=>$totalMoney,'sum_money'=>$totalMoney,'goods_money'=>$totalMoney],['id'=>$id]);
+        $orderModel->save(['actual_money'=>$totalMoney,'sum_money'=>$totalMoney],['id'=>$id]);
         //exit;
         return ['status'=>0,'data'=>[],'msg'=>'操作失败'];
     }

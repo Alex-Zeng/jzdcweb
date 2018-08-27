@@ -603,7 +603,7 @@ class Order extends Base{
         }
         $model = new MallOrder();
         $where['out_id'] = $orderNo;
-        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','goods_names','state','pay_date','out_id','buyer_comment','buyer_id','supplier','service_type'])->find();
+        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','goods_names','state','pay_date','out_id','buyer_comment','buyer_id','supplier','service_type','is_account_period'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
         }
@@ -612,7 +612,7 @@ class Order extends Base{
         }
 
         //更新状态
-        if($row->pay_date){ //有账期
+        if($row->is_account_period){ //有账期
             $state = MallOrder::STATE_ACCOUNT_PERIOD;
         }else{ //无账期 =>
             $state = MallOrder::STATE_REMITTANCE_SUPPLIER;
