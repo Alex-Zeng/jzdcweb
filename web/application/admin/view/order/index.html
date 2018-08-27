@@ -621,6 +621,19 @@
         if(id < 0){
             return;
         }
+        var contract_type = $("#pricing-form").find('select[name="contract_type"]').val();
+        if(contract_type == 1){
+            $("#pricing-form").bootstrapValidator('removeField','is_account_period');
+        }else{
+            $("#pricing-form").bootstrapValidator('addField','is_account_period',{
+                validators: {
+                    notEmpty: {
+                        message: '请设置账期支付'
+                    },
+                }
+            });
+        }
+
         //验证字段
         $("#pricing-form").data('bootstrapValidator').validate();
         if($("#pricing-form").data('bootstrapValidator').isValid()){
