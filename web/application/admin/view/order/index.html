@@ -272,6 +272,7 @@
                                 <div class="form-group form-inline date_container">
                                     <label class="col-md-3">账期支付</label>
                                     <select class="form-control " name="is_account_period">
+                                        <option value="">请选择</option>
                                         <option  value="0">否</option>
                                         <option  value="1">是</option>
                                     </select>
@@ -605,7 +606,14 @@
         live: 'disabled',
         message: 'This value is not valid',
         fields: {
-
+            is_account_period:{
+                message: '账期设置无效',
+                validators: {
+                    notEmpty: {
+                        message: '请设置账期支付'
+                    },
+                }
+            }
         }
     });
     $("#pricing-request").click(function () {
