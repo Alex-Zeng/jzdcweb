@@ -569,7 +569,7 @@
             <code class="error" style="color:#a94442;"></code>
         </td>
         <td><input type="number" min="1" class="form-control quantity"  name="goods[{{goods.id}}][quantity]"  step="1"  value="{{goods.quantity}}" /></td>
-        <td><input type="text" class="form-control total"  value="{{ (goods.price * goods.quantity).toFixed(3)}}"   disabled /></td>
+        <td width="180px"><input type="text" class="form-control total"  value="{{ (goods.price * goods.quantity).toFixed(4)}}"   disabled /></td>
     </tr>
     {{/each}}
 </script>
@@ -1067,7 +1067,7 @@
         //获取当前域值
         var price = $(this).closest('tr').find('.price').val();
         var quantity = $(this).closest('tr').find('.quantity').val();
-        var total = (price * quantity).toFixed(3);
+        var total = (price * quantity).toFixed(4);
         $(this).closest('tr').find('.total').val(total);
         updateTotal();
     });
@@ -1076,7 +1076,7 @@
         $("#adjust-price-body").find('tr>td>.total').each(function () {
             total += parseFloat($(this).val());
         });
-        $("#adjust-total-show").html(total.toFixed(3));
+        $("#adjust-total-show").html(total.toFixed(4));
     }
     //账期设置
     $('#pay-day-modal').on('show.bs.modal', function (event) {
