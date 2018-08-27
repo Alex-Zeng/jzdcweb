@@ -22,12 +22,16 @@ class  Suggestion extends Base{
         $content = $request->post('content','','trim');
 
         //验证数据
-//        $str='中';
-//        echo strlen($str);
-//        echo '<br />';
-//        echo mb_strlen($str,'UTF8');
+        if(!checkStrLength($contacts,10)){
+            return ['status'=>1,'data'=>[],'msg'=>'称呼最多输入10个字'];
+        }
+        if(!checkPhone($contactsNum)){
+            return ['status'=>1,'data'=>[],'msg'=>'反馈内容最多输入500个字'];
+        }
+        if(!checkStrLength($content,500)){
+            return ['status'=>1,'data'=>[],'msg'=>'联系电话不正确'];
+        }
 
-        //
         $model = new ComplaintsSuggestions();
         $data = [
             'content' => $content,

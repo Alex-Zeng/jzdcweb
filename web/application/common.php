@@ -82,6 +82,18 @@ function checkPassword($password){
 }
 
 /**
+ * @desc 验证长度
+ * @param $str
+ * @param $length
+ * @param string $encode
+ * @return bool
+ */
+function checkStrLength($str, $length, $encode = 'UTF8'){
+    $newLen = mb_strlen($str,$encode);
+    return $newLen > $length ? false : true;
+}
+
+/**
  * @desc 生成订单号，简单处理
  * @param int $number
  * @return string
