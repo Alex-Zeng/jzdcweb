@@ -61,19 +61,19 @@
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                             <tr>
-                                <th width="180px">称呼</th>
+                                <th width="200px">称呼</th>
                                 <th width="180px">提交时间</th>
-                                <th>联系电话</th>
+                                <th width="200px">联系电话</th>
                                 <th>投诉建议</th>
                             </tr>
                             </thead>
                             <tbody>
                             {volist name='list' id='suggestion'}
                             <tr>
-                                <td>{$suggestion.contacts}</td>
+                                <td>{:htmlspecialchars($suggestion.contacts)}</td>
                                 <td>{:date('Y-m-d H:i',$suggestion.created_time)}</td>
                                 <td>{$suggestion.contact_num}</td>
-                                <td>{$suggestion.content}</td>
+                                <td>{:htmlspecialchars($suggestion.content)}</td>
                             </tr>
                             {/volist}
                             </tbody>
