@@ -10,6 +10,7 @@ namespace app\admin\controller;
 
 use app\common\model\IndexUser;
 use think\Request;
+use app\common\model\SmProductCategory;
 
 class ProductCategory  extends Base{
 
@@ -18,7 +19,7 @@ class ProductCategory  extends Base{
      * @return mixed
      */
     public function index(){
-        $model = new \app\common\model\ProductCategory();
+        $model = new SmProductCategory();
         $fields = ['id','name','parent_id','is_display','ordering'];
         $rows = $model->where(['parent_id'=>0,'is_deleted'=>0])->field($fields)->select();
 
@@ -67,7 +68,7 @@ class ProductCategory  extends Base{
      * @return mixed
      */
     public function create(Request$request,$id = 0){
-        $model = new \app\common\model\ProductCategory();
+        $model = new SmProductCategory();
         if($request->isPost()){
             $name = $request->post('name','','trim');
             $parent = $request->post('parent',0,'intval');
@@ -104,7 +105,7 @@ class ProductCategory  extends Base{
      * @return mixed
      */
     public function edit(Request$request,$id){
-        $model = new \app\common\model\ProductCategory();
+        $model = new SmProductCategory();
         $field = ['id','name','parent_id','ordering','is_display'];
         $row = $model->where(['id'=>$id])->field($field)->find();
 
@@ -141,7 +142,7 @@ class ProductCategory  extends Base{
      * @param $id
      */
     public function delete($id){
-        $model = new \app\common\model\ProductCategory();
+        $model = new SmProductCategory();
         $row = $model->where(['id'=>$id])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
@@ -179,7 +180,7 @@ class ProductCategory  extends Base{
     public function sequence(Request $request){
         $id = $request->post('id',0);
         $sequence = $request->post('value',0);
-        $model = new \app\common\model\ProductCategory();
+        $model = new SmProductCategory();
         $result = $model->save(['ordering'=>$sequence],['id'=>$id]);
         if($result == true){
             return ['status'=>0,'data'=>[],'msg'=>'更新成功'];
