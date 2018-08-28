@@ -133,24 +133,38 @@ function  getTypeLevelList($level = 2){
     }
    return $list;
 }
-/*
-<select id="state" name="state">
-      <option value="" selected="">全部状态</option>
-      <option value="0">待核价</option>
-      <option value="1">待签约</option>
-      <option value="2">待采购商打款</option>
-      <option value="3">待发货</option>
-      <option value="4">订单关闭</option>
-      <option value="6">待收货</option>
-      <option value="7">待质检</option>
-      <option value="8">问题确认中</option>
-      <option value="9">账期中</option>
-       <option value="10">逾期中</option>
-       <option value="11">待打款至供应商</option>
-      <option value="13">交易完成</option>
-</select>
 
-*/
+/**
+ * @desc 根据层级返回分类列表数据
+ * @param int $level
+ * @return array
+ * @throws \think\db\exception\DataNotFoundException
+ * @throws \think\db\exception\ModelNotFoundException
+ * @throws \think\exception\DbException
+ */
+function getProductCategory($level = 2){
+    $model = new \app\common\model\ProductCategory();
+    $rows = $model->where(['parent_id'=>0])->field(['id','name','parent_id'])->select();
+    $list = [];
+    foreach ($rows as $row){
+        $list[] = ['id'=>$row->id,'name'=>$row->name,'parent'=>$row->parent_id,'level'=>1];
+        if($level == 2 || $level == 3){
+            $rows2 = $model->where(['parent_id'=>$row->id])->field(['id','name','parent_id'])->select();
+            foreach ($rows2 as $row2){
+                $list[] = ['id'=>$row2->id,'name'=>$row2->name,'parent'=>$row2->parent_id,'level'=>2];
+                if($level == 3){
+                    $rows3 = $model->where(['parent_id'=>$row2->id])->field(['id','name','parent_id'])->select();
+                    foreach($rows3 as $row3){
+                        $list[] = ['id'=>$row3->id,'name'=>$row3->name,'parent'=>$row3->parent_id,'level'=>3];
+                    }
+                }
+            }
+        }
+    }
+    return $list;
+}
+
+
 /**
  * @desc 返回订单状态
  * @param int $state
