@@ -27,7 +27,7 @@ class MallGoodsSpecifications extends Model{
     }
 
     public static function getFormatPath($path){
-        return    config('jzdc_domain').'/web/public/uploads/goods_color/'.$path;
+        return    config('jzdc_domain').config('jzdc_static_path').'/uploads/goods_color/'.$path;
     }
 
 
