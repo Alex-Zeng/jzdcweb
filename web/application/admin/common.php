@@ -143,7 +143,7 @@ function  getTypeLevelList($level = 2){
  * @throws \think\exception\DbException
  */
 function getProductCategory($level = 2){
-    $model = new \app\common\model\ProductCategory();
+    $model = new \app\common\model\SmProductCategory();
     $rows = $model->where(['parent_id'=>0])->field(['id','name','parent_id'])->select();
     $list = [];
     foreach ($rows as $row){

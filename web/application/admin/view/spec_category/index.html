@@ -169,7 +169,6 @@
     $(function () {
         $('#color').change(function () {
             var value = $(this).prop('checked');
-            alert(value);
             $.ajax({
                 url:"{:url('admin/spec_category/set')}",
                 type:'post',

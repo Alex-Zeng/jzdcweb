@@ -149,7 +149,7 @@ class SpecCategory extends Base{
      * @return array
      */
     public function create(Request $request,$categoryId){
-        $name = $request->post('name','');
+        $name = $request->post('name','trim');
         $model = new SmSpecCategory();
 
         $userId = getUserId();
@@ -165,6 +165,12 @@ class SpecCategory extends Base{
         }
 
         $model = new SmSpecCategoryDetails();
+        //验证数据是否存在
+        $exit = $model->where(['spec_category_id'=>$id,'spec_attr_name'=>$name,'is_standard'=>0,'is_deleted'=>0])->find();
+        if($exit){
+            return ['status'=>1,'data'=>[],'msg'=>'规格选项已经存在'];
+        }
+
         $data = ['spec_category_id'=>$id,'spec_attr_name'=>$name,'is_standard'=>0,'created_user_id'=>$userId,'created_user'=>$userInfo ? $userInfo->username : '','created_time'=>time()];
         $result = $model->save($data);
         if($result == true){
@@ -179,13 +185,25 @@ class SpecCategory extends Base{
      * @param $id
      */
     public function edit(Request $request,$id){
-        $name = $request->post('name','');
+        $name = $request->post('name','trim');
 
         $userId = getUserId();
         $userModel = new IndexUser();
         $userInfo = $userModel->getInfoById($userId);
 
         $model = new SmSpecCategoryDetails();
+
+        $row = $model->where(['id'=>$id])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'数据异常'];
+        }
+
+        //验证名称是否存在
+        $exit = $model->where(['spec_category_id'=>$row->spec_category_id,'spec_attr_name'=>$name,'is_standard'=>0,'is_deleted'=>0,'id'=>['not in',[$id]]])->find();
+        if($exit){
+            return ['status'=>1,'data'=>[],'msg'=>'规格选项已经存在'];
+        }
+
         $data = ['spec_attr_name'=>$name,'last_modified_user_id'=>$userId,'last_modified_user'=>$userInfo ? $userInfo->username : '','last_modified_time'=>time()];
         $result = $model->save($data,['id'=>$id]);
         if($result !== false){
