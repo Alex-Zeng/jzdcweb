@@ -621,6 +621,8 @@ class Goods  extends Base {
             $row['icon'] = SmProduct::getFormatImg($row->cover_img_url);
             $row['min_price'] = getFormatPrice($row->min_price);
             $row['max_price'] = getFormatPrice($row->max_price);
+            $row['isDiscussPrice'] = $row->is_price_neg_at_phone;
+            unset($row->is_price_neg_at_phone);
         }
 
         return ['status'=>0,'data'=>['total'=>$total,'typeList'=>$typeList,'list'=>$rows],'msg'=>''];
@@ -641,13 +643,13 @@ class Goods  extends Base {
         $model = new MallFavorite();
         $where['a.user_id'] = $this->userId;
 
-
         $rows = $model->alias('a')
                       ->join(['sm_product' =>'b'],'a.goods_id=b.id','left')
-                      ->join(['sm_products_categories'=>'c'],'b.id=c.product_id','left')
-                      ->join(['sm_product_category'=>'d','c.category_id=d.id'])
-                      ->where($where)->group('b.id')->field(['COUNT(*) AS count','d.name','d.id'])->select();
-
+                      ->join(['sm_product_category'=>'c'],'b.category_id=c.id','left')
+                      ->where($where)
+                      ->group('b.category_id')
+                      ->field(['COUNT(*) AS count','c.name','c.id'])
+                      ->select();
         $maps = getTypeMap();
         $list = [];
         foreach ($rows as $row){
@@ -673,12 +675,12 @@ class Goods  extends Base {
         }
 
         if($ids){
-            $typeModel = new MallType();
-            $typeRows = $typeModel->where(['id'=>['in',$ids]])->field(['id','name'])->select();
+            $categoryModel = new SmProductCategory();
+            $categoryRows = $categoryModel->where(['id'=>['in',$ids]])->field(['id','name'])->select();
         }
         foreach ($return as &$return_list){
             $return_list['name'] = '';
-            foreach ($typeRows as $typeRow){
+            foreach ($categoryRows as $typeRow){
                 if($return_list['id'] == $typeRow->id){
                     $return_list['name'] = $typeRow->name;
                     continue;
@@ -696,11 +698,11 @@ class Goods  extends Base {
      * @throws \think\Exception
      */
     public function detail($id){
-        $model = new MallGoods();
+        $model = new SmProduct();
         $row = $model->find(['id'=>$id]);
 
         $view = new View();
-        echo $view->fetch('index/goods_detail',['detail'=>$row ? getImgUrl($row->detail) : '']);
+        echo $view->fetch('index/goods_detail',['detail'=>$row ? getImgUrl($row->html_content_2) : '']);
     }
 
     /**
@@ -751,16 +753,21 @@ class Goods  extends Base {
         }
 
         //商品是否存在
-        $mallGoods = model('mall_goods');
+        $mallGoods = new SmProduct();
         $goods = $mallGoods->field('supplier')->where(['id'=>$gid,'state'=>2])->find();
         if(!$goods){
-            return ['status'=>0,'data'=>[],'msg'=>''];
+            return ['status'=>0,'data'=>[],'msg'=>'商品不存在'];
         }
 
         //获取九个热门
-        $dataGoods = $mallGoods->field('id,icon')->where(['id'=>['<>',$gid],'supplier'=>$goods['supplier'],'state'=>2])->order('time desc')->limit(9)->select();
+        $dataGoods = $mallGoods->where(['id'=>['<>',$gid],'supplier_id'=>$goods['supplier_id'],'state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])
+                               ->order('created_time desc')
+                               ->field(['id','cover_img_url'])
+                               ->limit(9)
+                               ->select();
+
         foreach ($dataGoods as $k => $v) {
-            $dataGoods[$k]['icon'] = $mallGoods::getFormatImg($v['icon']);
+            $dataGoods[$k]['icon'] = SmProduct::getFormatImg($v->cover_img_url);
         }
 
         return ['status'=>0,'data'=>$dataGoods,'msg'=>''];

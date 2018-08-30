@@ -14,6 +14,7 @@ use app\common\model\MallGoods;
 use app\common\model\MallGoodsSpecifications;
 use app\common\model\MallTypeOption;
 use app\common\model\MallUnit;
+use app\common\model\SmProduct;
 use think\Request;
 
 class MallCart extends Base{
@@ -60,12 +61,15 @@ class MallCart extends Base{
             return ['status'=>1,'data'=>[],'msg'=>'没有权限操作'];
         }
 
-        //查询是否
-        $model = new MallGoods();
-        $row = $model->where(['id'=>$id,'state'=>MallGoods::STATE_SALE])->find();
+        //查询商品是否
+        $model = new SmProduct();
+        $row = $model->where(['id'=>$id,'state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'商品不存在或已下架'];
         }
+
+        //Todo....
+
         //
         $goodsSpecificationsModel = new MallGoodsSpecifications();
         $specificationsRow = $goodsSpecificationsModel->where(['color_id'=>$colorId,'option_id'=>$optionId,'goods_id'=>$id])->field(['id','w_price'])->find();
