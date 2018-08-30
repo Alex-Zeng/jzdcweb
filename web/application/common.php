@@ -150,16 +150,15 @@ function getImgUrl($content="",$suffix = ''){
 }
 
 function getTypeMap(){
-    $model = new \app\common\model\MallType();
-    $rows = $model->where(['parent'=>0])->field(['id','name','parent'])->select();
+    $model = new \app\common\model\SmProductCategory();
+    $rows = $model->where(['parent_id'=>0,'is_display'=>1,'is_deleted'=>0])->field(['id','name','parent_id'])->select();
     $map = [];
     foreach ($rows as $row){
         $map[$row->id][] = $row->id;
-        $rows2 = $model->where(['parent'=>$row->id])->field(['id','name','parent'])->select();
+        $rows2 = $model->where(['parent_id'=>$row->id,'is_display'=>1,'is_deleted'=>0])->field(['id','name','parent_id'])->select();
         foreach ($rows2 as $row2){
             $map[$row->id][] = $row2->id;
-
-            $rows3 = $model->where(['parent'=>$row2->id])->field(['id','name','parent'])->select();
+            $rows3 = $model->where(['parent_id'=>$row2->id,'is_display'=>1,'is_deleted'=>0])->field(['id','name','parent_id'])->select();
             foreach($rows3 as $row3){
                 $map[$row->id][] = $row3->id;
             }

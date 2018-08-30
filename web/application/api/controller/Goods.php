@@ -13,6 +13,10 @@ use app\common\model\MallFavorite;
 use app\common\model\MallGoods;
 use app\common\model\MallGoodsSpecifications;
 use app\common\model\MallUnit;
+use app\common\model\SmProduct;
+use app\common\model\SmProductCategory;
+use app\common\model\SmProductGallery;
+use app\common\model\SmProductSpec;
 use app\common\model\UserGoodsSpecifications;
 use app\common\model\UserSearchLog;
 use app\common\model\MallType;
@@ -55,33 +59,25 @@ class Goods  extends Base {
      * @throws \think\exception\DbException
      */
     public function getCategoryList(Request $request){
-        $model = new MallType();
-        $field =  ['id','name','path','web_path'];
+        $model = new SmProductCategory();
+        $field =  ['id','name'];
         //获取一级分类
-        $rows = $model->where(['visible'=>1,'parent'=>0])->order('sequence','desc')->field($field)->select();
+        $rows = $model->where(['is_display'=>1,'is_deleted'=>0,'parent_id'=>0])->order('ordering','desc')->field($field)->select();
         foreach ($rows as &$row){
-            $webPath = $row->web_path ? $row->web_path : $row->path;
-            $row['web_path'] = MallType::getFormatIcon($webPath);
-            $row['path'] = MallType::getFormatIcon($row->path);
+            $row['path'] = '';
             //获取二级分类
-            $rows2 = $model->where(['visible'=>1,'parent'=>$row->id])->order('sequence','desc')->field($field)->select();
+            $rows2 = $model->where(['is_display'=>1,'is_deleted'=>0,'parent_id'=>$row->id])->order('ordering','desc')->field($field)->select();
             foreach ($rows2 as &$row2){
-                $webPath = $row2->web_path ? $row2->web_path : $row2->path;
-                $row2['web_path'] = MallType::getFormatIcon($webPath);
-                $row2['path'] = MallType::getFormatIcon($row2->path);
-                $rows3 = $model->where(['visible'=>1,'parent'=>$row2->id])->order('sequence','desc')->field($field)->select();
-              //  echo $model->getLastSql();
+                $row2['path'] = '';
+                $rows3 = $model->where(['is_display'=>1,'is_deleted'=>0,'parent_id'=>$row2->id])->order('ordering','desc')->field($field)->select();
                 foreach ($rows3 as &$row3){
-                    $webPath = $row3->web_path ? $row3->web_path : $row3->path;
-                    $row3['web_path'] = MallType::getFormatIcon($webPath);
-                    $row3['path'] = MallType::getFormatIcon($row3->path);
+                    $row3['path'] = '';
                 }
                 $row2['child'] = $rows3;
             }
             $row['child'] = $rows2;
         }
         return ['status'=>0,'data'=>$rows,'msg'=>''];
-
     }
 
 
@@ -97,35 +93,39 @@ class Goods  extends Base {
         $pageSize = $request->post('pageSize',10,'intval');
         $start = ($pageNumber - 1)*$pageSize;
 
-        $typeModel = new MallType();
-        $typeIdArr = $typeModel->getAllIds();
-        $typeIds = $typeIdArr ? implode(',',$typeIdArr) : '';
-        $model = new MallGoods();
-
+        $model = new SmProduct();
+        $categoryModel = new SmProductCategory();
+        $typeIds = $categoryModel->getChildIds(0);
         $where = [
-            'state' => 2,
-            'mall_state' => 1,
-            'online_forbid' => 0,
-            'share' => 0,
-            'type' => ['in',$typeIds]
+            'a.state' => SmProduct::STATE_FORSALE,
+            'a.audit_state' => SmProduct::AUDIT_RELEASED,
+            'a.is_deleted' =>0,
+            'b.category_id' => ['in',$typeIds]
         ];
-        $total = $model->where($where)->count();
 
-        $rows = $model->where($where)->order('id desc, bidding_show desc')->limit($start,$pageSize)->field(['id','icon','title','w_price','min_price','max_price','w_price','discount','bidding_show'])->select();
+        $total = $model->alias('a')->join(['sm_products_categories'=>'b'],'a.id=b.product_id','left')
+            ->where($where)->order('a.id desc')
+            ->group('a.id')
+            ->limit($start,$pageSize)
+            ->count();
+        $rows = $model->alias('a')->join(['sm_products_categories'=>'b'],'a.id=b.product_id','left')
+            ->where($where)->order('a.id desc')
+            ->group('a.id')
+            ->limit($start,$pageSize)
+            ->field(['a.id','a.is_price_neg_at_phone','a.title','a.min_price','a.max_price','a.cover_img_url'])
+            ->select();
         $list = [];
         foreach ($rows as $row){
             $list[] = [
                 'id' => $row->id,
                 'title' => $row->title,
-                'url' => MallGoods::getFormatImg($row->icon),
+                'url' => SmProduct::getFormatImg($row->cover_img_url),
                 'min_price' => getFormatPrice($row->min_price),
                 'max_price' => getFormatPrice($row->max_price),
-                'w_price' => getFormatPrice($row->w_price)
             ];
         }
         return ['status'=>0,'data'=>['total'=>$total,'list'=>$list],'msg'=>''];
     }
-
 
     /**
      * @desc 添加商品收藏
@@ -192,7 +192,7 @@ class Goods  extends Base {
      * @param Request $request
      * @return array
      */
-    public function search(Request $request){
+    public function search3(Request $request){
         $type = $request->post('type',0,'intval'); //搜索类型
         $keywords = $request->post('keywords',''); //关键字
         $sort = $request->post('sort','asc');
@@ -277,12 +277,116 @@ class Goods  extends Base {
     }
 
     /**
+     * @desc 商品搜索
+     * @param Request $request
+     * @return array
+     */
+    public function search(Request $request){
+        $type = $request->post('type',0,'intval'); //搜索类型
+        $keywords = $request->post('keywords',''); //关键字
+        $sort = $request->post('sort','asc'); //排序
+        $pageSize = $request->post('pageSize',10,'intval');
+        $pageNumber = $request->post('pageNumber',1,'intval');
+        $categoryId = $request->post('cateId',0,'intval');  //分类
+        if($pageSize > 12){ $pageSize = 12;}
+
+        $start = ($pageNumber - 1)*$pageSize;
+
+        $this->noauth();
+
+        $model = new SmProduct();
+        if(!$keywords){
+            $type = 0;
+        }
+
+        if($type == 0){  //商品搜索
+            $where = [];
+            if($keywords){
+                $where['a.title'] = ['like','%'.$keywords.'%'];
+            }
+            if($categoryId > 0){
+                //查询子类包含的ID
+                $typeIds = (new SmProductCategory())->getChildIds($categoryId);
+                $typeIds = array_merge([$categoryId],$typeIds);
+                $where['b.category_idtype'] = ['in',$typeIds];
+            }
+
+            //查询数据   //['think_work'=>'w']
+            $total = $model->alias('a')->join(['sm_products_categories'=> 'b'],'a.id=b.product_id','left')
+                ->where(['a.state'=>SmProduct::STATE_FORSALE,'a.audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])
+                ->where($where)
+                ->group('a.id')
+                ->count();
+
+            $rows = $model->alias('a')->join(['sm_products_categories'=> 'b'],'a.id=b.product_id','left')
+                ->where(['a.state'=>SmProduct::STATE_FORSALE,'a.audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])
+                ->where($where)
+                ->group('a.id')
+                ->limit($start,$pageSize)
+                ->field(['a.id','a.is_price_neg_at_phone','a.title','a.min_price','a.max_price','a.cover_img_url'])
+                ->select();
+        }else{ //供应商搜索
+            $total = $model->alias('a')->join(config('prefix').'index_user b','a.supplier_id=b.id','left')
+                ->where(['a.state'=>SmProduct::STATE_FORSALE,'a.audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])
+                ->where('b.real_name','like','%'.$keywords.'%')
+                ->count();
+            $rows = $model->alias('a')->join(config('prefix').'index_user b','a.supplier_id=b.id')
+                ->where(['a.state'=>SmProduct::STATE_FORSALE,'a.audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])
+                ->where('b.real_name','like','%'.$keywords.'%')
+                ->limit($start,$pageSize)
+                ->order('a.min_price',$sort)
+                ->field(['a.id','a.is_price_neg_at_phone','a.title','a.min_price','a.max_price','a.cover_img_url'])
+                ->select();
+        }
+
+        //返回数据
+        $list = $goodsIds = $goodsIdArr =  [];
+        if($this->userId > 0){
+            foreach($rows as $row){
+                $goodsIds[] = $row->id;
+            }
+            //查询
+            $favoriteModel = new MallFavorite();
+            $favoriteRows = $favoriteModel->where(['user_id'=>$this->userId,'goods_id'=>['in',$goodsIds]])->field(['goods_id'])->select();
+
+            foreach ($favoriteRows as $favoriteRow){
+                $goodsIdArr[] = $favoriteRow->goods_id;
+            }
+        }
+        //格式化返回数据
+        foreach($rows as $row){
+            $list[] = [
+                'id' => $row->id,
+                'title' => $row->title,
+                'url' => SmProduct::getFormatImg($row->cover_img_url),
+                'isDiscussPrice' => $row->is_price_neg_at_phone,
+                'min_price' => getFormatPrice($row->min_price),
+                'max_price' => getFormatPrice($row->max_price),
+                'isFavorite' => in_array($row->id,$goodsIdArr) ? 1 : 0
+            ];
+        }
+        //更新搜索历史
+        if($keywords && $this->userId){
+            $searchModel = new UserSearchLog();
+            $searchRow = $searchModel->where(['user_id'=>$this->userId,'keyword'=>$keywords])->find();
+            if($searchRow){
+                $searchModel->save(['times'=>$searchRow->times+1,'update_time'=>time()],['user_id'=>$this->userId,'keyword'=>$keywords,'type'=>$type]);
+            }else{
+                $searchModel->save(['user_id'=>$this->userId,'keyword'=>$keywords,'type'=>$type,'times'=>1,'create_time'=>time(),'update_time'=>time()]);
+            }
+        }
+
+        return ['status'=>0,'data'=>['total'=> $total,'list'=>$list],'msg'=>''];
+    }
+
+    /**
      * @desc 获取商品信息
      * @param Request $request
      * @param $id
      * @return array
      */
-    public function get(Request $request, $id){
+
+    public function get3(Request $request, $id){
         $model = new MallGoods();
         $row = $model->where(['id'=>$id,'state'=>2])->field(['id','title','min_price','max_price','w_price','state','type','w_price','supplier','icon','multi_angle_img','unit','title','m_detail','option_enable'])->find();
         if(!$row){
@@ -381,6 +485,54 @@ class Goods  extends Base {
     }
 
 
+    public function get(Request $request, $id){
+        //获取商品
+        $productModel = new SmProduct();
+        $condition = ['state'=>SmProduct::STATE_FORSALE,'audit'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0];
+        $product = $productModel->where($condition)->find();
+        if(!$product){
+            return ['status'=>1,'data'=>[],'msg'=>'商品不存在或已下架'];
+        }
+
+        $this->noauth();
+
+        //查询多图数据
+        $galleryModel = new SmProductGallery();
+        $gallerys = $galleryModel->where(['product_id'=>$id,'is_deleted'=>0])->select();
+        $imgList = [];
+        if($gallerys){  //取多图
+            foreach ($gallerys as $gallery){
+                $imgList[] = ['img' => SmProductGallery::getFormatImg($gallery->product_image_url)];
+            }
+        }else{  //取封面图
+            $imgList[] =["img"=>SmProduct::getFormatImg($product->cover_img_url)];
+        }
+
+        //获取商家
+        $userModel = new IndexUser();
+        $supplierInfo = $userModel->getInfoById($product->supplier_id);
+
+        //是否收藏
+        $isFavorite = 0;
+        if($this->userId > 0){
+            $favoriteModel = new MallFavorite();
+            $exist = $favoriteModel->where(['user_id'=>$this->userId,'goods_id'=>$id])->find();
+            $isFavorite = $exist ? 1 : 0;
+        }
+
+        //取规格数据
+        $specModel = new SmProductSpec();
+        $specs = $specModel->where(['product_id'=>$id,'is_deleted'=>0])->select();
+        foreach($specs as $spec){
+
+        }
+       //
+
+
+    }
+
+
+
     /**
      *
      * @param Request $request
@@ -439,23 +591,34 @@ class Goods  extends Base {
                     break;
                 }
             }
-            $where['b.type'] = ['in',$targetIds];
+            $where['b.category_id'] = ['in',$targetIds];
         }
 
-        $mallType = model('mall_type');
+        //分类
+        $categoryModel = new SmProductCategory();
         $typeList = [['count'=>0,'name'=>'全部','typeId'=>0]];
-        $parent = $mallType->where(['parent'=>0])->field('name,id')->order('sequence desc')->select();
-        foreach ($parent as $key => $val) {
-            $count =  $model->where(['user_id'=>$this->userId,'type_id'=>['in',$mallType->getChildIds($val['id'],true)]])->count();
+        $parent = $categoryModel->where(['parent_id'=>0,'is_display'=>1,'is_deleted'=>0])->order('ordering desc')->select();
+        foreach ($parent as $key => $val){
+            $count = $model->where(['user_id'=>$this->userId,'type_id'=>['in',$categoryModel->getChildIds($val['id'],true)]])->count();
             $typeList[] = ['count'=>$count,'name'=>$val['name'],'typeId'=>$val['id']];
             $typeList[0]['count'] += $count;
         }
 
-        $total = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where($where)->count();
-        $rows = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where($where)->order('a.time','desc')->limit($start,$pageSize)->field(['b.id','b.title','b.icon','b.min_price','b.max_price'])->select();
+        //数据获取
+        $total = $model->alias('a')
+                       ->join(['sm_product'=>'b'],'a.goods_id=b.id','left')
+                       ->where($where)
+                       ->count();
+        $rows = $model->alias('a')
+                       ->join(['sm_product' => 'b'],'a.goods_id=b.id','left')
+                       ->where($where)
+                       ->order('a.time','desc')
+                       ->limit($start,$pageSize)
+                       ->field(['b.id','b.title','b.cover_img_url','b.min_price','b.max_price','b.is_price_neg_at_phone'])
+                       ->select();
 
         foreach ($rows as &$row){
-            $row['icon'] = MallGoods::getFormatImg($row->icon);
+            $row['icon'] = SmProduct::getFormatImg($row->cover_img_url);
             $row['min_price'] = getFormatPrice($row->min_price);
             $row['max_price'] = getFormatPrice($row->max_price);
         }
@@ -478,9 +641,12 @@ class Goods  extends Base {
         $model = new MallFavorite();
         $where['a.user_id'] = $this->userId;
 
-        $rows = $model->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')
-            ->join(config('prefix').'mall_type c','b.type=c.id')
-            ->where($where)->group('b.type')->field(['COUNT(*) AS count','c.name','c.id'])->select();
+
+        $rows = $model->alias('a')
+                      ->join(['sm_product' =>'b'],'a.goods_id=b.id','left')
+                      ->join(['sm_products_categories'=>'c'],'b.id=c.product_id','left')
+                      ->join(['sm_product_category'=>'d','c.category_id=d.id'])
+                      ->where($where)->group('b.id')->field(['COUNT(*) AS count','d.name','d.id'])->select();
 
         $maps = getTypeMap();
         $list = [];
@@ -530,7 +696,6 @@ class Goods  extends Base {
      * @throws \think\Exception
      */
     public function detail($id){
-
         $model = new MallGoods();
         $row = $model->find(['id'=>$id]);
 
@@ -547,28 +712,30 @@ class Goods  extends Base {
      * @throws \think\exception\DbException
      */
     public function getPath($id){
-        $model = new MallGoods();
-        $row = $model->where(['id'=>$id,'state'=>2])->field(['id','title','min_price','max_price','w_price','state','type','w_price','supplier','icon','multi_angle_img','title','m_detail','option_enable'])->find();
-        if(!$row){
+        $productModel = new SmProduct();
+        $productRow = $productModel->where(['id'=>$id,'state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])->find();
+        if(!$productRow){
             return ['status'=>1,'data'=>[],'msg'=>'商品不存在'];
         }
 
         //查询商品类型
-        $model = new \app\common\model\MallType();
-        $row = $model->where(['id'=>$row->type])->field(['id','name','parent'])->find();
+        $model = new SmProductCategory();
+        $row = $model->where(['id'=>$productRow->category_id])->field(['id','name','parent_id'])->find();
         $list = [];
         if($row){
             $list[] = ['id'=>$row->id,'name'=>$row->name];
             if($row->parent > 0){
-                $row2 = $model->where(['id'=>$row->parent])->field(['id','name','parent'])->find();
+                $row2 = $model->where(['id'=>$row->parent])->field(['id','name','parent_id'])->find();
                 $list[] = ['id'=>$row2->id,'name'=>$row2->name];
                 if($row2->parent > 0){
-                    $row3 = $model->where(['id'=>$row2->parent])->field(['id','name','parent'])->find();
+                    $row3 = $model->where(['id'=>$row2->parent])->field(['id','name','parent_id'])->find();
                     $list[] =['id'=>$row3->id,'name'=>$row3->name];
                 }
             }
         }
-        $list = $list ? array_reverse($list) : [];
+
+
+
         return ['status'=>0,'data'=>$list,'msg'=>''];
     }
 

@@ -21,6 +21,7 @@ use app\common\model\MallReceiver;
 use app\common\model\Notice;
 use app\common\model\OrderMsg;
 use app\common\model\MallReceiverTag;
+use app\common\model\SmProduct;
 use sms\Yunpian;
 use think\Request;
 use think\View;
@@ -256,19 +257,31 @@ class User extends Base
             return $auth;
         }
         $model = new MallFavorite();
-        $field == 'time' ? ($field = 'a.' . $field) : ($field = 'b.w_price');
-        $total = $model->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['user_id' => $this->userId])->count();
-        $rows = $model->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['user_id' => $this->userId])->order([$field => $sort])->field(['b.id', 'b.title', 'b.w_price','b.min_price','b.max_price', 'b.icon'])->limit($offset, $pageSize)->select();
+        $field == 'time' ? ($field = 'a.' . $field) : ($field = 'b.min_price');
+
+        //数据获取
+        $total = $model->alias('a')
+            ->join(['sm_product'=>'b'],'a.goods_id=b.id','left')
+            ->where(['a.user_id'=>$this->userId])
+            ->count();
+        $rows = $model->alias('a')
+            ->join(['sm_product' => 'b'],'a.goods_id=b.id','left')
+            ->where(['a.user_id'=>$this->userId])
+            ->order([$field => $sort])
+            ->limit($offset,$pageSize)
+            ->field(['b.id','b.title','b.cover_img_url','b.min_price','b.max_price','b.is_price_neg_at_phone'])
+            ->select();
 
         $list = [];
         foreach ($rows as $row){
             $list[] = [
                 'id' => $row->id,
                 'title' => $row->title,
-                'icon' => MallGoods::getFormatImg($row->icon),
+                'icon' => SmProduct::getFormatImg($row->cover_img_url),
                 'min_price' => getFormatPrice($row->min_price),
                 'max_price' => getFormatPrice($row->max_price),
-                'w_price' => getFormatPrice($row->w_price)
+                'w_price' => '0.00',
+                'isDiscussPrice' => $row->is_price_neg_at_phone
             ];
         }
 
