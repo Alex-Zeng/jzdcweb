@@ -245,6 +245,33 @@ function getTypeLevel($typeId = 0){
 }
 
 /**
+ * @desc
+ * @param int $categoryId
+ * @return array
+ * @throws \think\db\exception\DataNotFoundException
+ * @throws \think\db\exception\ModelNotFoundException
+ * @throws \think\exception\DbException
+ */
+function getCategoryLevel($categoryId = 0){
+    $model = new \app\common\model\SmProductCategory();
+    $row = $model->where(['id'=>$categoryId])->field(['id','name','parent_id'])->find();
+    $list = [];
+    if($row){
+        $list[] = $row->name;
+        if($row->parent_id > 0){
+            $row2 = $model->where(['id'=>$row->parent_id])->field(['id','name','parent_id'])->find();
+            $list[] = $row2->name;
+            if($row2->parent_id > 0){
+                $row3 = $model->where(['id'=>$row2->parent_id])->field(['id','name','parent_id'])->find();
+                $list[] = $row3->name;
+            }
+        }
+    }
+    return $list;
+}
+
+
+/**
  * @desc 返回商品颜色
  * @return false|PDOStatement|string|\think\Collection
  * @throws \think\db\exception\DataNotFoundException

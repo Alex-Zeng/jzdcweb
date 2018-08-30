@@ -526,7 +526,9 @@ class Goods  extends Base {
         foreach($specs as $spec){
 
         }
-       //
+       //取sku数据
+
+
 
 
     }

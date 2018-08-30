@@ -24,7 +24,7 @@ class IndexMenu extends Base{
         foreach ($rows as &$row){
             $row['path'] = MenuMenu::getFormatImg($row->path);
             if($row->type_id > 0){
-                $goodsTypeArr = array_reverse(getTypeLevel($row->type_id));
+                $goodsTypeArr = array_reverse(getCategoryLevel($row->type_id));
                 $row['goodsTypeName'] = implode('&nbsp;>',$goodsTypeArr);
             }else{
                 $row['goodsTypeName'] = '';
