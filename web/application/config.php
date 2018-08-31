@@ -340,5 +340,10 @@ return [
         'fontSize'  => 38,
         'length'    => 4,
         'useCurve'  => false
+    ],
+    //异常处理
+    'http_exception_template'    =>  [
+        // 定义404错误的重定向页面地址
+        404 =>  APP_PATH.'admin/view/tips/error.html',
     ]
 ];
