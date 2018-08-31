@@ -3,7 +3,7 @@ namespace app\common\model;
 
 use think\Model;
 
-class SmProduct extends Model{
+class SmProduct extends Base{
 
 	// 设置当前模型对应的完整数据表名称-分类规格表
     protected $table = 'sm_product';
@@ -20,7 +20,7 @@ class SmProduct extends Model{
      * @return string
      */
     public static function getFormatImg($img){
-        return $img ? config('jzdc_domain').config('jzdc_static_path').'/uploads/goods_thumb/'.$img : '';
+        return $img ? config('jzdc_doc_path').'/goods_thumb/'.$img : '';
     }
 
 
