@@ -17,6 +17,8 @@ use app\common\model\SmProduct;
 use app\common\model\SmProductCategory;
 use app\common\model\SmProductGallery;
 use app\common\model\SmProductSpec;
+use app\common\model\SmProductSpecAttrKey;
+use app\common\model\SmProductSpecAttrVal;
 use app\common\model\UserGoodsSpecifications;
 use app\common\model\UserSearchLog;
 use app\common\model\MallType;
@@ -488,7 +490,7 @@ class Goods  extends Base {
     public function get(Request $request, $id){
         //获取商品
         $productModel = new SmProduct();
-        $condition = ['state'=>SmProduct::STATE_FORSALE,'audit'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0];
+        $condition = ['state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0];
         $product = $productModel->where($condition)->find();
         if(!$product){
             return ['status'=>1,'data'=>[],'msg'=>'商品不存在或已下架'];
@@ -520,17 +522,92 @@ class Goods  extends Base {
             $isFavorite = $exist ? 1 : 0;
         }
 
-        //取规格数据
         $specModel = new SmProductSpec();
-        $specs = $specModel->where(['product_id'=>$id,'is_deleted'=>0])->select();
-        foreach($specs as $spec){
 
+        //取规格数据
+        $keyModel = new SmProductSpecAttrKey();
+        $keyRows = $keyModel->where(['product_id'=>$id,'is_deleted'=>0])->order('ordering desc')->select();
+
+        $specList = [];
+        $valModel = new SmProductSpecAttrVal();
+
+        //判断是否有定制
+        $isCustomSpec = $specModel->where(['product_id'=>$id,'is_deleted'=>0,'is_customized'=>1])->find();
+
+
+        foreach($keyRows as $keyIndex => $keyRow){
+            //循环获取数据
+            $valRows = $valModel->where(['spec_attr_key_id'=>$keyRow->id,'is_deleted'=>0])->select();
+            $valList = [];
+            foreach ($valRows as  $valRow){
+                $valList[] = [
+                  "id" => $valRow->id,
+                  "name" => $valRow->spec_attr_val,
+                  "isCustom" => 0,
+                ];
+            }
+
+            if($valRows){
+                $specList[] = ["desc"=> $keyRow->spec_attr_key,"list"=>$valList,"id"=>$keyRow->id];
+            }
         }
-       //取sku数据
 
+        //将定制数据放置在第一个规格组合
+        if($specList){
+            foreach ($specList as $index => &$item){
+                //增加定制选项
+                if($index == 0 && $isCustomSpec){
+                    $item['list'][] = [
+                        "id" => "0",
+                        "name" => "定制",
+                        "isCustom" => 1,
+                    ];
+                }
+            }
+        }else{
+            $specList[] = ["desc"=> "定制规格","list"=>[ "id" => "0", "name" => "定制", "isCustom" => 1],"id"=>0];
+        }
 
+        //商品规格数据
+        $specRows = $specModel->where(['product_id'=>$id,'is_deleted'=>0])->select();
+        $specInfo = [];
+        foreach($specRows as $specRow){
+            //对于定制
+            if($specRow->is_customized == 1){
+                $specSet = "0";
+            }else{   //非定制
+                $specSet = explode(',',$specRow->spec_set);
+            }
+            $specInfo[][] = [
+                "setIds" => $specSet,
+                "specId" => $specRow->id,
+                "sku" => $specRow->sku_code,
+                "price" => $specRow->price,
+                "unit" => $specRow->unit,
+                "pic" => SmProductSpec::getFormatImg($specRow->spec_img_url),
+                "num" => $specRow->min_order_qty,
+                "isDiscussPrice" => $specRow->is_price_neg_at_phone
+            ];
+        }
 
-
+        $icon = $supplierInfo ? $supplierInfo->icon : '';
+        //返回结果
+        $list = [
+            "img" => $imgList,
+            "companyName" => $supplierInfo ? $supplierInfo->real_name : '',
+            "companyLogo" => IndexUser::getFormatIcon($icon),
+            "title" => $product->title,
+            "isDiscussPrice" => $product->is_price_neg_at_phone,
+            "minPrice" => $product->min_price,
+            "maxPrice" => $product->max_price,
+            "speclist" => $specList,
+            "specInfo" => $specInfo,
+            'detail' => getImgUrl($product->html_content_1),  //H5详情
+            "webDetail" => getImgUrl($product->html_content_2),//PC详情
+            'detailUrl' =>config('jzdc_domain').url('api/goods/detail',['id'=>$id]), //H5 Url
+            'isFavorite' => $isFavorite //是否收藏
+        ];
+        return ['status'=>0,'data'=>$list,'msg'=>''];
     }
 
 
