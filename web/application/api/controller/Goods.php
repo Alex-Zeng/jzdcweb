@@ -584,11 +584,16 @@ class Goods  extends Base {
         $specInfo = [];
         $specPriceDetails = [];
         foreach($specRows as $specRow){
+            $specSet = [];
             //对于定制
             if($specRow->is_customized == 1){
-                $specSet = "0";
+                $specSet = [0];
             }else{   //非定制
-                $specSet = explode(',',$specRow->spec_set);
+                $specSetArr = explode(',',$specRow->spec_set);
+                for ($i = 0; $i < count($specSetArr); $i++){
+                    $specSet[] = intval($specSetArr[$i]);
+                }
+
                 $specPriceDetails = (new SmProductSpecPrice())->getPriceDetail($specRow->id);
             }
             //查询物料编号、规格
