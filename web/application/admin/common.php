@@ -320,3 +320,12 @@ function allLateToString($data){
   }
   return $data;
 }
+
+/**
+ * [getProductAuditState 返回状态描述]
+ * @param  [int] $id    [状态值]
+ * @return [string]     [状态描述]
+ */
+function getProductAuditState($id){
+    return model('SmProduct')->getAuditState($id);
+}

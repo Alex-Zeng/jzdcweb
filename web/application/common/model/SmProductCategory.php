@@ -1,6 +1,6 @@
 <?php
 namespace app\common\model;
-
+use think\db;
 use think\Model;
 
 class SmProductCategory extends Model{
@@ -68,5 +68,71 @@ class SmProductCategory extends Model{
             }
         }
         return $arr;
+    }
+
+    /**
+     * [getCategorySelected 通过depthpath获取所有涉及的分类数据，包括层级数据，选中层级是谁]
+     * @param  [type] $categoryIds           [当前选中分类的ID集]
+     * @return [type]                       [分类集合数据]
+     */
+    public function getCategorySelected($categoryIds){
+        //[分类全路径['/1/2/3/4','1/2/3/5']]
+        $selectedCategoryDepthPath = db::table($this->table)->where(['id'=>['in',$categoryIds]])->field('id,depth_path')->select();
+       
+        //[分类集合 [['id'=>1,'name'=>'手机','parent_id'=>0,'level'=>1,'depth_path'=>'/1']] ]
+        $allCategoryList = db::table($this->table)->field('id,name,parent_id,level,depth_path')->select();
+
+        //分析组合
+        $zuhe = [];
+        $zuhebingzhi = [];
+        foreach ($selectedCategoryDepthPath as $k => $v) {
+            //不知道是否为最后一级，所以追加一级
+            $vStr = $v['depth_path'].'/0';
+            $vArr = explode('/',$vStr);
+           
+            $name = '';
+            foreach ($vArr as $kk => $vv) {
+                if($kk>0){
+                    $name = $name.'/'.$vv;
+                }else{
+                    $name = $vv;
+                }
+                if(isset($vArr[$kk+1])){
+                    $zuhe[$k]['level'.$name] = $vArr[$kk+1];
+                    if(!in_array('level'.$name, $zuhebingzhi)){
+                        $zuhebingzhi[] = 'level'.$name;
+                    }
+                }
+            }
+        }
+
+        //获取 
+        $zuhebingzhiValue = [];
+        foreach ($allCategoryList as $key => $val) {
+            if($val['parent_id']==0){
+                $zuhebingzhiValue['level'][] = $val;
+                continue;
+            }
+
+            $zuhebingzhivaluestr = 'level'.substr($val['depth_path'],0,strrpos($val['depth_path'],'/'));
+            if($zuhebingzhivaluestr=='level'){
+                continue;
+            }
+            if(in_array($zuhebingzhivaluestr,$zuhebingzhi)){
+                $zuhebingzhiValue[$zuhebingzhivaluestr][] = $val;
+            }
+        }
+        // dump($zuhe);
+        // dump($zuhebingzhiValue);
+        //由于上面对每个都假设后面还有一级，当不存在下一级时候，应该对应删除掉
+        foreach ($zuhe as $key => $val) {
+            foreach ($val as $kk => $vv) {
+                if(!isset($zuhebingzhiValue[$kk])){
+                    unset($zuhe[$key][$kk]);
+                }
+            }
+        }
+        
+        return ['selectedList'=>$zuhe,'levelSelectKeyList'=>$zuhebingzhi,'levelSelectList'=>$zuhebingzhiValue];
     }
 }  
