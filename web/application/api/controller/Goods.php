@@ -488,6 +488,15 @@ class Goods  extends Base {
     }
 
 
+    /**
+     * @desc 获取商品详细信息
+     * @param Request $request
+     * @param $id
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     public function get(Request $request, $id){
         //获取商品
         $productModel = new SmProduct();
@@ -535,39 +544,40 @@ class Goods  extends Base {
         //判断是否有定制
         $isCustomSpec = $specModel->where(['product_id'=>$id,'is_deleted'=>0,'is_customized'=>1])->find();
 
-
         foreach($keyRows as $keyIndex => $keyRow){
             //循环获取数据
             $valRows = $valModel->where(['spec_attr_key_id'=>$keyRow->id,'is_deleted'=>0])->select();
             $valList = [];
             foreach ($valRows as  $valRow){
                 $valList[] = [
-                  "id" => $valRow->id,
-                  "name" => $valRow->spec_attr_val,
+                  "specAttrValId" => $valRow->id,
+                  "specAttrVal" => $valRow->spec_attr_val,
                   "isCustom" => 0,
                 ];
             }
 
             if($valRows){
-                $specList[] = ["desc"=> $keyRow->spec_attr_key,"list"=>$valList,"id"=>$keyRow->id];
+                $specAttrs[] = ["specAttrKey"=> $keyRow->spec_attr_key,"specAttrVals"=>$valList,"specAttrId"=>$keyRow->id];
             }
         }
 
         //将定制数据放置在第一个规格组合
-        if($specList){
-            foreach ($specList as $index => &$item){
+        if($specAttrs){
+            foreach ($specAttrs as $index => &$item){
                 //增加定制选项
                 if($index == 0 && $isCustomSpec){
-                    $item['list'][] = [
-                        "id" => "0",
-                        "name" => "定制",
+                    $item['specAttrVals'][] = [
+                        "specAttrValId" => "0",
+                        "specAttrVal" => "定制",
                         "isCustom" => 1,
                     ];
                 }
             }
         }else{
-            $specList[] = ["desc"=> "定制规格","list"=>[ "id" => "0", "name" => "定制", "isCustom" => 1],"id"=>0];
+            $specAttrs[] = ["desc"=> "定制规格","list"=>[ "specAttrValId" => "0", "specAttrVal" => "定制", "isCustom" => 1],"id"=>0];
         }
+
+        $userSpecificationModel = new UserGoodsSpecifications();
 
         //商品规格数据
         $specRows = $specModel->where(['product_id'=>$id,'is_deleted'=>0])->select();
@@ -581,15 +591,22 @@ class Goods  extends Base {
                 $specSet = explode(',',$specRow->spec_set);
                 $specPriceDetails = (new SmProductSpecPrice())->getPriceDetail($specRow->id);
             }
-            $specInfo[][] = [
-                "setIds" => $specSet,
+            //查询物料编号、规格
+            $userSpecificationRow = $userSpecificationModel->where(['user_id'=>$this->userId,'product_spec_id'=>$specRow->id])->order('create_time desc')->find();
+            $materialCode = $userSpecificationRow ? $userSpecificationRow->specifications_no : '';  //物料编号
+            $materialSpec = $userSpecificationRow ? $userSpecificationRow->specifications_name : ''; //物料规格
+
+            $specInfo[] = [
+                "specAttrs" => $specSet,
                 "specId" => $specRow->id,
-                "sku" => $specRow->sku_code,
-                "price" => $specRow->price,
-                "unit" => $specRow->unit,
-                "pic" => SmProductSpec::getFormatImg($specRow->spec_img_url),
-                "num" => $specRow->min_order_qty,
+                "skuCode" => $specRow->sku_code,
+                "specPrice" => $specRow->price,
+                "specUnit" => $specRow->unit,
+                "specImageUrl" => SmProductSpec::getFormatImg($specRow->spec_img_url),
+                "moq" => $specRow->min_order_qty,
                 "isDiscussPrice" => $specRow->is_price_neg_at_phone,
+                "materialCode" => $materialCode,
+                "materialSpec" => $materialSpec,
                 "specPriceDetails" => $specPriceDetails
             ];
         }
@@ -597,15 +614,15 @@ class Goods  extends Base {
         $icon = $supplierInfo ? $supplierInfo->icon : '';
         //返回结果
         $list = [
-            "img" => $imgList,
+            "imgList" => $imgList,
             "companyName" => $supplierInfo ? $supplierInfo->real_name : '',
             "companyLogo" => IndexUser::getFormatIcon($icon),
             "title" => $product->title,
             "isDiscussPrice" => $product->is_price_neg_at_phone,
             "minPrice" => $product->min_price,
             "maxPrice" => $product->max_price,
-            "specList" => $specList,
-            "specInfo" => $specInfo,
+            "specAttrs" => $specAttrs,
+            "specifications" => $specInfo,
             'detail' => getImgUrl($product->html_content_1),  //H5详情
             "webDetail" => getImgUrl($product->html_content_2),//PC详情
             'detailUrl' =>config('jzdc_domain').url('api/goods/detail',['id'=>$id]), //H5 Url
