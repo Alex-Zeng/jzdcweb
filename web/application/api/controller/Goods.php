@@ -500,7 +500,7 @@ class Goods  extends Base {
     public function get(Request $request, $id){
         //获取商品
         $productModel = new SmProduct();
-        $condition = ['state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0];
+        $condition = ['state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0,'id'=>$id];
         $product = $productModel->where($condition)->find();
         if(!$product){
             return ['status'=>1,'data'=>[],'msg'=>'商品不存在或已下架'];

@@ -79,7 +79,7 @@ class MallCart extends Base{
         $where = ['user_id'=>$this->userId,'goods_id'=>$id,'product_spec_id'=>$specId];
         $cartRow = $cartModel->where($where)->find();
         if($cartRow){  //存在更新数量
-            $result = $cartModel->where($where)->setInc('quantity',$number);
+            $result = $cartModel->save(['quantity'=>$cartRow->quantity+$number,'price' => isset($specRow->price) ? $specRow->price : '0.00'],$where);
         }else{ //不存在插入数据
             $userModel = new IndexUser();
             $user = $userModel->getInfoById($this->userId);
