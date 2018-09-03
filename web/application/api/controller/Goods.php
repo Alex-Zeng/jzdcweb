@@ -632,34 +632,6 @@ class Goods  extends Base {
     }
 
 
-
-    /**
-     *
-     * @param Request $request
-     * @return array
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     */
-    public function standardPrice(Request $request){
-        $id = $request->post('id',0,'intval');
-        $colorId = $request->post('colorId',0,'intval');
-        $optionId = $request->post('optionId',0,'intval');
-
-        $model = new MallGoodsSpecifications();
-        $row = $model->where(['color_id'=>$colorId,'option_id'=>$optionId,'goods_id'=>$id])->field(['w_price'])->find();
-        if($row && $row->w_price){
-            return ['status'=>0,'data'=>['price'=>$row->w_price],'msg'=>''];
-        }
-        $goodsMoel = new MallGoods();
-        $goodsRow = $goodsMoel->where(['id'=>$id])->field(['w_price'])->find();
-        if($goodsRow && $goodsRow->w_price){
-            return ['status'=>0,'data'=>['price'=>getFormatPrice($goodsRow->w_price)],'msg'=>''];
-        }
-
-        return ['status'=>0,'data'=>['price'=>0],'msg'=>''];
-    }
-
     /**
      * @desc 收藏列表
      * @param Request $request
@@ -826,11 +798,11 @@ class Goods  extends Base {
         $list = [];
         if($row){
             $list[] = ['id'=>$row->id,'name'=>$row->name];
-            if($row->parent > 0){
-                $row2 = $model->where(['id'=>$row->parent])->field(['id','name','parent_id'])->find();
+            if($row->parent_id > 0){
+                $row2 = $model->where(['id'=>$row->parent_id])->field(['id','name','parent_id'])->find();
                 $list[] = ['id'=>$row2->id,'name'=>$row2->name];
-                if($row2->parent > 0){
-                    $row3 = $model->where(['id'=>$row2->parent])->field(['id','name','parent_id'])->find();
+                if($row2->parent_id > 0){
+                    $row3 = $model->where(['id'=>$row2->parent_id])->field(['id','name','parent_id'])->find();
                     $list[] =['id'=>$row3->id,'name'=>$row3->name];
                 }
             }
@@ -853,14 +825,14 @@ class Goods  extends Base {
         }
 
         //商品是否存在
-        $mallGoods = new SmProduct();
-        $goods = $mallGoods->field('supplier')->where(['id'=>$gid,'state'=>2])->find();
+        $productModel = new SmProduct();
+        $goods = $productModel->field('supplier_id')->where(['id'=>$gid,'state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED ,'is_deleted'=>0])->find();
         if(!$goods){
-            return ['status'=>0,'data'=>[],'msg'=>'商品不存在'];
+            return ['status'=>0,'data'=>[],'msg'=>'商品不存在或已下架'];
         }
 
         //获取九个热门
-        $dataGoods = $mallGoods->where(['id'=>['<>',$gid],'supplier_id'=>$goods['supplier_id'],'state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])
+        $dataGoods = $productModel->where(['id'=>['<>',$gid],'supplier_id'=>$goods['supplier_id'],'state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])
                                ->order('created_time desc')
                                ->field(['id','cover_img_url'])
                                ->limit(9)
@@ -882,23 +854,22 @@ class Goods  extends Base {
      */
     public function getSpecification(){
         $goodsId = Request::instance()->get('goodsId',0,'intval');
-        $colorId = Request::instance()->get('colorId',0,'intval');
-        $optionId = Request::instance()->get('optionId',0,'intval');
+        $specId = Request::instance()->get('specId',0,'intval');
 
         //
         $auth = $this->auth();
         if($auth){
             return $auth;
         }
-
-        $goodsSpecificationModel = new MallGoodsSpecifications();
-        $row = $goodsSpecificationModel->where(['color_id'=>$colorId,'option_id'=>$optionId,'goods_id'=>$goodsId])->find();
-        if(!$row){
-            return ['status'=>0,'data'=>['no'=> '','name' => ''],'msg'=>'' ];
-        }
-
         $userGoodsSpecificationModel = new UserGoodsSpecifications();
-        $userGoodsRow = $userGoodsSpecificationModel->where(['user_id'=>$this->userId,'goods_id'=>$goodsId,'specifications_id'=>$row->id])->find();
-        return ['status'=>0,'data'=>['no'=>$userGoodsRow ? $userGoodsRow->specifications_no : '' ,'name'=>$userGoodsRow ? $userGoodsRow->specifications_name :''],'msg'=>''];
+        $userGoodsRow = $userGoodsSpecificationModel->where(['user_id'=>$this->userId,'goods_id'=>$goodsId,'product_spec_id'=>$specId])->order('create_time desc')->find();
+        return [
+            'status'=>0,
+            'data'=>[
+                'no'=>$userGoodsRow ? $userGoodsRow->specifications_no : '',
+                'name'=>$userGoodsRow ? $userGoodsRow->specifications_name :''
+            ],
+            'msg'=>''
+        ];
     }
 }

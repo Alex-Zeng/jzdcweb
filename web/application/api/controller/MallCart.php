@@ -18,6 +18,7 @@ use app\common\model\SmProduct;
 use app\common\model\SmProductSpec;
 use app\common\model\SmProductSpecAttrs;
 use app\common\model\SmProductSpecAttrVal;
+use app\common\model\SmProductSpecPrice;
 use app\common\model\UserGoodsSpecifications;
 use think\Request;
 
@@ -131,7 +132,7 @@ class MallCart extends Base{
         $rows = $model->alias('a')->join(['sm_product_spec'=>'b'],'b.id=a.product_spec_id','left')
             ->join(['sm_product'=>'c'],'b.product_id=c.id')
             ->where($where)
-            ->field(['c.id','c.title','c.supplier_id','b.unit','b.is_price_neg_at_phone','b.spec_img_url','b.is_customized','b.id as spec_id','b.spec_set','a.quantity','b.price','a.id as card_id'])
+            ->field(['c.id','c.title','c.supplier_id','b.unit','b.is_price_neg_at_phone','b.spec_img_url','b.is_customized','b.id as spec_id','b.spec_set','a.quantity','b.price','a.id as cart_id'])
             ->select();
         $supplierData = [];
         foreach ($rows as $row){
@@ -162,8 +163,8 @@ class MallCart extends Base{
                 'icon' =>  $row->spec_img_url,
                 'quantity' => intval($row->quantity),
                 'specificationsInfo' => $optionInfo, //规格描述
-                'no' => $userSpecificationsRow ? $userSpecificationsRow->specifications_no : '',  //物料编号
-                'requirement' => $userSpecificationsRow ? $userSpecificationsRow->specifications_name : '',//物料名称
+                'materialCode' => $userSpecificationsRow ? $userSpecificationsRow->specifications_no : '',  //物料编号
+                'materialSpec' => $userSpecificationsRow ? $userSpecificationsRow->specifications_name : '',//物料名称
                 'unit' => $row->unit,  //单位
                 'isDiscussPrice' => $row->is_price_neg_at_phone, //议价
                 "specPriceDetails" => $specPriceDetails  //价格范围

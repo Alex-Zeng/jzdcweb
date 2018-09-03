@@ -3,6 +3,8 @@ namespace app\api\controller;
 
 use app\common\model\IndexArea;
 use app\common\model\MallOrder;
+use app\common\model\SmProduct;
+use app\common\model\SmProductCategory;
 use think\Request;
 
 class Index extends Base
@@ -100,6 +102,13 @@ class Index extends Base
     public function getPushTypeAndGoods(){
         $mallType = model('mall_type');
         $mallGoods = model('mall_goods');
+
+        $productModel = new SmProduct();
+        $productCategoryModel = new SmProductCategory();
+        //
+
+
+
 
         //获取首级推荐分类
         $dataType = $mallType->field('id,name')->where(['push'=>['>',0],'parent'=>0])->order('sequence','desc')->select();
