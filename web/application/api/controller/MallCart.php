@@ -17,6 +17,7 @@ use app\common\model\MallUnit;
 use app\common\model\SmProduct;
 use app\common\model\SmProductSpec;
 use app\common\model\SmProductSpecAttrs;
+use app\common\model\SmProductSpecAttrVal;
 use app\common\model\UserGoodsSpecifications;
 use think\Request;
 
@@ -125,26 +126,28 @@ class MallCart extends Base{
             $where['a.id'] = ['in',explode(',',$ids)];
         }
 
-        $specAttrModel = new SmProductSpecAttrs();
-
+        $specValModel = new SmProductSpecAttrVal();
         //查询数据
         $rows = $model->alias('a')->join(['sm_product_spec'=>'b'],'b.id=a.product_spec_id','left')
             ->join(['sm_product'=>'c'],'b.product_id=c.id')
             ->where($where)
-            ->field(['c.id','c.title','c.supplier_id','b.unit','b.is_price_neg_at_phone','b.spec_img_url','b.is_customized','b.id as spec_id','a.quantity','b.price','a.id as card_id'])
+            ->field(['c.id','c.title','c.supplier_id','b.unit','b.is_price_neg_at_phone','b.spec_img_url','b.is_customized','b.id as spec_id','b.spec_set','a.quantity','b.price','a.id as card_id'])
             ->select();
         $supplierData = [];
         foreach ($rows as $row){
             //查询规格
-            $specInfo = '';
+            $optionInfo = '';
+            $specPriceDetails = [];
             if($row->is_customized == 1){
-                $specInfo = '定制';
+                $optionInfo = '定制';
             }else{
-                $attrsRows = $specAttrModel->where(['product_spec_id'=>$row->spec_id,'is_deleted'=>0])->select();
-                foreach ($attrsRows as $attrsRow){
-                    $specInfo .= $attrsRow->spec_attr_text.',';
+                $specSetIds = $row->spec_set ? explode(',',$row->spec_set) : [];
+                $specVals = $specValModel->where(['id'=>['in',$specSetIds]])->select();
+                foreach ($specVals as $specVal){
+                    $optionInfo .= $specVal->spec_attr_val.',';
                 }
-                $specInfo = $specInfo ? substr($specInfo,0,strlen($specInfo)-1) : $specInfo;
+                $optionInfo = $optionInfo ? substr($optionInfo,0,strlen($optionInfo)-1) : '';
+                $specPriceDetails = (new SmProductSpecPrice())->getPriceDetail($row->spec_id);
             }
 
             //查询物料编号、物料规格
@@ -158,11 +161,12 @@ class MallCart extends Base{
                 'title' => $row->title,
                 'icon' =>  $row->spec_img_url,
                 'quantity' => intval($row->quantity),
-                'specificationsInfo' => $specInfo, //规格描述
+                'specificationsInfo' => $optionInfo, //规格描述
                 'no' => $userSpecificationsRow ? $userSpecificationsRow->specifications_no : '',  //物料编号
                 'requirement' => $userSpecificationsRow ? $userSpecificationsRow->specifications_name : '',//物料名称
                 'unit' => $row->unit,  //单位
-                'isDiscussPrice' => $row->is_price_neg_at_phone //议价
+                'isDiscussPrice' => $row->is_price_neg_at_phone, //议价
+                "specPriceDetails" => $specPriceDetails  //价格范围
             ];
         }
 

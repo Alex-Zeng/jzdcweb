@@ -19,6 +19,7 @@ use app\common\model\SmProductGallery;
 use app\common\model\SmProductSpec;
 use app\common\model\SmProductSpecAttrKey;
 use app\common\model\SmProductSpecAttrVal;
+use app\common\model\SmProductSpecPrice;
 use app\common\model\UserGoodsSpecifications;
 use app\common\model\UserSearchLog;
 use app\common\model\MallType;
@@ -571,12 +572,14 @@ class Goods  extends Base {
         //商品规格数据
         $specRows = $specModel->where(['product_id'=>$id,'is_deleted'=>0])->select();
         $specInfo = [];
+        $specPriceDetails = [];
         foreach($specRows as $specRow){
             //对于定制
             if($specRow->is_customized == 1){
                 $specSet = "0";
             }else{   //非定制
                 $specSet = explode(',',$specRow->spec_set);
+                $specPriceDetails = (new SmProductSpecPrice())->getPriceDetail($specRow->id);
             }
             $specInfo[][] = [
                 "setIds" => $specSet,
@@ -586,7 +589,8 @@ class Goods  extends Base {
                 "unit" => $specRow->unit,
                 "pic" => SmProductSpec::getFormatImg($specRow->spec_img_url),
                 "num" => $specRow->min_order_qty,
-                "isDiscussPrice" => $specRow->is_price_neg_at_phone
+                "isDiscussPrice" => $specRow->is_price_neg_at_phone,
+                "specPriceDetails" => $specPriceDetails
             ];
         }
 
@@ -600,7 +604,7 @@ class Goods  extends Base {
             "isDiscussPrice" => $product->is_price_neg_at_phone,
             "minPrice" => $product->min_price,
             "maxPrice" => $product->max_price,
-            "speclist" => $specList,
+            "specList" => $specList,
             "specInfo" => $specInfo,
             'detail' => getImgUrl($product->html_content_1),  //H5详情
             "webDetail" => getImgUrl($product->html_content_2),//PC详情
