@@ -158,7 +158,7 @@ class MallCart extends Base{
             $supplierData[$row->supplier_id][] =[
                 'goodsId' => $row->id,
                 'cartId' => $row->cart_id,
-                'price' => $row->price,
+                'price' => getFormatPrice($row->price),
                 'title' => $row->title,
                 'icon' =>  $row->spec_img_url,
                 'quantity' => intval($row->quantity),
