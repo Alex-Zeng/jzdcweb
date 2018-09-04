@@ -573,9 +573,11 @@ class Goods  extends Base {
                     ];
                 }
             }
-        }else{
+        }
+        if(!$specAttrs && $isCustomSpec == 1){
             $specAttrs[] = ["desc"=> "定制规格","list"=>[ "specAttrValId" => "0", "specAttrVal" => "定制", "isCustom" => 1],"id"=>0];
         }
+
 
         $userSpecificationModel = new UserGoodsSpecifications();
 
@@ -589,7 +591,7 @@ class Goods  extends Base {
             if($specRow->is_customized == 1){
                 $specSet = [0];
             }else{   //非定制
-                $specSetArr = explode(',',$specRow->spec_set);
+                $specSetArr = $specRow->spec_set ? explode(',',$specRow->spec_set) : [];
                 for ($i = 0; $i < count($specSetArr); $i++){
                     $specSet[] = intval($specSetArr[$i]);
                 }
@@ -600,7 +602,6 @@ class Goods  extends Base {
             $userSpecificationRow = $userSpecificationModel->where(['user_id'=>$this->userId,'product_spec_id'=>$specRow->id])->order('create_time desc')->find();
             $materialCode = $userSpecificationRow ? $userSpecificationRow->specifications_no : '';  //物料编号
             $materialSpec = $userSpecificationRow ? $userSpecificationRow->specifications_name : ''; //物料规格
-
             $specInfo[] = [
                 "specAttrs" => $specSet,
                 "specId" => $specRow->id,
