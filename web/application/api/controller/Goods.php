@@ -538,7 +538,7 @@ class Goods  extends Base {
         $keyModel = new SmProductSpecAttrKey();
         $keyRows = $keyModel->where(['product_id'=>$id,'is_deleted'=>0])->order('ordering desc')->select();
 
-        $specList = [];
+        $specAttrs = [];
         $valModel = new SmProductSpecAttrVal();
 
         //判断是否有定制
