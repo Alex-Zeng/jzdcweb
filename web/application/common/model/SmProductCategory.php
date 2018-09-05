@@ -1,6 +1,6 @@
 <?php
 namespace app\common\model;
-use think\db;
+
 use think\Model;
 
 class SmProductCategory extends Model{
@@ -77,10 +77,10 @@ class SmProductCategory extends Model{
      */
     public function getCategorySelected($categoryIds){
         //[分类全路径['/1/2/3/4','1/2/3/5']]
-        $selectedCategoryDepthPath = db::table($this->table)->where(['id'=>['in',$categoryIds]])->field('id,depth_path')->select();
+        $selectedCategoryDepthPath = $this->where(['id'=>['in',$categoryIds]])->field('id,depth_path')->select();
        
         //[分类集合 [['id'=>1,'name'=>'手机','parent_id'=>0,'level'=>1,'depth_path'=>'/1']] ]
-        $allCategoryList = db::table($this->table)->field('id,name,parent_id,level,depth_path')->select();
+        $allCategoryList = $this->field('id,name,parent_id,level,depth_path')->select();
 
         //分析组合
         $zuhe = [];

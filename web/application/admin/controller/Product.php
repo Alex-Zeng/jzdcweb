@@ -1,5 +1,6 @@
 <?php
 namespace app\admin\controller;
+use app\common\model\SmProduct;
 
 class Product extends Base{
 
@@ -57,7 +58,7 @@ class Product extends Base{
 
 
 		}
-		echo min([0,1]);exit();
+		
 		//单位
         $unitRows = model('MallUnit')->where([])->order('sequence','desc')->field(['id','name'])->select();
         return view('',['unitRows'=>$unitRows]);
@@ -170,17 +171,17 @@ class Product extends Base{
 				$state = input('post.state',0,'intval');
 				switch ($state) {
 		            case 1://审核通过
-		                $auditState = $SmProduct::AUDIT_RELEASED;
+		                $auditState = SmProduct::AUDIT_RELEASED;
 		                break;
 		            case 2://审核失败
-		                $auditState = $SmProduct::AUDIT_NOTAPPROVED;
+		                $auditState = SmProduct::AUDIT_NOTAPPROVED;
 		                break;
 		            default:
-		                $auditState = $SmProduct::AUDIT_PENDING;
+		                $auditState = SmProduct::AUDIT_PENDING;
 		                break;
 				}
 				$update = array_merge($SmProduct->filedDefaultValue('update'),['audit_state'=>$auditState]);
-				$where['audit_state'] = $SmProduct::AUDIT_PENDING; 
+				$where['audit_state'] = SmProduct::AUDIT_PENDING; 
 				$msg = '审核';
 				break;
 		}
@@ -208,9 +209,9 @@ class Product extends Base{
 
         //是否删除
         $where['a.is_deleted'] = 0;
-
+        
         //已审核
-        $where['a.audit_state'] = model('SmProduct')::AUDIT_RELEASED;
+        $where['a.audit_state'] = SmProduct::AUDIT_RELEASED;
         
         //是否推荐
         if($isRecommended>-1){
@@ -281,10 +282,10 @@ class Product extends Base{
         //待审核列表不同的角色显示的数据不一样，所以要分角色展示读取对应内容
         switch (getGroupId()) {
             case 2: //管理员
-                $where = ['a.audit_state'=>model('SmProduct')::AUDIT_PENDING];
+                $where = ['a.audit_state'=>SmProduct::AUDIT_PENDING];
                 break;
             case 3: //运营人员
-                $where = ['a.audit_state'=>['in',[model('SmProduct')::AUDIT_PENDING,model('SmProduct')::AUDIT_NOTAPPROVED]]];
+                $where = ['a.audit_state'=>['in',[SmProduct::AUDIT_PENDING,SmProduct::AUDIT_NOTAPPROVED]]];
                 break;
             default:
                 $where = ['a.audit_state'=>'-1'];
@@ -346,4 +347,13 @@ class Product extends Base{
         return ['status'=>0,'data'=>['list'=>$list]];
     }
 
+    /**
+     * [getCategoryAttr 获取分类对应的规格属性]
+     * @param  [type] $categoryId [分类ID]
+     * @return [type]             [description]
+     */
+    public function getCategoryAttr($categoryId){
+        $list = model('SmCategorySpecAttrKey')->getCategorySpecAttr($categoryId);
+        return ['status'=>0,'data'=>['list'=>$list]];
+    }
 }
