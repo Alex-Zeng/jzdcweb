@@ -14,6 +14,9 @@
     .comment{
         word-break:break-all;
     }
+    #adjustPrice-modal >.modal-dialog >.modal-content{
+        width: 900px;
+    }
 </style>
 
 <!-- Content Wrapper. Contains page content -->
@@ -125,6 +128,9 @@
                                                 <span class="label label-info" style="padding: 0 3px;border-radius: 3px">换货</span>
                                                 {elseif $goods.service_type == 3}
                                                 <span class="label label-danger" style="padding: 0 3px">维修</span>
+                                                {/if}
+                                                {if $goods.is_price_neg_at_phone == 1}
+                                                <span class="label label-success" style="padding: 0 3px;border-radius: 3px">议价</span>
                                                 {/if}
                                                 {$goods.title}
                                             </td>
