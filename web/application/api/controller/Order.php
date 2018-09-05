@@ -271,9 +271,9 @@ class Order extends Base{
                         'title' => $goodsList['title'],
                         'quantity' => $goodsList['quantity'],
                         'price' => $goodsList['price'],
-                        'no' => $goodsList['no'],
+                        'materialCode' => $goodsList['materialCode'],
                         'icon' => MallGoods::getFormatImg($goodsList['icon']),
-                        'requirement' => $goodsList['requirement'],
+                        'materialSpec' => $goodsList['materialSpec'],
                         'specificationsInfo' => $goodsList['specificationsInfo'],
                     ];
                 }
@@ -299,8 +299,8 @@ class Order extends Base{
                         if ($exist) {
                             $userGoodSpecificationsModel->save(['specifications_no' => $list['materialCode'], 'specifications_name' => $list['materialSpec'], 'update_time' => time()], $specificationsWhere);
                         } else {
-                            $specificationsWhere['specifications_no'] = $list['no'];
-                            $specificationsWhere['specifications_name'] = $list['requirement'];
+                            $specificationsWhere['specifications_no'] = $list['materialCode'];
+                            $specificationsWhere['specifications_name'] = $list['materialSpec'];
                             $specificationsWhere['create_time'] = time();
                             $userGoodSpecificationsModel->save($specificationsWhere);
                         }

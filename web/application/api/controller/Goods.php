@@ -311,7 +311,7 @@ class Goods  extends Base {
                 //查询子类包含的ID
                 $typeIds = (new SmProductCategory())->getChildIds($categoryId);
                 $typeIds = array_merge([$categoryId],$typeIds);
-                $where['b.category_idtype'] = ['in',$typeIds];
+                $where['b.category_id'] = ['in',$typeIds];
             }
 
             //查询数据   //['think_work'=>'w']
