@@ -110,7 +110,7 @@ class Order extends Base{
                 if(!$specRow->is_price_neg_at_phone){
                     $priceWhere = [
                         'spec_id' => $specRow->id,
-                        'is_delete' => 0,
+                        'is_deleted' => 0,
                         'min_order_qty' => ['lt',$specNum],
                         'max_order_qty' => ['gt',$specNum]
                     ];
