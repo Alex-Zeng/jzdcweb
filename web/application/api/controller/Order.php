@@ -252,7 +252,7 @@ class Order extends Base{
                         'icon' => $goodsList['icon'],
                         'title' => $goodsList['title'],
                         'price' => $goodsList['price'],
-                        's_info' => $goodsList['optionInfo'],
+                        's_info' => $goodsList['specificationsInfo'],
                         'shop_id' => 1,
                         'snapshot_id' => 0,
                         'quantity' => $goodsList['quantity'],
