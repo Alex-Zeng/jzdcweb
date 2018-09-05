@@ -1,0 +1,383 @@
+{include file="layout/header" title="" keywords="" /}
+
+{include file="layout/left" groupId="$groupId" keywords="" /}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"></h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">商品管理</a></li>
+                        <li class="breadcrumb-item active">待审核</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="row" style="padding-top: 15px;padding-right: 15px;padding-left: 15px;">
+                        <div class="col-md-11">
+                            <form class="form-inline" action="{:url()}"  method="get">
+                                <div class="input-group">
+                                    <select class="form-control" name="supplier_id"  placeholder="供应商">
+                                        <option value="0" {if $supplier_id eq 0}selected{/if}>全部供应商</option>
+                                        {volist name=":getSupplierList()"  id='user'}
+                                        <option  {if $supplier_id eq $user.id}selected{/if} value="{$user.id}">{$user.real_name}</option>
+                                        {/volist}
+                                    </select>
+                                </div>&nbsp;&nbsp;
+                                <div class="input-group">
+                                    <select class="form-control" name="is_recommended">
+                                        <option  {if $is_recommended eq -1} selected{/if} value="-1">是否推荐</option>
+                                        <option  {if $is_recommended eq 0} selected{/if} value="0">否</option>
+                                        <option  {if $is_recommended eq 1}selected{/if} value="1">是</option>
+                                    </select>
+                                </div>&nbsp;&nbsp;
+                                <div class="input-group" >
+                                    <input type="hidden" name='category_id' class="category-value-input" value="{$category_id}">
+                                    <div id="category-next-template-box">
+                                        {notempty name="categorySelected"}
+                                        {php}
+                                        foreach ($categorySelected['selectedList'] as $k =>$v){
+                                            foreach ($v as $kk =>$vv){
+                                            	
+													echo '<span class="select-level-div"><select class="form-control select-level next">';
+                                                    echo '<option value="0">请选择分类</option>';
+                                                    
+                                                    foreach ($categorySelected['levelSelectList'][$kk] as $kkk =>$vvv){
+                                                        if($vv==$vvv['id']){
+                                                            echo '<option value="'.$vvv['id'].'" selected="selected">'.$vvv['name'].'</option>';
+                                                        }else{
+                                                            echo '<option value="'.$vvv['id'].'">'.$vvv['name'].'</option>';
+                                                        }
+                                                    } 
+                                                echo '</select>';
+                                            }
+                                            for($i=1;$i<count($v);$i++){
+
+                                                echo '</span>';
+                                            }
+        
+                                        }
+                                        {/php}
+                                        {/notempty}
+                                    </div>
+                                </div>&nbsp;&nbsp;
+                                <div class="input-group">
+                                    <input class="form-control form-control-navbar"  name="title" type="search"  value="{$title}" placeholder="商品名称" aria-label="Search">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" id="search" type="submit">查找</button>
+                                    </div>
+                                </div>&nbsp;&nbsp;
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th width="150px">封面图片</th>
+                                <th >商品名称</th>
+                                <th>供应商</th>
+                                <th>规格数量</th>
+                                <th>状态</th>
+                                <th width="230px">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {empty name="list"}
+                                <tr>
+                                    <td colspan="6" align="center">暂无查到相关数据</td>
+                                </tr>
+                            {/empty}
+                            {volist name='list' id='goods'}
+                                <tr>
+                                    <td>{if $goods.cover_img_url}<img src="{$goods.cover_img_url}"   style="cursor: pointer;max-width: 100px;" />{/if}</td>
+                                    <td>{$goods.title}</td>
+                                    <td>{$goods.supplier_name}</td>
+                                    <td>{$goods.spec_count}</td>
+                                    <td>{$goods.audit_state|getProductAuditState}</td>
+                                    <td class="list-action">
+                                    	<a href="{:url('admin/product/view','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-info" >详情</a>
+                                        <a href="{:url('admin/product/edit','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-primary" >编辑</a>
+                                        {if $goods.state == 1}
+                                            <a href="javascript:void(0)" data-toggle="modal"  data-id="{$goods.id}" data-target="#down-modal"  class="btn btn-sm btn-warning">下架</a>
+                                        {/if}
+                                        {if $goods.state == 2}
+                                            <a href="javascript:void(0)" data-toggle="modal" data-id="{$goods.id}" data-target="#up-modal"  class="btn btn-sm btn-secondary">上架</a>
+                                        {/if}
+                                        <a href="javascript:void(0)"  class="btn btn-sm btn-danger"  data-id="{$goods.id}" data-toggle="modal"   data-target="#delete-modal">删除</a>
+                                        {if $goods.is_recommended == 0}
+                                            <a href="javascript:void(0)"  class="btn btn-sm btn-info"  data-id="{$goods.id}" data-toggle="modal"  data-target="#push-up-modal">设为推荐</a>
+                                        {/if}
+                                        {if $goods.is_recommended == 1}
+                                            <a href="javascript:void(0)"  class="btn btn-sm btn-danger"  data-id="{$goods.id}" data-toggle="modal"   data-target="#push-down-modal">取消推荐</a>
+                                        {/if}
+                                    </td>
+                                </tr>
+                            {/volist}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="6">{$page}</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+
+
+
+{include file="layout/footer" title="$title" keywords="" /}
+<script src="__STATIC__/js/plugins/layer/layer.js"></script>
+<script src="__STATIC__/js/admin/admin.function.js"></script>
+<div class="modal fade" id="down-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">是否确认下架该商品?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="down-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#down-modal').on('show.bs.modal', function (event) {
+        var id = $(event.relatedTarget).data('id');
+        $("#down-request").data('id',id);
+    });
+
+    $("#down-request").click(function () {
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        $.ajax({
+            type:'post',
+            url:'/?s=admin/product/update',
+            data:{'type':'sellDown','id':id},
+            dataType:'json',
+            success:function (data) {
+                returnData(data);
+            }
+        })
+    });
+</script>
+
+
+<div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">是否确认删除该商品?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="delete-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#delete-modal').on('show.bs.modal', function (event) {
+        var id = $(event.relatedTarget).data('id');
+        $("#delete-request").data('id',id);
+    });
+
+    $("#delete-request").click(function () {
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        $.ajax({
+            type:'post',
+            url:'/?s=admin/product/update',
+            data:{'type':'delete','id':id},
+            dataType:'json',
+            success:function (data) {
+                returnData(data);
+            }
+        })
+    });
+</script>
+<div class="modal fade" id="up-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">是否确认上架该商品?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="up-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#up-modal').on('show.bs.modal', function (event) {
+        var id = $(event.relatedTarget).data('id');
+        $("#up-request").data('id',id);
+    });
+
+    $("#up-request").click(function () {
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        $.ajax({
+            type:'post',
+            url:'/?s=admin/product/update',
+            data:{'type':'sellUp','id':id},
+            dataType:'json',
+            success:function (data) {
+                returnData(data);
+            }
+        })
+    });
+</script>
+<div class="modal fade push" id="push-up-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">设为推荐吗？</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="push-up-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#push-up-modal').on('show.bs.modal', function (event) {
+        var id = $(event.relatedTarget).data('id');
+        $("#push-up-request").data('id',id);
+    });
+
+    $("#push-up-request").click(function () {
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        $.ajax({
+            type:'post',
+            url:'/?s=admin/product/update',
+            data:{'type':'pushUp','id':id},
+            dataType:'json',
+            success:function (data) {
+                returnData(data);
+            }
+        })
+    });
+</script>
+<div class="modal fade push" id="push-down-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">取消推荐吗？</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="push-down-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#push-down-modal').on('show.bs.modal', function (event) {
+        var id = $(event.relatedTarget).data('id');
+        $("#push-down-request").data('id',id);
+    });
+
+    $("#push-down-request").click(function () {
+        var id = $(this).data('id');
+        if(id < 0){
+            return;
+        }
+        $.ajax({
+            type:'post',
+            url:'/?s=admin/product/update',
+            data:{'type':'pushDown','id':id},
+            dataType:'json',
+            success:function (data) {
+                returnData(data);
+            }
+        })
+    });
+</script>
+
+
+<script type="text/javascript" src="__STATIC__/js/template-web.js"></script>
+<!-- 分类选择框start -->
+<script id="next-template" type="text/html">
+    <span class="select-level-div">
+        <select class="form-control select-level">
+            <option  value="0">请选择分类</option>
+            {{each categoryNextLevelList as value}}
+                <option value="{{value.id}}">{{value.name}}</option>
+            {{/each}}
+        </select>
+    </span>
+</script>
+<script>
+    function ajaxGetCategory(id,elm,htmlType,lineType){
+        $.ajax({
+            type:'get',
+            url:'?s=admin/product/getCategoryNextLevelList&parentId='+id,
+            data:{},
+            dataType:'json',
+            success:function (data) {
+                if(data.status == 0){
+                    if(data.data.list.length>0){
+                        if(typeof(elm) == 'string'){
+                            elm = $(elm);
+                        }
+                        var html = template('next-template',{categoryNextLevelList:data.data.list});
+                        if(htmlType == 'html'){
+                            elm.html(html);
+                        }else if(htmlType == 'after'){
+                            elm.after(html);
+                        }
+                    }
+                    
+                }
+            }
+        });
+    }
+    
+    //给分类下的下拉框绑定事件
+    $('#category-next-template-box').on('change','.select-level',function () {
+        var typeId = $(this).val();//获取当前选中的分类值
+        $(this).siblings('.select-level-div').remove();//把当前触发的下拉框下级的去掉
+        if(typeId>0){
+            ajaxGetCategory(typeId,$(this),'after');
+        }else{
+            //获取上一级的选中分类值
+            var preSelectValue = $(this).parent('.select-level-div').siblings('.select-level').val();
+            if(preSelectValue!= undefined ){
+                typeId = preSelectValue;
+            }
+        }
+
+        //选中的值赋值于input[type=hidden]
+        $(this).parents('#category-next-template-box').siblings('.category-value-input').val(typeId);
+    });
+</script>
+{empty name="categorySelected"}
+    <script>
+    ajaxGetCategory(0,'#category-next-template-box','html');//加载首个分类
+    </script>
+{/empty}
+
+
+<script>
+	var url = '{:url("admin/product/listPass")}';
+    $('a[href="'+url+'"]').addClass('active');
+    $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
+</script>

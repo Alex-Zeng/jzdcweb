@@ -17,180 +17,106 @@
                 <a href="#" class="d-block">{:getUserName()}</a>
             </div>
         </div>
+    
+        {php}
+        $publicPrivilege = [
+            [
+                'managerKey' => '个人中心',
+                'managerUrl' => 'javascript:;',
+                'managerIcon'=> 'fa-user',
+                'managerVal' => [['name'=>'修改手机号','url'=>url('admin/user/editPhone'),'icon'=>'fa-phone'],['name'=>'修改登录密码','url'=>url('admin/user/changePassword'),'icon'=>'fa-key']]
+            ]
+        ];
+        $rolePrivilege = [
+            3=>[
+                [
+                    'managerKey' => '运营管理',
+                    'managerUrl' => 'javascript:;',
+                    'managerIcon'=> 'fa-dashboard',
+                    'managerVal' => [['name'=>'Banner管理','url'=>url('admin/banner/index'),'icon'=>'fa-image'],['name'=>'公告管理','url'=>url('admin/notice/index'),'icon'=>'fa-bell']]
+                ],[
+                    'managerKey' => '商品订单',
+                    'managerUrl' => 'javascript:;',
+                    'managerIcon'=> 'fa-cart-arrow-down',
+                    'managerVal' => [['name'=>'管理订单','url'=>url('admin/order/index'),'icon'=>'fa-database'],['name'=>'商品管理','url'=>url('admin/goods/index'),'icon'=>'fa-gear']]
+                ],[
+                    'managerKey' => '企业认证',
+                    'managerIcon'=> 'fa-users',
+                    'managerUrl' => url('admin/certification/index'),
+                    'managerVal' => []
+                ],[
+                    'managerKey' => '金融服务',
+                    'managerIcon'=> 'fa-money',
+                    'managerUrl' => url('admin/service/index'),
+                    'managerVal' => []
+                ],[
+                    'managerKey' => '投诉建议',
+                    'managerIcon'=> 'fa-feed',
+                    'managerUrl' => url('admin/suggestion/index'),
+                    'managerVal' => []
+                ],[
+                    'managerKey' => '商品管理',
+                    'managerIcon'=> 'fa-feed',
+                    'managerUrl' => url('admin/suggestion/index'),
+                    'managerVal' => [['name'=>'新增商品','url'=>url('admin/product/create'),'icon'=>'fa-database'],['name'=>'待审核','url'=>url('admin/product/listPending'),'icon'=>'fa-database'],['name'=>'已审核','url'=>url('admin/product/listpass'),'icon'=>'fa-database']]
+                ]
+            ],
+            2=>[
+                [
+                    'managerKey' => '商城管理',
+                    'managerUrl' => 'javascript:;',
+                    'managerIcon'=> 'fa-dashboard',
+                    'managerVal' => [['name'=>'全站商品','url'=>url('admin/goods/index'),'icon'=>'fa-image'],['name'=>'全站商品分类','url'=>url('admin/product_category/index'),'icon'=>'fa-cubes']]
+                ],[
+                    'managerKey' => '商品管理',
+                    'managerIcon'=> 'fa-feed',
+                    'managerUrl' => url('admin/suggestion/index'),
+                    'managerVal' => [['name'=>'待审核','url'=>url('admin/product/listPending'),'icon'=>'fa-database'],['name'=>'已审核','url'=>url('admin/product/listpass'),'icon'=>'fa-database']]
+                ],[
+                    'managerKey' => '系统菜单',
+                    'managerUrl' => 'javascript:;',
+                    'managerIcon'=> 'fa-dashboard',
+                    'managerVal' => [['name'=>'首页菜单','url'=>url('admin/index_menu/index'),'icon'=>'fa-image'],['name'=>'版本发布','url'=>url('admin/index/version'),'icon'=>'fa-reorder']]
+                ],[
+                    'managerKey' => '会员中心',
+                    'managerUrl' => 'javascript:;',
+                    'managerIcon'=> 'fa-group',
+                    'managerVal' => [['name'=>'管理会员','url'=>url('admin/member/index'),'icon'=>'fa-group']]
+                ]
+            ]
+        ];
+        
+        $privilege = array_merge($rolePrivilege[getGroupId()],$publicPrivilege);
+        {/php}
 
         <!-- Sidebar Menu -->
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                {if $groupId ==3}
-                <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fa fa-dashboard"></i>
-                        <p>
-                            运营管理
-                            <i class="right fa fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="{:url('admin/banner/index')}" class="nav-link">
-                                <i class="fa fa-image nav-icon"></i>
-                                <p>Banner管理</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{:url('admin/notice/index')}" class="nav-link">
-                                <i class="fa fa-bell nav-icon"></i>
-                                <p>公告管理</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                {/if}
-                {if $groupId ==2}
-                <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fa fa-dashboard"></i>
-                        <p>
-                            商城管理
-                            <i class="right fa fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="{:url('admin/goods/index')}" class="nav-link">
-                                <i class="fa fa-image nav-icon"></i>
-                                <p>全站商品</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{:url('admin/product_category/index')}" class="nav-link">
-                                <i class="fa fa-cubes nav-icon"></i>
-                                <p>全站商品分类</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                {/if}
-                {if $groupId ==2 }
-                <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fa fa-dashboard"></i>
-                        <p>
-                            系统菜单
-                            <i class="right fa fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="{:url('admin/index_menu/index')}" class="nav-link">
-                                <i class="fa fa-image nav-icon"></i>
-                                <p>首页菜单</p>
-                            </a>
-                        </li>
-                         <li class="nav-item">
-                            <a href="{:url('admin/index/version')}" class="nav-link">
-                                <i class="fa fa-reorder nav-icon"></i>
-                                <p>版本发布</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                {/if}
-                {if $groupId ==2 }
-                <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fa fa-group"></i>
-                        <p>
-                            会员中心
-                            <i class="right fa fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="{:url('admin/member/index')}" class="nav-link">
-                                <i class="fa fa-group nav-icon"></i>
-                                <p>管理会员</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                {/if}
-                {if $groupId ==3 }
-                <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fa fa-cart-arrow-down"></i>
-                        <p>
-                            商品订单
-                            <i class="right fa fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="{:url('admin/order/index')}" class="nav-link">
-                                <i class="fa fa-database nav-icon"></i>
-                                <p>管理订单</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{:url('admin/goods/index')}" class="nav-link">
-                                <i class="fa fa-gear nav-icon"></i>
-                                <p>商品管理</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                {/if}
-
-
-                <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fa fa-user"></i>
-                        <p>
-                            个人中心
-                            <i class="right fa fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <!-- <a href="/index.php?jzdc=index.edit_phone&relaod=15" class="nav-link"> -->
-                            <a href="{:url('user/editPhone')}" class="nav-link">
-                                <i class="fa fa-phone nav-icon"></i>
-                                <p>修改手机号</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <!-- <a href="/index.php?jzdc=index.edit_user&field=password&relaod=25" class="nav-link"> -->
-                            <a href="{:url('user/changePassword')}" class="nav-link">
-                                <i class="fa fa-key nav-icon"></i>
-                                <p>修改登录密码</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-
-                {if $groupId ==3 }
-                <li class="nav-item has-treeview">
-                    <a href="{:url('admin/certification/index')}" class="nav-link">
-                        <i class="nav-icon fa fa-users"></i>
-                        <p>企业认证</p>
-                    </a>
-                </li>
-                <li class="nav-item has-treeview">
-                    <a href="{:url('admin/service/index')}" class="nav-link">
-                        <i class="nav-icon fa fa-money"></i>
-                        <p>金融服务</p>
-                    </a>
-                </li>
-                {/if}
-
-                {if $groupId ==3 }
-                <li class="nav-item has-treeview">
-                    <a href="{:url('admin/suggestion/index')}" class="nav-link">
-                        <i class="nav-icon fa fa-feed"></i>
-                        <p>投诉建议</p>
-                    </a>
-                </li>
-                {/if}
+                {notempty name="privilege"}
+                {foreach name="privilege" item="vo"}
+                    <li class="nav-item has-treeview">
+                        <a href="{$vo.managerUrl}" class="nav-link">
+                            <i class="nav-icon fa {$vo.managerIcon}"></i>
+                            <p>
+                                {$vo.managerKey}
+                                {notempty name="$vo.managerVal"} <i class="right fa fa-angle-left"></i>{/notempty}
+                            </p>
+                        </a>
+                        {notempty name="$vo.managerVal"}
+                        <ul class="nav nav-treeview">
+                            {foreach name="vo.managerVal" item="vvoo"}
+                            <li class="nav-item">
+                                <a href="{$vvoo.url}" class="nav-link">
+                                    <i class="fa {$vvoo.icon} nav-icon"></i>
+                                    <p>{$vvoo.name}</p>
+                                </a>
+                            </li>
+                            {/foreach}
+                        </ul>
+                        {/notempty}
+                    </li>
+                {/foreach}
+                {/notempty}
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

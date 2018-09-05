@@ -344,4 +344,9 @@ return [
     'JZDC_SERVICE_EMAIL' => 'fuwu@jizhongdiancai.com',
     'JZDC_TOKEN_EXPIRE' => 30*24*3600,    //30天过期
     'VERSION_AREA' =>'v1.0', //省市区资源版本号
+    //异常处理
+    'http_exception_template'    =>  [
+        // 定义404错误的重定向页面地址
+        404 =>  APP_PATH.'admin/view/tips/error.html',
+    ]
 ];

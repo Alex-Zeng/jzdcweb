@@ -21,7 +21,7 @@ class SmProductSpecPrice extends Model{
         $rows = $this->where(['spec_id'=>$specId,'is_deleted'=>0])->select();
         $return = [];
         foreach($rows as $row){
-            $return[] = ["specPriceId"=>$row->id,"minOrderQty" => $row->min_order_qty,"maxOrderQty"=>$row->max_order_qty,"price" => $row->price];
+            $return[] = ["specPriceId"=>$row->id,"minOrderQty" => $row->min_order_qty,"maxOrderQty"=>$row->max_order_qty,"price" => getFormatPrice($row->price)];
         }
         return $return;
     }

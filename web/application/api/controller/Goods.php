@@ -500,7 +500,7 @@ class Goods  extends Base {
     public function get(Request $request, $id){
         //获取商品
         $productModel = new SmProduct();
-        $condition = ['state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0];
+        $condition = ['state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0,'id'=>$id];
         $product = $productModel->where($condition)->find();
         if(!$product){
             return ['status'=>1,'data'=>[],'msg'=>'商品不存在或已下架'];
@@ -538,7 +538,7 @@ class Goods  extends Base {
         $keyModel = new SmProductSpecAttrKey();
         $keyRows = $keyModel->where(['product_id'=>$id,'is_deleted'=>0])->order('ordering desc')->select();
 
-        $specList = [];
+        $specAttrs = [];
         $valModel = new SmProductSpecAttrVal();
 
         //判断是否有定制
@@ -573,9 +573,11 @@ class Goods  extends Base {
                     ];
                 }
             }
-        }else{
+        }
+        if(!$specAttrs && $isCustomSpec == 1){
             $specAttrs[] = ["desc"=> "定制规格","list"=>[ "specAttrValId" => "0", "specAttrVal" => "定制", "isCustom" => 1],"id"=>0];
         }
+
 
         $userSpecificationModel = new UserGoodsSpecifications();
 
@@ -584,23 +586,27 @@ class Goods  extends Base {
         $specInfo = [];
         $specPriceDetails = [];
         foreach($specRows as $specRow){
+            $specSet = [];
             //对于定制
             if($specRow->is_customized == 1){
-                $specSet = "0";
+                $specSet = [0];
             }else{   //非定制
-                $specSet = explode(',',$specRow->spec_set);
+                $specSetArr = $specRow->spec_set ? explode(',',$specRow->spec_set) : [];
+                for ($i = 0; $i < count($specSetArr); $i++){
+                    $specSet[] = intval($specSetArr[$i]);
+                }
+
                 $specPriceDetails = (new SmProductSpecPrice())->getPriceDetail($specRow->id);
             }
             //查询物料编号、规格
             $userSpecificationRow = $userSpecificationModel->where(['user_id'=>$this->userId,'product_spec_id'=>$specRow->id])->order('create_time desc')->find();
             $materialCode = $userSpecificationRow ? $userSpecificationRow->specifications_no : '';  //物料编号
             $materialSpec = $userSpecificationRow ? $userSpecificationRow->specifications_name : ''; //物料规格
-
             $specInfo[] = [
                 "specAttrs" => $specSet,
                 "specId" => $specRow->id,
                 "skuCode" => $specRow->sku_code,
-                "specPrice" => $specRow->price,
+                "specPrice" => getFormatPrice($specRow->price),
                 "specUnit" => $specRow->unit,
                 "specImageUrl" => SmProductSpec::getFormatImg($specRow->spec_img_url),
                 "moq" => $specRow->min_order_qty,
@@ -619,8 +625,8 @@ class Goods  extends Base {
             "companyLogo" => IndexUser::getFormatIcon($icon),
             "title" => $product->title,
             "isDiscussPrice" => $product->is_price_neg_at_phone,
-            "minPrice" => $product->min_price,
-            "maxPrice" => $product->max_price,
+            "minPrice" => getFormatPrice($product->min_price),
+            "maxPrice" => getFormatPrice($product->max_price),
             "specAttrs" => $specAttrs,
             "specifications" => $specInfo,
             'detail' => getImgUrl($product->html_content_1),  //H5详情
@@ -631,34 +637,6 @@ class Goods  extends Base {
         return ['status'=>0,'data'=>$list,'msg'=>''];
     }
 
-
-
-    /**
-     *
-     * @param Request $request
-     * @return array
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     */
-    public function standardPrice(Request $request){
-        $id = $request->post('id',0,'intval');
-        $colorId = $request->post('colorId',0,'intval');
-        $optionId = $request->post('optionId',0,'intval');
-
-        $model = new MallGoodsSpecifications();
-        $row = $model->where(['color_id'=>$colorId,'option_id'=>$optionId,'goods_id'=>$id])->field(['w_price'])->find();
-        if($row && $row->w_price){
-            return ['status'=>0,'data'=>['price'=>$row->w_price],'msg'=>''];
-        }
-        $goodsMoel = new MallGoods();
-        $goodsRow = $goodsMoel->where(['id'=>$id])->field(['w_price'])->find();
-        if($goodsRow && $goodsRow->w_price){
-            return ['status'=>0,'data'=>['price'=>getFormatPrice($goodsRow->w_price)],'msg'=>''];
-        }
-
-        return ['status'=>0,'data'=>['price'=>0],'msg'=>''];
-    }
 
     /**
      * @desc 收藏列表
@@ -826,11 +804,11 @@ class Goods  extends Base {
         $list = [];
         if($row){
             $list[] = ['id'=>$row->id,'name'=>$row->name];
-            if($row->parent > 0){
-                $row2 = $model->where(['id'=>$row->parent])->field(['id','name','parent_id'])->find();
+            if($row->parent_id > 0){
+                $row2 = $model->where(['id'=>$row->parent_id])->field(['id','name','parent_id'])->find();
                 $list[] = ['id'=>$row2->id,'name'=>$row2->name];
-                if($row2->parent > 0){
-                    $row3 = $model->where(['id'=>$row2->parent])->field(['id','name','parent_id'])->find();
+                if($row2->parent_id > 0){
+                    $row3 = $model->where(['id'=>$row2->parent_id])->field(['id','name','parent_id'])->find();
                     $list[] =['id'=>$row3->id,'name'=>$row3->name];
                 }
             }
@@ -853,14 +831,14 @@ class Goods  extends Base {
         }
 
         //商品是否存在
-        $mallGoods = new SmProduct();
-        $goods = $mallGoods->field('supplier')->where(['id'=>$gid,'state'=>2])->find();
+        $productModel = new SmProduct();
+        $goods = $productModel->field('supplier_id')->where(['id'=>$gid,'state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED ,'is_deleted'=>0])->find();
         if(!$goods){
-            return ['status'=>0,'data'=>[],'msg'=>'商品不存在'];
+            return ['status'=>0,'data'=>[],'msg'=>'商品不存在或已下架'];
         }
 
         //获取九个热门
-        $dataGoods = $mallGoods->where(['id'=>['<>',$gid],'supplier_id'=>$goods['supplier_id'],'state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])
+        $dataGoods = $productModel->where(['id'=>['<>',$gid],'supplier_id'=>$goods['supplier_id'],'state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])
                                ->order('created_time desc')
                                ->field(['id','cover_img_url'])
                                ->limit(9)
@@ -882,23 +860,22 @@ class Goods  extends Base {
      */
     public function getSpecification(){
         $goodsId = Request::instance()->get('goodsId',0,'intval');
-        $colorId = Request::instance()->get('colorId',0,'intval');
-        $optionId = Request::instance()->get('optionId',0,'intval');
+        $specId = Request::instance()->get('specId',0,'intval');
 
         //
         $auth = $this->auth();
         if($auth){
             return $auth;
         }
-
-        $goodsSpecificationModel = new MallGoodsSpecifications();
-        $row = $goodsSpecificationModel->where(['color_id'=>$colorId,'option_id'=>$optionId,'goods_id'=>$goodsId])->find();
-        if(!$row){
-            return ['status'=>0,'data'=>['no'=> '','name' => ''],'msg'=>'' ];
-        }
-
         $userGoodsSpecificationModel = new UserGoodsSpecifications();
-        $userGoodsRow = $userGoodsSpecificationModel->where(['user_id'=>$this->userId,'goods_id'=>$goodsId,'specifications_id'=>$row->id])->find();
-        return ['status'=>0,'data'=>['no'=>$userGoodsRow ? $userGoodsRow->specifications_no : '' ,'name'=>$userGoodsRow ? $userGoodsRow->specifications_name :''],'msg'=>''];
+        $userGoodsRow = $userGoodsSpecificationModel->where(['user_id'=>$this->userId,'goods_id'=>$goodsId,'product_spec_id'=>$specId])->order('create_time desc')->find();
+        return [
+            'status'=>0,
+            'data'=>[
+                'no'=>$userGoodsRow ? $userGoodsRow->specifications_no : '',
+                'name'=>$userGoodsRow ? $userGoodsRow->specifications_name :''
+            ],
+            'msg'=>''
+        ];
     }
 }

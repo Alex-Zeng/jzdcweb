@@ -185,8 +185,26 @@ function SendMail($tomail, $subject = '', $body = ''){
     return $mail->Send() ? true : false;
 }
 
+/**
+ * @desc 格式化价格  不够两位小数补零，超过两位末尾为零不显示
+ * @param $price
+ * @param int $length
+ * @return float|string
+ */
 function getFormatPrice($price,$length = 2){
-    return number_format($price,$length,'.','');
+    $floatT = floatval($price);
+    //判断是否有小数
+    $floatArr = explode ( '.', $floatT );
+    if(count($floatArr) > 1){
+        if(strlen($floatArr[1]) <= 2){
+            return number_format($floatT,$length,'.','');
+        }else{
+            return (string)$floatT;
+        }
+
+    }else{
+        return  number_format($floatT,$length,'.','');
+    }
 }
 
 /**

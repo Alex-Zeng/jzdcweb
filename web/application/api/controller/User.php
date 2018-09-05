@@ -280,7 +280,6 @@ class User extends Base
                 'icon' => SmProduct::getFormatImg($row->cover_img_url),
                 'min_price' => getFormatPrice($row->min_price),
                 'max_price' => getFormatPrice($row->max_price),
-                'w_price' => '0.00',
                 'isDiscussPrice' => $row->is_price_neg_at_phone
             ];
         }

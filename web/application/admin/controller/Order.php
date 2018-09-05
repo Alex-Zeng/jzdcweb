@@ -127,8 +127,7 @@ class Order extends Base{
     public function  pricing(Request $request,$id){
         $contract_type = $request->post('contract_type',0,'intval');
         $contractNumber = $request->post('contract_number','');
-        $payDate = $request->post('pay_date','');
-        $sumMoney = $request->post('sum_money',0);
+        $accountPeriod = $request->post('is_account_period',0,'intval');
         $model = new MallOrder();
         $row = $model->where(['id'=>$id])->find();
         if(!$row || $row->state != MallOrder::STATE_PRICING){
@@ -136,13 +135,10 @@ class Order extends Base{
         }
         if($contract_type == 2){
             //有账期 =》 待发货，没账期 => 待采购商打款
-            $data = ['contract_number'=>$contractNumber,'actual_money'=>$sumMoney,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
-            if($payDate){
-                $data['pay_date']=$payDate;
-            }
+            $data = ['contract_number'=>$contractNumber,'is_account_period'=>$accountPeriod,'state'=>$accountPeriod ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
             $result = $model->save($data,['id'=>$id]);
             if($result == true){
-                if($payDate){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
+                if($accountPeriod == 1){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
                     $userModel = new IndexUser();
                     $user = $userModel->getInfoById($row->supplier);
                     $yunpian = new Yunpian();
@@ -164,7 +160,7 @@ class Order extends Base{
                 return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
             }
         }else{ //待签约
-            $data = ['actual_money'=>$sumMoney,'state'=>MallOrder::STATE_SIGN];
+            $data = ['state'=>MallOrder::STATE_SIGN];
             $result = $model->save($data,['id'=>$id]);
             if($result == true){
                 //更新消息通知
@@ -195,7 +191,7 @@ class Order extends Base{
      */
     public function sign(Request $request,$id){
         $contractNumber = $request->post('contract_number','');
-        $payDate = $request->post('pay_date','');
+        $accountPeriod = $request->post('is_account_period',0,'intval');
         $model = new MallOrder();
         $row = $model->where(['id'=>$id])->find();
         if(!$row || $row->state != MallOrder::STATE_SIGN){
@@ -203,14 +199,12 @@ class Order extends Base{
         }
 
         //有账期 =》 待发货，没账期 => 待采购商打款
-        $data = ['contract_number'=>$contractNumber,'state'=>$payDate ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
-        if($payDate){
-            $data['pay_date'] = $payDate;
-        }
+        $data = ['contract_number'=>$contractNumber,'is_account_period'=>$accountPeriod,'state'=>$accountPeriod ? MallOrder::STATE_DELIVER : MallOrder::STATE_REMITTANCE];
+
         $result = $model->save($data,['id'=>$id]);
         if($result == true){
             $userModel = new IndexUser();
-            if($payDate){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
+            if($accountPeriod == 1){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
                 $user = $userModel->getInfoById($row->supplier);
                 $yunpian = new Yunpian();
                 $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
@@ -581,4 +575,90 @@ class Order extends Base{
         $objWriter->save('php://output');
         exit;
     }
+
+    /**
+     * @desc 调价
+     * @param $id
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function adjustPrice($id){
+        //接收参数
+        $goods = Request::instance()->post('goods/a');
+
+        //获取总价
+        $totalMoney = 0;
+        foreach ($goods as $orderGoodsId => $item){
+            $totalMoney += $item['price']*$item['quantity'];
+        }
+        //提取数据
+
+        $model = new MallOrder();
+        $row = $model->where(['id'=>$id])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
+        }
+
+        //更新order_goods数据
+        $goodsModel = new MallOrderGoods();
+        foreach($goods as $orderGoodsId => $item){
+            $goodsModel->save(['price'=> $item['price'],'quantity'=>$item['quantity']],['id'=>$orderGoodsId]);
+        }
+        //更新order价格
+        $orderModel = new MallOrder();
+        $orderModel->save(['actual_money'=>$totalMoney,'sum_money'=>$totalMoney],['id'=>$id]);
+        //exit;
+        return ['status'=>0,'data'=>[],'msg'=>'操作失败'];
+    }
+
+    /**
+     * @desc 获取订单商品列表
+     * @param $id
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getOrderProductList($id){
+        $model = new MallOrder();
+        $row = $model->where(['id'=>$id])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
+        }
+        $goodsModel = new MallOrderGoods();
+
+        $rows = $goodsModel->alias('a')->join('mall_goods b','a.goods_id=b.id','left')->where(['a.order_id'=>$id])->order('a.id','asc')->field(['b.icon','a.id','a.title','a.price','a.s_info','a.quantity'])->select();
+        foreach ($rows as &$row){
+            $row['iconPath'] = MallGoods::getFormatImg($row->icon);
+            $row['quantity'] = intval($row->quantity);
+        }
+
+        return ['status'=>0,'data'=>$rows,'msg'=>''];
+    }
+
+    /**
+     * @desc  设置账期
+     * @param $id
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function setPayday($id){
+        $date = Request::instance()->post('date');
+        $model = new MallOrder();
+        $row = $model->where(['id'=>$id])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
+        }
+        //设置账期日期
+        $result = $model->save(['pay_date'=>$date],['id'=>$id]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'设置成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'设置失败'];
+    }
+
 }
