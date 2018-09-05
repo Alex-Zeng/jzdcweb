@@ -132,7 +132,7 @@ class MallCart extends Base{
         $rows = $model->alias('a')->join(['sm_product_spec'=>'b'],'b.id=a.product_spec_id','left')
             ->join(['sm_product'=>'c'],'b.product_id=c.id')
             ->where($where)
-            ->field(['c.id','c.title','c.supplier_id','b.unit','b.is_price_neg_at_phone','b.spec_img_url','b.is_customized','b.id as spec_id','b.spec_set','a.quantity','b.price','a.id as cart_id'])
+            ->field(['c.id','c.title','c.supplier_id','b.unit','b.is_price_neg_at_phone','b.spec_img_url','b.is_customized','b.id as spec_id','b.spec_set','a.quantity','b.price','b.min_order_qty','a.id as cart_id'])
             ->select();
         $supplierData = [];
         foreach ($rows as $row){
@@ -162,6 +162,7 @@ class MallCart extends Base{
                 'title' => $row->title,
                 'icon' =>  $row->spec_img_url,
                 'quantity' => intval($row->quantity),
+                'moq' =>  $row->min_order_qty,
                 'specificationsInfo' => $optionInfo, //规格描述
                 'materialCode' => $userSpecificationsRow ? $userSpecificationsRow->specifications_no : '',  //物料编号
                 'materialSpec' => $userSpecificationsRow ? $userSpecificationsRow->specifications_name : '',//物料名称
