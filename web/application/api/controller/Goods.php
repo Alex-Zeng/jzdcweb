@@ -195,95 +195,6 @@ class Goods  extends Base {
      * @param Request $request
      * @return array
      */
-    public function search3(Request $request){
-        $type = $request->post('type',0,'intval'); //搜索类型
-        $keywords = $request->post('keywords',''); //关键字
-        $sort = $request->post('sort','asc');
-        $pageSize = $request->post('pageSize',10,'intval');
-        $pageNumber = $request->post('pageNumber',1,'intval');
-        $categoryId = $request->post('cateId',0,'intval');
-        if($pageSize > 12){ $pageSize = 12;}
-
-        $start = ($pageNumber - 1)*$pageSize;
-
-//        if(!$keywords) {
-//            return ['status'=>1,'data'=>[],'msg'=>'搜索关键词不能为空'];
-//        }
-
-        $this->noauth();
-
-        $model = new MallGoods();
-        $where = [];
-        if(!$keywords){
-            $type = 0;
-        }
-
-        if($type == 0 ){  //商品搜索
-            $where['state'] = 2;
-            $where['mall_state'] = 1;
-            if($keywords){
-                $where['title'] = ['like','%'.$keywords.'%'];
-            }
-            if($categoryId > 0){
-                //查询子类包含的ID
-                 $typeIds = (new MallType())->getChildIds($categoryId);
-                 $typeIds = array_merge([$categoryId],$typeIds);
-                 $where['type'] = ['in',$typeIds];
-            }
-            $total = $model->where($where)->count();
-
-            $rows = $model->where($where)->order('w_price',$sort)->limit($start,$pageSize)->field(['id','icon','title','w_price','min_price','max_price','w_price','discount','bidding_show'])->select();
-        }else{ //供应商搜索
-            $total =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where(['a.state'=>2,'a.mall_state'=>1])->where('b.real_name','like','%'.$keywords.'%')->count();
-            $rows =  $model->alias('a')->join(config('prefix').'index_user b','a.supplier=b.id','left')->where(['a.state'=>2,'a.mall_state'=>1])->where('b.real_name','like','%'.$keywords.'%')->order('a.w_price',$sort)->field(['a.id','a.icon','a.title','a.w_price','a.min_price','a.max_price','a.discount','a.bidding_show'])->select();
-        }
-        $list = [];
-
-        $goodsIds = $goodsIdArr = [];
-        if($this->userId > 0){
-            foreach ($rows as $row){
-                $goodsIds[] = $row->id;
-            }
-            //查询
-            $favoriteModel = new MallFavorite();
-            $favoriteRows = $favoriteModel->where(['user_id'=>$this->userId,'goods_id'=>['in',$goodsIds]])->field(['goods_id'])->select();
-
-            foreach ($favoriteRows as $favoriteRow){
-                $goodsIdArr[] = $favoriteRow->goods_id;
-            }
-        }
-        
-        foreach($rows as $row){
-            $list[] = [
-                'id' => $row->id,
-                'title' => $row->title,
-                'url' => MallGoods::getFormatImg($row->icon),
-                'min_price' => getFormatPrice($row->min_price),
-                'max_price' => getFormatPrice($row->max_price),
-                'w_price' => getFormatPrice($row->w_price),
-                'isFavorite' => in_array($row->id,$goodsIdArr) ? 1 : 0
-            ];
-        }
-        //更新搜索历史
-        if($keywords && $this->userId){
-            $searchModel = new UserSearchLog();
-            $searchRow = $searchModel->where(['user_id'=>$this->userId,'keyword'=>$keywords])->find();
-            if($searchRow){
-                $searchModel->save(['times'=>$searchRow->times+1,'update_time'=>time()],['user_id'=>$this->userId,'keyword'=>$keywords,'type'=>$type]);
-            }else{
-                $searchModel->save(['user_id'=>$this->userId,'keyword'=>$keywords,'type'=>$type,'times'=>1,'create_time'=>time(),'update_time'=>time()]);
-            }
-        }
-
-
-        return ['status'=>0,'data'=>['total'=> $total,'list'=>$list],'msg'=>''];
-    }
-
-    /**
-     * @desc 商品搜索
-     * @param Request $request
-     * @return array
-     */
     public function search(Request $request){
         $type = $request->post('type',0,'intval'); //搜索类型
         $keywords = $request->post('keywords',''); //关键字
@@ -381,112 +292,6 @@ class Goods  extends Base {
 
         return ['status'=>0,'data'=>['total'=> $total,'list'=>$list],'msg'=>''];
     }
-
-    /**
-     * @desc 获取商品信息
-     * @param Request $request
-     * @param $id
-     * @return array
-     */
-
-    public function get3(Request $request, $id){
-        $model = new MallGoods();
-        $row = $model->where(['id'=>$id,'state'=>2])->field(['id','title','min_price','max_price','w_price','state','type','w_price','supplier','icon','multi_angle_img','unit','title','m_detail','option_enable'])->find();
-        if(!$row){
-            return ['status'=>1,'data'=>[],'msg'=>'商品不存在或已下架'];
-        }
-        $this->noauth();
-
-        //格式化图片 multi_angle_img
-        $imgList = [];
-        $imgArr = $row->multi_angle_img ? explode('|',$row->multi_angle_img) : [];
-        if($imgArr){  //取多图
-            for($i = 0; $i < count($imgArr); $i++){
-                $imgList[] =["img"=>MallGoods::getFormatMultiImg($imgArr[$i])];
-            }
-        }else{  //取封面图
-            $imgList[] =["img"=>MallGoods::getFormatImg($row->icon)];
-        }
-
-
-        //商家
-        $userModel = new IndexUser();
-        $user = $userModel->getInfoById($row->supplier);
-
-        //
-        $standards = [];
-        $mallTypeModel = new MallType();
-        $mallTypeRow = $mallTypeModel->where(['id'=>$row->type])->find();
-
-        $goodsSpecificationsModel = new MallGoodsSpecifications();
-        if($mallTypeRow && $mallTypeRow->color == 1){
-            $colorRows =  $goodsSpecificationsModel->where(['goods_id'=>$row->id])->field(['color_id','color_name','color_img'])->group('color_id')->select();
-            foreach ($colorRows as &$colorRow){
-                $colorRow['color_img'] = $colorRow->color_img ? MallGoodsSpecifications::getFormatPath($colorRow->color_img) : ($colorRow->color_id > 0 ? MallColor::getFormatImg($colorRow->color_id) : '');
-            }
-            $colorList = $colorRows;
-            if($colorList){
-                $standards[] = [
-                    'title' =>'规格',
-                    'list' =>  $colorList
-                ];
-            }
-        }
-        if($mallTypeRow && $mallTypeRow->diy_option == 1){
-            $optionRows =  $goodsSpecificationsModel->alias('a')->join(config('prefix').'mall_type_option b','a.option_id=b.id','left')->where(['a.goods_id'=>$row->id,'a.option_id'=>['gt',0]])->field(['a.option_id','b.name as option_name'])->group('a.option_id')->select();
-            $optionName = $mallTypeRow->option_name ? $mallTypeRow->option_name : '二级规格';
-            if($optionRows){
-                $standards[] = [
-                    'title' => $optionName,
-                    'list' =>  $optionRows
-                ];
-            }
-        }
-
-        $standardsPriceRows = $goodsSpecificationsModel->where(['goods_id'=>$row->id])->field(['color_id','option_id','w_price'])->select();
-        $standardsPrice = [];
-        foreach ($standardsPriceRows as $standardsPriceRow){
-            $standardsPrice[] = [
-                'option_id' => $standardsPriceRow->option_id,
-                'color_id' => $standardsPriceRow->color_id,
-                'price' => $standardsPriceRow->w_price
-            ];
-        }
-
-        //是否收藏
-        $isFavorite = 0;
-        if($this->userId > 0){
-            $favoriteModel = new MallFavorite();
-            $exist = $favoriteModel->where(['user_id'=>$this->userId,'goods_id'=>$id])->find();
-            $isFavorite = $exist ? 1 : 0;
-        }
-
-        //更新商品访问量
-        $model->where(['id'=>$id])->setInc('visit',1);
-
-        //单位
-        $unitModel = new MallUnit();
-        $unitRow = $unitModel->find(['id'=>$row->unit]);
-
-        $data = [
-            'title' => $row->title,  //商品标题
-            'min_price' => getFormatPrice($row->min_price), //商品价格
-            'max_price' => getFormatPrice($row->max_price),//
-            'price' => getFormatPrice($row->w_price),
-            'unit' => $unitRow ? $unitRow->name : '',
-            'supplier' => $user ? $user->real_name : '', //供应商
-            'supplierLogo' => $user->icon ? IndexUser::getFormatIcon($user->icon) : '', //供应商logo
-            'standard' => $standards ? $standards : [], //规格
-            'standardPrice' => $standardsPrice,
-            'imgList' => $imgList, //视图图片
-            'detail' => getImgUrl($row->m_detail),
-            'detailUrl' =>config('jzdc_domain').url('api/goods/detail',['id'=>$id]),
-            'isFavorite' => $isFavorite //是否收藏
-        ];
-
-        return ['status'=>0,'data'=>$data,'msg'=>''];
-    }
-
 
     /**
      * @desc 获取商品详细信息
@@ -608,7 +413,7 @@ class Goods  extends Base {
                 "skuCode" => $specRow->sku_code,
                 "specPrice" => getFormatPrice($specRow->price),
                 "specUnit" => $specRow->unit,
-                "specImageUrl" => SmProductSpec::getFormatImg($specRow->spec_img_url),
+                "specImageUrl" => $specRow->spec_img_url ? SmProductSpec::getFormatImg($specRow->spec_img_url) : SmProduct::getFormatImg($product->cover_img_url),
                 "moq" => $specRow->min_order_qty,
                 "isDiscussPrice" => $specRow->is_price_neg_at_phone,
                 "materialCode" => $materialCode,
