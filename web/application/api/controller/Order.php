@@ -54,7 +54,7 @@ class Order extends Base{
         }
         foreach ($detailRows as $detailRow){
             foreach ($detailRow['list'] as $detailList){
-                if(!$detailList['goods'] || !$detailList['specId']){
+                if(!$detailList['goodsId'] || !$detailList['specId']){
                     return ['status'=>1,'data'=>[],'msg'=>'商品规格错误'];
                 }
             }
