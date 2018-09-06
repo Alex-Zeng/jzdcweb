@@ -16,6 +16,8 @@ use app\common\model\MallOrderGoods;
 use app\common\model\MallOrderPay;
 use app\common\model\MallShopFinance;
 use app\common\model\OrderMsg;
+use app\common\model\SmProduct;
+use app\common\model\SmProductSpec;
 use sms\Yunpian;
 use think\Request;
 
@@ -79,11 +81,11 @@ class Order extends Base{
 
             $total = 0;
             foreach ($goodsRows as & $goodsRow){
-                $productModel = new MallGoods();
+                $productModel = new SmProduct();
+                $specModel = new SmProductSpec();
                 $productRow = $productModel->where(['id'=>$goodsRow->goods_id])->find();
-                $path = $productRow ? $productRow->icon : '';
-                $goodsRow['icon'] = MallGoods::getFormatImg($path);
-
+                $specRow = $specModel->where(['id'=>$goodsRow->product_spec_id])->find();
+                $goodsRow['icon'] = $specRow && $specRow->spec_img_url ? SmProductSpec::getFormatImg($specRow->spec_img_url) : SmProduct::getFormatImg($productRow->cover_img_url);
                 $total += $goodsRow->price * $goodsRow->quantity;
             }
             $row['total'] = $total;
@@ -292,20 +294,12 @@ class Order extends Base{
                    $financeModel->save($financeData);
 
                 //更新交易统计量
-                  $orderGoodsModel = new MallOrderGoods();
-                  $orderGoodsRows = $orderGoodsModel->where(['order_id'=>$row->id])->field(['quantity','goods_id'])->select();
-                  foreach ($orderGoodsRows as $orderGoodsRow){
-                      $goodsModel = new MallGoods();
-                      $goodsModel->where(['id'=>$orderGoodsRow->goods_id])->setInc('sold',$orderGoodsRow->quantity);
-                  }
-                //更新店内会员 订单统计
-//                function update_shop_buyer($pdo,$table_pre,$order){
-//                    $sql="select count(id) as c,sum(`actual_money`) as c2 from ".self::$table_pre."order where `shop_id`=".$order['shop_id']." and `buyer`='".$order['buyer']."' and `state`=6";
-//                    $r=$pdo->query($sql,2)->fetch(2);
-//                    $sql="update ".self::$table_pre."shop_buyer set `money`='".$r['c2']."',`order`='".$r['c']."' where `shop_id`=".$order['shop_id']." and `username`='".$order['buyer']."'";
-//                    $pdo->exec($sql);
-//
-//                }
+//                  $orderGoodsModel = new MallOrderGoods();
+//                  $orderGoodsRows = $orderGoodsModel->where(['order_id'=>$row->id])->field(['quantity','goods_id'])->select();
+//                  foreach ($orderGoodsRows as $orderGoodsRow){
+//                      $goodsModel = new MallGoods();
+//                      $goodsModel->where(['id'=>$orderGoodsRow->goods_id])->setInc('sold',$orderGoodsRow->quantity);
+//                  }
 
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();
@@ -628,10 +622,25 @@ class Order extends Base{
             return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
         }
         $goodsModel = new MallOrderGoods();
+        $productModel = new SmProduct();
 
-        $rows = $goodsModel->alias('a')->join('mall_goods b','a.goods_id=b.id','left')->where(['a.order_id'=>$id])->order('a.id','asc')->field(['b.icon','a.id','a.title','a.price','a.s_info','a.quantity'])->select();
+        $rows = $goodsModel->alias('a')->join( ['sm_product_spec'=>'b'],'a.product_spec_id=b.id','left')
+                                             ->where(['a.order_id'=>$id])
+                                             ->order('a.id','asc')
+                                             ->field(['b.spec_img_url','b.product_id','a.id','a.title','a.price','a.s_info','a.quantity'])
+                                             ->select();
         foreach ($rows as &$row){
-            $row['iconPath'] = MallGoods::getFormatImg($row->icon);
+            if(!$row->spec_img_url){
+                if($row->product_id > 0){
+                    $productRow = $productModel->where(['id'=>$row->product_id])->find();
+                    $iconPath = SmProduct::getFormatImg($productRow->cover_img_url);
+                }else{
+                    $iconPath = '';
+                }
+            }else{
+                $iconPath =  SmProductSpec::getFormatImg($row->spec_img_url);
+            }
+            $row['iconPath'] = $iconPath;
             $row['quantity'] = intval($row->quantity);
         }
 

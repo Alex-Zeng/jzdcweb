@@ -14,7 +14,6 @@ use app\common\model\IndexArea;
 use app\common\model\IndexGroup;
 use app\common\model\IndexUser;
 use app\common\model\MallFavorite;
-use app\common\model\MallGoods;
 use app\common\model\MallOrder;
 use app\common\model\MallOrderGoods;
 use app\common\model\MallReceiver;
@@ -280,7 +279,8 @@ class User extends Base
                 'icon' => SmProduct::getFormatImg($row->cover_img_url),
                 'min_price' => getFormatPrice($row->min_price),
                 'max_price' => getFormatPrice($row->max_price),
-                'isDiscussPrice' => $row->is_price_neg_at_phone
+                'isDiscussPrice' => $row->is_price_neg_at_phone,
+                'showPrice' => getShowPrice($row->is_price_neg_at_phone,$row->min_price,$row->max_price)
             ];
         }
 
@@ -350,12 +350,12 @@ class User extends Base
         $pendingNumber = $model->where(['supplier' => $this->userId, 'state' => MallOrder::STATE_DELIVER])->count();
         $serviceNumber = $model->where(['supplier'=> $this->userId,'state'=>MallOrder::STATE_RECEIVE,'service_type'=>1])->order(['supplier'=> $this->userId,'state'=>MallOrder::STATE_FINISH,'service_type'=>1])->count();
         //在售商品总数
-        $goodsModel = new MallGoods();
+        $productModel = new SmProduct();
         //交易金额   $where['confirm_delivery_time'] = ['>',0];
         $moneyInfo = $model->where(['supplier'=>$this->userId,'confirm_delivery_time'=>['gt',0]])->field(['sum(`actual_money`) as money'])->find();
 
         //在售商品访问量
-        $goodsInfo = $goodsModel->where(['state'=>2,'mall_state'=>1,'supplier'=>$this->userId])->field(['count(*) as count','sum(visit) as visit'])->find();
+        $goodsInfo = $productModel->where(['state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0,'supplier_id'=>$this->userId])->field(['count(*) as count','sum(page_view) as visit'])->find();
         //
         return [
             'status' => 0,
@@ -436,8 +436,8 @@ class User extends Base
             $orderRow = $orderModel->where(['out_id' => $row->order_no])->field(['id','goods_names'])->find();
 
             $orderGoodsModel = new MallOrderGoods();
-            $orderGoodsRow = $orderGoodsModel->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['order_id' => $row->order_id])->field(['b.icon'])->find();
-            $icon = MallGoods::getFormatImg($orderGoodsRow ? $orderGoodsRow->icon : '');
+            $orderGoodsRow = $orderGoodsModel->alias('a')->join(['sm_product' =>'b'], 'a.goods_id=b.id', 'left')->where(['order_id' => $row->order_id])->field(['b.cover_img_url'])->find();
+            $icon = SmProduct::getFormatImg($orderGoodsRow ? $orderGoodsRow->cover_img_url : '');
             $time = strtotime($row['create_time']);
 
             $data[] = [

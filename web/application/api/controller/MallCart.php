@@ -35,10 +35,19 @@ class MallCart extends Base{
             return $auth;
         }
 
-        $userId = $this->userId;
         $model = new \app\common\model\MallCart();
-        $count = $model->where(['user_id'=>$userId])->count();
 
+        $where = [];
+        $where['a.user_id'] = $this->userId;
+        $where['c.state'] = SmProduct::STATE_FORSALE;
+        $where['c.audit_state'] = SmProduct::AUDIT_RELEASED;
+        $where['c.is_deleted'] = 0;
+        $where['b.is_deleted'] = 0;
+
+        //查询数据
+        $count = $model->alias('a')->join(['sm_product_spec'=>'b'],'b.id=a.product_spec_id','left')
+            ->join(['sm_product'=>'c'],'b.product_id=c.id')
+            ->where($where)->count();
         return ['status'=>0,'data'=>['total'=>$count],'msg'=>''];
     }
 
@@ -169,7 +178,8 @@ class MallCart extends Base{
                 'materialSpec' => $userSpecificationsRow ? $userSpecificationsRow->specifications_name : '',//物料名称
                 'unit' => $row->unit,  //单位
                 'isDiscussPrice' => $row->is_price_neg_at_phone, //议价
-                "specPriceDetails" => $specPriceDetails  //价格范围
+                "specPriceDetails" => $specPriceDetails,  //价格范围
+                'showPrice' => getSimplePrice($row->is_price_neg_at_phone,$row->price)
             ];
         }
 

@@ -125,6 +125,8 @@ class Goods  extends Base {
                 'url' => SmProduct::getFormatImg($row->cover_img_url),
                 'min_price' => getFormatPrice($row->min_price),
                 'max_price' => getFormatPrice($row->max_price),
+                'isDiscussPrice' => $row->is_price_neg_at_phone,
+                'showPrice' => getShowPrice($row->is_price_neg_at_phone,$row->min_price,$row->max_price)
             ];
         }
         return ['status'=>0,'data'=>['total'=>$total,'list'=>$list],'msg'=>''];
@@ -276,7 +278,8 @@ class Goods  extends Base {
                 'isDiscussPrice' => $row->is_price_neg_at_phone,
                 'min_price' => getFormatPrice($row->min_price),
                 'max_price' => getFormatPrice($row->max_price),
-                'isFavorite' => in_array($row->id,$goodsIdArr) ? 1 : 0
+                'isFavorite' => in_array($row->id,$goodsIdArr) ? 1 : 0,
+                'showPrice' => getShowPrice($row->is_price_neg_at_phone,$row->min_price,$row->max_price)
             ];
         }
         //更新搜索历史
@@ -418,7 +421,8 @@ class Goods  extends Base {
                 "isDiscussPrice" => $specRow->is_price_neg_at_phone,
                 "materialCode" => $materialCode,
                 "materialSpec" => $materialSpec,
-                "specPriceDetails" => $specPriceDetails
+                "specPriceDetails" => $specPriceDetails,
+                "showPrice" => getSimplePrice($specRow->is_price_neg_at_phone,$specRow->price)
             ];
         }
 
@@ -437,7 +441,8 @@ class Goods  extends Base {
             'detail' => getImgUrl($product->html_content_1),  //H5详情
             "webDetail" => getImgUrl($product->html_content_2),//PC详情
             'detailUrl' =>config('jzdc_domain').url('api/goods/detail',['id'=>$id]), //H5 Url
-            'isFavorite' => $isFavorite //是否收藏
+            'isFavorite' => $isFavorite, //是否收藏
+            'showPrice' => getShowPrice($product->is_price_neg_at_phone,$product->min_price,$product->max_price)
         ];
         return ['status'=>0,'data'=>$list,'msg'=>''];
     }
@@ -505,6 +510,7 @@ class Goods  extends Base {
             $row['min_price'] = getFormatPrice($row->min_price);
             $row['max_price'] = getFormatPrice($row->max_price);
             $row['isDiscussPrice'] = $row->is_price_neg_at_phone;
+            $row['showPrice'] = getShowPrice($row->is_price_neg_at_phone,$row->min_price,$row->max_price);
             unset($row->is_price_neg_at_phone);
         }
 
@@ -682,5 +688,46 @@ class Goods  extends Base {
             ],
             'msg'=>''
         ];
+    }
+
+    /**
+     * @desc 添加物料编号、规格
+     * @param Request $request
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function addSpecification(Request $request){
+        $specId = $request->post('specId','0','intval');
+        $materialCode = $request->post('materialCode','','trim');
+        $materialSpec = $request->post('materialSpec','','trim');
+        //验证
+        $productModel = new SmProduct();
+        $productSpecModel = new SmProductSpec();
+
+        $productSpec = $productSpecModel->where(['id'=>$specId,'is_deleted'=>0])->find();
+        if(!$productSpec){
+            return ['status'=>1,'data'=>[],'msg'=>'商品规格不存在'];
+        }
+        $product = $productModel->where(['id'=>$productSpec->product_id,'is_deleted'=>0])->find();
+        if(!$product){
+            return ['status'=>1,'data'=>[],'msg'=>'商品不存在'];
+        }
+        if($product->state != SmProduct::STATE_FORSALE && $product->audit_state != SmProduct::AUDIT_RELEASED){
+            return ['status'=>1,'data'=>[],'msg'=>'商品已下架'];
+        }
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $model = new UserGoodsSpecifications();
+        $result = $model->save(['user_id'=>$this->userId,'goods_id'=>$productSpec->product_id,'specifications_no'=>$materialCode,'specifications_name'=>$materialSpec,'product_spec_id'=>$specId,'create_time'=>time()]);
+        if($result == true){
+            return ['status'=>0,'data'=>[],'msg'=>'保存成功'];
+        }
+        return ['status'=>0,'data'=>[],'msg'=>'保存失败'];
     }
 }

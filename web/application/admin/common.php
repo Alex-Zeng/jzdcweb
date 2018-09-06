@@ -329,3 +329,21 @@ function allLateToString($data){
 function getProductAuditState($id){
     return model('SmProduct')->getAuditState($id);
 }
+
+/**
+ * [getSpu 通过商品表ID生成SPU]
+ * @param  [type] $id [商品表ID]
+ * @return [type]     [description]
+ */
+function getSpu($id){
+    return date('Ymd').str_pad($id, 5, 0, STR_PAD_LEFT);
+}
+
+/**
+ * [getSku 通过商品规格组合表ID生成SKU]
+ * @param  [type] $id [商品规格组合表ID]
+ * @return [type]     [description]
+ */
+function getSku($id){
+    return date('Ymd').str_pad($id, 5, 0, STR_PAD_LEFT);
+}

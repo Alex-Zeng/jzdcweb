@@ -263,14 +263,16 @@ class Order extends Base{
                         'buyer_id' => $this->userId,
                         'specifications_no' => $goodsList['materialCode'],
                         'specifications_name' => $goodsList['materialSpec'],
-                        'is_price_neg_at_phone' => $goodsList['isDiscussPrice']
-                    ];
+                        'is_price_neg_at_phone' => $goodsList['isDiscussPrice'],
+                        'product_spec_id' => $goodsList['specId']
+                     ];
 
                     $returnGoodsList[] = [
                         'goodsId' => $goodsList['goods_id'],
                         'title' => $goodsList['title'],
                         'quantity' => $goodsList['quantity'],
                         'price' => $goodsList['price'],
+                        'unit' => $goodsList['unit'],
                         'materialCode' => $goodsList['materialCode'],
                         'icon' => MallGoods::getFormatImg($goodsList['icon']),
                         'materialSpec' => $goodsList['materialSpec'],

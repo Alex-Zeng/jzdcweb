@@ -285,6 +285,7 @@
     $('a[href="'+url+'"]').addClass('active');
     $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
     function validateSubmit() {
+        // alert(editor1.html());return;
         $('#cover-upload-file').closest('.form-group').removeClass('has-error');
         $('#cover-upload-file').closest('.form-group').find('.help-block').html('');
         $('.submit-tip').html('');
