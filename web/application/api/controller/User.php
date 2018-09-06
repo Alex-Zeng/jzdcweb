@@ -279,7 +279,8 @@ class User extends Base
                 'icon' => SmProduct::getFormatImg($row->cover_img_url),
                 'min_price' => getFormatPrice($row->min_price),
                 'max_price' => getFormatPrice($row->max_price),
-                'isDiscussPrice' => $row->is_price_neg_at_phone
+                'isDiscussPrice' => $row->is_price_neg_at_phone,
+                'showPrice' => getShowPrice($row->is_price_neg_at_phone,$row->min_price,$row->max_price)
             ];
         }
 

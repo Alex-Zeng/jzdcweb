@@ -344,3 +344,35 @@ function getDevice(){
         return 'androidWechat';
     }
 }
+
+/**
+ * @desc 前端显示价格
+ * @param int $isDiscuss
+ * @param $minPrice
+ * @param $maxPrice
+ * @return float|string
+ */
+function getShowPrice($isDiscuss = 0, $minPrice,$maxPrice){
+    if($isDiscuss == 1){
+        return '电议';
+    }
+    $minPrice = getFormatPrice($minPrice);
+    $maxPrice = getFormatPrice($maxPrice);
+    if($minPrice == $maxPrice){
+        return '¥'.$maxPrice;
+    }
+    return '¥'.$minPrice.'-'.$maxPrice;
+}
+
+/**
+ * @desc 显示价格
+ * @param int $isDiscuss
+ * @param $price
+ * @return string
+ */
+function getSimplePrice($isDiscuss = 0, $price){
+    if($isDiscuss == 1){
+        return '电议';
+    }
+    return $price;
+}

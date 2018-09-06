@@ -178,7 +178,8 @@ class MallCart extends Base{
                 'materialSpec' => $userSpecificationsRow ? $userSpecificationsRow->specifications_name : '',//物料名称
                 'unit' => $row->unit,  //单位
                 'isDiscussPrice' => $row->is_price_neg_at_phone, //议价
-                "specPriceDetails" => $specPriceDetails  //价格范围
+                "specPriceDetails" => $specPriceDetails,  //价格范围
+                'showPrice' => getSimplePrice($row->is_price_neg_at_phone,$row->price)
             ];
         }
 
