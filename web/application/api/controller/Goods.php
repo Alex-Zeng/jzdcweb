@@ -683,4 +683,45 @@ class Goods  extends Base {
             'msg'=>''
         ];
     }
+
+    /**
+     * @desc 添加物料编号、规格
+     * @param Request $request
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function addSpecification(Request $request){
+        $specId = $request->post('specId','0','intval');
+        $materialCode = $request->post('materialCode','','trim');
+        $materialSpec = $request->post('materialSpec','','trim');
+        //验证
+        $productModel = new SmProduct();
+        $productSpecModel = new SmProductSpec();
+
+        $productSpec = $productSpecModel->where(['id'=>$specId,'is_deleted'=>0])->find();
+        if(!$productSpec){
+            return ['status'=>1,'data'=>[],'msg'=>'商品规格不存在'];
+        }
+        $product = $productModel->where(['id'=>$productSpec->product_id,'is_deleted'=>0])->find();
+        if(!$product){
+            return ['status'=>1,'data'=>[],'msg'=>'商品不存在'];
+        }
+        if($product->state != SmProduct::STATE_FORSALE && $product->audit_state != SmProduct::AUDIT_RELEASED){
+            return ['status'=>1,'data'=>[],'msg'=>'商品已下架'];
+        }
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        $model = new UserGoodsSpecifications();
+        $result = $model->save(['user_id'=>$this->userId,'goods_id'=>$productSpec->product_id,'specifications_no'=>$materialCode,'specifications_name'=>$materialSpec,'product_spec_id'=>$specId,'create_time'=>time()]);
+        if($result == true){
+            return ['status'=>0,'data'=>[],'msg'=>'保存成功'];
+        }
+        return ['status'=>0,'data'=>[],'msg'=>'保存失败'];
+    }
 }
