@@ -15,9 +15,9 @@ class Base extends Model{
 		switch ($action) {
 			case 'create':
 				$return = [
-					'create_user_id'		=> getUserId(),
-					'create_user'   		=> getUserName(),
-					'create_time'			=> time(),
+					'created_user_id'		=> getUserId(),
+					'created_user'   		=> getUserName(),
+					'created_time'			=> time(),
 					'last_modified_user_id'	=> 0,
 					'last_modified_user'   	=> '',
 					'last_modified_time'   	=> 0,
