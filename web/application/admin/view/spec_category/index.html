@@ -44,7 +44,7 @@
                                 <div class="input-group">
                                     自定义规格名称 &nbsp;&nbsp;
                                     <div class="input-group-append">
-                                        <input class="form-control" value="{$specCategoryRow.spec_type_name}" id="option_name" name="option_name" type="text">
+                                        <input class="form-control" value="{$specAttrKey}" id="option_name" name="option_name" type="text">
                                     </div>
                                 </div>
                             </div>
@@ -60,9 +60,9 @@
                                 <tbody>
                                 {foreach name="details" id="option"}
                                 <tr>
-                                    <td>{$option.spec_attr_name}</td>
+                                    <td>{$option.spec_option_text}</td>
                                     <td>
-                                        <a href="#"  class="btn btn-sm btn-primary" data-id="{$option.id}" data-name="{$option.spec_attr_name}" data-shop="0" data-toggle="modal" data-target="#edit-modal">编辑</a>
+                                        <a href="#"  class="btn btn-sm btn-primary" data-id="{$option.id}" data-name="{$option.spec_option_text}" data-shop="0" data-toggle="modal" data-target="#edit-modal">编辑</a>
                                         <a href="#" class="btn btn-sm btn-danger" data-id="{$option.id}" data-toggle="modal" data-target="#delete-modal">删除</a>
                                     </td>
                                 </tr>
