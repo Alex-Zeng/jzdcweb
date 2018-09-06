@@ -344,7 +344,9 @@ class Product extends Base{
 	 * @return [type] [description]
 	 */
 	public function edit(){
-
+        //单位
+        $unitRows = model('MallUnit')->where([])->order('sequence','desc')->field(['id','name'])->select();
+        return view('',['unitRows'=>$unitRows]);
 	}
 
 	/**
