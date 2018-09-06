@@ -32,7 +32,7 @@ class SmProduct extends Base{
      * @return string
      */
     public static function getFormatMultiImg($img){
-        return $img ? config('jzdc_domain').config('jzdc_doc_path').'/goods/'.$img : '';
+        return $img ? config('jzdc_doc_path').'/goods/'.$img : '';
     }
 
 
