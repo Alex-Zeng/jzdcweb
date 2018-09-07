@@ -165,7 +165,7 @@ class Goods  extends Base {
             return ['status'=>1,'data'=>[],'msg'=>'商品处于非正常状态不能收藏'];
         }
 
-        $result = $model->save(['user_id'=>$userId,'username'=>$username,'goods_id'=>$productId,'time'=>time(),'type_id'=>$goods['type']]);
+        $result = $model->save(['user_id'=>$userId,'username'=>$username,'goods_id'=>$productId,'time'=>time(),'type_id'=>$goods['category_id']]);
         if($result == true){
             return ['status'=>0,'data'=>[],'msg'=>'收藏成功'];
         }
