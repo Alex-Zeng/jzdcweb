@@ -9,7 +9,10 @@
 namespace app\admin\controller;
 
 use app\common\model\IndexUser;
+use app\common\model\SmCategorySpecAttrKey;
+use app\common\model\SmCategorySpecAttrOptions;
 use app\common\model\SmProductCategory;
+use app\common\model\SmProductSpec;
 use app\common\model\SmSpecCategory;
 use app\common\model\SmSpecCategoryDetails;
 use think\Request;
@@ -40,25 +43,25 @@ class SpecCategory extends Base{
             }
         }
 
-        $specCategoryModel = new SmSpecCategory();
-        $specCategoryRow = $specCategoryModel->where(['category_id'=>$id])->find();
+        $specKeyModel = new SmCategorySpecAttrKey();
 
         $color = 0;
-        $details = [];
+        $details = $specCategoryRow = [];
 
         //是否设置颜色规格
+        $specOptionModel = new SmCategorySpecAttrOptions();
+        //查询颜色规格
+        $colorRow = $specKeyModel->where(['category_id'=>$id,'is_standard'=>1,'is_deleted'=>0])->find();
+        if($colorRow){
+            $color = 1;
+        }
+        //查询自定义规格
+        $specCategoryRow = $specKeyModel->where(['category_id'=>$id,'is_standard'=>0,'is_deleted'=>0])->find();
         if($specCategoryRow){
-            $specCategoryDetailsModel = new SmSpecCategoryDetails();
-            //查询颜色规格
-             $colorRow = $specCategoryDetailsModel->where(['spec_category_id'=>$specCategoryRow->id,'is_standard'=>1,'is_deleted'=>0])->find();
-             if($colorRow){
-                 $color = 1;
-             }
-            //查询自定义规格
-            $details = $specCategoryDetailsModel->where(['spec_category_id'=>$specCategoryRow->id,'is_standard'=>0,'is_deleted'=>0])->select();
+            $details = $specOptionModel->where(['category_spec_attr_key_id'=>$specCategoryRow->id,'is_deleted'=>0])->select();
         }
 
-        $this->assign('specCategoryRow',$specCategoryRow);
+        $this->assign('specAttrKey',$specCategoryRow ? $specCategoryRow->spec_attr_key : '');
         $this->assign('color',$color);
         $this->assign('option',$details ? 1 : 0);
         $this->assign('details',$details);
@@ -77,36 +80,27 @@ class SpecCategory extends Base{
         $categoryId = $request->post('id',0);
         $value = $request->post('value',0);
         $field = $request->post('field','');
-        $model = new SmSpecCategory();
+        $model = new SmCategorySpecAttrKey();
 
         $userId = getUserId();
         $userModel = new IndexUser();
         $userInfo = $userModel->getInfoById($userId);
 
-        $row = $model->where(['category_id'=>$categoryId,'is_deleted'=>0])->find();
-        if(!$row){
-            $model->save(['category_id'=>$categoryId,'spec_type_name'=>'','created_user_id'=>$userId,'created_user'=>$userInfo ? $userInfo->username : '','create_time'=>time()]);
-            $id = $model->id;
-        }else{
-            $id = $row->id;
-        }
-
         switch ($field){
             case 'color':
-                $detailModel = new SmSpecCategoryDetails();
                 if($value == 1){  //启用
-                    $exit = $detailModel->where(['spec_category_id'=>$id,'is_standard'=>1,'is_deleted'=>0])->find();
+                    $exit = $model->where(['category_id'=>$categoryId,'is_standard'=>1,'is_deleted'=>0])->find();
                     if($exit){ //更新
                     }else{  //添加
-                        $data = ['spec_category_id'=>$id,'spec_attr_name'=>'颜色','is_standard'=>1,'created_user_id'=>$userId,'created_user'=>$userInfo ? $userInfo->username : '','created_time'=>time()];
-                        $result = $detailModel->save($data);
+                        $data = ['category_id'=>$categoryId,'spec_attr_key'=>'颜色','is_standard'=>1,'created_user_id'=>$userId,'created_user'=>$userInfo ? $userInfo->username : '','created_time'=>time()];
+                        $result = $model->save($data);
                     }
                 }else{ //禁用
-                    $result = $detailModel->save(['is_deleted'=>1,'deleted_user'=>$userInfo ? $userInfo->username : '','deleted_time'=>time()],['spec_category_id'=>$id,'is_standard'=>1,'is_deleted'=>0]);
+                    $result = $model->save(['is_deleted'=>1,'deleted_user'=>$userInfo ? $userInfo->username : '','deleted_time'=>time()],['category_id'=>$categoryId,'is_standard'=>1,'is_deleted'=>0]);
                 }
                 break;
             case 'option': //修改规格名称
-                $result = $model->save(['spec_type_name'=>$value],['category_id'=>$categoryId,'is_deleted'=>0]);
+                $result = $model->save(['spec_attr_key'=>$value],['category_id'=>$categoryId,'is_deleted'=>0,'is_standard'=>0]);
                 break;
         }
 
@@ -124,7 +118,7 @@ class SpecCategory extends Base{
      * @return array
      */
     public function delete(Request $request,$id){
-        $model = new SmSpecCategoryDetails();
+        $model = new SmCategorySpecAttrOptions();
         $row = $model->where(['id'=>$id])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'数据不存在'];
@@ -150,28 +144,28 @@ class SpecCategory extends Base{
      */
     public function create(Request $request,$categoryId){
         $name = $request->post('name','trim');
-        $model = new SmSpecCategory();
+        $model = new SmCategorySpecAttrKey();
 
         $userId = getUserId();
         $userModel = new IndexUser();
         $userInfo = $userModel->getInfoById($userId);
 
-        $row = $model->where(['category_id'=>$categoryId,'is_deleted'=>0])->find();
+        $row = $model->where(['category_id'=>$categoryId,'is_deleted'=>0,'is_standard'=>0])->find();
         if(!$row){
-            $model->save(['category_id'=>$categoryId,'spec_type_name'=>'','created_user_id'=>$userId,'created_user'=>$userInfo ? $userInfo->username : '','create_time'=>time()]);
+            $model->save(['category_id'=>$categoryId,'spec_attr_key'=>'','created_user_id'=>$userId,'is_standard'=>0,'created_user'=>$userInfo ? $userInfo->username : '','created_time'=>time()]);
             $id = $model->id;
         }else{
             $id = $row->id;
         }
 
-        $model = new SmSpecCategoryDetails();
+        $model = new SmCategorySpecAttrOptions();
         //验证数据是否存在
-        $exit = $model->where(['spec_category_id'=>$id,'spec_attr_name'=>$name,'is_standard'=>0,'is_deleted'=>0])->find();
+        $exit = $model->where(['category_spec_attr_key_id'=>$id,'spec_option_text'=>$name,'is_deleted'=>0])->find();
         if($exit){
             return ['status'=>1,'data'=>[],'msg'=>'规格选项已经存在'];
         }
 
-        $data = ['spec_category_id'=>$id,'spec_attr_name'=>$name,'is_standard'=>0,'created_user_id'=>$userId,'created_user'=>$userInfo ? $userInfo->username : '','created_time'=>time()];
+        $data = ['category_spec_attr_key_id'=>$id,'spec_option_text'=>$name,'created_user_id'=>$userId,'created_user'=>$userInfo ? $userInfo->username : '','created_time'=>time()];
         $result = $model->save($data);
         if($result == true){
             return ['status'=>0,'data'=>[],'msg'=>'添加成功'];
@@ -191,7 +185,7 @@ class SpecCategory extends Base{
         $userModel = new IndexUser();
         $userInfo = $userModel->getInfoById($userId);
 
-        $model = new SmSpecCategoryDetails();
+        $model = new SmCategorySpecAttrOptions();
 
         $row = $model->where(['id'=>$id])->find();
         if(!$row){
@@ -199,12 +193,12 @@ class SpecCategory extends Base{
         }
 
         //验证名称是否存在
-        $exit = $model->where(['spec_category_id'=>$row->spec_category_id,'spec_attr_name'=>$name,'is_standard'=>0,'is_deleted'=>0,'id'=>['not in',[$id]]])->find();
+        $exit = $model->where(['spec_option_text'=>$name,'is_deleted'=>0,'id'=>['not in',[$id]]])->find();
         if($exit){
             return ['status'=>1,'data'=>[],'msg'=>'规格选项已经存在'];
         }
 
-        $data = ['spec_attr_name'=>$name,'last_modified_user_id'=>$userId,'last_modified_user'=>$userInfo ? $userInfo->username : '','last_modified_time'=>time()];
+        $data = ['spec_option_text'=>$name,'last_modified_user_id'=>$userId,'last_modified_user'=>$userInfo ? $userInfo->username : '','last_modified_time'=>time()];
         $result = $model->save($data,['id'=>$id]);
         if($result !== false){
             return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
