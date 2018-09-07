@@ -344,7 +344,9 @@ class Product extends Base{
 	 * @return [type] [description]
 	 */
 	public function edit(){
-
+        //单位
+        $unitRows = model('MallUnit')->where([])->order('sequence','desc')->field(['id','name'])->select();
+        return view('',['unitRows'=>$unitRows]);
 	}
 
 	/**
@@ -520,7 +522,7 @@ class Product extends Base{
         foreach ($productList as $key => $val) {
             $productList[$key]['spec_count'] = $model_sm_product_spec->where(['product_id'=>$val['id']])->count();
             //     $user = $userModel->getInfoById($row->supplier);
-            //     $row['cover_img_url'] = $row->cover_img_url ? model('MallGoods')::getFormatImg($row->cover_img_url) : '';
+             $productList[$key]['cover_img_url'] = $val->cover_img_url ? model('SmProduct')::getFormatImg($val->cover_img_url) : '';
             //     $row['supplier_name'] = $user ? $user->real_name : '';
         }
 
@@ -598,6 +600,7 @@ class Product extends Base{
         $model_sm_product_spec = model('SmProductSpec');
         foreach ($productList as $key => $val) {
             $productList[$key]['spec_count'] = $model_sm_product_spec->where(['product_id'=>$val['id']])->count();
+            $productList[$key]['cover_img_url'] = $val->cover_img_url ? model('SmProduct')::getFormatImg($val->cover_img_url) : '';
             //     $user = $userModel->getInfoById($row->supplier);
             //     $row['cover_img_url'] = $row->cover_img_url ? model('MallGoods')::getFormatImg($row->cover_img_url) : '';
             //     $row['supplier_name'] = $user ? $user->real_name : '';

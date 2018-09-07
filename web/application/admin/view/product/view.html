@@ -143,7 +143,11 @@
                             
                             <div class="form-inline form-group">
                                 <label for="" class="col-md-2">产地</label>
-                                <span class="">{$productArea[$product['province_of_origin_id']]}-{$productArea[$product['city_of_origin_id']]}-{$productArea[$product['district_of_origin_id']]}</span>
+                                <span class="">
+                                    {if $product['province_of_origin_id']>0}{$productArea[$product['province_of_origin_id']]}-{/if}
+                                    {if $product['city_of_origin_id']>0}   {$productArea[$product['city_of_origin_id']]}-{/if}
+                                    {if $product['district_of_origin_id']>0}{$productArea[$product['district_of_origin_id']]}{/if}
+                                </span>
                             </div>
                             <div class="form-inline form-group">
                                 <label for="" class="col-md-2">详情APP/H5</label>

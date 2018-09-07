@@ -105,8 +105,20 @@ class Index extends Base
 
         $productModel = new SmProduct();
         $productCategoryModel = new SmProductCategory();
-        //
+        //获取推荐分类的ID
+        $condition = ['a.is_recommended'=>1,'b.is_display'=>1];
+/*
 
+        $categoryRows = $productModel->alias('a')->join(['sm_product_category'=>'b'],'a.category_id=b.id','left')
+                                         ->where($condition)
+                                         ->field(['b.id','SUBSTRING_INDEX(b.depth_path, \'/\', 2) AS `path`'])
+                                         ->group('path')
+                                         ->limit(8)
+                                         ->select();
+       //查询子类
+        foreach ($categoryRows as $categoryRow){
+
+        }*/
 
 
 
