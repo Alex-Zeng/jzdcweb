@@ -36,7 +36,7 @@
                                         <div class="row">
                                           <select class="form-control col-md-6 select2" name="supplier_id">
                                                 {volist name=":getSupplierList()"  id='user'}
-                                                <option  value="{$user.id}">{$user.real_name}</option>
+                                                <option  value="{$user.id}" {if $user.id eq $row['supplier_id']}selected="selected"{/if}>{$user.real_name}</option>
                                                 {/volist}
                                           </select>
                                         </div>
@@ -45,7 +45,45 @@
                                 <div class="form-inline form-group ajax-bind-change">
                                     <label for="" class="col-md-2">*所属类目</label>
                                     <div class="col-md-9 no-padding">
-                                        <div id="category-template-box"></div>
+                                        <div id="category-template-box">
+                                            {notempty name="categorySelected"}
+                                                {php}
+                                                    foreach ($categorySelected['selectedList'] as $k =>$v){
+                                                        echo '<div class="row category-box">';
+                                                        foreach ($v as $kk =>$vv){
+                                                            if($kk=='level'){
+                                                                echo '<div class="select-level-div">';
+                                                            }else{
+                                                                echo '<span class="select-level-div">';
+                                                            }
+                                                            echo '<select class="form-control select-level"><option  value="0">请选择</option>';
+                                                                foreach ($categorySelected['levelSelectList'][$kk] as $kkk =>$vvv){
+                                                                    if($vv==$vvv['id']){
+                                                                        echo '<option value="'.$vvv['id'].'" selected="selected">'.$vvv['name'].'</option>';
+                                                                    }else{
+                                                                        echo '<option value="'.$vvv['id'].'">'.$vvv['name'].'</option>';
+                                                                    }
+                                                                } 
+                                                            echo '</select>';
+                                                        }
+                                                        for($i=1;$i<count($v);$i++){
+                                                            echo '</span>';
+                                                        } 
+            
+                                                        echo '</div>';
+                                                        if($k==0){
+                                                            echo '<a href="javascript:;" class="category-add" style="padding-top: 6px;padding-left: 5px;">&nbsp;&nbsp;&nbsp;&nbsp;继续添加</a><input type="hidden" name="category_id[]" class="category-value-input" value="">';
+                                                        }else{
+                                                            echo '<a href="javascript:;" class="category-del" style="padding-top: 6px;padding-left: 5px;">&nbsp;&nbsp;&nbsp;&nbsp;删除当前</a>
+                                                                            <input type="hidden" name="category_id[]" class="category-value-input">';
+                                                        }
+                                                        echo '</div>';
+                                                    }
+                                                {/php}
+                                                {/notempty}  
+                                                
+                                                
+                                        </div>
                                         
                                     </div>
                                 </div>
@@ -249,7 +287,7 @@
         {{/if}}
     </script>
     <script>
-            function ajaxGetCategory(id,elm,htmlType,lineType){
+            function ajaxGetCategory(id,elm,htmlType,lineType,selected=''){
                 $.ajax({
                     type:'get',
                     url:'?s=admin/product/getCategoryNextLevelList&parentId='+id,
@@ -274,8 +312,11 @@
                 });
             }
 
+            {empty name="categorySelected"}
             //加载首个分类
             ajaxGetCategory(0,'#category-template-box','html','ready');
+
+            {/empty}
 
             //增加分类
             $('.ajax-bind-change').on('click',".category-add",function(){

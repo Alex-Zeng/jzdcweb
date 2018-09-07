@@ -127,14 +127,14 @@ class Product extends Base{
                 $data2 = [];
                 $data2_result = [];
                 $multi_img_url = $post['multi_img_url'];
-                $multi_img_url = explode('|', $multi_img_url);dump( $post);
+                $multi_img_url = explode('|', $multi_img_url);
                 if(count($multi_img_url)>0){
                     foreach ($multi_img_url as $key => $val) {
                         if($val!=''){
                             $data2[] = array_merge(['product_id'=>$data1_id,'product_image_url'=>$val],$createDefault);
                         }
                     }
-                    dump($data2);exit();
+                    // dump($data2);exit();
                     $data2_result = model('SmProductGallery')->saveAll($data2);
                     // dump($data2_result);
                 }
@@ -344,6 +344,15 @@ class Product extends Base{
 	 * @return [type] [description]
 	 */
 	public function edit(){
+        $id = input('param.id',0,'intval');
+        //商品表
+        $row = model('SmProduct')->where(['id'=>$id])->find();
+        $this->assign('row',$row);  
+
+        $allCategrody = model('SmProductsCategories')->where(['product_id'=>$id])->column('category_id'); 
+        $categorySelected = model('SmProductCategory')->getCategorySelected($allCategrody);
+        // dump($categorySelected);exit();
+        $this->assign('categorySelected',$categorySelected); 
         //单位
         $unitRows = model('MallUnit')->where([])->order('sequence','desc')->field(['id','name'])->select();
         return view('',['unitRows'=>$unitRows]);
@@ -540,7 +549,60 @@ class Product extends Base{
 	 * @return [type] [description]
 	 */
 	public function listDraft(){
+        $title = input('get.title','','trim');
+        $supplierId = input('get.supplier_id',0,'intval');
+        $isRecommended = input('get.is_recommended',-1,'intval');
+        $categoryId = input('get.category_id',0,'intval');
 
+        //是否删除
+        $where['a.is_deleted'] = 0;
+        
+        //已审核
+        $where['a.audit_state'] = SmProduct::AUDIT_SAVED;
+        
+        //是否推荐
+        if($isRecommended>-1){
+            $where['a.is_recommended']  = $isRecommended;
+        }
+        //供应商
+        if($supplierId>0){
+            $where['a.supplier_id']  = $supplierId;
+        }
+        //商品名称
+        if($title!=''){
+            $where['a.title']  = ['like','%'.$title.'%'];
+        }
+        //分类
+        if($categoryId>0){
+            $productIds = model('SmProductsCategories')->where(['category_id'=>$categoryId])->column('product_id');
+            $where['a.id'] = ['in',$productIds];
+
+            //对分类进行多层级回显
+            $categorySelected = model('SmProductCategory')->getCategorySelected($categoryId);
+           
+            //categorySelected数组中selectedList选中的值、levelSelectList选中值得同级成员
+            $this->assign('categorySelected',$categorySelected);
+        }
+        
+        $productList = model('SmProduct')
+                ->field('a.id,a.state,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.nickname as supplier_name,a.is_recommended')
+                ->alias('a')
+                ->join('jzdc_index_user b','a.supplier_id=b.id','LEFT')->where($where)->paginate(20,false,['query'=>request()->param()]);
+        $model_sm_product_spec = model('SmProductSpec');
+        foreach ($productList as $key => $val) {
+            $productList[$key]['spec_count'] = $model_sm_product_spec->where(['product_id'=>$val['id']])->count();
+            //     $user = $userModel->getInfoById($row->supplier);
+             $productList[$key]['cover_img_url'] = $val->cover_img_url ? model('SmProduct')::getFormatImg($val->cover_img_url) : '';
+            //     $row['supplier_name'] = $user ? $user->real_name : '';
+        }
+
+        $this->assign('title',$title);
+        $this->assign('supplier_id',$supplierId);
+        $this->assign('category_id',$categoryId);
+        $this->assign('is_recommended',$isRecommended);       
+        $this->assign('list',$productList);
+        $this->assign('page',$productList->render());
+        return view();
 	}
 
 	/**
