@@ -498,11 +498,12 @@ class Order extends Base{
 
         //查询产品
         $goodsModel = new MallOrderGoods();
-        $goodsRows = $goodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.id','a.title','a.price','a.quantity','a.s_info','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.cover_img_url'])->select();
+        $goodsRows = $goodsModel->alias('a')->join(['sm_product_spec'=>'b'],'a.goods_id=b.id','left')->where(['order_id'=>$row->id])
+                                ->field(['a.id','a.title','a.price','a.quantity','a.s_info','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.spec_img_url'])->select();
 
         foreach($goodsRows as &$goodsRow){
             $goodsRow['quantity'] = intval($goodsRow->quantity);
-            $goodsRow['icon'] = SmProduct::getFormatImg($goodsRow->cover_img_url);
+            $goodsRow['icon'] = SmProduct::getFormatImg($goodsRow->spec_img_url);
         }
 
         //查询支付凭证
