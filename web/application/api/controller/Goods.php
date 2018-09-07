@@ -375,7 +375,7 @@ class Goods  extends Base {
                 //增加定制选项
                 if($index == 0 && $isCustomSpec){
                     $item['specAttrVals'][] = [
-                        "specAttrValId" => "0",
+                        "specAttrValId" => 0,
                         "specAttrVal" => "定制",
                         "isCustom" => 1,
                     ];
@@ -383,7 +383,7 @@ class Goods  extends Base {
             }
         }
         if(!$specAttrs && $isCustomSpec == 1){
-            $specAttrs[] = ["desc"=> "定制规格","list"=>[ "specAttrValId" => "0", "specAttrVal" => "定制", "isCustom" => 1],"id"=>0];
+            $specAttrs[] = ["desc"=> "定制规格","list"=>[ "specAttrValId" => 0, "specAttrVal" => "定制", "isCustom" => 1],"id"=>0];
         }
 
 
