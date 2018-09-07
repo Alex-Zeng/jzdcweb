@@ -79,11 +79,16 @@ class ProductCategory  extends Base{
             $userModel = new IndexUser();
             $userInfo = $userModel->getInfoById($userId);
 
+            //查询父级
+            $parentRow = $model->where(['id'=>$parent])->find();
+
+
             $data = [
                 'name' => $name,
                 'parent_id' => $parent,
                 'ordering' => $sequence,
                 'is_display' => $display,
+                'level' => $parentRow ?  intval($parentRow->level +1) : 1,
                 'created_user_id' => $userId,
                 'created_user' => $userInfo ? $userInfo->username : '',
                 'created_time' => time()
@@ -91,6 +96,8 @@ class ProductCategory  extends Base{
 
             $result = $model->save($data);
             if($result){
+                $depth = $parentRow ?  $parentRow->depth_path.'/'.$parentRow->id.'/'.$model->id : '/'.$model->id;
+                $model->save(['depth_path'=>$depth],['id'=>$model->id]);
                 $this->redirect(url('admin/product_category/index'));
             }
         }
@@ -119,11 +126,16 @@ class ProductCategory  extends Base{
             $userModel = new IndexUser();
             $userInfo = $userModel->getInfoById($userId);
 
+            //查询父级
+            $parentRow = $model->where(['id'=>$parent])->find();
+
             $data = [
                 'name' => $name,
                 'parent_id' => $parent,
                 'ordering' => $sequence,
                 'is_display' => $display,
+                'level' => $parentRow ?  intval($parentRow->level +1) : 1,
+                'depth_path' =>$parentRow ?  $parentRow->depth_path.'/'.$parentRow->id.'/'.$id : '/'.$id ,
                 'last_modified_user_id' => $userId,
                 'last_modified_user' => $userInfo ? $userInfo->username : '',
                 'last_modified_time' => time()

@@ -100,44 +100,56 @@ class Index extends Base
 
     //获取首页推荐分类及推荐商品
     public function getPushTypeAndGoods(){
-        $mallType = model('mall_type');
-        $mallGoods = model('mall_goods');
-
         $productModel = new SmProduct();
         $productCategoryModel = new SmProductCategory();
         //获取推荐分类的ID
-        $condition = ['a.is_recommended'=>1,'b.is_display'=>1];
-/*
+        $condition = ['a.is_recommended'=>1,'b.is_display'=>1,'a.state'=>SmProduct::STATE_FORSALE,'a.audit_state'=>SmProduct::AUDIT_RELEASED,'a.is_deleted'=>0];
 
         $categoryRows = $productModel->alias('a')->join(['sm_product_category'=>'b'],'a.category_id=b.id','left')
-                                         ->where($condition)
-                                         ->field(['b.id','SUBSTRING_INDEX(b.depth_path, \'/\', 2) AS `path`'])
-                                         ->group('path')
-                                         ->limit(8)
-                                         ->select();
-       //查询子类
+            ->where($condition)
+            ->field(['b.id','SUBSTRING_INDEX(b.depth_path, \'/\', 2) AS `path`'])
+            ->group('path')
+            ->limit(8)
+            ->select();
+
+        $dataType = [];
+
+        //查询子类
         foreach ($categoryRows as $categoryRow){
-
-        }*/
-
-
-
-        //获取首级推荐分类
-        $dataType = $mallType->field('id,name')->where(['push'=>['>',0],'parent'=>0])->order('sequence','desc')->select();
-
-        foreach ($dataType as $key => $val) {
-            //获取二级推荐分类
-            $dataType[$key]['pushTypeList'] = $mallType->field('id,name')->where(['push'=>['>',0],'parent'=>$val['id']])->order('sequence','desc')->select();
-
-            //获取该首级分类及其子类的所以商品推荐   
-            $ids = $mallType->getChildIds($val['id'],true);
-            $dataGoods = $mallGoods->field('id,icon,min_price,max_price,title')->where(['type'=>['in',$ids],'push'=>['>',0],'state'=>2])->order('push','desc')->select();
-            foreach ($dataGoods as $k => $v) {
-                $dataGoods[$k]['icon'] = $mallGoods::getFormatImg($v['icon']);
-                $dataGoods[$k]['min_price'] = getFormatPrice($v['min_price']);
-                $dataGoods[$k]['max_price'] = getFormatPrice($v['max_price']);
+            if(!$categoryRow->path){
+                continue;
             }
-            $dataType[$key]['pushGoodsList'] = $dataGoods;
+            $cateId = substr($categoryRow->path,1,strlen($categoryRow->path)-1);
+            $categoryRow = $productCategoryModel->where(['id'=>$cateId])->find();
+            //获取子集ID
+            $cateAllId =  $productCategoryModel->getCategoryIds($cateId,true);
+
+            $productResult =  $typeLists = [];
+            $dataProducts = $productModel->where(['category_id'=>['in',$cateAllId],'is_recommended'=>1,'is_deleted'=>0])->order('created_time desc')->limit(8)->field(['id','min_price','max_price','title','is_price_neg_at_phone','cover_img_url'])->select();
+
+            foreach($dataProducts as $dataProduct){
+                $productResult[] =[
+                    'id' =>(string) $dataProduct->id,
+                    'title' => $dataProduct->title,
+                    'min_price' => getFormatPrice($dataProduct->min_price),
+                    'max_price' => getFormatPrice($dataProduct->max_price),
+                    'icon' =>  SmProduct::getFormatImg($dataProduct->cover_img_url),
+                    'isDiscussPrice' => $dataProduct->is_price_neg_at_phone,
+                    'showPrice' => getShowPrice($dataProduct->is_price_neg_at_phone,$dataProduct->min_price,$dataProduct->max_price)
+                ];
+            }
+
+            $typeLists =  $productCategoryModel->where(['parent_id'=>$cateId,'is_display'=>1,'is_deleted'=>0])->order('ordering desc')->field(['id','name'])->select();
+            foreach ($typeLists as &$typeList){
+                $typeList->id = (string)$typeList->id;
+            }
+
+            $dataType[] = [
+                'id' => $cateId,
+                'name' => $categoryRow->name,
+                'pushTypeList' =>$typeLists,
+                'pushGoodsList' => $productResult
+            ];
         }
 
         return ['status' => 0, 'data' => ['dataType' => $dataType], 'msg' => '返回成功'];
