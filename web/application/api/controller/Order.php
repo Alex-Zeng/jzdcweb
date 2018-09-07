@@ -103,8 +103,7 @@ class Order extends Base{
                     $optionInfo = $optionInfo ? substr($optionInfo,0,strlen($optionInfo)-1) : '';
                 }
                 //根据规格以及购买数量查询对应的价格
-                $price = '0.00';
-
+                $price = $specRow->price;
                 $specNum = isset($detailList['quantity']) ? $detailList['quantity'] : 1;
                 //是否议价
                 if(!$specRow->is_price_neg_at_phone){
