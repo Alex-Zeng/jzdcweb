@@ -181,7 +181,15 @@ function SendMail($tomail, $subject = '', $body = ''){
     $mail->SetFrom(config('JZDC_MAIL_LOGINNAME'), '集众电采');
     $mail->Subject = $subject;
     $mail->MsgHTML($body);
-    $mail->AddAddress($tomail, $tomail);
+
+    if(is_array($tomail)){
+       $emailArr = $tomail;
+    }else{
+       $emailArr = explode(',',$tomail);
+    }
+    for ($i =0; $i < count($emailArr); $i++){
+        $mail->AddAddress($emailArr[$i], $emailArr[$i]);
+    }
     return $mail->Send() ? true : false;
 }
 

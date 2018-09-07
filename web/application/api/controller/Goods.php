@@ -158,8 +158,9 @@ class Goods  extends Base {
         if($result_already){
             return ['status'=>1,'data'=>[],'msg'=>'商品已经收藏过'];
         }
+        $productModel = new SmProduct();
 
-        $goods = model('mall_goods')->field('type')->where(['state'=>2,'id'=>$productId])->find();
+        $goods = $productModel->where(['id'=>$productId,'state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])->find();
         if(!$goods){
             return ['status'=>1,'data'=>[],'msg'=>'商品处于非正常状态不能收藏'];
         }

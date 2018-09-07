@@ -312,6 +312,12 @@ class Order extends Base{
             }
         }
 
+        //发送邮件通知
+        $emailStr = config('JZDC_OP_EMAIL');
+        $subject='集众电采平台系统订单通知';
+        $content='您好，现有新的订单生成，请及时跟进处理，谢谢。';
+        SendMail($emailStr,$subject,$content);
+
         return ['status'=>0,'data'=>$return,'msg'=>'订单生成成功'];
     }
 

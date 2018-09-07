@@ -348,5 +348,9 @@ return [
     'http_exception_template'    =>  [
         // 定义404错误的重定向页面地址
         404 =>  APP_PATH.'admin/view/tips/error.html',
-    ]
+    ],
+    //运营邮件通知
+    'JZDC_OP_EMAIL' => 'caizijie@jizhongdiancai.com,weiming@jizhongdiancai.com',
+
+
 ];
