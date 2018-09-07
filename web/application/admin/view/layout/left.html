@@ -59,7 +59,17 @@
                     'managerIcon'=> 'fa-feed',
                     'managerUrl' => url('admin/suggestion/index'),
                     'managerVal' => [['name'=>'新增商品','url'=>url('admin/product/create'),'icon'=>'fa-database'],['name'=>'草稿','url'=>url('admin/product/listDraft'),'icon'=>'fa-database'],['name'=>'待审核','url'=>url('admin/product/listPending'),'icon'=>'fa-database'],['name'=>'已审核','url'=>url('admin/product/listpass'),'icon'=>'fa-database']]
-                ]
+                ],[
+                   'managerKey' => '数据报表',
+                   'managerIcon'=> 'fa-feed',
+                   'managerUrl' => url('admin/suggestion/index'),
+                   'managerVal' => [   ['name'=>'商品交易报表','url'=>url('admin/report/trade'),'icon'=>'fa-database'],
+                                       ['name'=>'供应商交易报表','url'=>url('admin/product/listpass'),'icon'=>'fa-database'],
+                                       ['name'=>'采购商交易报表','url'=>url('admin/product/listpass'),'icon'=>'fa-database'],
+                                       ['name'=>'订单数据报表','url'=>url('admin/product/listpass'),'icon'=>'fa-database'],
+                                       ['name'=>'企业注册认证数据','url'=>url('admin/product/listpass'),'icon'=>'fa-database']
+                                   ]
+                  ]
             ],
             2=>[
                 [
