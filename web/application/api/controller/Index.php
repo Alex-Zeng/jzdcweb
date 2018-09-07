@@ -133,7 +133,9 @@ class Index extends Base
                     'title' => $dataProduct->title,
                     'min_price' => getFormatPrice($dataProduct->min_price),
                     'max_price' => getFormatPrice($dataProduct->max_price),
-                    'icon' =>  SmProduct::getFormatImg($dataProduct->cover_img_url)
+                    'icon' =>  SmProduct::getFormatImg($dataProduct->cover_img_url),
+                    'isDiscussPrice' => $dataProduct->is_price_neg_at_phone,
+                    'showPrice' => getShowPrice($dataProduct->is_price_neg_at_phone,$dataProduct->min_price,$dataProduct->max_price)
                 ];
             }
 
