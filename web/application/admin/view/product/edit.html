@@ -92,7 +92,7 @@
                                     <label class="col-md-2">*商品名称</label>
                                     <div class="col-md-5 no-padding">
                                         <div class="row">
-                                            <input type="text"  name="title" maxlength="30" class="form-control col-md-6" />
+                                            <input type="text" name="title" value="{$row['title']}" maxlength="30" class="form-control col-md-6" />
                                         </div>
                                     </div>
                                 </div>
@@ -155,7 +155,7 @@
                                             <p class="help-block2" style="padding-top: 6px;padding-left: 5px;">支持jpg、jpeg、png格式，大小不超过2.0M</p>
                                         </div>
                                         <div class="row">
-                                            <input  type="hidden" name="cover_img_url" id="cover-upload-file"  value="" />
+                                            <input  type="hidden" name="cover_img_url" id="cover-upload-file"  value="{$row['cover_img_url']}" data-path="{$row['cover_img_url']}"/>
                                             <small class="help-block" style="padding-top: 6px;padding-left: 5px;"></small>
                                         </div>
                                     </div>
@@ -463,7 +463,7 @@
             }
             //获取规格数据并缓存起来
             var categoryAttr = $('#combination-container').data('category'+categoryId);
-            console.log(categoryAttr);
+            // console.log(categoryAttr);
             if(categoryAttr == undefined){
                 $.ajax({
                         type:'get',

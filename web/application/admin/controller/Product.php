@@ -1,7 +1,19 @@
 <?php
 namespace app\admin\controller;
 use app\common\model\SmProduct;
+use app\common\model\SmProductGallery;
+use app\common\model\SmProductsCategories;
+use app\common\model\SmProductCategory;
+use app\common\model\SmProductSpec;
+use app\common\model\SmProductSpecAttrKey;
+use app\common\model\SmProductSpecAttrVal;
+use app\common\model\SmProductSpecPrice;
+use app\common\model\SmCategorySpecAttrKey;
+use app\common\model\IndexArea;
+use app\common\model\MallUnit;
 use think\Db;
+
+
 class Product extends Base{
 
 	/**
@@ -81,11 +93,20 @@ class Product extends Base{
                 return  $this->errorMsg('101008');
             }
 
+            $SmProduct              = new SmProduct();
+            $SmProductGallery       = new SmProductGallery();
+            $SmProductsCategories   = new SmProductsCategories();
+            $SmProductSpec          = new SmProductSpec();
+            $SmProductSpecAttrKey   = new SmProductSpecAttrKey();
+            $SmProductSpecAttrVal   = new SmProductSpecAttrVal();
+            $SmProductSpecPrice     = new SmProductSpecPrice();
+
+
             // dump($post);exit();
             Db::startTrans();
             $dbCommit = 0;
 			//公共创建使用的字段值
-			$createDefault = model('SmProduct')->filedDefaultValue('create');
+			$createDefault = $SmProduct->filedDefaultValue('create');
 			
 			//ok商品表 			sm_product 					SmProduct 	
                 if(isset($post['spec']))  {
@@ -115,8 +136,8 @@ class Product extends Base{
     			];
     			$data1 = array_merge($data1,$createDefault);
                 
-                $data1_result = model('SmProduct')->data($data1)->save();
-                $data1_id = model('SmProduct')->id;
+                $data1_result = $SmProduct->data($data1)->save();
+                $data1_id = $SmProduct->id;
                 if(!$data1_result){
                     $dbCommit = 1; 
                 }
@@ -135,7 +156,7 @@ class Product extends Base{
                         }
                     }
                     // dump($data2);exit();
-                    $data2_result = model('SmProductGallery')->saveAll($data2);
+                    $data2_result = $SmProductGallery->saveAll($data2);
                     // dump($data2_result);
                 }
                 if(!$data2_result){
@@ -154,7 +175,7 @@ class Product extends Base{
                         }
                     }
                     // dump($data3);
-                    $data3_result = model('SmProductsCategories')->saveAll($data3);
+                    $data3_result = $SmProductsCategories->saveAll($data3);
                     // dump($data3_result);
                 }
                 if(!$data3_result){
@@ -181,7 +202,7 @@ class Product extends Base{
                 }
                 if(!empty($data4)){
                     //dump($data4);
-                    $data4_result = model('SmProductSpec')->saveAll($data4);
+                    $data4_result = $SmProductSpec->saveAll($data4);
                     //dump($data4_result);
                 }
                 if(!$data4_result){
@@ -202,7 +223,7 @@ class Product extends Base{
                 }
                 if(!empty($data5)){
                     // dump($data5);
-                    $data5_result = model('SmProductSpecAttrKey')->saveAll($data5);
+                    $data5_result = $SmProductSpecAttrKey->saveAll($data5);
                     // dump($data5_result);
                 }
                 if(!$data5_result){
@@ -229,7 +250,7 @@ class Product extends Base{
                 }
                 if(!empty($data6)){
                     //dump($data6);
-                    $data6_result = model('smProductSpecAttrVal')->saveAll($data6);
+                    $data6_result = $SmProductSpecAttrVal->saveAll($data6);
                     //dump($data6_result);
                 }
                 foreach ($data6_result as $key => $val) { //8_颜色|红色 => id
@@ -241,7 +262,7 @@ class Product extends Base{
                 // dump($data6_plan_param2_data9);
                  
 
-            //商品规格组合价格表     sm_product_spec_price       smProductSpecPrice未完成
+            //商品规格组合价格表     sm_product_spec_price       SmProductSpecPrice未完成
                 $data7 = [];
                 $data7_result = [];
                 foreach ($post['spec']['price_section'] as $key => $val) {
@@ -256,7 +277,7 @@ class Product extends Base{
                 }
                 if(!empty($data7)){
                     // dump($data7);
-                    $data7_result = model('sm_product_spec_price')->saveAll($data7);
+                    $data7_result = $SmProductSpecPrice->saveAll($data7);
                     if(!$data7_result){
                         $dbCommit = 7; 
                     }
@@ -274,7 +295,7 @@ class Product extends Base{
                 }
                 // dump($data9_plan_param1);
                 foreach ($data4_result as $key => $val) {//更新规格组合表
-                    $data_result9 = model('SmProductSpec')->where(['id'=>$val['id']])->update(['sku_code'=>getSku($val['id']),'spec_set'=>implode(',', $data9_plan_param1[$key])]);
+                    $data_result9 = $SmProductSpec->where(['id'=>$val['id']])->update(['sku_code'=>getSku($val['id']),'spec_set'=>implode(',', $data9_plan_param1[$key])]);
                     // dump(['sku_code'=>getSku($val['id']),'spec_set'=>implode(',', $data9_plan_param1[$key])]);
                     if(!$data_result9){
                         $dbCommit = 8; 
@@ -283,7 +304,7 @@ class Product extends Base{
             }
 
             //商品SPU更新
-                $data_result10 = model('SmProduct')->where(['id'=>$data1_id])->update(['spu_code'=>getSpu($data1_id)]);
+                $data_result10 = $SmProduct->where(['id'=>$data1_id])->update(['spu_code'=>getSpu($data1_id)]);
                 if(!$data_result10){
                     $dbCommit = 9; 
                 }
@@ -301,9 +322,9 @@ class Product extends Base{
                             'is_customized' =>  1,
                             'is_price_neg_at_phone'=>0
                         ]);
-                $data11_result = model('SmProductSpec')->saveAll($data11);
+                $data11_result = $SmProductSpec->saveAll($data11);
                 if($data11_result){
-                    $data11_result_2 = model('SmProductSpec')->where(['id'=>$data11_result[0]['id']])->update(['sku_code'=>getSku($data11_result[0]['id'])]);
+                    $data11_result_2 = $SmProductSpec->where(['id'=>$data11_result[0]['id']])->update(['sku_code'=>getSku($data11_result[0]['id'])]);
                 }
                 if(!$data11_result_2){
                     $dbCommit = 10; 
@@ -315,7 +336,7 @@ class Product extends Base{
                             'max_order_qty' =>  99999999.99,
                             'price'         =>  $post['custom_price']
                         ]);
-                $data12_result =  model('sm_product_spec_price')->data($data12)->save();
+                $data12_result =  $SmProductSpecPrice->data($data12)->save();
                 if(!$data12_result){
                     $dbCommit = 11; 
                 }
@@ -333,7 +354,8 @@ class Product extends Base{
 		}
 		
 		//单位
-        $unitRows = model('MallUnit')->where([])->order('sequence','desc')->field(['id','name'])->select();
+        $MallUnit = new MallUnit();
+        $unitRows = $MallUnit->where([])->order('sequence','desc')->field(['id','name'])->select();
         return view('',['unitRows'=>$unitRows]);
 	}
 
@@ -345,16 +367,28 @@ class Product extends Base{
 	 */
 	public function edit(){
         $id = input('param.id',0,'intval');
+
+        $SmProduct              = new SmProduct();
+        $SmProductGallery       = new SmProductGallery();
+        $SmProductsCategories   = new SmProductsCategories();
+        $SmProductCategory      = new SmProductCategory();
+        $SmProductSpec          = new SmProductSpec();
+        $SmProductSpecAttrKey   = new SmProductSpecAttrKey();
+        $SmProductSpecAttrVal   = new SmProductSpecAttrVal();
+        $SmProductSpecPrice     = new SmProductSpecPrice();
+
         //商品表
-        $row = model('SmProduct')->where(['id'=>$id])->find();
+        $row = $SmProduct->where(['id'=>$id])->find();
+        $row['cover_img_url'] = $SmProduct->getFormatImg($row['cover_img_url']);
         $this->assign('row',$row);  
 
-        $allCategrody = model('SmProductsCategories')->where(['product_id'=>$id])->column('category_id'); 
-        $categorySelected = model('SmProductCategory')->getCategorySelected($allCategrody);
+        $allCategrody = $SmProductsCategories->where(['product_id'=>$id])->column('category_id'); 
+        $categorySelected = $SmProductCategory->getCategorySelected($allCategrody);
         // dump($categorySelected);exit();
         $this->assign('categorySelected',$categorySelected); 
         //单位
-        $unitRows = model('MallUnit')->where([])->order('sequence','desc')->field(['id','name'])->select();
+        $MallUnit = new MallUnit();
+        $unitRows = $MallUnit->where([])->order('sequence','desc')->field(['id','name'])->select();
         return view('',['unitRows'=>$unitRows]);
 	}
 
@@ -366,12 +400,20 @@ class Product extends Base{
 		//获取商品ID
 		$productId = input('param.id',0,'intval');
 
+        $SmProduct = new SmProduct();
+        $SmProductSpec = new SmProductSpec();
+        $SmProductSpecAttrVal = new SmProductSpecAttrVal();
+        $SmProductGallery = new SmProductGallery();
+        $SmProductsCategories = new SmProductsCategories();
+        $SmProductCategory = new SmProductCategory();
+        $IndexArea = new IndexArea();
+
         $where['a.id'] = $productId;
-        $product = model('SmProduct')
+        $product = $SmProduct
                 ->field('a.id,a.spu_code,a.cover_img_url,a.html_content_1,a.html_content_2,a.province_of_origin_id,a.city_of_origin_id,a.district_of_origin_id,a.title,b.nickname as supplier_name')
                 ->alias('a')
                 ->join('jzdc_index_user b','a.supplier_id=b.id','LEFT')->where($where)->find();
-        $product['cover_img_url'] = model('SmProduct')->getFormatImg($product['cover_img_url']);
+        $product['cover_img_url'] = $SmProduct->getFormatImg($product['cover_img_url']);
 
         $rows = [];
         $multiImg = [];
@@ -379,28 +421,28 @@ class Product extends Base{
         $productArea = [];
         if(!empty($product)){
             //规格
-            $rows = model('SmProductSpec')->field('id,sku_code,spec_set,price,unit,is_customized,is_price_neg_at_phone,min_order_qty')->where(['product_id'=>$productId])->select();
+            $rows = $SmProductSpec->field('id,sku_code,spec_set,price,unit,is_customized,is_price_neg_at_phone,min_order_qty')->where(['product_id'=>$productId])->select();
             foreach ($rows as $key => $val) {
-            	$rows[$key]['attr'] = model('SmProductSpecAttrVal')->field('spec_attr_val')->where(['id'=>['in',$val['spec_set']]])->select();
+            	$rows[$key]['attr'] = $SmProductSpecAttrVal->field('spec_attr_val')->where(['id'=>['in',$val['spec_set']]])->select();
             }
 
             //多视角图片
-            $multiImg = model('SmProductGallery')->field('product_image_url')->where(['product_id'=>$productId])->select();
+            $multiImg = $SmProductGallery->field('product_image_url')->where(['product_id'=>$productId])->select();
             foreach ($multiImg as $key => $val) {
-            	$multiImg[$key]['product_image_url'] = model('SmProduct')->getFormatMultiImg($val['product_image_url']);
+            	$multiImg[$key]['product_image_url'] = $SmProduct->getFormatMultiImg($val['product_image_url']);
             }
 
             //对分类进行多层级回显
             ////通过商品ID找出其关联的所有分类
-            $allCategrody = model('SmProductsCategories')->where(['product_id'=>$productId])->column('category_id'); 
-            $categorySelected = model('SmProductCategory')->getCategorySelected($allCategrody);
+            $allCategrody = $SmProductsCategories->where(['product_id'=>$productId])->column('category_id'); 
+            $categorySelected = $SmProductCategory->getCategorySelected($allCategrody);
 
             //产地省市区
             $area = [];
             $area[] = $product['province_of_origin_id'];
             $area[] = $product['city_of_origin_id'];
             $area[] = $product['district_of_origin_id'];
-            $productArea = model('IndexArea')->where(['id'=>['in',$area]])->column('id,name');
+            $productArea = $IndexArea->where(['id'=>['in',$area]])->column('id,name');
         }
         
         $this->assign('product',$product);                        //商品信息
@@ -420,7 +462,7 @@ class Product extends Base{
 		$id   = input('post.id',0,'intval');
 
         //查询是否存在
-        $SmProduct = model('SmProduct');
+        $SmProduct = new SmProduct();
         $data = $SmProduct->where(['id'=>$id])->field('id')->find();
         if(!$data){
         	return $this->errorMsg('100900');
@@ -493,6 +535,10 @@ class Product extends Base{
         $isRecommended = input('get.is_recommended',-1,'intval');
         $categoryId = input('get.category_id',0,'intval');
 
+        $SmProductsCategories = new SmProductsCategories();
+        $SmProductCategory = new SmProductCategory();
+        $SmProduct = new SmProduct();
+        $SmProductSpec = new SmProductSpec();
         //是否删除
         $where['a.is_deleted'] = 0;
         
@@ -513,25 +559,24 @@ class Product extends Base{
         }
         //分类
         if($categoryId>0){
-            $productIds = model('SmProductsCategories')->where(['category_id'=>$categoryId])->column('product_id');
+            $productIds = $SmProductsCategories->where(['category_id'=>$categoryId])->column('product_id');
             $where['a.id'] = ['in',$productIds];
 
             //对分类进行多层级回显
-            $categorySelected = model('SmProductCategory')->getCategorySelected($categoryId);
+            $categorySelected = $SmProductCategory->getCategorySelected($categoryId);
            
            	//categorySelected数组中selectedList选中的值、levelSelectList选中值得同级成员
             $this->assign('categorySelected',$categorySelected);
         }
         
-        $productList = model('SmProduct')
+        $productList = $SmProduct
                 ->field('a.id,a.state,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.nickname as supplier_name,a.is_recommended')
                 ->alias('a')
                 ->join('jzdc_index_user b','a.supplier_id=b.id','LEFT')->where($where)->paginate(20,false,['query'=>request()->param()]);
-        $model_sm_product_spec = model('SmProductSpec');
         foreach ($productList as $key => $val) {
-            $productList[$key]['spec_count'] = $model_sm_product_spec->where(['product_id'=>$val['id']])->count();
+            $productList[$key]['spec_count'] = $SmProductSpec->where(['product_id'=>$val['id']])->count();
             //     $user = $userModel->getInfoById($row->supplier);
-             $productList[$key]['cover_img_url'] = $val->cover_img_url ? model('SmProduct')::getFormatImg($val->cover_img_url) : '';
+             $productList[$key]['cover_img_url'] = $val->cover_img_url ? $SmProduct::getFormatImg($val->cover_img_url) : '';
             //     $row['supplier_name'] = $user ? $user->real_name : '';
         }
 
@@ -554,6 +599,12 @@ class Product extends Base{
         $isRecommended = input('get.is_recommended',-1,'intval');
         $categoryId = input('get.category_id',0,'intval');
 
+        $SmProductsCategories = new SmProductsCategories();
+        $SmProductCategory = new SmProductCategory();
+        $SmProduct = new SmProduct();
+        $SmProductSpec = new SmProductSpec();
+
+
         //是否删除
         $where['a.is_deleted'] = 0;
         
@@ -574,25 +625,24 @@ class Product extends Base{
         }
         //分类
         if($categoryId>0){
-            $productIds = model('SmProductsCategories')->where(['category_id'=>$categoryId])->column('product_id');
+            $productIds = $SmProductsCategories->where(['category_id'=>$categoryId])->column('product_id');
             $where['a.id'] = ['in',$productIds];
 
             //对分类进行多层级回显
-            $categorySelected = model('SmProductCategory')->getCategorySelected($categoryId);
+            $categorySelected = $SmProductCategory->getCategorySelected($categoryId);
            
             //categorySelected数组中selectedList选中的值、levelSelectList选中值得同级成员
             $this->assign('categorySelected',$categorySelected);
         }
         
-        $productList = model('SmProduct')
+        $productList = $SmProduct
                 ->field('a.id,a.state,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.nickname as supplier_name,a.is_recommended')
                 ->alias('a')
                 ->join('jzdc_index_user b','a.supplier_id=b.id','LEFT')->where($where)->paginate(20,false,['query'=>request()->param()]);
-        $model_sm_product_spec = model('SmProductSpec');
         foreach ($productList as $key => $val) {
-            $productList[$key]['spec_count'] = $model_sm_product_spec->where(['product_id'=>$val['id']])->count();
+            $productList[$key]['spec_count'] = $SmProductSpec->where(['product_id'=>$val['id']])->count();
             //     $user = $userModel->getInfoById($row->supplier);
-             $productList[$key]['cover_img_url'] = $val->cover_img_url ? model('SmProduct')::getFormatImg($val->cover_img_url) : '';
+             $productList[$key]['cover_img_url'] = $val->cover_img_url ? $SmProduct::getFormatImg($val->cover_img_url) : '';
             //     $row['supplier_name'] = $user ? $user->real_name : '';
         }
 
@@ -614,6 +664,11 @@ class Product extends Base{
         $supplierId = input('get.supplier_id',0,'intval');
         $isRecommended = input('get.is_recommended',-1,'intval');
         $categoryId = input('get.category_id',0,'intval');
+
+        $SmProductsCategories = new SmProductsCategories();
+        $SmProductCategory = new SmProductCategory();
+        $SmProduct = new SmProduct();
+        $SmProductSpec = new SmProductSpec();
 
         //是否删除
         $where['a.is_deleted'] = 0;
@@ -645,24 +700,23 @@ class Product extends Base{
         }
         //分类
         if($categoryId>0){
-            $productIds = model('SmProductsCategories')->where(['category_id'=>$categoryId])->column('product_id');
+            $productIds = $SmProductsCategories->where(['category_id'=>$categoryId])->column('product_id');
             $where['a.id'] = ['in',$productIds];
 
             //对分类进行多层级回显
-            $categorySelected = model('SmProductCategory')->getCategorySelected($categoryId);
+            $categorySelected = $SmProductCategory->getCategorySelected($categoryId);
            
            	//categorySelected数组中selectedList选中的值、levelSelectList选中值得同级成员
             $this->assign('categorySelected',$categorySelected);
         }
         
-        $productList = model('SmProduct')
+        $productList = $SmProduct
                 ->field('a.id,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.nickname as supplier_name')
                 ->alias('a')
                 ->join('jzdc_index_user b','a.supplier_id=b.id','LEFT')->where($where)->paginate(20,false,['query'=>request()->param()]);
-        $model_sm_product_spec = model('SmProductSpec');
         foreach ($productList as $key => $val) {
-            $productList[$key]['spec_count'] = $model_sm_product_spec->where(['product_id'=>$val['id']])->count();
-            $productList[$key]['cover_img_url'] = $val->cover_img_url ? model('SmProduct')::getFormatImg($val->cover_img_url) : '';
+            $productList[$key]['spec_count'] = $SmProductSpec->where(['product_id'=>$val['id']])->count();
+            $productList[$key]['cover_img_url'] = $val->cover_img_url ? $SmProduct::getFormatImg($val->cover_img_url) : '';
             //     $user = $userModel->getInfoById($row->supplier);
             //     $row['cover_img_url'] = $row->cover_img_url ? model('MallGoods')::getFormatImg($row->cover_img_url) : '';
             //     $row['supplier_name'] = $user ? $user->real_name : '';
@@ -683,7 +737,8 @@ class Product extends Base{
      * @return [type]            [array]
      */
     public function getCategoryNextLevelList($parentId = 0){
-        $list = model('SmProductCategory')->getCategoryIds($parentId);
+        $SmProductCategory = new SmProductCategory();
+        $list = $SmProductCategory->getCategoryIds($parentId);
         return ['status'=>0,'data'=>['list'=>$list]];
     }
 
@@ -693,7 +748,8 @@ class Product extends Base{
      * @return [type]             [description]
      */
     public function getCategoryAttr($categoryId){
-        $list = model('SmCategorySpecAttrKey')->getCategorySpecAttr($categoryId);
+        $SmCategorySpecAttrKey = new SmCategorySpecAttrKey();
+        $list = $SmCategorySpecAttrKey->getCategorySpecAttr($categoryId);
         return ['status'=>0,'data'=>['list'=>$list]];
     }
 
@@ -704,7 +760,8 @@ class Product extends Base{
      * @return [type]            [description]
      */
     public function getAreaNextLevelList($parentId=45067){
-        $list =  model("IndexArea")->getAreaList($parentId);
+        $IndexArea = new IndexArea();
+        $list =  $IndexArea->getAreaList($parentId);
         return ['status'=>0,'data'=>['list'=>$list]];
 
     }
