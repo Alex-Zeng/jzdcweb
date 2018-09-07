@@ -122,7 +122,7 @@ class Index extends Base
             $cateId = substr($categoryRow->path,1,strlen($categoryRow->path)-1);
             $categoryRow = $productCategoryModel->where(['id'=>$cateId])->find();
             //获取子集ID
-            $cateAllId =  $productCategoryModel->getCategoryIds($cateId,true);
+            $cateAllId =  $productCategoryModel->getChildIds($cateId,true);
 
             $productResult =  $typeLists = [];
             $dataProducts = $productModel->where(['category_id'=>['in',$cateAllId],'is_recommended'=>1,'is_deleted'=>0])->order('created_time desc')->limit(8)->field(['id','min_price','max_price','title','is_price_neg_at_phone','cover_img_url'])->select();

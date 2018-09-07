@@ -103,8 +103,7 @@ class Order extends Base{
                     $optionInfo = $optionInfo ? substr($optionInfo,0,strlen($optionInfo)-1) : '';
                 }
                 //根据规格以及购买数量查询对应的价格
-                $price = '0.00';
-
+                $price = $specRow->price;
                 $specNum = isset($detailList['quantity']) ? $detailList['quantity'] : 1;
                 //是否议价
                 if(!$specRow->is_price_neg_at_phone){
@@ -312,6 +311,12 @@ class Order extends Base{
                 }
             }
         }
+
+        //发送邮件通知
+        $emailStr = config('JZDC_OP_EMAIL');
+        $subject='集众电采平台系统订单通知';
+        $content='您好，现有新的订单生成，请及时跟进处理，谢谢。';
+        SendMail($emailStr,$subject,$content);
 
         return ['status'=>0,'data'=>$return,'msg'=>'订单生成成功'];
     }

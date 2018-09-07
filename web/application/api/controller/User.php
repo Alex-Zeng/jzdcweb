@@ -607,6 +607,12 @@ class User extends Base
                 $yunPian->send($userInfo->phone, [], Yunpian::TPL_CERT_SUBMIT);
             }
 
+            //发送邮件通知
+            $emailStr = config('JZDC_OP_EMAIL');
+            $subject='集众电采平台系统认证通知';
+            $content='现有用户提交企业认证申请，请及时跟进，谢谢。';
+            SendMail($emailStr,$subject,$content);
+
             return ['status' => 0, 'data' => [], 'msg' => '已提交认证信息,等待审核...'];
         }
         return ['status' => 1, 'data' => [], 'msg' => '提交审核失败'];

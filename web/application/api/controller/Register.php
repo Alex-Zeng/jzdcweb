@@ -130,6 +130,12 @@ class Register{
             ];
             $jwt = JWT::encode($token,$key);
             $data['token']= $jwt;
+            //发送邮件通知
+            $emailStr = config('JZDC_OP_EMAIL');
+            $subject='集众电采平台系统注册通知';
+            $content='平台有新用户注册，请及时跟进，谢谢';
+            SendMail($emailStr,$subject,$content);
+
             return ['status'=>0,'data'=>$data,'msg'=>''];
         }
         return ['status'=>1,'data'=>[],'msg'=>'注册失败'];
