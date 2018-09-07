@@ -1,8 +1,8 @@
 <?php
 namespace app\common\model;
 
-
 use think\Model;
+use app\common\model\SmCategorySpecAttrOptions;
 
 class SmCategorySpecAttrKey extends Model
 {
@@ -33,7 +33,8 @@ class SmCategorySpecAttrKey extends Model
                 }
             }else{
                 //自行添加的规格值
-                $attrKey[$key]['spec_attr_val'] = model('SmCategorySpecAttrOptions')->where(['category_spec_attr_key_id'=>$val['id'],'is_deleted'=>0])->field('id,spec_option_text')->select();
+                $SmCategorySpecAttrOptions = new SmCategorySpecAttrOptions();
+                $attrKey[$key]['spec_attr_val'] = $SmCategorySpecAttrOptions->where(['category_spec_attr_key_id'=>$val['id'],'is_deleted'=>0])->field('id,spec_option_text')->select();
             }
         }
 
