@@ -474,9 +474,9 @@ class Product extends Base{
                 'supplier_id'           =>$post['supplier_id'],
                 'title'                 =>$post['title'],
                 'cover_img_url'         =>$post['cover_img_url'],
-                'district_of_origin_id' =>$post['district_of_origin_id'],
-                'city_of_origin_id'     =>$post['city_of_origin_id'],
-                'province_of_origin_id' =>$post['province_of_origin_id'],
+                'district_of_origin_id' =>isset($post['district_of_origin_id'])?$post['district_of_origin_id']:0,
+                'city_of_origin_id'     =>isset($post['city_of_origin_id'])?$post['city_of_origin_id']:0,
+                'province_of_origin_id' =>isset($post['province_of_origin_id'])?$post['province_of_origin_id']:0,
                 'html_content_1'        =>$post['html_content_1'],
                 'html_content_2'        =>$post['html_content_2'],
                 'audit_state'           =>$post['audit_state'],
@@ -537,17 +537,19 @@ class Product extends Base{
                     }
                 }
             }
-            foreach ($post['update_category_id'] as $key => $val) {//更新
-                if($key!=$val && $val!=0){
-                    $data3_update = ['product_id'=>$product_id,'category_id'=>$val];
-                    if($SmProductsCategories->where($data3_update)->count()==0){
-                        $data3_result_update = $SmProductsCategories->where(['product_id'=>$product_id,'category_id'=>$key])->update(['category_id'=>$val]);
-                        if(!$data3_result_update){
-                            Db::rollback(); 
-                            return $this->errorMsg('101211',['replace'=>['__REPLACE__'=>'data3_result_update']]);
+            if(isset($post['update_category_id'])){//更新
+                foreach ($post['update_category_id'] as $key => $val) {
+                    if($key!=$val && $val!=0){
+                        $data3_update = ['product_id'=>$product_id,'category_id'=>$val];
+                        if($SmProductsCategories->where($data3_update)->count()==0){
+                            $data3_result_update = $SmProductsCategories->where(['product_id'=>$product_id,'category_id'=>$key])->update(['category_id'=>$val]);
+                            if(!$data3_result_update){
+                                Db::rollback(); 
+                                return $this->errorMsg('101211',['replace'=>['__REPLACE__'=>'data3_result_update']]);
+                            }
+                        }else{
+                            return $this->errorMsg('101212');
                         }
-                    }else{
-                        return $this->errorMsg('101212');
                     }
                 }
             }
