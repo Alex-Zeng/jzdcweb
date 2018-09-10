@@ -1040,7 +1040,7 @@ class Product extends Base{
             $where['a.id'] = ['in',$productIds];
 
             //对分类进行多层级回显
-            $categorySelected = $SmProductCategory->getCategorySelected($categoryId);
+            $categorySelected = $SmProductCategory->getCategorySelected([$categoryId]);
            
            	//categorySelected数组中selectedList选中的值、levelSelectList选中值得同级成员
             $this->assign('categorySelected',$categorySelected);
@@ -1106,7 +1106,7 @@ class Product extends Base{
             $where['a.id'] = ['in',$productIds];
 
             //对分类进行多层级回显
-            $categorySelected = $SmProductCategory->getCategorySelected($categoryId);
+            $categorySelected = $SmProductCategory->getCategorySelected([$categoryId]);
            
             //categorySelected数组中selectedList选中的值、levelSelectList选中值得同级成员
             $this->assign('categorySelected',$categorySelected);
@@ -1181,7 +1181,7 @@ class Product extends Base{
             $where['a.id'] = ['in',$productIds];
 
             //对分类进行多层级回显
-            $categorySelected = $SmProductCategory->getCategorySelected($categoryId);
+            $categorySelected = $SmProductCategory->getCategorySelected([$categoryId]);
            
            	//categorySelected数组中selectedList选中的值、levelSelectList选中值得同级成员
             $this->assign('categorySelected',$categorySelected);
