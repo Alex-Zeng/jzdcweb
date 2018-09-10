@@ -480,6 +480,7 @@ class Product extends Base{
                 'html_content_1'        =>$post['html_content_1'],
                 'html_content_2'        =>$post['html_content_2'],
                 'audit_state'           =>$post['audit_state'],
+                'state'                 =>  2
             ];
             $data1_result = $SmProduct->where(['id'=>$product_id])->update(array_merge($updateDefault,$data1));
 
