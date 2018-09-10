@@ -153,15 +153,15 @@ class Factoring extends Base {
         $IndexUser = new IndexUser();
         $user = $IndexUser->field('real_name')->where(['id'=>$userId])->find();
         $factoringDetail = [
-            'loanAccount'   =>$data->loan_account?$data->loan_account:'0.00',
-            'stateName'     =>$FmFactoring->getStateName($data->state),
-            'needAccount'   =>$data->need_account?$data->need_account:'0.00',
+            'loanAccount'   =>isset($data->loan_account)?$data->loan_account:'0.00',
+            'stateName'     =>isset($data->state)?$FmFactoring->getStateName($data->state):'',
+            'needAccount'   =>isset($data->need_account)?$data->need_account:'0.00',
             'dataTime'      =>isset($data->add_time)?date('Y-m-d H:i:s',$data->add_time):'',
-            'contactUsername'=>$data->contact_username?$data->contact_username:'',
-            'contactphone'  =>$data->contact_phone?$data->contact_phone:'',
-            'name'          =>$user->real_name?$user->real_name:'',
-            'bankCorporate' =>$data->bank_corporate?$data->bank_corporate:'',
-            'bankAddress'   =>$data->bank_address?$data->bank_address:''
+            'contactUsername'=>isset($data->contact_username)?$data->contact_username:'',
+            'contactphone'  =>isset($data->contact_phone)?$data->contact_phone:'',
+            'name'          =>isset($user->real_name)?$user->real_name:'',
+            'bankCorporate' =>isset($data->bank_corporate)?$data->bank_corporate:'',
+            'bankAddress'   =>isset($data->bank_address)?$data->bank_address:''
         ];
         return ['status'=>0,'data'=>['factoringDetail'=>$factoringDetail],'msg'=>'详情数据'];
     }
