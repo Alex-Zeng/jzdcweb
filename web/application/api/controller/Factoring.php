@@ -1,9 +1,10 @@
 <?php
-/**
- * User huangjiahui
- * Date 2018/07/26
- */
 namespace app\api\controller;
+
+use app\common\model\FmFactoring;
+use app\common\model\IndexUser;
+use app\common\model\IndexGroup;
+use app\common\model\MallOrder;
 
 class Factoring extends Base {
 
@@ -15,7 +16,8 @@ class Factoring extends Base {
 			return $auth;
 		}
   		$userId = $this->userId;
-        $data = db('index_user')->field('real_name as name')->where(['id'=>$userId])->find();
+        $IndexUser = new IndexUser();
+        $data = $IndexUser->field('real_name as name')->where(['id'=>$userId])->find();
         if(!$data){
         	$data['real_name'] = '';
         }
@@ -32,15 +34,14 @@ class Factoring extends Base {
 		}
 		$userId = $this->userId;
 		$groupId = $this->groupId;
-		$indexGroup = model('IndexGroup');
 		switch ($groupId) {
-			case $indexGroup::GROUP_BUYER:
+			case IndexGroup::GROUP_BUYER:
 				$dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','4,13'],'buyer_id'=>$userId])->order('id desc')->select();
 		        if(!$dataList){
 		        	$dataList = [];
 		        }
 				break;
-			case $indexGroup::GROUP_SUPPLIER:
+			case IndexGroup::GROUP_SUPPLIER:
 				$dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','4,13'],'supplier'=>$userId])->order('id desc')->select();
 		        if(!$dataList){
 		        	$dataList = [];
@@ -77,14 +78,13 @@ class Factoring extends Base {
             return ['status'=>-2,'data'=>'','msg'=>$result];
         }
 
-        $indexGroup = model('IndexGroup');
-        $mallOrder = db('mall_order');
+        $MallOrder = new MallOrder();
 		switch ($groupId) {
-			case $indexGroup::GROUP_BUYER:
-				$order = $mallOrder->field('out_id,actual_money')->where(['state'=>['not in','4,13'],'buyer_id'=>$userId,'id'=>$data['order_id']])->order('id desc')->find();
+			case IndexGroup::GROUP_BUYER:
+				$order = $MallOrder->field('out_id,actual_money')->where(['state'=>['not in','4,13'],'buyer_id'=>$userId,'id'=>$data['order_id']])->order('id desc')->find();
 				break;
-			case $indexGroup::GROUP_SUPPLIER:
-				$order = $mallOrder->field('out_id,actual_money')->where(['state'=>['not in','4,13'],'supplier'=>$userId,'id'=>$data['order_id']])->order('id desc')->find();
+			case IndexGroup::GROUP_SUPPLIER:
+				$order = $MallOrder->field('out_id,actual_money')->where(['state'=>['not in','4,13'],'supplier'=>$userId,'id'=>$data['order_id']])->order('id desc')->find();
 				break;
 			default:
 				$order = '';
@@ -103,8 +103,10 @@ class Factoring extends Base {
         $data['order_sn'] = $order['out_id'];
         $data['add_time'] = time();
         $data['user_id'] = $userId;
+        $data['state']  = 1;
 
-        if(db('factoring')->insert($data)){
+        $FmFactoring = new FmFactoring();
+        if($FmFactoring->data($data)->save()){
             return ['status'=>0,'data'=>'','msg'=>'申请提交成功'];
         }else{
             return ['status'=>-2,'data'=>'','msg'=>'申请提交失败'];
@@ -120,16 +122,48 @@ class Factoring extends Base {
         }
         $userId = $this->userId;
         
-    	$data = db('factoring')->field('add_time,order_sn,need_account')->order('factoring_id desc')->where(['user_id'=>$userId])->select();
+        $FmFactoring = new FmFactoring();
+    	$data = $FmFactoring->field('factoring_id,add_time,order_sn,need_account,state,loan_account')->order('factoring_id desc')->where(['user_id'=>$userId])->select();
 		$factoringList = [];
 		$dt = [];
 		foreach ($data as $key => $value) {
-			$dt['dataTime'] = date('Y-m-d H:i:s',$value['add_time']); 
-			$dt['orderSn'] = $value['order_sn']; 
-			$dt['needAccount'] = $value['need_account']; 
-			$factoringList[] = $dt;
+            $dt['factoringId'] = $value['factoring_id'];
+			$dt['dataTime']     = date('Y-m-d H:i:s',$value['add_time']); 
+			$dt['orderSn']      = $value['order_sn']; 
+            $dt['needAccount']  = $value['need_account'];  
+            $dt['stateName']    = $FmFactoring->getStateName($value['state']); 
+			$dt['loanAccount'] = $value['loan_account']; 
+			$factoringList[]    = $dt;
 		}
-		return ['status'=>0,'data'=>['factoringList'=>$factoringList],'msg'=>'申请提交成功'];
+		return ['status'=>0,'data'=>['factoringList'=>$factoringList],'msg'=>'列表数据'];
+    }
+
+    //获取保理业务详情
+    public function getFactoringDetail(){
+        //验证登录
+        $auth = $this->auth();
+        if($auth){
+         return $auth;
+        }
+        $userId = $this->userId;
+
+        $factoring_id = input('post.factoringId',0,'intval');
+        $FmFactoring = new FmFactoring();
+        $data = $FmFactoring->field('need_account,add_time,order_sn,contact_username,contact_phone,state,loan_account,bank_corporate,bank_address')->where(['user_id'=>$userId,'factoring_id'=>$factoring_id])->find();
+        $IndexUser = new IndexUser();
+        $user = $IndexUser->field('real_name')->where(['id'=>$userId])->find();
+        $factoringDetail = [
+            'loanAccount'   =>$data->loan_account?$data->loan_account:'0.00',
+            'stateName'     =>$FmFactoring->getStateName($data->state),
+            'needAccount'   =>$data->need_account?$data->need_account:'0.00',
+            'dataTime'      =>isset($data->add_time)?date('Y-m-d H:i:s',$data->add_time):'',
+            'contactUsername'=>$data->contact_username?$data->contact_username:'',
+            'contactphone'  =>$data->contact_phone?$data->contact_phone:'',
+            'name'          =>$user->real_name?$user->real_name:'',
+            'bankCorporate' =>$data->bank_corporate?$data->bank_corporate:'',
+            'bankAddress'   =>$data->bank_address?$data->bank_address:''
+        ];
+        return ['status'=>0,'data'=>['factoringDetail'=>$factoringDetail],'msg'=>'详情数据'];
     }
 
 
