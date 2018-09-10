@@ -360,7 +360,7 @@ class Goods  extends Base {
             foreach ($valRows as  $valRow){
                 $valList[] = [
                   "specAttrValId" => $valRow->id,
-                  "specAttrVal" => $valRow->spec_attr_val,
+                  "specAttrVal" => $valRow->spec_attr_val ? $valRow->spec_attr_val : '规格二',   //规格一存在
                   "isCustom" => 0,
                 ];
             }

@@ -133,6 +133,7 @@ class Order extends Base{
                     'materialSpec' => $detailList['materialSpec'], //物料规格
                     'optionInfo' => $optionInfo,
                     'icon'=>$specRow->spec_img_url,
+                    'iconPath' =>$specRow->spec_img_url ? SmProductSpec::getFormatImg($specRow->spec_img_url) : SmProduct::getFormatImg($product->cover_img_url),
                     'specId' => $detailList['specId'],
                     'isDiscussPrice' => $specRow->is_price_neg_at_phone   //是否议价
                 ];
@@ -156,6 +157,7 @@ class Order extends Base{
                 'materialSpec' => $row['materialSpec'],
                 'specificationsInfo' => $row['optionInfo'],
                 'icon' =>$row['icon'],
+                'iconPath' => $row['iconPath'],
                 'isDiscussPrice' => $row['isDiscussPrice']
             ];
         }
@@ -273,7 +275,7 @@ class Order extends Base{
                         'price' => $goodsList['price'],
                         'unit' => $goodsList['unit'],
                         'materialCode' => $goodsList['materialCode'],
-                        'icon' => MallGoods::getFormatImg($goodsList['icon']),
+                        'icon' => $goodsList['iconPath'],
                         'materialSpec' => $goodsList['materialSpec'],
                         'specificationsInfo' => $goodsList['specificationsInfo'],
                     ];
@@ -435,14 +437,17 @@ class Order extends Base{
             }
             $row['companyName']  = $userInfo ? $userInfo->real_name : '';
             $row['groupId'] = $this->groupId;
-            $row['money'] = $row->actual_money;
+            $row['money'] = getFormatPrice($row->actual_money);
             $row['orderDate'] = date('Y-m-d H:i:s',$row->add_time);
 
-            $goodsRows = $orderGoodsModel->alias('a')->join(['sm_product'=>'b'],'a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.cover_img_url','a.s_info'])->select();
+            $goodsRows = $orderGoodsModel->alias('a')
+                ->join(['sm_product'=>'b'],'a.goods_id=b.id','left')
+                ->join(['sm_product_spec' => 'c'],'a.product_spec_id=c.id','left')
+                ->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.cover_img_url','a.s_info','c.spec_img_url'])->select();
 
             foreach($goodsRows as &$goodsRow){
                 $goodsRow['quantity'] = intval($goodsRow->quantity);
-                $goodsRow['icon'] = SmProduct::getFormatImg($goodsRow->cover_img_url);
+                $goodsRow['icon'] = $goodsRow->spec_img_url ? SmProductSpec::getFormatImg($goodsRow->spec_img_url) : SmProduct::getFormatImg($goodsRow->cover_img_url);
                 $goodsRow['price'] = getFormatPrice($goodsRow->price);
             }
             $row['goods'] = $goodsRows;

@@ -92,7 +92,7 @@ class SpecCategory extends Base{
                     $exit = $model->where(['category_id'=>$categoryId,'is_standard'=>1,'is_deleted'=>0])->find();
                     if($exit){ //更新
                     }else{  //添加
-                        $data = ['category_id'=>$categoryId,'spec_attr_key'=>'颜色','is_standard'=>1,'created_user_id'=>$userId,'created_user'=>$userInfo ? $userInfo->username : '','created_time'=>time()];
+                        $data = ['category_id'=>$categoryId,'spec_attr_key'=>'规格','is_standard'=>1,'created_user_id'=>$userId,'created_user'=>$userInfo ? $userInfo->username : '','created_time'=>time()];
                         $result = $model->save($data);
                     }
                 }else{ //禁用
