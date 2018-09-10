@@ -11,7 +11,9 @@ namespace app\api\controller;
 
 
 use app\common\model\SmProduct;
+use app\common\model\SmProductSpec;
 use app\common\model\SmProductSpecAttrVal;
+use app\common\model\UserGoodsSpecifications;
 use think\Request;
 
 class Material extends Base{
@@ -78,7 +80,7 @@ class Material extends Base{
             $where['a.specifications_no|a.specifications_name|c.title'] = ['like','%'.$keyword.'%'];
         }
 
-        $field = ['a.id','a.specifications_no','a.specifications_name','a.product_spec_id','b.sku_code','b.spec_set','b.is_customized','b.min_order_qty','c.title'];
+        $field = ['a.id','a.specifications_no','a.specifications_name','a.product_spec_id','b.sku_code','b.spec_set','b.is_customized','b.spec_img_url','b.min_order_qty','c.title','c.cover_img_url'];
         $total = $model->alias('a')
             ->join(['sm_product_spec' => 'b'],'a.product_spec_id = b.id','left')
             ->join(['sm_product' => 'c'],'b.product_id=c.id','left')
@@ -107,18 +109,89 @@ class Material extends Base{
             }
 
             $list[] = [
-              'materialId' => $row->id,
-               'specId' => $row->product_spec_id,
-              'materialCode' => $row->specifications_no,
-              'materialSpec' => $row->specifications_name,
-              'title' => $row->title,
-              'minOrderQty' => $row->min_order_qty,
-              'specInfo' => $specInfo
+                'materialId' => $row->id,
+                'specId' => $row->product_spec_id,
+                'materialCode' => $row->specifications_no,
+                'materialSpec' => $row->specifications_name,
+                'title' => $row->title,
+                'minOrderQty' => $row->min_order_qty,
+                'specInfo' => $specInfo,
+                'imgUrl' => $row->spec_img_url ? SmProductSpec::getFormatImg($row->spec_img_url) : SmProduct::getFormatImg($row->cover_img_url)
             ];
-
         }
 
         return ['status'=>0,'data'=>['total'=> $total,'list'=>$list],'msg'=>''];
+    }
+
+
+    /**
+     * @desc 修改物料
+     * @param Request $request
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function edit(Request $request){
+        $materialId = $request->post('materialId',0,'intval');
+        $materialCode = $request->post('materialCode','','trim');
+        $materialSpec = $request->post('materialSpec','','trim');
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        //验证数据
+        if(!$materialCode){
+            return ['status'=>1,'data'=>[],'msg'=>'物料编号必须填写'];
+        }
+        if(strlen($materialCode) > 30){
+            return ['status'=>1,'data'=>[],'msg'=>'物料编号最多30个字'];
+        }
+        if(strlen($materialSpec) > 40){
+            return ['status'=>1,'data'=>[],'msg'=>'物料规格最多40个字'];
+        }
+        $model = new UserGoodsSpecifications();
+        //验证数据是否存在
+        $row = $model->where(['id'=>$materialId])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'物料编号规格不存在'];
+        }
+
+        $result = $model->save(['specifications_no'=>$materialCode,'specifications_name'=>$materialSpec,'update_time'=>time()],['id'=>$materialId]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'修改失败'];
+    }
+
+    /**
+     * @desc 删除物料
+     * @param Request $request
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function delete(Request $request){
+        $materialId = $request->post('materialId',0,'intval');
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        $model = new UserGoodsSpecifications();
+        //验证数据是否存在
+        $row = $model->where(['id'=>$materialId])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'物料编号规格不存在'];
+        }
+
+        $result = $model->where(['id'=>$materialId])->delete();
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'物料编号规格删除成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'物料编号规格删除失败'];
     }
 
 }
