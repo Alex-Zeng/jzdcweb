@@ -704,6 +704,10 @@ class Goods  extends Base {
         $materialCode = $request->post('materialCode','','trim');
         $materialSpec = $request->post('materialSpec','','trim');
         //验证
+        if(!$materialCode){
+            return ['status'=>1,'data'=>[],'msg'=>'物料编号必须填写'];
+        }
+
         $productModel = new SmProduct();
         $productSpecModel = new SmProductSpec();
 
