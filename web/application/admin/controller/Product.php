@@ -420,9 +420,11 @@ class Product extends Base{
             //是否重复
             if(isset($post['spec']['category'])){
                 if(isset($post['update_spec']['category'])){
-                    $post['spec']['category'] = array_merge_recursive($post['spec']['category'],$post['update_spec']['category']);
+                    $post_spec_category = array_merge_recursive($post['spec']['category'],$post['update_spec']['category']);
+                }else{
+                     $post_spec_category = $post['spec']['category'];
                 }
-                foreach ($post['spec']['category'] as $key => $val) {
+                foreach ($post_spec_category as $key => $val) {
                     if(max($val)!=-1 && min($val)==-1){
                         $msg = explode('_', $key);
                         $line = array_flip($val);
@@ -430,11 +432,11 @@ class Product extends Base{
                     }
                 }
                 //是否未有规格组合但未任何选择、是否有组合规格是一模一样的
-                $checkCategoryEqual = array_keys($post['spec']['category']);
+                $checkCategoryEqual = array_keys($post_spec_category);
                 foreach ($checkCategoryEqual as $k => $v) {
-                    for ($i=0; $i <count($post['spec']['category'][$checkCategoryEqual[0]]) ; $i++) { 
+                    for ($i=0; $i <count($post_spec_category[$checkCategoryEqual[0]]) ; $i++) { 
                         $checkVal[$i] = isset($checkVal[$i])?$checkVal[$i]:'';
-                        $checkVal[$i]  =  $checkVal[$i].'|'. $post['spec']['category'][$v][$i];
+                        $checkVal[$i]  =  $checkVal[$i].'|'. $post_spec_category[$v][$i];
                     }
                 }
                 foreach ($checkVal as $key => $val) {
@@ -555,7 +557,8 @@ class Product extends Base{
             }
 
             //商品规格新增
-            if(isset($post['spec']['category'])){    
+            if(isset($post['spec']['category'])){
+             
                 //商品规格组合表       sm_product_spec             SmProductSpec 
                     $data4 = [];//sku_code spec_set未插入
                     $data4_result = [];
@@ -583,18 +586,24 @@ class Product extends Base{
                     $data5_result = [];
                     foreach ($post['spec']['category'] as $key => $val) {
                         $category_spec_attr_key_val = explode('_', $key);
-                        $data5[] = array_merge($createDefault,[
+                        //查询是否存在
+                        if($SmProductSpecAttrKey->where(['product_id'=>$product_id,'category_spec_attr_key_id'=>$category_spec_attr_key_val[0],'is_deleted'=>0])->count()==0){
+                            $data5[] = array_merge($createDefault,[
                                 'product_id'                =>$product_id,
                                 'category_spec_attr_key_id' =>$category_spec_attr_key_val[0],
                                 'spec_attr_key'             =>$category_spec_attr_key_val[1]
                             ]);
+                        }
                     }
+                    if(count($data5)>0){
+                        $data5_result = $SmProductSpecAttrKey->saveAll($data5);//这个不是所有的规格明细所以要重新查
+                        if(!$data5_result){
+                            Db::rollback(); 
+                            return $this->errorMsg('101211',['replace'=>['__REPLACE__'=>'data5_result']]); 
+                        }
+                    }
+                    $data5_result = $SmProductSpecAttrKey->where(['product_id'=>$product_id,'is_deleted'=>0])->select();//由于上面的仅是插入新增的所以所有的规格明细要重新查
 
-                    $data5_result = $SmProductSpecAttrKey->saveAll($data5);
-                    if(!$data5_result){
-                        Db::rollback(); 
-                        return $this->errorMsg('101211',['replace'=>['__REPLACE__'=>'data5_result']]); 
-                    }
                    
                 //ok商品规格明细属性表     sm_product_spec_attr_val    smProductSpecAttrVal
                     $data6 = [];
@@ -607,22 +616,33 @@ class Product extends Base{
                     }
                     foreach ($data5_result as $k => $v) {//获取规格明细ID插入到规格明细属性值表一对多
                         foreach ($data6_plan_param0[$v['category_spec_attr_key_id'].'_'.$v['spec_attr_key']] as $kk => $vv) {
-                            $data6[] = array_merge($createDefault,[
-                                'spec_attr_key_id'  => $v['id'],
-                                'spec_attr_val'     => $vv,
-                            ]);
-                            $data6_plan_param1[] = $v['category_spec_attr_key_id'].'_'.$v['spec_attr_key'].'|'.$vv;// 8_颜色|红色
+                            if($SmProductSpecAttrVal->where(['spec_attr_key_id'=>$v['id'],'spec_attr_val'=>$vv,'is_deleted'=>0])->count()==0){
+                                $data6[] = array_merge($createDefault,[
+                                    'spec_attr_key_id'  => $v['id'],
+                                    'spec_attr_val'     => $vv,
+                                ]);
+                            }
+                            // $data6_plan_param1[] = $v['category_spec_attr_key_id'].'_'.$v['spec_attr_key'].'|'.$vv;// 8_颜色|红色
                         }
                     }
-                    $data6_result = $SmProductSpecAttrVal->saveAll($data6); 
-                    foreach ($data6_result as $key => $val) { //8_颜色|红色 => id
-                        $data6_plan_param2_data9[$data6_plan_param1[$key]] = $val['id'];
+                    if(count($data6)>0){
+                        $data6_result = $SmProductSpecAttrVal->saveAll($data6); 
+                        if(!$data6_result){
+                            Db::rollback(); 
+                            return $this->errorMsg('101211',['replace'=>['__REPLACE__'=>'data6_result']]);
+                        }
                     }
-                    if(!$data6_result){
-                        Db::rollback(); 
-                        return $this->errorMsg('101211',['replace'=>['__REPLACE__'=>'data6_result']]);
+                    foreach ($data5_result as $k => $v) {
+                        $data6_result = $SmProductSpecAttrVal->where(['spec_attr_key_id'=>$v['id'],'is_deleted'=>0])->select();
+                        foreach ($data6_result as $kk => $vv) {
+                            $data6_plan_param2_data9[$v['category_spec_attr_key_id'].'_'.$v['spec_attr_key'].'|'.$vv['spec_attr_val']] = $vv['id'];
+                        }
                     }
-                     
+                    // foreach ($data6_result as $key => $val) { //8_颜色|红色 => id
+                    //     $data6_plan_param2_data9[$data6_plan_param1[$key]] = $val['id'];
+                    // }
+                    
+                     // dump($data6_plan_param2_data9) ;exit();  
 
                 //商品规格组合价格表     sm_product_spec_price       SmProductSpecPrice未完成
                     $data7 = [];
