@@ -985,7 +985,7 @@ class Product extends Base{
 		                $auditState = SmProduct::AUDIT_PENDING;
 		                break;
 				}
-				$update = array_merge($SmProduct->filedDefaultValue('update'),['audit_state'=>$auditState]);
+				$update = array_merge($SmProduct->filedDefaultValue('update'),['state'=>1,'audit_state'=>$auditState]);
 				$where['audit_state'] = SmProduct::AUDIT_PENDING; 
 				$msg = '审核';
 				break;
@@ -1047,9 +1047,9 @@ class Product extends Base{
         }
         
         $productList = $SmProduct
-                ->field('a.id,a.state,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.nickname as supplier_name,a.is_recommended')
+                ->field('a.id,a.state,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.real_name as supplier_name,a.is_recommended')
                 ->alias('a')
-                ->join('jzdc_index_user b','a.supplier_id=b.id','LEFT')->where($where)->paginate(20,false,['query'=>request()->param()]);
+                ->join('jzdc_index_user b','a.supplier_id=b.id','LEFT')->where($where)->order('id desc')->paginate(20,false,['query'=>request()->param()]);
         foreach ($productList as $key => $val) {
             $productList[$key]['spec_count'] = $SmProductSpec->where(['product_id'=>$val['id']])->count();
             //     $user = $userModel->getInfoById($row->supplier);
@@ -1113,9 +1113,9 @@ class Product extends Base{
         }
         
         $productList = $SmProduct
-                ->field('a.id,a.state,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.nickname as supplier_name,a.is_recommended')
+                ->field('a.id,a.state,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.real_name as supplier_name,a.is_recommended')
                 ->alias('a')
-                ->join('jzdc_index_user b','a.supplier_id=b.id','LEFT')->where($where)->paginate(20,false,['query'=>request()->param()]);
+                ->join('jzdc_index_user b','a.supplier_id=b.id','LEFT')->where($where)->order('id desc')->paginate(20,false,['query'=>request()->param()]);
         foreach ($productList as $key => $val) {
             $productList[$key]['spec_count'] = $SmProductSpec->where(['product_id'=>$val['id']])->count();
             //     $user = $userModel->getInfoById($row->supplier);
@@ -1188,9 +1188,9 @@ class Product extends Base{
         }
         
         $productList = $SmProduct
-                ->field('a.id,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.nickname as supplier_name')
+                ->field('a.id,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.real_name as supplier_name')
                 ->alias('a')
-                ->join('jzdc_index_user b','a.supplier_id=b.id','LEFT')->where($where)->paginate(20,false,['query'=>request()->param()]);
+                ->join('jzdc_index_user b','a.supplier_id=b.id','LEFT')->where($where)->order('id desc')->paginate(20,false,['query'=>request()->param()]);
         foreach ($productList as $key => $val) {
             $productList[$key]['spec_count'] = $SmProductSpec->where(['product_id'=>$val['id']])->count();
             $productList[$key]['cover_img_url'] = $val->cover_img_url ? $SmProduct::getFormatImg($val->cover_img_url) : '';
