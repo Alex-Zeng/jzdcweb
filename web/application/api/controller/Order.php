@@ -297,15 +297,18 @@ class Order extends Base{
 
                     //保存用户最后一次商品规格物料并删除购物车
                     foreach ($order['list'] as $list) {
-                        $specificationsWhere = ['user_id' => $this->userId, 'goods_id' => $list['goods_id'], 'product_spec_id' => $list['specId']];
-                        $exist = $userGoodSpecificationsModel->where($specificationsWhere)->find();
-                        if ($exist) {
-                            $userGoodSpecificationsModel->save(['specifications_no' => $list['materialCode'], 'specifications_name' => $list['materialSpec'], 'update_time' => time()], $specificationsWhere);
-                        } else {
-                            $specificationsWhere['specifications_no'] = $list['materialCode'];
-                            $specificationsWhere['specifications_name'] = $list['materialSpec'];
-                            $specificationsWhere['create_time'] = time();
-                            $userGoodSpecificationsModel->save($specificationsWhere);
+                        if($list['materialCode']){
+                            $specificationsWhere = ['user_id' => $this->userId, 'goods_id' => $list['goods_id'], 'product_spec_id' => $list['specId']];
+                            $exist = $userGoodSpecificationsModel->where($specificationsWhere)->find();
+                            if ($exist) {
+                                $userGoodSpecificationsModel->save(['specifications_no' => $list['materialCode'], 'specifications_name' => $list['materialSpec'], 'update_time' => time()], $specificationsWhere);
+                            } else {
+                                $specificationsWhere['specifications_no'] = $list['materialCode'];
+                                $specificationsWhere['specifications_name'] = $list['materialSpec'];
+                                $specificationsWhere['create_time'] = time();
+                                $specificationsWhere['update_time'] = time();
+                                $userGoodSpecificationsModel->save($specificationsWhere);
+                            }
                         }
                         //删除购物清单 同步操作,
                         $cartModel->where(['user_id' => $this->userId, 'goods_id' => $list['goods_id'], 'product_spec_id' => $list['specId']])->delete();
@@ -455,6 +458,8 @@ class Order extends Base{
             $row['statusMsg'] = getOrderMsg($this->groupId,$row->state,$row->service_type,$queryStatus);
             $row['cancelType'] = $this->groupId && ($row->state == 1 || $row->state == 0)   ? 1 : 0;
             $row['confirmType'] = ($this->groupId == IndexGroup::GROUP_BUYER)&& ($row->state == 6) && ($row->service_type == 0 || $row->service_type == 2) ? 1 : 0;
+            $row['actual_money'] = getFormatPrice($row->actual_money);
+            $row['goods_money'] = getFormatPrice($row->goods_money);
             unset($row->add_time);
         }
 
