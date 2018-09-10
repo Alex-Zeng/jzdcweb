@@ -107,6 +107,8 @@ class Order extends Base{
             $row['buyerName'] = $buyerInfo ? $buyerInfo->real_name : '';
             $row['buyerPayInfo'] = $buyerPayInfo;
             $row['supplierPayInfo'] = $supplierPayInfo;
+
+            $row['sum_money'] = getFormatPrice($row->sum_money);
         }
 
         $this->assign('list',$rows);
