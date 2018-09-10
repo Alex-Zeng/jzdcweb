@@ -574,7 +574,7 @@
     <tr data-id="{{goods.id}}">
         <td><img src="{{ goods.iconPath}}"  width="45px" /> {{goods.title}}</td><td>{{goods.s_info}}</td>
         <td>
-            <input type="number" min="0.0000"  placeholder="0.0000"  name="goods[{{goods.id}}][price]"   step="0.001"  value="{{goods.price}}" class="form-control price" />
+            <input type="number" min="0.0000"  placeholder="0.0000"  name="goods[{{goods.id}}][price]"   step="0.0001"  value="{{goods.price}}" class="form-control price" />
             <code class="error" style="color:#a94442;"></code>
         </td>
         <td><input type="number" min="1" class="form-control quantity"  name="goods[{{goods.id}}][quantity]"  step="1"  value="{{goods.quantity}}" /></td>
@@ -1043,9 +1043,9 @@
         $("#adjust-price-body").find('tr>td>.price').each(function () {
             //获取每一个对象
             var price = $(this).val();
-            var re = /^([0-9]*)+(.[0-9]{1,3})?$/
+            var re = /^([0-9]*)+(.[0-9]{1,4})?$/
             if(!re.test(price)){
-                $(this).closest('td').find('code').html('请填写正确格式或三位小数');
+                $(this).closest('td').find('code').html('请填写正确格式或四位小数');
                 validate = false;
             }
         });

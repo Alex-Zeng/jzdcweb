@@ -14,7 +14,7 @@ class SmProductSpec extends Model{
      * @return string
      */
     public static function getFormatImg($img){
-        return $img ? config('jzdc_doc_path').'/goods_thumb/'.$img : '';
+        return $img ? config('jzdc_doc_path').'/goods/'.$img : '';
     }
 	
 }  
