@@ -3,6 +3,7 @@ namespace app\common\model;
 
 use think\Model;
 use app\common\model\SmCategorySpecAttrOptions;
+use app\common\model\MallColor;
 
 class SmCategorySpecAttrKey extends Model
 {
@@ -21,7 +22,8 @@ class SmCategorySpecAttrKey extends Model
                 //系统统一添加的规格值
                 switch ($val['spec_attr_key']) {
                     case '颜色':
-                        $colorAttrVal = model('MallColor')->field('id,name as spec_option_text')->select();
+                        $MallColor = new MallColor();
+                        $colorAttrVal = $MallColor->field('id,name as spec_option_text')->select();
                         foreach ($colorAttrVal as $k => $v) {
                             $colorAttrVal[$k]['img'] = config('jzdc_doc_path').'../static/img/color_icon/'.$v['id'].'.png';
                         }

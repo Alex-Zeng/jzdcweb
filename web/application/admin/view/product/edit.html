@@ -45,20 +45,31 @@
                                 <div class="form-inline form-group ajax-bind-change">
                                     <label for="" class="col-md-2">*所属类目</label>
                                     <div class="col-md-9 no-padding">
+                                        <div id="js_category_delete"></div>
                                         <div id="category-template-box">
                                             {notempty name="categorySelected"}
                                                 {php}
+                                                    $seleteed = [];
                                                     foreach ($categorySelected['selectedList'] as $k =>$v){
-                                                        echo '<div class="row category-box">';
+                                                        if($k==0){
+                                                            echo '<div class="row category-box">';
+                                                        }else{
+                                                            echo '<div class="row category-box" style="margin-top: 10px;">';
+                                                        }
                                                         foreach ($v as $kk =>$vv){
                                                             if($kk=='level'){
                                                                 echo '<div class="select-level-div">';
                                                             }else{
                                                                 echo '<span class="select-level-div">';
                                                             }
-                                                            echo '<select class="form-control select-level"><option  value="0">请选择</option>';
+                                                            if($k==0){
+                                                                echo '<select class="form-control select-level" disabled="disabled"><option  value="0">请选择</option>';
+                                                            }else{
+                                                                echo '<select class="form-control select-level"><option  value="0">请选择</option>';
+                                                            }
                                                                 foreach ($categorySelected['levelSelectList'][$kk] as $kkk =>$vvv){
                                                                     if($vv==$vvv['id']){
+                                                                        $seleteed[$k] = $vvv['id'];
                                                                         echo '<option value="'.$vvv['id'].'" selected="selected">'.$vvv['name'].'</option>';
                                                                     }else{
                                                                         echo '<option value="'.$vvv['id'].'">'.$vvv['name'].'</option>';
@@ -72,10 +83,9 @@
             
                                                         echo '</div>';
                                                         if($k==0){
-                                                            echo '<a href="javascript:;" class="category-add" style="padding-top: 6px;padding-left: 5px;">&nbsp;&nbsp;&nbsp;&nbsp;继续添加</a><input type="hidden" name="category_id[]" class="category-value-input" value="">';
+                                                            echo '<a href="javascript:;" class="category-add" style="padding-top: 6px;padding-left: 5px;">&nbsp;&nbsp;&nbsp;&nbsp;继续添加</a><input type="hidden" class="category-value-input" value="'.$seleteed[$k].'" data-id="'.$seleteed[$k].'">';
                                                         }else{
-                                                            echo '<a href="javascript:;" class="category-del" style="padding-top: 6px;padding-left: 5px;">&nbsp;&nbsp;&nbsp;&nbsp;删除当前</a>
-                                                                            <input type="hidden" name="category_id[]" class="category-value-input">';
+                                                            echo '<a href="javascript:;" class="category-del" style="padding-top: 6px;padding-left: 5px;">&nbsp;&nbsp;&nbsp;&nbsp;删除当前</a><input type="hidden" name="update_category_id['.$seleteed[$k].']" class="category-value-input" value="'.$seleteed[$k].'" data-id="'.$seleteed[$k].'">';
                                                         }
                                                         echo '</div>';
                                                     }
@@ -102,14 +112,19 @@
                                     <div class="col-md-12 no-padding">
                                         <button type="button" class="btn btn-primary" id="combination-container-add">添加规格组合</button>
 
-                                        <input type="checkbox" class="js_specification_customization" name="custom_switch" /> 定制
-                                        <div style="display: none; " class="js_specification_customization_value">
-                                            定制单价：<input type="number"  name="custom_price" min="0" class="form-control col-md-6" />
+                                        <input type="checkbox" class="js_specification_customization" name="custom_switch" {present name="row['custom_switch']"}checked="checked"{/present}/> 定制
+                                        <div {present name="row['custom_switch']"}style="display: inline; "{else/}style="display: none; "{/present} class="js_specification_customization_value">
+                                            <input type="hidden" name="custom_id" value="{$row['custom_id']??0}">
+                                            定制单价：<input type="number"  name="custom_price" min="0" class="form-control col-md-6 js_custom_price" value="{$row['custom_price']??''}"/>
                                             定制单位：
                                             <select class="form-control unit"  name="custom_unit">
-                                                <option value="-1" >请选择</option>
+                                                <option value="0" >请选择</option>
                                                 {foreach name="unitRows" id="unit"}
-                                                <option value="{$unit.id}" data-name="{$unit.name}" >{$unit.name}</option>
+                                                {present name="row['custom_unit']"}
+                                                    <option value="{$unit.name}" {if condition="$row.custom_unit eq $unit.name "}selected="selected"{/if} >{$unit.name}</option>
+                                                {else/}
+                                                    <option value="{$unit.name}" >{$unit.name}</option>
+                                                {/present}
                                                 {/foreach}
                                             </select>
                                         </div>
@@ -119,6 +134,7 @@
                                     <div class="col-md-12 no-padding">
                                         <div class="card">
                                             <div class="card-body p-0">
+                                                <div id="js_spec_delete"></div>
                                                 <table class="table table-striped">
                                                     <thead >
                                                     <tr>
@@ -132,7 +148,57 @@
                                                     </tr>
                                                     </thead>
                                                     <tbody id="combination-container" data-category="">
-                                                     
+                                                    {foreach name="row.spec" item="vo"}
+                                                        <tr class="js_specification_tr">
+                                                            <td>
+                                                                {volist name="row.specAttr" id="cvo"}
+                                                                    {php}$nname = $key;{/php}
+                                                                    <select class="form-control js_specification_attr js_specification_color"  disabled="disabled">
+                                                                    {volist name="cvo" id="cvvoo" key="kk" }
+                                                                    {in name="cvvoo['spec_option_text']" value="$vo['category']"}
+                                                                    {php}
+                                                                        $selectVal = $cvvoo['spec_option_text'];
+                                                                    {/php}
+                                                                    <option  value="{$cvvoo['spec_option_text']}"  selected="selected">{$cvvoo['spec_option_text']}</option>
+                                                                    {else/}
+                                                                    <option  value="{$cvvoo['spec_option_text']}" >{$cvvoo['spec_option_text']}</option>
+                                                                     {/in}
+                                                                        
+                                                                    {/volist}
+                                                                    </select>
+                                                                    <input type="hidden" value="{$selectVal}" name="update_spec[category][{$nname}][]">
+                                                                {/volist}
+                                                            </td>
+                                                            <td>
+                                                                <select class="form-control unit"  name="update_spec[unit][]">
+                                                                    <option value="0" >请选择</option>
+                                                                    {foreach name="unitRows" id="unit"}
+                                                                    <option value="{$unit.name}" data-name="{$unit.name}" {if condition="$vo.unit eq $unit.name"}selected="selected"{/if} >{$unit.name}</option>
+                                                                    {/foreach}
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <div class="form-check">
+                                                                    <select class="form-control js_is_price_neg_at_phone"  name="update_spec[is_price_neg_at_phone][]">
+                                                                        <option value="1" {if condition="$vo.is_price_neg_at_phone eq 1"}selected="selected"{/if}>是</option>
+                                                                        <option value="0" {if condition="$vo.is_price_neg_at_phone eq 0"}selected="selected"{/if}>否</option>
+                                                                    </select>
+                                                                </div>
+                                                            </td>
+                                                            <td><input type="number" class="form-control js_min_order_qty" value="{$vo.min_order_qty}" min="0"  name="update_spec[min_order_qty][]" /></td>
+                                                            <td><input type="number" class="form-control js_price" value="{$vo.price}" min="0" name="update_spec[price][]" /></td>
+                                                            <td>
+                                                                <input class="js_specification_picture" name="file" type="file" data-path="{$vo.spec_img_url_path}"  style="display: inline;">
+                                                                <input  type="hidden" class="js_specification_picture_data" name="update_spec[spec_img_url][]" value="{$vo.spec_img_url}" />
+                                                            </td>
+                                                            <td>    
+                                                                <input type="hidden" value="{$vo.id}" name="update_spec[id][]">
+                                                                <button type="button" class="btn btn-success  js_specification_price">设置价格区间</button>
+                                                                <input type="hidden" class="js_specification_price_data" name="update_spec[price_section][]">
+                                                                <button type="button" class="btn btn-danger  js_specification_delete" data-id="{$vo.id}" >删除</button>
+                                                            </td>
+                                                        </tr>
+                                                    {/foreach}
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -155,7 +221,7 @@
                                             <p class="help-block2" style="padding-top: 6px;padding-left: 5px;">支持jpg、jpeg、png格式，大小不超过2.0M</p>
                                         </div>
                                         <div class="row">
-                                            <input  type="hidden" name="cover_img_url" id="cover-upload-file"  value="{$row['cover_img_url']}" data-path="{$row['cover_img_url']}"/>
+                                            <input  type="hidden" name="cover_img_url" id="cover-upload-file"  value="{$row['cover_img_url']}" data-path="{$row['cover_img_url_path']}"/>
                                             <small class="help-block" style="padding-top: 6px;padding-left: 5px;"></small>
                                         </div>
                                     </div>
@@ -165,13 +231,13 @@
                                     <div class="col-md-5 no-padding">
                                         <div class="row">
                                             <div class="col-md-6 no-padding">
-                                                <input id="multi-file" name="file" type="file" data-show-caption="true"  multiple>
+                                                <input id="multi-file" name="file" type="file" multiple>
                                             </div>
                                             <p class="help-block2" style="padding-top: 6px;padding-left: 5px;">支持jpg、jpeg、png格式，大小不超过2.0M</p>
 
                                         </div>
                                         <div class="row">
-                                            <input  type="hidden" name="multi_img_url" id="multi-upload-file"  value="" />
+                                            <input  type="hidden" name="multi_img_url" id="multi-upload-file" />
                                             <small class="help-block" style="padding-top: 6px;padding-left: 5px;"></small>
                                         </div>
                                     </div>
@@ -187,7 +253,7 @@
                                     <label class="col-md-2">商品详情APP/H5</label>
                                     <div class="col-md-7 no-padding">
                                         <div class="row">
-                                            <textarea id="html_content_1" class="textarea goods-content" placeholder="商品详情..."  name="html_content_1"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                            <textarea id="html_content_1" class="textarea goods-content" placeholder="商品详情..."  name="html_content_1"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;">{$row.html_content_1}</textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -195,13 +261,17 @@
                                     <label class="col-md-2">商品详情Web</label>
                                     <div class="col-md-7 no-padding">
                                         <div class="row">
-                                            <textarea id="html_content_2" class="textarea goods-content" placeholder="商品详情..."  name="html_content_2"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                            <textarea id="html_content_2" class="textarea goods-content" placeholder="商品详情..."  name="html_content_2"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;">{$row.html_content_2}</textarea>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="card-footer col-md-offset-2">
                                 <input type="hidden" name="audit_state" class="js_audit_state" value="1">
+                                <input type="hidden" name="min_price" class="js_min_price" value="0">
+                                <input type="hidden" name="max_price" class="js_max_price" value="0">
+                                <input type="hidden" name="is_price_neg_at_phone" class="js_math_is_price_neg_at_phone" value="0">
+                                <input type="hidden" name="product_id" value="{$row.id}">
                                 <button type="button" class="btn btn-primary js_draft">存为草稿</button>
                                 <button type="button" class="btn btn-primary js_release">发布</button>
                                 <small class="submit-tip" style="padding-top: 6px;padding-left: 5px;color: #a94442"></small>
@@ -329,6 +399,10 @@
 
             //删除分类
             $('.ajax-bind-change').on('click',".category-del",function(){
+                var delId = $(this).siblings('.category-value-input').data('id');
+                if(delId>0){
+                    $('#js_category_delete').after('<input type="hidden" name="delete_category_id[]" value="'+delId+'">');
+                }
                 $(this).parent('.category-box').remove();
             });
 
@@ -365,8 +439,6 @@
                             {{each colv['spec_attr_val'] as colvv}}
                                 <option  value="{{colvv['spec_option_text']}}">{{colvv['spec_option_text']}} </option>
                             {{/each}}
-                            <option data-spec_attr_option="0"  value="0">自定义颜色</option>
-                            <input type="text" class="form-control col-md-2 colorText"  name="spec[colorText][{{colv['id']}}_{{colv['spec_attr_key']}}][]"  style="display: none"/>
                         </select>
                     {{ else }}
                         <select class="form-control js_specification_attr"  name="spec[category][{{colv['id']}}_{{colv['spec_attr_key']}}][]">
@@ -380,17 +452,15 @@
             </td>
             <td>
                 <select class="form-control unit"  name="spec[unit][]">
-                    <option value="-1" >请选择</option>
+                    <option value="0" >请选择</option>
                     {foreach name="unitRows" id="unit"}
                     <option value="{$unit.id}" data-name="{$unit.name}" >{$unit.name}</option>
                     {/foreach}
-                    <option value="0" >自定义单位</option>
                 </select>
-                <input type="text" class="form-control col-md-2 unitText" name="spec[unit_text][]" style="display: none"/>
             </td>
             <td>
                 <div class="form-check">
-                    <select class="form-control unit"  name="spec[is_price_neg_at_phone][]">
+                    <select class="form-control js_is_price_neg_at_phone"  name="spec[is_price_neg_at_phone][]">
                         <option value="1" >是</option>
                         <option value="0" selected="selected">否</option>
                     </select>
@@ -411,27 +481,27 @@
         {{/if}}
     </script>
     <script>
-        //有颜色规格 事件监听选择自定义
-        $('#combination-container').on('change','.js_specification_color',function(){
-            if($(this).val()==0){
-                $(this).siblings('.colorText').show();
-                $(this).siblings('.colorText').val('');
-            }else{
-                $(this).siblings('.colorText').hide();
-                $(this).siblings('.colorText').val('');
-            }
-        });
-        //单位 事件监听选择自定义
-        $('#combination-container').on('change','.unit',function(){
-            if($(this).val()==0){
-                $(this).siblings('.unitText').show();
-                $(this).siblings('.unitText').val('');
-            }else{
-                $(this).siblings('.unitText').hide();
-                $(this).siblings('.unitText').val('');
-            }
+        // //有颜色规格 事件监听选择自定义
+        // $('#combination-container').on('change','.js_specification_color',function(){
+        //     if($(this).val()==0){
+        //         $(this).siblings('.colorText').show();
+        //         $(this).siblings('.colorText').val('');
+        //     }else{
+        //         $(this).siblings('.colorText').hide();
+        //         $(this).siblings('.colorText').val('');
+        //     }
+        // });
+        // //单位 事件监听选择自定义
+        // $('#combination-container').on('change','.unit',function(){
+        //     if($(this).val()==0){
+        //         $(this).siblings('.unitText').show();
+        //         $(this).siblings('.unitText').val('');
+        //     }else{
+        //         $(this).siblings('.unitText').hide();
+        //         $(this).siblings('.unitText').val('');
+        //     }
             
-        })
+        // })
 
         //初始化数据显示
         combinationContainerEmpty();
@@ -486,8 +556,12 @@
     </script>
 <!-- 图片上传 -->
 <script>
+    eachPicture();
+
+
     function eachPicture(){
         $('#combination-container .js_specification_picture').each(function(i,n){
+            var path = $(this).data('path');
             $(n).fileinput({
                 language: 'zh', //设置语言
                 uploadUrl: '?s=admin/file/upload',  //上传地址
@@ -498,11 +572,14 @@
                 allowedPreviewTypes: ['image'],
                 allowedFileTypes: ['image'],
                 allowedFileExtensions:  ['jpg', 'png','jpeg'],
+                initialPreview: path,
+                initialPreviewAsData: true,
+                initialPreviewFileType: 'image',
                 maxFileSize : 5120,
                 maxFileCount: 1,
                 uploadExtraData: function(previewId, index) {   //额外参数的关键点
                     var obj = {};
-                    obj.type = 'goods_thumb';
+                    obj.type = 'goods';
                     return obj;
                 }
             });
@@ -644,6 +721,10 @@
             var trIndex = $(this).parents('tr').index();
             
             $('#delete-specification-request').one('click',{'trIndex':trIndex},function(obj){
+                var delId= $('.js_specification_delete:eq('+trIndex+')').data('id');
+                if(parseInt(delId)>0){
+                    $('#js_spec_delete').after('<input type="hidden" name="delete_spec[id][]" value="'+delId+'">');
+                }
                 $('#combination-container tr:eq('+trIndex+')').remove();
                 combinationContainerEmpty();
                 $('#delete-specification-modal').modal('hide');
@@ -657,18 +738,23 @@
 <!-- 4产品主图 start-->
     <script>
         // 单图上传
+        var path = $('#cover-upload-file').data('path');
         $("#cover-file").fileinput({
             language: 'zh', //设置语言
             uploadUrl: '?s=admin/file/upload',  //上传地址
-            showUpload: true, //是否显示上传按钮
-            showRemove:true,
+            showUpload: false, 
+            showCaption: true,
+            showRemove:false,
             dropZoneEnabled: false,
-            showCaption: true,//是否显示标题
             allowedPreviewTypes: ['image'],
             allowedFileTypes: ['image'],
             allowedFileExtensions:  ['jpg', 'png','jpeg'],
             maxFileSize : 5120,
             maxFileCount: 1,
+            initialPreview: [path],
+            initialPreviewAsData: true,
+            initialPreviewFileType: 'image',
+            overwriteInitial: false,
             uploadExtraData: function(previewId, index) {   //额外参数的关键点
                 var obj = {};
                 obj.type = 'goods_thumb';
@@ -689,24 +775,61 @@
 <!-- 5多视角图片 start -->
     <script>
         //多图上传
+        var multiImgsPath = {:json_encode($row.multi_img_url_path)};
+        var multiImgs = {:json_encode($row.multi_img_url)};
+        // $("#multi-file").fileinput({
+        //     language: 'zh', //设置语言
+        //     uploadUrl: '?s=admin/file/upload',  //上传地址
+        //     showUpload: true, //是否显示上传按钮
+        //     showRemove:true,
+        //     uploadAsync: false,
+        //     dropZoneEnabled: true,
+        //     overwriteInitial: false,
+        //     showCaption: true,//是否显示标题
+        //     allowedPreviewTypes: ['image'],
+        //     allowedFileTypes: ['image'],
+        //     allowedFileExtensions:  ['jpg', 'png','jpeg'],
+        //     maxFileSize : 5120,
+        //     maxFileCount: 20,
+        //     initialPreview: multiImgsPath,
+        //     initialPreviewConfig:multiImgs,
+        //     initialPreviewAsData: true,
+        //     initialPreviewFileType: 'image',
+        //     uploadExtraData: function(previewId, index) {   //额外参数的关键点
+        //         var obj = {};
+        //         obj.type = 'goods';
+        //         return obj;
+        //     }
+        // });
+
         $("#multi-file").fileinput({
-            language: 'zh', //设置语言
-            uploadUrl: '?s=admin/file/upload',  //上传地址
-            showUpload: true, //是否显示上传按钮
-            showRemove:true,
-            dropZoneEnabled: false,
-            showCaption: true,//是否显示标题
-            allowedPreviewTypes: ['image'],
-            allowedFileTypes: ['image'],
-            allowedFileExtensions:  ['jpg', 'png','jpeg'],
-            maxFileSize : 5120,
-            maxFileCount: 20,
-            uploadExtraData: function(previewId, index) {   //额外参数的关键点
-                var obj = {};
-                obj.type = 'goods';
-                return obj;
-            }
-        });
+                // theme: 'fa',
+                language: 'zh',
+                uploadUrl: '?s=admin/file/upload',
+                // uploadAsync: false,
+                // dropZoneEnabled: false,
+                showUpload: false, 
+                showCaption: true,
+                showRemove:false,
+                allowedPreviewTypes: ['image'],
+                allowedFileTypes: ['image'],
+                allowedFileExtensions:  ['jpg', 'png','jpeg'],
+                maxFileSize : 5120,
+                maxFileCount: 20,
+                overwriteInitial: false,
+                initialPreview: multiImgsPath,
+                initialPreviewAsData: true, // identify if you are sending preview data only and not the raw markup
+                initialPreviewFileType: 'image', // image is the default and can be overridden in config below
+                initialPreviewConfig: multiImgs,
+                uploadExtraData: {type: "goods"}
+            }).on('filesorted', function(e, params) {
+                console.log('file sorted', e, params);
+            }).on('fileuploaded', function(e, params) {
+                console.log('file uploaded', e, params);
+            }).on("filepredelete", function(jqXHR,params) {
+                console.log(jqXHR);
+                console.log(params);
+            });
         $('#multi-file').on("fileuploaded", function(event, data) {
             if(data.response) {
                 var str = $('#multi-upload-file').val();
@@ -729,16 +852,16 @@
             <select class="form-control js_area_box_select">
                 <option  value="0">请选择</option>
                 {{each areaNextLevelList as value}}
-                    <option value="{{value.id}}" >{{value.name}}</option>
+                    <option value="{{value.id}}" {{ if selected==value.id }}selected="selected" {{/if}}>{{value.name}}</option>
                 {{/each}}
             </select>
             {{ if name!='' }}
-            <input type="hidden" name='{{name}}' class="js_area_box_input">
+            <input type="hidden" name='{{name}}' class="js_area_box_input" value="{{selected}}">
             {{/if}}
         </span>
     </script>
     <script>
-            function ajaxGetArea(id,elm,htmlType,name){
+            function ajaxGetArea(id,elm,htmlType,name,selected=0){
                 $.ajax({
                     type:'get',
                     url:'?s=admin/product/getAreaNextLevelList&parentId='+id,
@@ -750,7 +873,7 @@
                                 if(typeof(elm) == 'string'){
                                     elm = $(elm);
                                 }
-                                var html = template('area-template',{areaNextLevelList:data.data.list,name:name});
+                                var html = template('area-template',{areaNextLevelList:data.data.list,name:name,selected:selected});
                                 if(htmlType == 'html'){
                                     elm.html(html);
                                 }else if(htmlType == 'after'){
@@ -763,9 +886,20 @@
                 });
             }
 
+            {if $row.province_of_origin_id gt 0}
+                ajaxGetArea(45067,'#js_area_template','html','province_of_origin_id',{$row.province_of_origin_id});
+                {if $row.city_of_origin_id gt 0}
+                    ajaxGetArea({$row.province_of_origin_id},'#js_area_template .js_area_box_select:eq(0)','after','city_of_origin_id',{$row.city_of_origin_id});
+                    {if $row.district_of_origin_id gt 0}
+                        ajaxGetArea({$row.city_of_origin_id},'#js_area_template .js_area_box_select:eq(1)','after','district_of_origin_id',{$row.district_of_origin_id});
+                    {/if}
+                {/if}
+            {else/}
             //加载首个分类
             ajaxGetArea(45067,'#js_area_template','html','province_of_origin_id');
-
+            {/if}
+            
+            
 
             //给分类下的下拉框绑定事件
             $('#js_area_template').on('change','.js_area_box_select',function () {
@@ -814,7 +948,7 @@
 
 <!-- 9菜单选中 start -->
     <script>
-        var url = '{:url("admin/product/create")}';
+        var url = '{:url("admin/product/edit")}';
         $('a[href="'+url+'"]').addClass('active');
         $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
     </script>
@@ -872,26 +1006,43 @@
             return false;
         }
 
-        $('.js_draft').click(function(){
-            ('#html_content_1').html(editor1.html());
+        function submitWork(val){
+            //草稿还是发布
+            $('.js_audit_state').val(val);
+            //文本编辑框
+            $('#html_content_1').html(editor1.html());
             $('#html_content_2').html(editor2.html());
-            $('.js_audit_state').val(1);
-             ajaxSubmit('#add-form');
-            // //验证数据
-            // $("#add-form").data('bootstrapValidator').validate();
-            // //数据提交
-            // if($("#add-form").data('bootstrapValidator').isValid()){
-            //     alert(1212);
-            //     ajaxSubmit('#add-form');
-            // }
+            //最大值最小值
+            if($('.js_specification_customization').prop('checked')==true){
+                var priceArr = [$('.js_custom_price').val()];
+            }else{
+                var priceArr = [];
+            }
+            var phoneArr = [];
+            $('.js_specification_tr').each(function(i){
+                phoneArr.push($(this).find('.js_is_price_neg_at_phone').val());
+                priceArr.push($(this).find('.js_price').val());
+            });
+            var max = eval("Math.max(" + priceArr.join() + ")");
+            var min = eval("Math.min(" + priceArr.join() + ")");
+            if(phoneArr==undefined){
+                var at = 0;
+            }else{
+                var at  = eval(phoneArr.join("+"))==phoneArr.length?1:0;
+            }
+            $('.js_min_price').val(min);
+            $('.js_max_price').val(max);
+            $('.js_math_is_price_neg_at_phone').val(at);
+            ajaxSubmit('#add-form');
+        }
+
+        $('.js_draft').click(function(){
             
+            submitWork(1);
         });
 
         $('.js_release').click(function(){
-            $('#html_content_1').html(editor1.html());
-            $('#html_content_2').html(editor2.html());
-            $('.js_audit_state').val(2);
-            ajaxSubmit('#add-form');
+            submitWork(2);
         });
         
         $("#add-form").bootstrapValidator({

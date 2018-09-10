@@ -71,7 +71,7 @@
                                             <select class="form-control unit"  name="custom_unit">
                                                 <option value="-1" >请选择</option>
                                                 {foreach name="unitRows" id="unit"}
-                                                <option value="{$unit.id}" data-name="{$unit.name}" >{$unit.name}</option>
+                                                <option value="{$unit.name}" data-name="{$unit.name}" >{$unit.name}</option>
                                                 {/foreach}
                                             </select>
                                         </div>
@@ -324,8 +324,6 @@
                             {{each colv['spec_attr_val'] as colvv}}
                                 <option  value="{{colvv['spec_option_text']}}">{{colvv['spec_option_text']}} </option>
                             {{/each}}
-                            <option data-spec_attr_option="0"  value="0">自定义颜色</option>
-                            <input type="text" class="form-control col-md-2 colorText"  name="spec[colorText][{{colv['id']}}_{{colv['spec_attr_key']}}][]"  style="display: none"/>
                         </select>
                     {{ else }}
                         <select class="form-control js_specification_attr"  name="spec[category][{{colv['id']}}_{{colv['spec_attr_key']}}][]">
@@ -341,9 +339,8 @@
                 <select class="form-control unit"  name="spec[unit][]">
                     <option value="-1" >请选择</option>
                     {foreach name="unitRows" id="unit"}
-                    <option value="{$unit.id}" data-name="{$unit.name}" >{$unit.name}</option>
+                    <option value="{$unit.name}" data-name="{$unit.name}" >{$unit.name}</option>
                     {/foreach}
-                    <option value="0" >自定义单位</option>
                 </select>
                 <input type="text" class="form-control col-md-2 unitText" name="spec[unit_text][]" style="display: none"/>
             </td>
@@ -480,49 +477,48 @@
     <div class="modal fade" id="price-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                
+                <div class="modal-body">
+                    <div class="card" >
+                        <div class="card-body p-0">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>数量区间</th>
+                                    <th>产品单价</th>
+                                    <th>&nbsp;&nbsp;</th>
+                                </tr>
+                                </thead>
+                                <tbody class="price-add">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:;" id="price-add" style="float: left;margin-right: 220px;">+新增价格区间</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" data-id="" id="price-request">保存</button>
+                </div>
             </div>
         </div>
     </div>
     <script id="price-template" type="text/html">
-        <div class="modal-body">
-            <div class="card" >
-                <div class="card-body p-0">
-                    <table class="table table-striped">
-                        <thead>
-                        <tr>
-                            <th>数量区间</th>
-                            <th>产品单价</th>
-                            <th>&nbsp;&nbsp;</th>
-                        </tr>
-                        </thead>
-                        <tbody class="price-add">
-                            {{ if priceObj!='' }}
-                            {{each priceObj as colv}}
-                                <tr>
-                                    <td>
-                                        <input type="number" class="min" value="{{colv['js_min_order_qty']}}" style="width: 80px;" />&nbsp;-&nbsp;
-                                        <input type="number" class="max"  value="{{colv['js_max_order_qty']}}" style="width: 80px;" />
-                                    </td>
-                                    <td>
-                                        <input type="number" class="price" value="{{colv['js_price']}}" style="width: 120px;" />
-                                    </td>
-                                    <td>
-                                    </td>
-                                </tr>
-                            {{/each}}
-                            
-                            {{/if}}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <a href="javascript:;" id="price-add" style="float: left;margin-right: 220px;">+新增价格区间</a>
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-            <button type="button" class="btn btn-primary" data-id="" id="price-request">保存</button>
-        </div>
+            {{ if priceObj!='' }}
+            {{each priceObj as colv}}
+                <tr>
+                    <td>
+                        <input type="number" class="min" value="{{colv['js_min_order_qty']}}" style="width: 80px;" />&nbsp;-&nbsp;
+                        <input type="number" class="max"  value="{{colv['js_max_order_qty']}}" style="width: 80px;" />
+                    </td>
+                    <td>
+                        <input type="number" class="price" value="{{colv['js_price']}}" style="width: 120px;" />
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+            {{/each}}
+            
+            {{/if}}            
     </script>
     <script>
         //价格区间弹出层
@@ -533,14 +529,21 @@
             var js_min_order_qty = $(this).parents('tr').find('.js_min_order_qty').val();
             var js_max_order_qty = '99999999.99';
             //生成html展示
-            var priceObj =  [{'js_price':js_price,'js_min_order_qty':js_min_order_qty,'js_max_order_qty':js_max_order_qty}];
-            var html = template('price-template',{'priceObj':priceObj})
-            $('#price-modal .modal-content').html(html);
+            var trVal =$(this).siblings('.js_specification_price_data').val();
+            if(trVal==''){
+                var priceObj =  [{'js_price':js_price,'js_min_order_qty':js_min_order_qty,'js_max_order_qty':js_max_order_qty}];
+                var html = template('price-template',{'priceObj':priceObj})
+            }else{
+                console.log(trVal);
+                var html = template('price-template',{'priceObj':JSON.parse(trVal)})
+            }
+            $('#price-modal .modal-content .price-add').html(html);
             $('#price-modal').modal('show');
 
 
             //点击保存把价格区间全部拿出来存储
             $('#price-request').on('click',{'trIndex':trIndex},function(obj){
+                
                 //与外部的互相事件绑定
                 var min = $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr:first .min').val();
                 var price = $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr:first .price').val();
@@ -559,13 +562,13 @@
                         var vmax = trobj.find('.max').val()
                         var vprice = trobj.find('.price').val()
                         if(vmin>=vmax){
-                            alert('区间有错');return;
+                            alert('区间有错1');return;
                         }
                         if(parseFloat(vmin)==0.00 || parseFloat(vmax)==0.00  || parseFloat(vprice)==0.00){
-                            alert('区间有错');return;
+                            alert('区间有错2');return;
                         }
 
-                       var objd = {'min':vmin,'max':vmax,'price':vprice};
+                       var objd = {'js_min_order_qty':vmin,'js_max_order_qty':vmax,'js_price':vprice};
                        modelVals.push(objd);
                     }
                    
@@ -581,7 +584,10 @@
         });
         //添加价格区间
         $('body').on('click','#price-add', function (event) {
-            $(this).parent('.modal-footer').siblings('.modal-body').find('.price-add').append('<tr><td><input type="number" value="" style="width: 80px;" />&nbsp;-&nbsp;<input type="number"  value="" style="width: 80px;" /></td><td><input type="number"  value="" style="width: 120px;" /></td><td><a href="javascript:;" >删除</a></td></tr>');
+
+            var priceObj =  [{'js_price':0,'js_min_order_qty':0,'js_max_order_qty':0}];
+            var html = template('price-template',{'priceObj':priceObj})    
+            $(this).parent('.modal-footer').siblings('.modal-body').find('.price-add').append(html);
         });
 
     </script>
