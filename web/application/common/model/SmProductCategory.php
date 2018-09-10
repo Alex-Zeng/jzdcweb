@@ -76,8 +76,11 @@ class SmProductCategory extends Model{
      * @return [type]                       [分类集合数据]
      */
     public function getCategorySelected($categoryIds){
+        $selectedCategoryDepthPath =[];
         //[分类全路径['/1/2/3/4','1/2/3/5']]
-        $selectedCategoryDepthPath = $this->where(['id'=>['in',$categoryIds]])->field('id,depth_path')->select();
+        foreach ($categoryIds as $key => $val) {
+            $selectedCategoryDepthPath[] = $this->where(['id'=>$val])->field('depth_path')->find();
+        }
        
         //[分类集合 [['id'=>1,'name'=>'手机','parent_id'=>0,'level'=>1,'depth_path'=>'/1']] ]
         $allCategoryList = $this->field('id,name,parent_id,level,depth_path')->select();
