@@ -458,6 +458,8 @@ class Order extends Base{
             $row['statusMsg'] = getOrderMsg($this->groupId,$row->state,$row->service_type,$queryStatus);
             $row['cancelType'] = $this->groupId && ($row->state == 1 || $row->state == 0)   ? 1 : 0;
             $row['confirmType'] = ($this->groupId == IndexGroup::GROUP_BUYER)&& ($row->state == 6) && ($row->service_type == 0 || $row->service_type == 2) ? 1 : 0;
+            $row['actual_money'] = getFormatPrice($row->actual_money);
+            $row['goods_money'] = getFormatPrice($row->goods_money);
             unset($row->add_time);
         }
 
