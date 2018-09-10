@@ -271,13 +271,15 @@
                                 <input type="hidden" name="max_price" class="js_max_price" value="0">
                                 <input type="hidden" name="is_price_neg_at_phone" class="js_math_is_price_neg_at_phone" value="0">
                                 <input type="hidden" name="product_id" value="{$row.id}">
-                                {if condition="$row.audit_state eq 5"}
-                                <input type="hidden" name="audit_state" class="js_audit_state" value="2">
-                                <button type="button" class="btn btn-primary js_release">修改</button>
-                                {else/}
+                                {if condition="$row.audit_state eq 1"}
                                 <input type="hidden" name="audit_state" class="js_audit_state" value="1">
                                 <button type="button" class="btn btn-primary js_draft">存为草稿</button>
                                 <button type="button" class="btn btn-primary js_release">发布</button>
+                                {elseif condition="$row.audit_state eq 5" /}
+                                <input type="hidden" name="audit_state" class="js_audit_state" value="2">
+                                <button type="button" class="btn btn-primary js_release">修改</button>
+                                {else/}
+                                <p>待审核</p>
                                 {/if}
                                 <small class="submit-tip" style="padding-top: 6px;padding-left: 5px;color: #a94442"></small>
                             </div>
@@ -459,7 +461,7 @@
                 <select class="form-control unit"  name="spec[unit][]">
                     <option value="0" >请选择</option>
                     {foreach name="unitRows" id="unit"}
-                    <option value="{$unit.id}" data-name="{$unit.name}" >{$unit.name}</option>
+                    <option value="{$unit.name}" >{$unit.name}</option>
                     {/foreach}
                 </select>
             </td>
