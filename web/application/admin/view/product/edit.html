@@ -121,12 +121,26 @@
                                                 <option value="0" >请选择</option>
                                                 {foreach name="unitRows" id="unit"}
                                                 {present name="row['custom_unit']"}
-                                                    <option value="{$unit.name}" {if condition="$row.custom_unit eq $unit.name "}selected="selected"{/if} >{$unit.name}</option>
+                                                    <option value="{$unit}" {if condition="$row.custom_unit eq $unit "}selected="selected"{/if} >{$unit}</option>
                                                 {else/}
-                                                    <option value="{$unit.name}" >{$unit.name}</option>
+                                                    <option value="{$unit}" >{$unit}</option>
                                                 {/present}
                                                 {/foreach}
+                                                {present name="row['custom_unit']"}
+                                                    <option value="0" {notin name="row.custom_unit" value="$unitRows" }selected="selected"{/notin}>自定义</option>
+                                                {else/}
+                                                    <option value="0" >自定义</option>
+                                                {/present}
                                             </select>
+                                            {present name="row['custom_unit']"}
+                                                {notin name="row.custom_unit" value="$unitRows" }
+                                                    <input type="text" class="form-control col-md-2 unitText" value="{$row.custom_unit}" name="custom_unit_text">
+                                                {else/}
+                                                    <input type="text" class="form-control col-md-2 unitText" value="" name="custom_unit_text" style="display: none"/>
+                                                {/notin}
+                                            {else/}
+                                                <input type="text" class="form-control col-md-2 unitText" name="custom_unit_text" style="display: none"/>
+                                            {/present}
                                         </div>
                                     </div>
                                 </div>
@@ -151,31 +165,27 @@
                                                     {foreach name="row.spec" item="vo"}
                                                         <tr class="js_specification_tr">
                                                             <td>
-                                                                {volist name="row.specAttr" id="cvo"}
-                                                                    {php}$nname = $key;{/php}
-                                                                    <select class="form-control js_specification_attr js_specification_color"  disabled="disabled">
-                                                                    {volist name="cvo" id="cvvoo" key="kk" }
-                                                                    {in name="cvvoo['spec_option_text']" value="$vo['category']"}
-                                                                    {php}
-                                                                        $selectVal = $cvvoo['spec_option_text'];
-                                                                    {/php}
-                                                                    <option  value="{$cvvoo['spec_option_text']}"  selected="selected">{$cvvoo['spec_option_text']}</option>
-                                                                    {else/}
-                                                                    <option  value="{$cvvoo['spec_option_text']}" >{$cvvoo['spec_option_text']}</option>
-                                                                     {/in}
-                                                                        
-                                                                    {/volist}
+                                                                {foreach name="vo.category" item="fvv" key="fkk"}
+                                                                    <input type="hidden" name="update_spec[category][{$fkk}][]" value="{$fvv}"/> 
+                                                                    <input type="hidden" name="update_spec[category_text][{$fkk}][]" value=""/> 
+                                                                    <select class="form-control"  disabled="disabled">
+                                                                        <option selected="selected">{$fvv}</option>
                                                                     </select>
-                                                                    <input type="hidden" value="{$selectVal??''}" name="update_spec[category][{$nname}][]">
-                                                                {/volist}
+                                                                {/foreach}
                                                             </td>
                                                             <td>
                                                                 <select class="form-control unit"  name="update_spec[unit][]">
-                                                                    <option value="0" >请选择</option>
+                                                                    <option value="-1" >请选择</option>
                                                                     {foreach name="unitRows" id="unit"}
-                                                                    <option value="{$unit.name}" data-name="{$unit.name}" {if condition="$vo.unit eq $unit.name"}selected="selected"{/if} >{$unit.name}</option>
+                                                                    <option value="{$unit}" data-name="{$unit}" {if condition="$vo.unit eq $unit"}selected="selected"{/if} >{$unit}</option>
                                                                     {/foreach}
+                                                                    <option value="0" {notin name="vo.unit" value="$unitRows" }selected="selected"{/notin}>自定义</option>
                                                                 </select>
+                                                                {in name="vo.unit" value="$unitRows" }
+                                                                <input type="text" class="form-control col-md-3 unitText" name="update_spec[unit_text][]" style="display: none"/>
+                                                                {else/}
+                                                                <input type="text" class="form-control col-md-3 unitText" value="{$vo.unit??''}" name="update_spec[unit_text][]" />
+                                                                {/in}
                                                             </td>
                                                             <td>
                                                                 <div class="form-check">
@@ -446,24 +456,29 @@
                             {{each colv['spec_attr_val'] as colvv}}
                                 <option  value="{{colvv['spec_option_text']}}">{{colvv['spec_option_text']}} </option>
                             {{/each}}
+                            <option value="0">自定义</option>
                         </select>
+                        <input type="text" class="form-control col-md-2 colorText" name="spec[category_text][{{colv['id']}}_{{colv['spec_attr_key']}}][]" style="display: none"/>
                     {{ else }}
-                        <select class="form-control js_specification_attr"  name="spec[category][{{colv['id']}}_{{colv['spec_attr_key']}}][]">
+                        <select class="form-control js_specification_attr js_specification_color"  name="spec[category][{{colv['id']}}_{{colv['spec_attr_key']}}][]">
                             <option value="-1">{{colv['spec_attr_key']}}</option>
                             {{each colv['spec_attr_val'] as colvv}}
                                 <option value="{{colvv['spec_option_text']}}">{{colvv['spec_option_text']}} </option>
                             {{/each}}
                         </select>
+                        <input type="text" class="form-control col-md-2 colorText" name="spec[category_text][{{colv['id']}}_{{colv['spec_attr_key']}}][]" style="display: none"/>
                     {{/if}}
                 {{/each}}
             </td>
             <td>
                 <select class="form-control unit"  name="spec[unit][]">
-                    <option value="0" >请选择</option>
+                    <option value="-1" >请选择</option>
                     {foreach name="unitRows" id="unit"}
-                    <option value="{$unit.name}" >{$unit.name}</option>
+                    <option value="{$unit}" >{$unit}</option>
                     {/foreach}
+                    <option value="0" >自定义</option>
                 </select>
+                <input type="text" class="form-control col-md-2 unitText" name="spec[unit_text][]" style="display: none"/>
             </td>
             <td>
                 <div class="form-check">
@@ -488,27 +503,27 @@
         {{/if}}
     </script>
     <script>
-        // //有颜色规格 事件监听选择自定义
-        // $('#combination-container').on('change','.js_specification_color',function(){
-        //     if($(this).val()==0){
-        //         $(this).siblings('.colorText').show();
-        //         $(this).siblings('.colorText').val('');
-        //     }else{
-        //         $(this).siblings('.colorText').hide();
-        //         $(this).siblings('.colorText').val('');
-        //     }
-        // });
-        // //单位 事件监听选择自定义
-        // $('#combination-container').on('change','.unit',function(){
-        //     if($(this).val()==0){
-        //         $(this).siblings('.unitText').show();
-        //         $(this).siblings('.unitText').val('');
-        //     }else{
-        //         $(this).siblings('.unitText').hide();
-        //         $(this).siblings('.unitText').val('');
-        //     }
+        //有颜色规格 事件监听选择自定义
+        $('#combination-container').on('change','.js_specification_color',function(){
+            if($(this).val()==0){
+                $(this).next('.colorText').show();
+                $(this).next('.colorText').val('');
+            }else{
+                $(this).next('.colorText').hide();
+                $(this).next('.colorText').val('');
+            }
+        });
+        //单位 事件监听选择自定义
+        $('#add-form').on('change','.unit',function(){
+            if($(this).val()==0){
+                $(this).siblings('.unitText').show();
+                $(this).siblings('.unitText').val('');
+            }else{
+                $(this).siblings('.unitText').hide();
+                $(this).siblings('.unitText').val('');
+            }
             
-        // })
+        })
 
         //初始化数据显示
         combinationContainerEmpty();
