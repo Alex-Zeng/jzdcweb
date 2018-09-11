@@ -512,7 +512,7 @@ class Order extends Base{
         $goodsModel = new MallOrderGoods();
         $productModel = new SmProduct();
         $goodsRows = $goodsModel->alias('a')->join(['sm_product_spec'=>'b'],'a.goods_id=b.id','left')->where(['order_id'=>$row->id])
-                                ->field(['a.id','a.title','a.price','a.quantity','a.s_info','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.spec_img_url'])->select();
+                                ->field(['a.id','a.title','a.price','a.quantity','a.unit','a.s_info','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.spec_img_url'])->select();
 
         foreach($goodsRows as &$goodsRow){
             $goodsRow['quantity'] = intval($goodsRow->quantity);
@@ -523,6 +523,7 @@ class Order extends Base{
                 $goodsRow['icon'] = SmProduct::getFormatImg($product->cover_img_url);
             }
             $goodsRow['price'] = getFormatPrice($goodsRow->price);
+            $goodsRow['specUnit'] = $goodsRow->unit;
         }
 
         //查询支付凭证
