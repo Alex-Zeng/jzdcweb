@@ -382,5 +382,5 @@ function getSimplePrice($isDiscuss = 0, $price){
     if($isDiscuss == 1){
         return '电议';
     }
-    return $price;
+    return getFormatPrice($price);
 }
