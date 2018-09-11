@@ -21,6 +21,15 @@ use think\Request;
 
 class Report extends Base{
 
+    public function __construct(Request $request = null)
+    {
+        parent::__construct($request);
+        $groupId = getGroupId();
+        if($groupId != IndexGroup::GROUP_OPERATION){
+            $this->errorTips();
+        }
+    }
+
     /**
      * @desc 交易报表
      * @return mixed
@@ -206,16 +215,14 @@ class Report extends Base{
         }
 
 
-        $fields = ['a.*','b.username','b.phone','b.reg_time'];
+        $fields = ['a.*','b.username','b.phone','b.reg_time','b.contact'];
         $rows = $model->alias('a')->join(config('prefix').'index_user b','a.writer=b.id','left')->where($where)->field($fields)->order('a.write_time','desc')->paginate(20,false,['query'=>request()->param()]);
 
         $this->assign('k',$k);
         $this->assign('list',$rows);
         $this->assign('page',$rows->render());
-
-        $this->assign('start','');
-        $this->assign('end','');
-
+        $this->assign('start',$start);
+        $this->assign('end',$end);
         return $this->fetch();
     }
 
@@ -423,7 +430,7 @@ class Report extends Base{
         }
 
 
-        $fields = ['a.*','b.username','b.phone','b.reg_time'];
+        $fields = ['a.*','b.username','b.phone','b.reg_time','b.contact'];
 
         vendor('PHPExcel.PHPExcel');
         $objPHPExcel = new \PHPExcel();
@@ -473,17 +480,17 @@ class Report extends Base{
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('E' . $counter, $row->reg_role);
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('F' . $counter, date('Y-m-d',$row->reg_time));
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('G' . $counter, $row->legal_representative);
-                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('H' . $counter, $row->contact_point);
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('H' . $counter, $row->contact);
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('I' . $counter, $row->ent_phone);
-                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('J' . $counter,  date('Y-m-d',$row->edit_time));
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('J' . $counter, $row->edit_time >0 ? date('Y-m-d',$row->edit_time) : '');
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('K' . $counter,    $row->status == 1 ? '待审核': ($row->status == 2 ? '已通过': '已拒绝'));
-                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('L' . $counter, date('Y-m-d',$row->edit_time));
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('L' . $counter,   $row->audit_time >0 ? date('Y-m-d',$row->audit_time) : '');
                 $counter++;
                 unset($goodsRows);
                 unset($rows);
             }
         }
-        $filename = 'company_' . date('YmdHi', time()) . '.xls';
+        $filename = '企业注册认证_' . date('YmdHi', time()) . '.xls';
         $objPHPExcel->getActiveSheet()->setTitle('企业注册认证信息');
         header("Content-Type: application/force-download");
         header("Content-Type: application/octet-stream");
@@ -580,7 +587,7 @@ class Report extends Base{
                 unset($rows);
             }
         }
-        $filename = $role == IndexGroup::GROUP_SUPPLIER ? 'supplier_' . date('YmdHi', time()) . '.xls' : 'buyer_' . date('YmdHi', time()) . '.xls';
+        $filename = $role == IndexGroup::GROUP_SUPPLIER ? '供应商交易报表_' . date('YmdHi', time()) . '.xls' : '采购商交易报表_' . date('YmdHi', time()) . '.xls';
         $title = IndexGroup::GROUP_SUPPLIER ? '供应商交易报表信息' : '采购商交易报表信息';
         $objPHPExcel->getActiveSheet()->setTitle($title);
         header("Content-Type: application/force-download");
