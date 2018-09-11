@@ -1,4 +1,4 @@
-{include file="layout/header" title="商品交易报表" keywords="" /}
+{include file="layout/header" title="供应商交易报表" keywords="" /}
 
 {include file="layout/left" groupId="$groupId" keywords="" /}
 <!-- Content Wrapper. Contains page content -->
@@ -12,7 +12,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active">商品交易报表</li>
+                        <li class="breadcrumb-item active">供应商交易报表</li>
                     </ol>
                 </div><!-- /.col -->
             </div><!-- /.row -->
@@ -23,24 +23,29 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">商品交易报表</h3>
+                        <h3 class="card-title">供应商交易报表</h3>
                     </div>
                     <div class="row" style="padding-top: 15px;padding-right: 15px">
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             <form class="form-inline ml-3" action="{:url()}"  method="get">
+                                <div class = "input-group">
+                                    <input type = "date"  name="start" class = "form-control"  value="{$start}" placeholder="开始日期">
+                                    <span style="display: inline-block;vertical-align: middle;padding-top: 5px"><hr /></span>
+                                    <input type = "date" name="end" class = "form-control" value="{$end}" placeholder="结束日期">
+                                </div>
                                 <div class="input-group">
 
                                 </div>&nbsp;&nbsp;
                                 <div class="input-group">
-                                    <input class="form-control form-control-navbar"  name="k" type="search"  value="" placeholder="留言/手机号" aria-label="Search">
+                                    <input class="form-control form-control-navbar"  name="k" type="search"  value="" placeholder="供应商" aria-label="Search">
                                     <div class="input-group-append">
                                         <button class="btn btn-primary" id="search" type="submit">查找</button>
                                     </div>
                                 </div>
                             </form>
                         </div>
-                        <div class="col-md-6">
-
+                        <div class="col-md-4">
+                            <a class="btn btn-primary pull-right"  target="_blank"  href="{:url('admin/report/supplier_export',['start'=>$start,'end'=>$end,'k'=>$k])}" >导出</a>
                         </div>
                     </div>
                     <!-- /.card-header -->
@@ -48,25 +53,21 @@
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                             <tr>
-                                <th width="150px">姓名</th>
-                                <th width="150px">性别</th>
-                                <th>手机号</th>
-                                <th>提交类型</th>
-                                <th>填写者</th>
-                                <th>提交时间</th>
-                                <th>留言</th>
+                                <th width="150px">序号</th>
+                                <th width="150px">日期</th>
+                                <th>供应商名称</th>
+                                <th>交易订单数</th>
+                                <th>交易金额</th>
                             </tr>
                             </thead>
                             <tbody>
                             {volist name='list' id='service'}
                             <tr>
-                                <td>{$service.name}</td>
-                                <td>{$service.sex}</td>
-                                <td>{$service.phone}</td>
-                                <td>{$service.type_name}</td>
-                                <td>{$service.writer_name}{if $service.writer}#{$service.writer}{/if}</td>
-                                <td>{:date('Y-m-d H:i',$service.write_time)}</td>
-                                <td>{$service.comment}</td>
+                                <td>{$key+1}</td>
+                                <td>{$service.order_date}</td>
+                                <td>{$service.real_name}</td>
+                                <td>{$service.count}</td>
+                                <td>{$service.total_money}</td>
                             </tr>
                             {/volist}
                             </tbody>
@@ -94,6 +95,7 @@
 
 {include file="layout/footer" title="$title" keywords="" /}
 <script type="text/javascript">
-    var url = '{:url("admin/service/index")}';
-    $('a[href="'+url+'"]').addClass('active');
+    var url = '{:url("admin/report/supplier")}';
+    $('.nav-sidebar').find('a[href="'+url+'"]').addClass('active');
+    $('.nav-sidebar').find('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
 </script>

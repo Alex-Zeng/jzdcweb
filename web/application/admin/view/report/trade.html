@@ -48,25 +48,27 @@
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                             <tr>
-                                <th width="150px">姓名</th>
-                                <th width="150px">性别</th>
-                                <th>手机号</th>
-                                <th>提交类型</th>
-                                <th>填写者</th>
-                                <th>提交时间</th>
-                                <th>留言</th>
+                                <th width="150px">序号</th>
+                                <th width="150px">日期</th>
+                                <th>SKU编码</th>
+                                <th>商品名称</th>
+                                <th>商品规格</th>
+                                <th>交易数量</th>
+                                <th>交易金额</th>
+                                <th>平均交易单价</th>
                             </tr>
                             </thead>
                             <tbody>
-                            {volist name='list' id='service'}
+                            {volist name='list' id='trade'}
                             <tr>
-                                <td>{$service.name}</td>
-                                <td>{$service.sex}</td>
-                                <td>{$service.phone}</td>
-                                <td>{$service.type_name}</td>
-                                <td>{$service.writer_name}{if $service.writer}#{$service.writer}{/if}</td>
-                                <td>{:date('Y-m-d H:i',$service.write_time)}</td>
-                                <td>{$service.comment}</td>
+                                <td>{$key+1}</td>
+                                <td>{$trade.order_date}</td>
+                                <td>{$trade.sku_code}</td>
+                                <td>{$trade.title}</td>
+                                <td>商品规格</td>
+                                <td>{$trade.amount}</td>
+                                <td>{$trade.total_price}</td>
+                                <td>{$trade.avgPrice}</td>
                             </tr>
                             {/volist}
                             </tbody>
