@@ -109,7 +109,6 @@ class Goods  extends Base {
         $total = $model->alias('a')->join(['sm_products_categories'=>'b'],'a.id=b.product_id','left')
             ->where($where)->order('a.id desc')
             ->group('a.id')
-            ->limit($start,$pageSize)
             ->count();
         $rows = $model->alias('a')->join(['sm_products_categories'=>'b'],'a.id=b.product_id','left')
             ->where($where)->order('a.id desc')
