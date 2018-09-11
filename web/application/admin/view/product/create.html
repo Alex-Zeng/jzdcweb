@@ -73,7 +73,9 @@
                                                 {foreach name="unitRows" id="unit"}
                                                 <option value="{$unit.name}" data-name="{$unit.name}" >{$unit.name}</option>
                                                 {/foreach}
+                                                <option value="0">自定义</option>
                                             </select>
+                                                <input type="text" class="form-control col-md-2 unitText" name="custom_unit_text" style="display: none"/>
                                         </div>
                                     </div>
                                 </div>
@@ -324,7 +326,9 @@
                             {{each colv['spec_attr_val'] as colvv}}
                                 <option  value="{{colvv['spec_option_text']}}">{{colvv['spec_option_text']}} </option>
                             {{/each}}
+                            <option value="0">自定义</option>
                         </select>
+                        <input type="text" class="form-control col-md-2 colorText" name="spec[category_text][{{colv['id']}}_{{colv['spec_attr_key']}}][]" style="display: none"/>
                     {{ else }}
                         <select class="form-control js_specification_attr"  name="spec[category][{{colv['id']}}_{{colv['spec_attr_key']}}][]">
                             <option value="-1">{{colv['spec_attr_key']}}</option>
@@ -341,6 +345,7 @@
                     {foreach name="unitRows" id="unit"}
                     <option value="{$unit.name}" data-name="{$unit.name}" >{$unit.name}</option>
                     {/foreach}
+                    <option value="0">自定义</option>
                 </select>
                 <input type="text" class="form-control col-md-2 unitText" name="spec[unit_text][]" style="display: none"/>
             </td>
@@ -378,7 +383,7 @@
             }
         });
         //单位 事件监听选择自定义
-        $('#combination-container').on('change','.unit',function(){
+        $('#add-form').on('change','.unit',function(){
             if($(this).val()==0){
                 $(this).siblings('.unitText').show();
                 $(this).siblings('.unitText').val('');
