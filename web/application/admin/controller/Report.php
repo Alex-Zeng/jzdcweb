@@ -26,21 +26,40 @@ class Report extends Base{
      * @return mixed
      */
     public function trade(){
+        $title = Request::instance()->get('title','','trim');
+        $sku = Request::instance()->get('sku','','trim');
+        $start = Request::instance()->get('start','');
+        $end = Request::instance()->get('end','');
+
         $model = new MallOrderGoods();
         $where = ['c.state' => ['neq',MallOrder::STATE_CLOSED]];
+
+        if(isset($sku) && $sku){
+            $where['b.sku_code'] = ['like','%'.$sku.'%'];
+        }
+        if(isset($title) && $title){
+            $where['a.title'] = ['like','%'.$title.'%'];
+        }
+        if(isset($start) && $start && isset($end) && $end){
+            $where['c.add_time'] = ['between',[strtotime($start),strtotime($end.' 23:59:59')]];
+        }elseif (isset($start) && $start){
+            $where['c.add_time'] = ['gt',strtotime($start)];
+        }elseif (isset($end) && $end){
+            $where['c.add_time'] = ['lt',strtotime($end.' 23:59:59')];
+        }
 
         $total = $model->alias('a')
             ->join(['sm_product_spec'=>'b'],'a.product_spec_id=b.id','left')
             ->join(['jzdc_mall_order'=>'c'],'a.order_id=c.id','left')
             ->where($where)
-            ->field(['c.add_time','b.sku_code','a.title','FROM_UNIXTIME(c.add_time, \'%Y-%m-%d\') as order_date','SUM(a.price) as total_price','SUM(a.quantity) as amount'])
+            ->field(['c.add_time','b.sku_code','a.title','a.s_info','FROM_UNIXTIME(c.add_time, \'%Y-%m-%d\') as order_date','SUM(a.price) as total_price','SUM(a.quantity) as amount'])
             ->group('order_date,a.product_spec_id')
             ->count();
         $rows = $model->alias('a')
             ->join(['sm_product_spec'=>'b'],'a.product_spec_id=b.id','left')
             ->join(['jzdc_mall_order'=>'c'],'a.order_id=c.id','left')
             ->where($where)
-            ->field(['c.add_time','b.sku_code','a.title','FROM_UNIXTIME(c.add_time, \'%Y-%m-%d\') as order_date','SUM(a.price) as total_price','SUM(a.quantity) as amount'])
+            ->field(['c.add_time','b.sku_code','a.title','a.s_info','FROM_UNIXTIME(c.add_time, \'%Y-%m-%d\') as order_date','SUM(a.price) as total_price','SUM(a.quantity) as amount'])
             ->group('order_date,a.product_spec_id')
             ->order('order_date desc,a.product_spec_id desc')
             ->paginate(20,$total,['query'=>request()->param()]);
@@ -51,6 +70,10 @@ class Report extends Base{
             $row['avgPrice'] = getFormatPrice($row->total_price/$row->amount);
         }
 
+        $this->assign('title',$title);
+        $this->assign('sku',$sku);
+        $this->assign('start',$start);
+        $this->assign('end',$end);
         $this->assign('list',$rows);
         $this->assign('stateList',MallOrder::getStateList());
         $this->assign('page',$rows->render());
@@ -196,6 +219,108 @@ class Report extends Base{
         return $this->fetch();
     }
 
+    /**
+     * @desc 商品交易报表导出
+     * @param string $start
+     * @param string $title
+     * @param string $end
+     * @param string $sku
+     * @throws \think\exception\DbException
+     */
+    public function trade_export($start = '',$title = '',$end = '',$sku = ''){
+        $model = new MallOrderGoods();
+        $where = ['c.state' => ['neq',MallOrder::STATE_CLOSED]];
+
+        if(isset($sku) && $sku){
+            $where['b.sku_code'] = ['like','%'.$sku.'%'];
+        }
+        if(isset($title) && $title){
+            $where['a.title'] = ['like','%'.$title.'%'];
+        }
+        if(isset($start) && $start && isset($end) && $end){
+            $where['c.add_time'] = ['between',[strtotime($start),strtotime($end.' 23:59:59')]];
+        }elseif (isset($start) && $start){
+            $where['c.add_time'] = ['gt',strtotime($start)];
+        }elseif (isset($end) && $end){
+            $where['c.add_time'] = ['lt',strtotime($end.' 23:59:59')];
+        }
+
+        vendor('PHPExcel.PHPExcel');
+        $objPHPExcel = new \PHPExcel();
+        $objPHPExcel->setActiveSheetIndex(0);
+        //设置表头
+        $objPHPExcel->setActiveSheetIndex(0)
+            ->setCellValue('A1', '序号')
+            ->setCellValue('B1', '日期')
+            ->setCellValue('C1',   'SKU编码')
+            ->setCellValue('D1', '商品名称')
+            ->setCellValue('E1', '商品规格')
+            ->setCellValue('F1','交易数量')
+            ->setCellValue('G1','交易金额')
+            ->setCellValue('H1','平均交易单价');
+
+        //查询数据
+        $total = $model->alias('a')
+            ->join(['sm_product_spec'=>'b'],'a.product_spec_id=b.id','left')
+            ->join(['jzdc_mall_order'=>'c'],'a.order_id=c.id','left')
+            ->where($where)
+            ->field(['c.add_time','b.sku_code','a.title','a.s_info','FROM_UNIXTIME(c.add_time, \'%Y-%m-%d\') as order_date','SUM(a.price) as total_price','SUM(a.quantity) as amount'])
+            ->group('order_date,a.product_spec_id')
+            ->count();
+
+        $pageSize = 100;
+        $page = ceil($total / $pageSize);
+        $counter = 2;
+
+        $objPHPExcel->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
+        //设置宽度
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('A')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('B')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('B')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('D')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('E')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('F')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('G')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('H')->setWidth(20);
+
+        for ($i = 0; $i < $page; $i++) {
+            $start = $pageSize * $i;
+        $rows = $model->alias('a')
+            ->join(['sm_product_spec'=>'b'],'a.product_spec_id=b.id','left')
+            ->join(['jzdc_mall_order'=>'c'],'a.order_id=c.id','left')
+            ->where($where)
+            ->field(['c.add_time','b.sku_code','a.title','a.s_info','FROM_UNIXTIME(c.add_time, \'%Y-%m-%d\') as order_date','SUM(a.price) as total_price','SUM(a.quantity) as amount'])
+            ->group('order_date,a.product_spec_id')
+            ->order('order_date desc,a.product_spec_id desc')
+            ->limit($start, $pageSize)
+            ->select();
+            foreach ($rows as $row) {
+                $avgPrice = getFormatPrice($row->total_price/$row->amount);
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('A' . $counter, $counter-1);
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('B'.$counter,$row->order_date);
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('C' . $counter, $row->sku_code);
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('D' . $counter, $row->title);
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('E' . $counter, $row->s_info);
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('F' . $counter, floatval($row->amount));
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('G' . $counter, getFormatPrice($row->total_price));
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('H' . $counter, $avgPrice);
+                $counter++;
+                unset($goodsRows);
+                unset($rows);
+            }
+        }
+        $filename = '商品交易报表_' . date('YmdHi', time()) . '.xls';
+        $title ='商品交易报表_信息';
+        $objPHPExcel->getActiveSheet()->setTitle($title);
+        header("Content-Type: application/force-download");
+        header("Content-Type: application/octet-stream");
+        header("Content-Type: application/download");
+        header('Content-Disposition:inline;filename="' . $filename . '"');
+        //生成excel文件
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+        $objWriter->save('php://output');
+        exit;
+    }
 
     protected function roleReport($role = IndexGroup::GROUP_SUPPLIER){
         $k = Request::instance()->get('k','','trim');
