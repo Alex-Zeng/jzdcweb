@@ -26,7 +26,7 @@ class Product extends Base{
 		if(request()->isPost()){
 			//接收所有提交的数据
 			$post = input('post.');
-            // dump($post['spec']);exit();
+            // dump($post);exit();
             //验证数据
             if($post['supplier_id']<=0){
                return $this->errorMsg('101000');
@@ -44,6 +44,15 @@ class Product extends Base{
                 if($post['custom_unit']==-1){
                     return $this->errorMsg('101007');
                 }
+                if($post['custom_unit']==="0"){
+                    if($post['custom_unit_text']==''){
+                        return $this->errorMsg('101011');
+                    }
+                    if(mb_strlen($post['custom_unit_text'],"utf-8")>3){
+                        return $this->errorMsg('101012');
+                    }     
+                    $post['custom_unit'] = $post['custom_unit_text'];
+                }
             }else{
                 if(!isset($post['spec'])){
                    return  $this->errorMsg('101003');
@@ -59,12 +68,41 @@ class Product extends Base{
             if(isset($post['spec']['category'])){
                 foreach ($post['spec']['category'] as $key => $val) {
                     if(max($val)!=-1 && min($val)==-1){
-                        $msg = explode('_', $key);
+                        
                         $line = array_flip($val);
                         return $this->errorMsg('101005',['replace'=>['__REPLACE__'=>'第'.($line[min($val)]+1).'行的'.$msg[1].'规格未选择']]);
                     }
+                    foreach ($val as $kk => $vv) {
+                        if($vv==="0"){
+                            if($post['spec']['category_text'][$key][$kk]==''){
+                                $msg = explode('_', $key);
+                                return $this->errorMsg('101005',['replace'=>['__REPLACE__'=>'第'.($kk+1).'行的'.$msg[1].'规格未填写']]);
+                            }
+                            if(mb_strlen($post['spec']['category_text'][$key][$kk],"utf-8")>100){
+                                $msg = explode('_', $key);
+                                return $this->errorMsg('101005',['replace'=>['__REPLACE__'=>'第'.($kk+1).'行的'.$msg[1].'规格长度过长']]);
+                            }
+                            $post['spec']['category'][$key][$kk] = $post['spec']['category_text'][$key][$kk];
+                        }
+
+
+                        //单位选择
+                        if($post['spec']['unit'][$kk]==-1){
+                            return $this->errorMsg('101005',['replace'=>['__REPLACE__'=>'第'.($kk+1).'行的自定义单位未选择']]);
+                        }
+                        if($post['spec']['unit'][$kk]==="0"){
+                            if($post['spec']['unit_text'][$kk]==''){
+                                return $this->errorMsg('101005',['replace'=>['__REPLACE__'=>'第'.($kk+1).'行的自定义单位未填写']]);
+                            }
+                            if(mb_strlen($post['spec']['unit_text'][$kk],"utf-8")>3){
+                                return $this->errorMsg('101005',['replace'=>['__REPLACE__'=>'第'.($kk+1).'行的自定义单位长度不能超过三位']]);
+                            }
+                            $post['spec']['unit'][$kk] = $post['spec']['unit_text'][$kk];
+                        }
+                    }
                 }
-                //是否未有规格组合但未任何选择、是否有组合规格是一模一样的
+                
+                //是否有规格组合但未任何选择、是否有组合规格是一模一样的
                 $checkCategoryEqual = array_keys($post['spec']['category']);
                 foreach ($checkCategoryEqual as $k => $v) {
                     for ($i=0; $i <count($post['spec']['category'][$checkCategoryEqual[0]]) ; $i++) { 
@@ -86,6 +124,7 @@ class Product extends Base{
                     }
                 }
             }
+
             if(trim($post['cover_img_url'])==''){
                 return $this->errorMsg('101004');
             }
@@ -383,7 +422,7 @@ class Product extends Base{
         if(request()->isPost()){
             $post = input("post.");
             $product_id = input("post.product_id",0,'intval');
-
+            // dump($post);exit();
             //验证数据
             if($post['supplier_id']<=0){
                return $this->errorMsg('101200');
@@ -395,8 +434,17 @@ class Product extends Base{
                 if(trim($post['custom_price'])==''){
                     return $this->errorMsg('101202');
                 }
-                if($post['custom_unit']===0){
+                if($post['custom_unit']==-1){
                     return $this->errorMsg('101203');
+                }
+                if($post['custom_unit']==="0"){
+                    if($post['custom_unit_text']==''){
+                        return $this->errorMsg('101213');
+                    }
+                    if(mb_strlen($post['custom_unit_text'],"utf-8")>3){
+                        return $this->errorMsg('101214');
+                    }     
+                    $post['custom_unit'] = $post['custom_unit_text'];
                 }
             }else{
                 if(!isset($post['update_spec']) && !isset($post['spec'])){
@@ -417,30 +465,42 @@ class Product extends Base{
                     }
                 }
             }
-            //是否重复
-            if(isset($post['spec']['category'])){
-                if(isset($post['update_spec']['category'])){
-                    $post_spec_category = array_merge_recursive($post['spec']['category'],$post['update_spec']['category']);
-                }else{
-                     $post_spec_category = $post['spec']['category'];
-                }
-                foreach ($post_spec_category as $key => $val) {
+
+            $lineAttr = [];
+            $lineUpdateCount = 0;
+            if(isset($post['update_spec'])){
+                $lineAttr = $post['update_spec'];
+                $lineUpdateCount = count($post['update_spec']['unit']);//获取已插入的记录数
+            }
+            if(isset($post['spec'])){
+                $lineAttr = array_merge_recursive($lineAttr,$post['spec']);
+            }
+            if(count($lineAttr)>0){
+                foreach ($lineAttr['category'] as $key => $val) {
                     if(max($val)!=-1 && min($val)==-1){
                         $msg = explode('_', $key);
                         $line = array_flip($val);
                         return $this->errorMsg('101207',['replace'=>['__REPLACE__'=>'第'.($line[min($val)]+1).'行的'.$msg[1].'规格未选择']]);
                     }
-                }
-                //是否未有规格组合但未任何选择、是否有组合规格是一模一样的
-                $checkCategoryEqual = array_keys($post_spec_category);
-                foreach ($checkCategoryEqual as $k => $v) {
-                    for ($i=0; $i <count($post_spec_category[$checkCategoryEqual[0]]) ; $i++) { 
-                        $checkVal[$i] = isset($checkVal[$i])?$checkVal[$i]:'';
-                        $checkVal[$i]  =  $checkVal[$i].'|'. $post_spec_category[$v][$i];
+                    foreach ($val as $kk => $vv) {
+                        if($vv==="0"){
+                            if($lineAttr['category_text'][$key][$kk]==''){
+                                $msg = explode('_', $key);
+                                return $this->errorMsg('101207',['replace'=>['__REPLACE__'=>'第'.($kk+1).'行的'.$msg[1].'规格未填写']]);
+                            }
+                            if(mb_strlen($lineAttr['category_text'][$key][$kk],"utf-8")>100){
+                                $msg = explode('_', $key);
+                                return $this->errorMsg('101207',['replace'=>['__REPLACE__'=>'第'.($kk+1).'行的'.$msg[1].'规格长度过长']]);
+                            }
+                            $post['spec']['category'][$key][$kk-$lineUpdateCount] = $lineAttr['category_text'][$key][$kk];//好关键的赋值
+                        }
+                        $checkVal[$kk] = isset($checkVal[$kk])?$checkVal[$kk]:'';
+                        $checkVal[$kk]  =  $checkVal[$kk].'|'. $vv;
                     }
                 }
+                //是否未有规格组合但未任何选择、是否有组合规格是一模一样的
                 foreach ($checkVal as $key => $val) {
-                    if($val==('|'.implode('|',array_fill(0, count($checkCategoryEqual), '-1')))){
+                    if($val==('|'.implode('|',array_fill(0, count($lineAttr['category']), '-1')))){
                         return $this->errorMsg('101207',['replace'=>['__REPLACE__'=>'第'.($key+1).'行的规格未作任何选择']]);
                     }
                 }
@@ -452,7 +512,28 @@ class Product extends Base{
                         }
                     }
                 }
+                // dump($lineAttr);exit();
+                //单位
+                for ($i=0; $i < count($lineAttr['unit']); $i++) { 
+                    if($lineAttr['unit'][$i]=='-1'){
+                        return $this->errorMsg('101005',['replace'=>['__REPLACE__'=>'第'.($i+1).'行的自定义单位未选择']]);
+                    }
+                    if($lineAttr['unit'][$i]==="0"){
+                        if($lineAttr['unit_text'][$i]==''){
+                            return $this->errorMsg('101207',['replace'=>['__REPLACE__'=>'第'.($i+1).'行的自定义单位未填写']]);
+                        }
+                        if(mb_strlen($lineAttr['unit_text'][$i],"utf-8")>3){
+                            return $this->errorMsg('101207',['replace'=>['__REPLACE__'=>'第'.($i+1).'行的自定义单位长度不能超过三位']]);
+                        }
+                        if($i<$lineUpdateCount){
+                            $post['update_spec']['unit'][$i] = $lineAttr['unit_text'][$i];
+                        }else{
+                            $post['spec']['unit'][$i-$lineUpdateCount] = $lineAttr['unit_text'][$i];
+                        }
+                    }
+                }
             }
+            // dump($post['update_spec']);exit;
             if(trim($post['cover_img_url'])==''){
                 return $this->errorMsg('101208');
             }
@@ -815,10 +896,14 @@ class Product extends Base{
                 $row['custom_unit']=$val['unit'];
             }else{
 
+                $attrValAll = $SmProductSpecAttrVal->alias('a')->join(['sm_product_spec_attr_key'=>'b'],'a.spec_attr_key_id=b.id','left')->where(['a.id'=>['in',$val['spec_set']]])->field('a.spec_attr_val,b.category_spec_attr_key_id,b.spec_attr_key')->select(); 
+                foreach ($attrValAll as $kk => $vv) {
+                    $attrVal[$vv['category_spec_attr_key_id'].'_'.$vv['spec_attr_key']] = $vv['spec_attr_val'];
+                }
                 $spec[] = 
                 [
                     'id'=>$val['id'],
-                    'category'=>$SmProductSpecAttrVal->where(['id'=>['in',$val['spec_set']]])->column('spec_attr_val'),
+                    'category'=>$attrVal,
                     'unit'=>$val['unit'],
                     'is_price_neg_at_phone'=>$val['is_price_neg_at_phone'],
                     'min_order_qty'=>$val['min_order_qty'],
@@ -830,22 +915,22 @@ class Product extends Base{
             }
         }
         $row['spec'] = $spec;
-        //读取商品规格
-        $specAll = $SmCategorySpecAttrKey->field('id,spec_attr_key')->where(['category_id'=>$row['category_id'],'is_deleted'=>0])->select();
-        $specAttr = [];
-        foreach ($specAll as $key => $val) {
-            if($val['spec_attr_key']=='颜色'){
-                $specAttr[$val['id'].'_'.$val['spec_attr_key']] = $MallColor->field('id,name as spec_option_text')->select();
-            }else{
-                $specAttr[$val['id'].'_'.$val['spec_attr_key']] = $SmCategorySpecAttrOptions->field('id,spec_option_text')->where(['category_spec_attr_key_id'=>$val['id'],'is_deleted'=>0])->select();
-            }
-         } 
-         $row['specAttr'] = $specAttr;
-         // dump($specAttr);exit();
+        // //读取商品规格
+        // $specAll = $SmCategorySpecAttrKey->field('id,spec_attr_key')->where(['category_id'=>$row['category_id'],'is_deleted'=>0])->select();
+        // $specAttr = [];
+        // foreach ($specAll as $key => $val) {
+            // if($val['spec_attr_key']=='颜色'){
+            //     $specAttr[$val['id'].'_'.$val['spec_attr_key']] = $MallColor->column('name');
+            // }else{
+            //     $specAttr[$val['id'].'_'.$val['spec_attr_key']] = $SmCategorySpecAttrOptions->where(['category_spec_attr_key_id'=>$val['id'],'is_deleted'=>0])->column('spec_option_text');
+            // }
+         // } 
+         // $row['specAttr'] = $specAttr;
+
 
         //单位
         $MallUnit = new MallUnit();
-        $unitRows = $MallUnit->where([])->order('sequence','desc')->field(['id','name'])->select();
+        $unitRows = $MallUnit->where([])->order('sequence','desc')->column('name');
 
 
         $this->assign('row',$row); 
