@@ -1,7 +1,18 @@
 {include file="layout/header" title="商品交易报表" keywords="" /}
 
 {include file="layout/left" groupId="$groupId" keywords="" /}
-<!-- Content Wrapper. Contains page content -->
+<style type="text/css">
+    hr{
+        width: 10px;
+        border: 1px solid #ced4da;
+        margin-left: 2px;
+        margin-right: 2px;
+    }
+    input[type="date"]:before{
+        color:#A9A9A9;
+        content:attr(placeholder);
+    }
+</style>
 <div class="content-wrapper">
     <div class="content-header">
         <div class="container-fluid">
@@ -16,7 +27,7 @@
                     </ol>
                 </div><!-- /.col -->
             </div><!-- /.row -->
-        </div><!-- /.container-fluid -->
+        </div>
     </div>
     <section class="content">
         <div class="row">
@@ -26,26 +37,41 @@
                         <h3 class="card-title">商品交易报表</h3>
                     </div>
                     <div class="row" style="padding-top: 15px;padding-right: 15px">
-                        <div class="col-md-12">
-                            <div class="col-md-9">
-                                <form class="form-inline" action="{:url()}"  method="get">
-                                    <div class = "input-group">
+                        <div class="col-md-10">
+                            <form class="form-inline ml-3" action="{:url()}"  method="get">
+                                <div class="form-group">
+                                    <label style="font-weight: normal;">日期：</label>
+                                    <div class="input-group" style="padding-right: 15px">
                                         <input type = "date"  name="start" class = "form-control"  value="{$start}" placeholder="开始日期">
-                                        <span style="display: inline-block;vertical-align: middle;padding-top: 5px"><hr /></span>
+                                        <span style="padding-top: 5px"><hr /></span>
                                         <input type = "date" name="end" class = "form-control" value="{$end}" placeholder="结束日期">
-                                    </div>&nbsp;
-                                    <div class="input-group">
-                                        <input class="form-control form-control-navbar"  name="title" type="text"  value="{$title}" placeholder="商品名称" aria-label="Search">
-                                        <input class="form-control form-control-navbar"  name="sku" type="text"  value="{$sku}" placeholder="SKU编码" aria-label="Search">
-                                        <button class="btn btn-primary" id="search" type="submit">查找</button>
                                     </div>
-                                </form>
-                            </div>
-                            <div class="col-md-2">
-                                <a class="btn btn-primary pull-right"  target="_blank"  href="{:url('admin/report/trade_export',['start'=>$start,'end'=>$end,'title'=>$title,'sku'=>$sku])}" >导出</a>
-                            </div>
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-weight: normal;">SKU编码：</label>
+                                    <div class="input-group" style="padding-right: 15px">
+                                        <input class="form-control form-control-navbar"  name="sku" type="text"  value="{$sku}" placeholder="" aria-label="Search">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label style="font-weight: normal;">商品名称：</label>
+                                    <div class="input-group" style="padding-right: 15px">
+                                        <input class="form-control form-control-navbar"  name="title" type="text"  value="{$title}" placeholder="" aria-label="Search">
+                                    </div>
+                                </div>
+                                <div class="input-group" style="padding-right: 15px">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" id="search" type="submit">搜索</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-2">
+                            <a class="btn btn-primary pull-right"  target="_blank"  href="{:url('admin/report/buyer_export',['start'=>$start,'end'=>$end])}" >导出</a>
                         </div>
                     </div>
+
                     <!-- /.card-header -->
                     <div class="card-body">
                         <table id="example2" class="table table-bordered table-hover">
@@ -88,17 +114,10 @@
     </section>
 </div>
 
-<div class="modal fade" id="info-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-body ">
-            </div>
-        </div>
-    </div>
-</div>
 
 {include file="layout/footer" title="$title" keywords="" /}
 <script type="text/javascript">
-    var url = '{:url("admin/service/index")}';
-    $('a[href="'+url+'"]').addClass('active');
+    var url = '{:url("admin/report/trade")}';
+    $('.nav-sidebar').find('a[href="'+url+'"]').addClass('active');
+    $('.nav-sidebar').find('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
 </script>

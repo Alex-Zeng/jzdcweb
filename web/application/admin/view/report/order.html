@@ -14,8 +14,11 @@
     .comment{
         word-break:break-all;
     }
-    #adjustPrice-modal >.modal-dialog >.modal-content{
-        width: 900px;
+    hr{
+        width: 10px;
+        border: 1px solid #ced4da;
+        margin-left: 2px;
+        margin-right: 2px;
     }
 </style>
 
@@ -46,13 +49,16 @@
                     <div class="row" style="padding-top: 15px;padding-right: 15px">
                         <div class="col-md-10">
                             <form class="form-inline ml-3" action="{:url()}"  method="get">
-                                <div class = "input-group">
+                                <div class="form-group">
+                                    <label style="font-weight: normal;">日期：</label>
+                                <div class = "input-group" style="padding-right: 15px;">
                                     <input type = "date"  name="start" class = "form-control"  value="{$start}" placeholder="开始日期">
                                     <span style="display: inline-block;vertical-align: middle;padding-top: 5px"><hr /></span>
                                     <input type = "date" name="end" class = "form-control" value="{$end}" placeholder="结束日期">
                                 </div>&nbsp;
+                                </div>
                                 <div class="input-group">
-                                    <button class="btn btn-primary" id="search" type="submit">查找</button>
+                                    <button class="btn btn-primary" id="search" type="submit">搜索</button>
                                 </div>
                             </form>
                         </div>

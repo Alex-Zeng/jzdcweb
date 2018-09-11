@@ -67,7 +67,7 @@ class Report extends Base{
         foreach ($rows as $row){
             $row['total_price'] = getFormatPrice($row->total_price);
             $row['amount'] = floatval($row->amount);
-            $row['avgPrice'] = getFormatPrice($row->total_price/$row->amount);
+            $row['avgPrice'] = getFormatPrice(round($row->total_price/$row->amount,4));
         }
 
         $this->assign('title',$title);
@@ -295,7 +295,7 @@ class Report extends Base{
             ->limit($start, $pageSize)
             ->select();
             foreach ($rows as $row) {
-                $avgPrice = getFormatPrice($row->total_price/$row->amount);
+                $avgPrice = getFormatPrice(round($row->total_price/$row->amount,4));
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('A' . $counter, $counter-1);
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('B'.$counter,$row->order_date);
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('C' . $counter, $row->sku_code);
