@@ -272,7 +272,7 @@ class Order extends Base{
                         'goodsId' => $goodsList['goods_id'],
                         'title' => $goodsList['title'],
                         'quantity' => $goodsList['quantity'],
-                        'price' => $goodsList['price'],
+                        'price' => getFormatPrice($goodsList['price']),
                         'unit' => $goodsList['unit'],
                         'materialCode' => $goodsList['materialCode'],
                         'icon' => $goodsList['iconPath'],
@@ -520,6 +520,7 @@ class Order extends Base{
                 $product = $productModel->find(['id'=>$goodsRow->goods_id]);
                 $goodsRow['icon'] = SmProduct::getFormatImg($product->cover_img_url);
             }
+            $goodsRow['price'] = getFormatPrice($goodsRow->price);
         }
 
         //查询支付凭证
