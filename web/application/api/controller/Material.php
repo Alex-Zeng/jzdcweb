@@ -80,15 +80,17 @@ class Material extends Base{
             $where['a.specifications_no|a.specifications_name|c.title'] = ['like','%'.$keyword.'%'];
         }
 
-        $field = ['a.id','a.specifications_no','a.specifications_name','a.product_spec_id','b.sku_code','b.spec_set','b.is_customized','b.spec_img_url','b.min_order_qty','c.title','c.cover_img_url'];
+        $field = ['a.id','a.specifications_no','a.specifications_name','a.product_spec_id','b.sku_code','b.spec_set','b.is_customized','b.spec_img_url','b.min_order_qty','c.title','c.cover_img_url','d.real_name'];
         $total = $model->alias('a')
             ->join(['sm_product_spec' => 'b'],'a.product_spec_id = b.id','left')
             ->join(['sm_product' => 'c'],'b.product_id=c.id','left')
+            ->join(['jzdc_index_user'=>'d'],'c.supplier_id=d.id','left')
             ->where($where)->count();
 
         $rows = $model->alias('a')
             ->join(['sm_product_spec' => 'b'],'a.product_spec_id = b.id','left')
             ->join(['sm_product' => 'c'],'b.product_id=c.id','left')
+            ->join(['jzdc_index_user'=>'d'],'c.supplier_id=d.id','left')
             ->where($where)->limit($start,$pageSize)->field($field)->select();
 
         $specAttrValModel = new SmProductSpecAttrVal();
@@ -116,6 +118,7 @@ class Material extends Base{
                 'title' => $row->title,
                 'minOrderQty' => $row->min_order_qty,
                 'specInfo' => $specInfo,
+                'supplierName' => $row->real_name,
                 'imgUrl' => $row->spec_img_url ? SmProductSpec::getFormatImg($row->spec_img_url) : SmProduct::getFormatImg($row->cover_img_url)
             ];
         }
@@ -187,8 +190,9 @@ class Material extends Base{
             $specRows = $model->alias('a')
                 ->join(['sm_product_spec' => 'b'],'a.product_spec_id = b.id','left')
                 ->join(['sm_product' => 'c'],'b.product_id=c.id','left')
+                ->join(['jzdc_index_user' => 'd'],'c.supplier_id=d.id','left')
                 ->where(['a.user_id'=>$this->userId, 'c.state' => SmProduct::STATE_FORSALE, 'c.audit_state' => SmProduct::AUDIT_RELEASED, 'c.is_deleted' =>0, 'b.is_deleted' => 0])
-                ->field(['a.id','a.specifications_no','a.specifications_name','a.product_spec_id','b.sku_code','b.spec_set','b.is_customized','b.spec_img_url','b.min_order_qty','c.title','c.cover_img_url'])
+                ->field(['a.id','a.specifications_no','a.specifications_name','a.product_spec_id','b.sku_code','b.spec_set','b.is_customized','b.spec_img_url','b.min_order_qty','c.title','c.cover_img_url','d.real_name'])
                 ->select();
             $specList = [];
             foreach ($specRows as $specRow){
@@ -211,6 +215,7 @@ class Material extends Base{
                     'skuCode' => $specRow->sku_code,
                     'minOrderQty' => $specRow->min_order_qty,
                     'specInfo' => $specInfo,
+                    'supplierName' => $specRow->real_name,
                     'imgUrl' => $specRow->spec_img_url ? SmProductSpec::getFormatImg($specRow->spec_img_url) : SmProduct::getFormatImg($specRow->cover_img_url)
                 ];
             }
