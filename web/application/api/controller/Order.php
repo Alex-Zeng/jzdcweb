@@ -446,12 +446,14 @@ class Order extends Base{
             $goodsRows = $orderGoodsModel->alias('a')
                 ->join(['sm_product'=>'b'],'a.goods_id=b.id','left')
                 ->join(['sm_product_spec' => 'c'],'a.product_spec_id=c.id','left')
-                ->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.cover_img_url','a.s_info','c.spec_img_url'])->select();
+                ->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.unit','a.specifications_no','a.specifications_name','b.cover_img_url','a.s_info','c.spec_img_url'])->select();
 
             foreach($goodsRows as &$goodsRow){
                 $goodsRow['quantity'] = intval($goodsRow->quantity);
                 $goodsRow['icon'] = $goodsRow->spec_img_url ? SmProductSpec::getFormatImg($goodsRow->spec_img_url) : SmProduct::getFormatImg($goodsRow->cover_img_url);
                 $goodsRow['price'] = getFormatPrice($goodsRow->price);
+                $goodsRow['specUnit'] = $goodsRow->unit;
+                unset($goodsRow->unit);
             }
             $row['goods'] = $goodsRows;
 			$queryStatus = $status == 6 ? true : false;
