@@ -38,7 +38,7 @@
                     'managerKey' => '商品订单',
                     'managerUrl' => 'javascript:;',
                     'managerIcon'=> 'fa-cart-arrow-down',
-                    'managerVal' => [['name'=>'管理订单','url'=>url('admin/order/index'),'icon'=>'fa-database'],['name'=>'商品管理','url'=>url('admin/goods/index'),'icon'=>'fa-gear']]
+                    'managerVal' => [['name'=>'管理订单','url'=>url('admin/order/index'),'icon'=>'fa-database']] 
                 ],[
                     'managerKey' => '企业认证',
                     'managerIcon'=> 'fa-users',
@@ -66,7 +66,7 @@
                     'managerKey' => '商城管理',
                     'managerUrl' => 'javascript:;',
                     'managerIcon'=> 'fa-dashboard',
-                    'managerVal' => [['name'=>'全站商品','url'=>url('admin/goods/index'),'icon'=>'fa-image'],['name'=>'全站商品分类','url'=>url('admin/product_category/index'),'icon'=>'fa-cubes']]
+                    'managerVal' => [['name'=>'全站商品分类','url'=>url('admin/product_category/index'),'icon'=>'fa-cubes']]
                 ],[
                     'managerKey' => '商品管理',
                     'managerIcon'=> 'fa-feed',
@@ -87,6 +87,7 @@
         ];
         
         $privilege = array_merge($rolePrivilege[getGroupId()],$publicPrivilege);
+
         {/php}
 
         <!-- Sidebar Menu -->

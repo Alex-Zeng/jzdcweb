@@ -67,7 +67,7 @@ class User extends Base{
 
             // $this->admin_log();
 
-            return $this->successMsg('Goods/index',['msg'=>'']);
+            return $this->successMsg('Product/listPass',['msg'=>'']);
         }
         // $this->error('$msg');
         return view();
