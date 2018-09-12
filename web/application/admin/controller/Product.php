@@ -68,7 +68,7 @@ class Product extends Base{
             if(isset($post['spec']['category'])){
                 foreach ($post['spec']['category'] as $key => $val) {
                     if(max($val)!=-1 && min($val)==-1){
-                        
+                        $msg = explode('_', $key);
                         $line = array_flip($val);
                         return $this->errorMsg('101005',['replace'=>['__REPLACE__'=>'第'.($line[min($val)]+1).'行的'.$msg[1].'规格未选择']]);
                     }
