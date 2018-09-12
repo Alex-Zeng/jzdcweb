@@ -92,7 +92,7 @@ class Order extends Base{
 
                 $optionInfo = '';
                 //判断是否定制,根据规格查询 所有规格，进行拼接字符
-                if($specRow->is_customized == 1){
+                if(getBinDecimal($specRow->is_customized) == 1){
                    $optionInfo = '定制';
                 }else{
                     $specSetIds = $specRow->spec_set ? explode(',',$specRow->spec_set) : [];
