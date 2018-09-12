@@ -15,6 +15,6 @@ class SmProductGallery extends Base{
      * @return string
      */
     public static function getFormatImg($img){
-        return config('jzdc_domain').config('jzdc_static_path').'/uploads/goods/'.$img;
+        return config('jzdc_doc_path').'/goods/'.$img;
     }
 }  
