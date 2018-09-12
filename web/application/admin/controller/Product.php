@@ -85,7 +85,6 @@ class Product extends Base{
                             $post['spec']['category'][$key][$kk] = $post['spec']['category_text'][$key][$kk];
                         }
 
-
                         //单位选择
                         if($post['spec']['unit'][$kk]==-1){
                             return $this->errorMsg('101005',['replace'=>['__REPLACE__'=>'第'.($kk+1).'行的自定义单位未选择']]);
@@ -123,8 +122,16 @@ class Product extends Base{
                         }
                     }
                 }
-            }
 
+                //删除多余的规格列
+                foreach ($post['spec']['category'] as $k => $v) {
+                    if(array_sum($v)==(-1*count($v))){
+                        unset($post['spec']['category'][$k]);
+                        unset($post['spec']['category_text'][$k]);
+                    }
+                }
+            }
+            // dump($post);exit();
             if(trim($post['cover_img_url'])==''){
                 return $this->errorMsg('101004');
             }
@@ -476,6 +483,22 @@ class Product extends Base{
                 }
             }
 
+            if(isset($post['spec'])){//删除多余的规格列
+                if(isset($post['update_spec'])){
+                    $update_category_key = array_keys($post['update_spec']['category']);
+                }else{
+                    $update_category_key = [];
+                }
+                foreach ($post['spec']['category'] as $k => $v) {
+                    if(count($update_category_key)>0){
+                        if(!in_array($k,$update_category_key)){
+                            unset($post['spec']['category'][$k]);
+                            unset($post['spec']['category_text'][$k]);
+                        }
+                    }
+                }
+            }
+
             $lineAttr = [];
             $lineUpdateCount = 0;
             if(isset($post['update_spec'])){
@@ -522,6 +545,8 @@ class Product extends Base{
                         }
                     }
                 }
+
+
                 // dump($lineAttr);exit();
                 //单位
                 for ($i=0; $i < count($lineAttr['unit']); $i++) { 
@@ -542,8 +567,10 @@ class Product extends Base{
                         }
                     }
                 }
-            }
-            // dump($post['update_spec']);exit;
+            }   
+
+
+            // dump($post);exit;
             if(trim($post['cover_img_url'])==''){
                 return $this->errorMsg('101208');
             }
@@ -706,6 +733,9 @@ class Product extends Base{
                         $data6_plan_param0[$k] = array_unique($v);
                     }
                     foreach ($data5_result as $k => $v) {//获取规格明细ID插入到规格明细属性值表一对多
+                        if(!isset($data6_plan_param0[$v['category_spec_attr_key_id'].'_'.$v['spec_attr_key']])){
+                            continue;
+                        }
                         foreach ($data6_plan_param0[$v['category_spec_attr_key_id'].'_'.$v['spec_attr_key']] as $kk => $vv) {
                             if($SmProductSpecAttrVal->where(['spec_attr_key_id'=>$v['id'],'spec_attr_val'=>$vv,'is_deleted'=>0])->count()==0){
                                 $data6[] = array_merge($createDefault,[
