@@ -26,6 +26,7 @@ class Register{
         $code = $request->post('code','');
         $username = $request->post('userName','','htmlspecialchars');
         $channel = $request->post('channel',0,'intval');
+        $password = $request->post('password','');
 
         //判断手机号
         if(!$phone){
@@ -45,6 +46,12 @@ class Register{
         }
         if(checkPhone($username)){
             return ['status'=>1,'data'=>[],'msg' => '用户名不能为手机号'];
+        }
+        if(!$password){
+            return ['status'=>1,'data'=>[],'msg' => '密码必须填写'];
+        }
+        if(!checkPassword($password)){
+            return ['status'=>1,'data'=>[],'msg'=>'密码必须为6-20位的数字和字母组合'];
         }
 
 
@@ -92,9 +99,9 @@ class Register{
             'username' => $username,
             'nickname' => $username,
             'phone' => $phone,
-            'password' => '',
+            'password' => md5($password),
             'reg_time' => time(),
-            'reg_ip' => get_ip(),
+           // 'reg_ip' => get_ip(),
             'group' => 6,
             'state' => 1
         ];
@@ -110,7 +117,8 @@ class Register{
                 'phone' => $phone,
                 'email' => '',
                 'username' => $username,
-                'group' => 6
+                'group' => 6,
+                'companyName' => ''
             ];
             //生成token
             $key = config('jzdc_token_key');
@@ -118,10 +126,16 @@ class Register{
                 "id" => $model->id,
                 "group" => 6,
                 "time" => time(),
-                "expire" => time() + 5*3600   //过期时间
+                "expire" => time() + config('JZDC_TOKEN_EXPIRE')   //过期时间
             ];
             $jwt = JWT::encode($token,$key);
             $data['token']= $jwt;
+            //发送邮件通知
+            $emailStr = config('JZDC_OP_EMAIL');
+            $subject='集众电采平台系统注册通知';
+            $content='平台有新用户注册，请及时跟进，谢谢';
+            SendMail($emailStr,$subject,$content);
+
             return ['status'=>0,'data'=>$data,'msg'=>''];
         }
         return ['status'=>1,'data'=>[],'msg'=>'注册失败'];

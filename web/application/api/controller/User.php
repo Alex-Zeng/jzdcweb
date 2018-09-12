@@ -14,15 +14,16 @@ use app\common\model\IndexArea;
 use app\common\model\IndexGroup;
 use app\common\model\IndexUser;
 use app\common\model\MallFavorite;
-use app\common\model\MallGoods;
 use app\common\model\MallOrder;
 use app\common\model\MallOrderGoods;
 use app\common\model\MallReceiver;
 use app\common\model\Notice;
 use app\common\model\OrderMsg;
 use app\common\model\MallReceiverTag;
+use app\common\model\SmProduct;
 use sms\Yunpian;
 use think\Request;
+use think\View;
 
 class User extends Base
 {
@@ -56,7 +57,7 @@ class User extends Base
         $tag = $request->post('tag', '');
         $default = $request->post('is_default', 0, 'intval');
         if (!checkPhone($phone)) {
-            return ['status' => 1, 'data' => [], 'msg' => '手机号格式不正确'];
+            return ['status' => 1, 'data' => [], 'msg' => '您输入的联系方式无效，请输入有效的手机号码！'];
         }
 
         if (!$detail) {
@@ -255,19 +256,31 @@ class User extends Base
             return $auth;
         }
         $model = new MallFavorite();
-        $field == 'time' ? ($field = 'a.' . $field) : ($field = 'b.w_price');
-        $total = $model->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['user_id' => $this->userId])->count();
-        $rows = $model->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['user_id' => $this->userId])->order([$field => $sort])->field(['b.id', 'b.title', 'b.w_price','b.min_price','b.max_price', 'b.icon'])->limit($offset, $pageSize)->select();
+        $field == 'time' ? ($field = 'a.' . $field) : ($field = 'b.min_price');
+
+        //数据获取
+        $total = $model->alias('a')
+            ->join(['sm_product'=>'b'],'a.goods_id=b.id','left')
+            ->where(['a.user_id'=>$this->userId])
+            ->count();
+        $rows = $model->alias('a')
+            ->join(['sm_product' => 'b'],'a.goods_id=b.id','left')
+            ->where(['a.user_id'=>$this->userId])
+            ->order([$field => $sort])
+            ->limit($offset,$pageSize)
+            ->field(['b.id','b.title','b.cover_img_url','b.min_price','b.max_price','b.is_price_neg_at_phone'])
+            ->select();
 
         $list = [];
         foreach ($rows as $row){
             $list[] = [
                 'id' => $row->id,
                 'title' => $row->title,
-                'icon' => MallGoods::getFormatImg($row->icon),
+                'icon' => SmProduct::getFormatImg($row->cover_img_url),
                 'min_price' => getFormatPrice($row->min_price),
                 'max_price' => getFormatPrice($row->max_price),
-                'w_price' => getFormatPrice($row->w_price)
+                'isDiscussPrice' => $row->is_price_neg_at_phone,
+                'showPrice' => getShowPrice($row->is_price_neg_at_phone,$row->min_price,$row->max_price)
             ];
         }
 
@@ -336,7 +349,27 @@ class User extends Base
         $total = $model->where(['supplier' => $this->userId])->count();
         $pendingNumber = $model->where(['supplier' => $this->userId, 'state' => MallOrder::STATE_DELIVER])->count();
         $serviceNumber = $model->where(['supplier'=> $this->userId,'state'=>MallOrder::STATE_RECEIVE,'service_type'=>1])->order(['supplier'=> $this->userId,'state'=>MallOrder::STATE_FINISH,'service_type'=>1])->count();
-        return ['status' => 0, 'data' => ['yesterday' => $yesterdayCount, 'total' => $total, 'pending' => $pendingNumber,'service'=>$serviceNumber], 'msg' => ''];
+        //在售商品总数
+        $productModel = new SmProduct();
+        //交易金额   $where['confirm_delivery_time'] = ['>',0];
+        $moneyInfo = $model->where(['supplier'=>$this->userId,'confirm_delivery_time'=>['gt',0]])->field(['sum(`actual_money`) as money'])->find();
+
+        //在售商品访问量
+        $goodsInfo = $productModel->where(['state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0,'supplier_id'=>$this->userId])->field(['count(*) as count','sum(page_view) as visit'])->find();
+        //
+        return [
+            'status' => 0,
+            'data' => [
+                'yesterday' => $yesterdayCount,
+                'total' => $total,
+                'pending' => $pendingNumber,
+                'service'=>$serviceNumber,
+                'goodsNumber'=>$goodsInfo->count,
+                'visit'=>$goodsInfo->visit ? $goodsInfo->visit : 0,
+                'money' => $moneyInfo  && $moneyInfo->money ? number_format($moneyInfo->money) : 0
+            ],
+            'msg' => ''
+        ];
     }
 
     /**
@@ -354,11 +387,23 @@ class User extends Base
             return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
         }
         $model = new MallOrder();
-        $payCount = $model->where(['buyer_id' => $this->userId,'state'=>MallOrder::STATE_REMITTANCE])->count();
-        $recieveNumber = $model->where(['buyer_id' => $this->userId,'state'=>MallOrder::STATE_RECEIVE])->count();
-        $pendingNumber = $model->where(['buyer_id' => $this->userId,'state'=>MallOrder::STATE_DELIVER])->count();
-        $serviceNumber = $model->where(['buyer_id'=> $this->userId,'state'=>MallOrder::STATE_RECEIVE,'service_type'=>1])->order(['buyer_id'=> $this->userId,'state'=>MallOrder::STATE_FINISH,'service_type'=>1])->count();
-        return ['status' => 0, 'data' => ['pay' => $payCount, 'recieve' => $recieveNumber, 'deliver' => $pendingNumber,'service'=>$serviceNumber], 'msg' => ''];
+        $condition = [MallOrder::STATE_REMITTANCE,MallOrder::STATE_ACCOUNT_PERIOD,MallOrder::STATE_OVERDUE];
+        $payCount = $model->where(['buyer_id' => $this->userId])->whereIn('state',$condition)->count();
+        $recieveNumber = $model->where(['buyer_id' => $this->userId,'state' => MallOrder::STATE_RECEIVE])->count();
+        $pendingNumber = $model->where(['buyer_id' => $this->userId,'state' => MallOrder::STATE_DELIVER])->count();
+        $serviceNumber = $model->where(['buyer_id'=> $this->userId,'service_type'=>1])->count();
+        $moneyInfo = $model->where(['buyer_id'=>$this->userId,'confirm_delivery_time'=>['gt',0]])->field(['sum(`actual_money`) as money'])->find();
+        return [
+            'status' => 0,
+            'data' => [
+                'pay' => $payCount,
+                'recieve' => $recieveNumber,
+                'deliver' => $pendingNumber,
+                'service'=>$serviceNumber,
+                'money'=>$moneyInfo && $moneyInfo->money ? number_format($moneyInfo->money) : 0
+            ],
+            'msg' => ''
+        ];
     }
 
 
@@ -391,8 +436,8 @@ class User extends Base
             $orderRow = $orderModel->where(['out_id' => $row->order_no])->field(['id','goods_names'])->find();
 
             $orderGoodsModel = new MallOrderGoods();
-            $orderGoodsRow = $orderGoodsModel->alias('a')->join(config('prefix') . 'mall_goods b', 'a.goods_id=b.id', 'left')->where(['order_id' => $row->order_id])->field(['b.icon'])->find();
-            $icon = MallGoods::getFormatImg($orderGoodsRow ? $orderGoodsRow->icon : '');
+            $orderGoodsRow = $orderGoodsModel->alias('a')->join(['sm_product' =>'b'], 'a.goods_id=b.id', 'left')->where(['order_id' => $row->order_id])->field(['b.cover_img_url'])->find();
+            $icon = SmProduct::getFormatImg($orderGoodsRow ? $orderGoodsRow->cover_img_url : '');
             $time = strtotime($row['create_time']);
 
             $data[] = [
@@ -435,6 +480,7 @@ class User extends Base
 
         foreach ($rows as &$row) {
             $row['release_time'] = date('Y', $row->release_time) . '年' . date('m', $row->release_time) . '月' . date('d', $row->release_time) . '日 ' . date('H:i', $row->release_time);
+            $row['contentUrl'] = config('jzdc_domain').url('api/user/noticeDetail',['id'=>$row->id]);
         }
         return ['status' => 0, 'data' => ['list' => $rows, 'total' => $total], 'msg' => ''];
     }
@@ -561,6 +607,12 @@ class User extends Base
                 $yunPian->send($userInfo->phone, [], Yunpian::TPL_CERT_SUBMIT);
             }
 
+            //发送邮件通知
+            $emailStr = config('JZDC_OP_EMAIL');
+            $subject='集众电采平台系统认证通知';
+            $content='现有用户提交企业认证申请，请及时跟进，谢谢。';
+            SendMail($emailStr,$subject,$content);
+
             return ['status' => 0, 'data' => [], 'msg' => '已提交认证信息,等待审核...'];
         }
         return ['status' => 1, 'data' => [], 'msg' => '提交审核失败'];
@@ -594,6 +646,7 @@ class User extends Base
             'property' => $row->ent_property,
             'role' => $row->reg_role,
             'status' => $row->status,
+            'isAgent' => $row->agent_identity_card ? 1 : 0,
             'business' => $row->business_license ? $row->business_license : '',
             'permitsAccount' => $row->permits_accounts ? $row->permits_accounts : '',
             'legalIdentityCard' => $row->legal_identity_card ? $row->legal_identity_card : '',
@@ -703,7 +756,9 @@ class User extends Base
         }
 
         $model = new MallReceiverTag();
-        $row = $model->where(['user_id' => $this->userId])->field(['tag', 'id'])->order('id', 'desc')->select();
+        //$row = $model->where(['user_id' => $this->userId])->field(['tag', 'id'])->order('id', 'desc')->select();
+        $row = $model->where(['user_id' => $this->userId])->whereOr(['is_default'=>1])->order('is_default','desc')->field(['tag', 'id'])->order('id', 'desc')->select();
+
 
         return ['status' => 0, 'data' => $row, 'msg' => ''];
     }
@@ -753,7 +808,7 @@ class User extends Base
         //验证短信
         $codeModel = new \app\common\model\Code();
         $codeRow = $codeModel->where(['phone' => $oldInfo->phone, 'type' => \app\common\model\Code::TYPE_PHONE_BIND_OLD])->order('id', 'desc')->find();
-        if (!$codeRow || $codeRow['code'] != $code) {
+        if (!$codeRow || $codeRow['code'] != $oldCode) {
             return ['status' => 1, 'data' => [], 'msg' => '短信验证码错误'];
         }
         if ($codeRow['expire_time'] < time()) {
@@ -761,7 +816,7 @@ class User extends Base
         }
 
         $codeRow = $codeModel->where(['phone' => $phone, 'type' => \app\common\model\Code::TYPE_PHONE_BIND_NEW])->order('id', 'desc')->find();
-        if (!$codeRow || $codeRow['code'] != $code) {
+        if (!$codeRow || $codeRow['code'] != $newCode) {
             return ['status' => 1, 'data' => [], 'msg' => '短信验证码错误'];
         }
         if ($codeRow['expire_time'] < time()) {
@@ -806,7 +861,7 @@ class User extends Base
         }
 
         if (!checkPassword($password) || !checkPassword($confirmPassword)){
-            return ['status'=>1,'data'=>[],'msg'=>'密码必须为4-20位的数字和字母组合'];
+            return ['status'=>1,'data'=>[],'msg'=>'密码必须为6-20位的数字和字母组合'];
         }
 
         if ($password != $confirmPassword) {
@@ -1040,11 +1095,19 @@ class User extends Base
             'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : '',
             'phone' => $row->phone,
             'email' => $row->email,
-            'username' => $row->username
+            'username' => $row->username,
+            'companyName' => $row->real_name
         ];
 
         return ['status' => 0, 'data' => $return, 'msg' => ''];
     }
 
 
+    public function noticeDetail($id){
+        $model = new Notice();
+        $row = $model->find(['id'=>$id]);
+
+        $view = new View();
+        echo $view->fetch('index/notice_detail',['detail'=>$row ? getImgUrl($row->content) : '']);
+    }
 }

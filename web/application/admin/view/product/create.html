@@ -1,0 +1,918 @@
+{include file="layout/header" title="" keywords="" /}
+
+{include file="layout/left" groupId="$groupId" keywords="" /}
+<style type="text/css">
+    #custom-container > tr> td > input{
+        width: 130px !important;
+    }
+</style>
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"></h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">商品管理</a></li>
+                        <li class="breadcrumb-item active">商品添加</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-primary">
+                        <form id="add-form" role="form" action="{:url('')}" method="post"  ><!-- onsubmit="return validateSubmit()" -->
+                            <div class="card-body">
+                                <div class="form-inline form-group">
+                                    <label  class="col-md-2">*选择供应商</label>
+                                    <div class="col-md-5 no-padding">
+                                        <div class="row">
+                                          <select class="form-control col-md-6 select2" name="supplier_id">
+                                                {volist name=":getSupplierList()"  id='user'}
+                                                <option  value="{$user.id}">{$user.real_name}</option>
+                                                {/volist}
+                                          </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-inline form-group ajax-bind-change">
+                                    <label for="" class="col-md-2">*所属类目</label>
+                                    <div class="col-md-9 no-padding">
+                                        <div id="category-template-box"></div>
+                                        
+                                    </div>
+                                </div>
+                             
+                                <div class="form-inline form-group">
+                                    <label class="col-md-2">*商品名称</label>
+                                    <div class="col-md-5 no-padding">
+                                        <div class="row">
+                                            <input type="text"  name="title" maxlength="30" class="form-control col-md-6" />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <br/><br/>
+                                <div class="form-inline form-group">
+                                    <div class="col-md-12 no-padding">
+                                        <button type="button" class="btn btn-primary" id="combination-container-add">添加规格组合</button>
+
+                                        <input type="checkbox" class="js_specification_customization" name="custom_switch" /> 定制
+                                        <div style="display: none; " class="js_specification_customization_value">
+                                            定制单价：<input type="number"  name="custom_price" min="0" class="form-control col-md-6" />
+                                            定制单位：
+                                            <select class="form-control unit"  name="custom_unit">
+                                                <option value="-1" >请选择</option>
+                                                {foreach name="unitRows" id="unit"}
+                                                <option value="{$unit.name}" data-name="{$unit.name}" >{$unit.name}</option>
+                                                {/foreach}
+                                                <option value="0">自定义</option>
+                                            </select>
+                                                <input type="text" class="form-control col-md-2 unitText" name="custom_unit_text" style="display: none"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-inline form-group">
+                                    <div class="col-md-12 no-padding">
+                                        <div class="card">
+                                            <div class="card-body p-0">
+                                                <table class="table table-striped">
+                                                    <thead >
+                                                    <tr>
+                                                        <th>组合规格</th>
+                                                        <th>计量单位</th>
+                                                        <th>是否电议</th>
+                                                        <th>起售数量</th>
+                                                        <th>单价</th>
+                                                        <th>图片</th>
+                                                        <th>操作</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody id="combination-container" data-category="">
+                                                     
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br/><br/>
+
+                                
+                                <div id="standard_container" class="js_ajax_bind_change"></div>
+    
+
+                                <div class="form-inline form-group">
+                                    <label class="col-md-2">*产品主图</label>
+                                    <div class="col-md-5 no-padding">
+                                        <div class="row">
+                                            <div class="col-md-6 no-padding">
+                                                <input id="cover-file" name="file" type="file"  data-show-caption="true">
+                                            </div>
+                                            <p class="help-block2" style="padding-top: 6px;padding-left: 5px;">支持jpg、jpeg、png格式，大小不超过2.0M</p>
+                                        </div>
+                                        <div class="row">
+                                            <input  type="hidden" name="cover_img_url" id="cover-upload-file"  value="" />
+                                            <small class="help-block" style="padding-top: 6px;padding-left: 5px;"></small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-inline form-group">
+                                    <label  class="col-md-2">多视角图片</label>
+                                    <div class="col-md-5 no-padding">
+                                        <div class="row">
+                                            <div class="col-md-6 no-padding">
+                                                <input id="multi-file" name="file" type="file" data-show-caption="true"  multiple>
+                                            </div>
+                                            <p class="help-block2" style="padding-top: 6px;padding-left: 5px;">支持jpg、jpeg、png格式，大小不超过2.0M</p>
+
+                                        </div>
+                                        <div class="row">
+                                            <input  type="hidden" name="multi_img_url" id="multi-upload-file"  value="" />
+                                            <small class="help-block" style="padding-top: 6px;padding-left: 5px;"></small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-inline form-group">
+                                    <label for="" class="col-md-2">产地</label>
+                                    <div class="col-md-5 no-padding">
+                                        <div class="row" id="js_area_template"></div>
+                                    </div>
+                                </div>
+                                <div class="form-inline form-group">
+                                    <label class="col-md-2">商品详情APP/H5</label>
+                                    <div class="col-md-7 no-padding">
+                                        <div class="row">
+                                            <textarea id="html_content_1" class="textarea goods-content" placeholder="商品详情..."  name="html_content_1"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-inline form-group">
+                                    <label class="col-md-2">商品详情Web</label>
+                                    <div class="col-md-7 no-padding">
+                                        <div class="row">
+                                            <textarea id="html_content_2" class="textarea goods-content" placeholder="商品详情..."  name="html_content_2"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer col-md-offset-2">
+                                <input type="hidden" name="audit_state" class="js_audit_state" value="1">
+                                <button type="button" class="btn btn-primary js_draft">存为草稿</button>
+                                <button type="button" class="btn btn-primary js_release">发布</button>
+                                <small class="submit-tip" style="padding-top: 6px;padding-left: 5px;color: #a94442"></small>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{include file="layout/footer" title="$title" keywords="" /}
+<link href="__STATIC__/js/plugins/bootstrap-fileinput/css/fileinput.css" media="all" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="__STATIC__/js/plugins/kindeditor/themes/default/default.css" />
+<link rel="stylesheet" href="__STATIC__/js/plugins/kindeditor/plugins/code/prettify.css" />
+<link rel="stylesheet" href="__STATIC__/js/plugins/bootstrapvalidator/css/bootstrapValidator.css"/>
+<script src="__STATIC__/js/plugins/bootstrap-fileinput/js/fileinput.js" type="text/javascript"></script>
+<script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
+<script type="text/javascript" src="__STATIC__/js/template-web.js"></script>
+<script src="__STATIC__/js/plugins/kindeditor/kindeditor-all.js"></script>
+<script src="__STATIC__/js/plugins/kindeditor/lang/zh-CN.js"></script>
+<link rel="stylesheet" href="__STATIC__/js/plugins/select2/select2.css" />
+<script src="__STATIC__/js/plugins/select2/select2.min.js" type="text/javascript"></script>
+
+<!-- 1选择供应商 start -->
+    <script>
+        $(function () {
+            $('.select2').select2();
+        })
+    </script>
+    <style>
+    .select2-container .select2-selection--single{height: 38px;}
+    .select2-container--default .select2-selection--single{border-color: #ced4da;}
+    .select2-container--default .select2-selection--single .select2-selection__rendered{line-height: 38px;}
+    .select2-container--default .select2-selection--single .select2-selection__arrow{top: 4px;}
+    </style>
+<!-- 1选择供应商 end -->
+
+
+
+<!-- 2所属类目 start -->
+    <script id="next-template" type="text/html">
+        {{ if lineType == 'next' }}
+            <span class="select-level-div">
+                <select class="form-control select-level next">
+                    <option  value="0">请选择</option>
+                    {{each categoryNextLevelList as value}}
+                        <option value="{{value.id}}" >{{value.name}}</option>
+                    {{/each}}
+                </select>
+            </span>
+        {{/if}}
+        
+        {{ if lineType == 'ready' }}
+            <div class="row category-box" id="">
+                <div class="select-level-div">
+                    <select class="form-control select-level">
+                        <option  value="0">请选择</option>
+                        {{each categoryNextLevelList as value}}
+                            <option value="{{value.id}}" >{{value.name}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                <a href="javascript:;" class="category-add" style="padding-top: 6px;padding-left: 5px;">&nbsp;&nbsp;&nbsp;&nbsp;继续添加</a>
+                <input type="hidden" name='category_id[]' class="category-value-input" value="{$category_id??''}">
+            </div>
+        {{/if}}
+
+        {{ if lineType == 'add' }}
+            <div class="row category-box" style="margin-top: 10px;">
+                <div class="select-level-div">
+                    <select class="form-control select-level">
+                        <option  value="0">请选择</option>
+                        {{each categoryNextLevelList as value}}
+                            <option value="{{value.id}}" >{{value.name}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                <a href="javascript:;" class="category-del" style="padding-top: 6px;padding-left: 5px;">&nbsp;&nbsp;&nbsp;&nbsp;删除当前</a>
+                <input type="hidden" name='category_id[]' class="category-value-input">
+            </div>
+        {{/if}}
+    </script>
+    <script>
+            function ajaxGetCategory(id,elm,htmlType,lineType){
+                $.ajax({
+                    type:'get',
+                    url:'?s=admin/product/getCategoryNextLevelList&parentId='+id,
+                    data:{},
+                    dataType:'json',
+                    success:function (data) {
+                        if(data.status == 0){
+                            if(data.data.list.length>0){
+                                if(typeof(elm) == 'string'){
+                                    elm = $(elm);
+                                }
+                                var html = template('next-template',{categoryNextLevelList:data.data.list,lineType:lineType});
+                                if(htmlType == 'html'){
+                                    elm.html(html);
+                                }else if(htmlType == 'after'){
+                                    elm.after(html);
+                                }
+                            }
+                            
+                        }
+                    }
+                });
+            }
+
+            //加载首个分类
+            ajaxGetCategory(0,'#category-template-box','html','ready');
+
+            //增加分类
+            $('.ajax-bind-change').on('click',".category-add",function(){
+                if($('.ajax-bind-change .category-box').length>=5){
+                    layer.alert('最多只能关联五个');
+                    return false;
+                }
+                ajaxGetCategory(0,'.ajax-bind-change .category-box:last','after','add');
+            });
+
+            //删除分类
+            $('.ajax-bind-change').on('click',".category-del",function(){
+                $(this).parent('.category-box').remove();
+            });
+
+            //给分类下的下拉框绑定事件
+            $('.ajax-bind-change').on('change','.select-level',function () {
+                var typeId = $(this).val();//获取当前选中的分类值
+                $(this).siblings('.select-level-div').remove();//把当前触发的下拉框下级的去掉
+                if(typeId>0){
+                    ajaxGetCategory(typeId,$(this),'after','next');
+                }else{
+                    //获取上一级的选中分类值
+                    var preSelectValue = $(this).parent('.select-level-div').siblings('.select-level').val();
+                    if(preSelectValue!= undefined ){
+                        typeId = preSelectValue;
+                    }
+                }
+
+                //选中的值赋值于input[type=hidden]
+                $(this).parents('.category-box').children('.category-value-input').val(typeId);
+            });
+    </script>
+<!-- 2所属类目 end -->
+
+
+<!-- 3规格组合 start -->
+    <script id="container-template" type="text/html">
+        {{ if categoryAttr !='' }}
+        <tr class="js_specification_tr">
+            <td>
+                {{each categoryAttr as colv}}
+                    {{ if colv['spec_attr_key']=='规格' }}
+                        <select class="form-control js_specification_attr js_specification_color"  name="spec[category][{{colv['id']}}_{{colv['spec_attr_key']}}][]">
+                            <option value="-1">{{colv['spec_attr_key']}}</option>
+                            {{each colv['spec_attr_val'] as colvv}}
+                                <option  value="{{colvv['spec_option_text']}}">{{colvv['spec_option_text']}} </option>
+                            {{/each}}
+                            <option value="0">自定义</option>
+                        </select>
+                        <input type="text" class="form-control col-md-2 colorText" name="spec[category_text][{{colv['id']}}_{{colv['spec_attr_key']}}][]" style="display: none"/>
+                    {{ else }}
+                        <select class="form-control js_specification_attr js_specification_color"  name="spec[category][{{colv['id']}}_{{colv['spec_attr_key']}}][]">
+                            <option value="-1">{{colv['spec_attr_key']}}</option>
+                            {{each colv['spec_attr_val'] as colvv}}
+                                <option value="{{colvv['spec_option_text']}}">{{colvv['spec_option_text']}} </option>
+                            {{/each}}
+                            <option value="0">自定义</option>
+                        </select>
+                        <input type="text" class="form-control col-md-2 colorText" name="spec[category_text][{{colv['id']}}_{{colv['spec_attr_key']}}][]" style="display: none"/>
+                    {{/if}}
+                {{/each}}
+            </td>
+            <td>
+                <select class="form-control unit"  name="spec[unit][]">
+                    <option value="-1" >请选择</option>
+                    {foreach name="unitRows" id="unit"}
+                    <option value="{$unit.name}" data-name="{$unit.name}" >{$unit.name}</option>
+                    {/foreach}
+                    <option value="0">自定义</option>
+                </select>
+                <input type="text" class="form-control col-md-2 unitText" name="spec[unit_text][]" style="display: none"/>
+            </td>
+            <td>
+                <div class="form-check">
+                    <select class="form-control unit"  name="spec[is_price_neg_at_phone][]">
+                        <option value="1" >是</option>
+                        <option value="0" selected="selected">否</option>
+                    </select>
+                </div>
+            </td>
+            <td><input type="number" class="form-control js_min_order_qty" value="1" min="0"  name="spec[min_order_qty][]" /></td>
+            <td><input type="number" class="form-control js_price" value="0.00" min="0" name="spec[price][]" /></td>
+            <td>
+                <input class="js_specification_picture" name="file" type="file" style="display: inline;">
+                <input  type="hidden" class="js_specification_picture_data" name="spec[spec_img_url][]" value="" />
+            </td>
+            <td>    
+                <button type="button" class="btn btn-success  js_specification_price">设置价格区间</button>
+                <input type="hidden" class="js_specification_price_data" name="spec[price_section][]">
+                <button type="button" class="btn btn-danger  js_specification_delete">删除</button>
+            </td>
+        </tr>
+        {{/if}}
+    </script>
+    <script>
+        //有颜色规格 事件监听选择自定义
+        $('#combination-container').on('change','.js_specification_color',function(){
+            if($(this).val()==0){
+                $(this).next('.colorText').show();
+                $(this).next('.colorText').val('');
+            }else{
+                $(this).next('.colorText').hide();
+                $(this).next('.colorText').val('');
+            }
+        });
+        //单位 事件监听选择自定义
+        $('#add-form').on('change','.unit',function(){
+            if($(this).val()==0){
+                $(this).siblings('.unitText').show();
+                $(this).siblings('.unitText').val('');
+            }else{
+                $(this).siblings('.unitText').hide();
+                $(this).siblings('.unitText').val('');
+            }
+            
+        })
+
+        //初始化数据显示
+        combinationContainerEmpty();
+
+        //验证是否处于无数据状态
+        function combinationContainerEmpty(){
+            var len =$('#combination-container .js_specification_tr').length;
+            if(len){
+                $("#combination-container .js_specification_tr_none").remove();
+            }else{
+                $("#combination-container").html('<tr class="js_specification_tr_none"><td colspan="7" class="text-center">暂无任何的规格组合</td></tr>');
+            }
+        }
+
+        //赋值显示
+        function combinationContainerColspan(categoryAttr){
+            var html = template('container-template',{'categoryAttr':categoryAttr});
+            $('#combination-container').append(html);
+            combinationContainerEmpty();
+        }
+
+        //添加规格按钮事件监听
+        $("#combination-container-add").click(function(){
+            //获取主分类选中的ID
+            var categoryId = $('#category-template-box .category-box:first .category-value-input').val();
+            if(categoryId==0){
+                layer.alert('请先选择分类');
+                return;
+            }
+            //获取规格数据并缓存起来
+            var categoryAttr = $('#combination-container').data('category'+categoryId);
+            // console.log(categoryAttr);
+            if(categoryAttr == undefined){
+                $.ajax({
+                        type:'get',
+                        url:'?s=admin/product/getCategoryAttr&categoryId='+categoryId,
+                        data:{},
+                        dataType:'json',
+                        success:function (data) {
+                            if(data.status == 0){
+                                $('#combination-container').data('category'+categoryId,data.data.list);
+                                combinationContainerColspan(data.data.list);
+                                eachPicture();
+                            }
+                        }
+                    });
+            }else{
+                combinationContainerColspan(categoryAttr);
+                eachPicture();
+            }
+        });
+    </script>
+<!-- 图片上传 -->
+<script>
+    function eachPicture(){
+        $('#combination-container .js_specification_picture').each(function(i,n){
+            $(n).fileinput({
+                language: 'zh', //设置语言
+                uploadUrl: '?s=admin/file/upload',  //上传地址
+                showUpload: true, //是否显示上传按钮
+                showRemove:true,
+                dropZoneEnabled: false,
+                showCaption: false,//是否显示标题
+                allowedPreviewTypes: ['image'],
+                allowedFileTypes: ['image'],
+                allowedFileExtensions:  ['jpg', 'png','jpeg'],
+                maxFileSize : 5120,
+                maxFileCount: 1,
+                uploadExtraData: function(previewId, index) {   //额外参数的关键点
+                    var obj = {};
+                    obj.type = 'goods';
+                    return obj;
+                }
+            });
+            $(n).on("fileuploaded", function(event, data) {
+                if(data.response){
+                    $(this).parents('.file-input').siblings('.js_specification_picture_data').val(data.response.data.filename);
+                }
+            });
+            $(n).on('fileclear', function(event,id) {
+                $(this).parents('.file-input').siblings('.js_specification_picture_data').val('');
+            });
+        });
+    }
+</script>
+<!-- 价格 -->
+    <div class="modal fade" id="price-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="card" >
+                        <div class="card-body p-0">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>数量区间</th>
+                                    <th>产品单价</th>
+                                    <th>&nbsp;&nbsp;</th>
+                                </tr>
+                                </thead>
+                                <tbody class="price-add">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:;" id="price-add" style="float: left;margin-right: 220px;">+新增价格区间</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" data-id="" id="price-request">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script id="price-template" type="text/html">
+            {{ if priceObj!='' }}
+            {{each priceObj as colv xx}}
+                <tr>
+                    <td>
+                        <input type="number" class="min" value="{{colv['min_order_qty']}}" style="width: 80px;" />&nbsp;-&nbsp;
+                        <input type="number" class="max"  value="{{colv['max_order_qty']}}" style="width: 80px;" />
+                    </td>
+                    <td>
+                        <input type="number" class="price" value="{{colv['price']}}" style="width: 120px;" />
+
+                    </td>
+                    <td>
+                        <input type="hidden" class="id" value="{{colv['id']}}" style="width: 120px;" />
+                        <a href="javascript:;" class="price-del">删除</a>
+                    </td>
+                </tr>
+            {{/each}}
+            {{/if}}            
+    </script>
+    <script>
+        //价格区间弹出层
+        $('#combination-container').off('click','.js_specification_price').on('click','.js_specification_price', function (event) {
+            // event.preventDefault();//阻止之前的事件绑定
+            //获取当前行的值
+            var trIndex = $(this).parents('tr').index();
+            var js_price = $(this).parents('tr').find('.js_price').val();
+            var js_min_order_qty = $(this).parents('tr').find('.js_min_order_qty').val();
+            var js_max_order_qty = '99999999.99';
+            //生成html展示
+            var trVal =$(this).siblings('.js_specification_price_data').val();
+            if(trVal==''){
+                var priceObj =  [{'price':js_price,'min_order_qty':js_min_order_qty,'max_order_qty':js_max_order_qty,'id':""}];
+                var html = template('price-template',{'priceObj':priceObj})
+            }else{
+                var html = template('price-template',{'priceObj':JSON.parse(trVal)})
+            }
+            $('#price-modal .modal-content .price-add').html(html);
+            $('#price-modal').modal('show');
+
+
+            //点击保存把价格区间全部拿出来存储
+            $('#price-request').off('click').on('click',{'trIndex':trIndex},function(obj){
+                // obj.preventDefault();//阻止之前的事件绑定
+                //与外部的互相事件绑定
+                var min = $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr:first .min').val();
+                var price = $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr:first .price').val();
+                $('#combination-container .js_specification_tr:eq('+trIndex+') .js_min_order_qty').val(min);
+                $('#combination-container .js_specification_tr:eq('+trIndex+') .js_price').val(price);
+                
+                //如果1有设置区间则存储起来
+                var trlen = $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr').length;
+                var modelVals = [];
+                for (var i =0;  i < trlen; i++) {
+                    var trobj = $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr:eq('+i+')');
+                    var vmin = eval(trobj.find('.min').val());
+                    var vmax = eval(trobj.find('.max').val());
+                    var vprice = eval(trobj.find('.price').val());
+                    var vid = trobj.find('.id').val();
+                    if(vmin>=vmax){
+                        layer.alert('第'+(i+1)+'区间的最小值不能大于最大值');
+                        return;
+                    }
+                    var nextVmin = $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr:eq('+(i+1)+')').find('.min').val();
+                    if(nextVmin!=undefined){
+                        nextVmin = eval(nextVmin);
+                        if(vmax>=nextVmin){
+                            layer.alert('第'+(i+1)+'区间最大值不能少于或等于第'+(i+2)+'区间最小值');
+                            return;break;
+                        }
+                        if((nextVmin-vmax)!=1){
+                            layer.alert('第'+(i+1)+'区间最大值与第'+(i+2)+'区间最小值差值不能大于1');
+                            return;break;
+                        }
+                    }
+
+                   var objd = {'price':vprice,'min_order_qty':vmin,'max_order_qty':vmax,'id':vid};
+                   modelVals.push(objd);
+                }
+                $('#combination-container .js_specification_tr:eq('+trIndex+') .js_specification_price_data').val(JSON.stringify(modelVals));
+                $('#price-modal').modal('hide');
+                obj.stopPropagation(); return false;
+            });
+            event.stopPropagation();return false;
+        });
+        //添加价格区间
+        $('body').on('click','#price-add', function (event) {
+            var priceObj =  [{'js_price':0,'js_min_order_qty':0,'js_max_order_qty':0}];
+            var html = template('price-template',{'priceObj':priceObj})    
+            $(this).parent('.modal-footer').siblings('.modal-body').find('.price-add').append(html);
+        });
+        //删除价格区间
+        $('body').on('click','.price-del', function (event) {
+            var trlen = $(this).parents('.modal-body').find('.price-add tr').length;
+            if(trlen==1){
+                layer.alert('最少有一个，不能再删除了');
+            }else{
+                $(this).parents('tr').remove();
+            }
+        });
+        $('body').on('focus','.js_price',function(event){
+            var val = $(this).val();
+            $(this).data('blur',val);
+        });
+        $('body').on('blur','.js_price',function(event){
+            if($(this).parents('.js_specification_tr').find('.js_specification_price_data').val()!=''){
+                layer.alert('当前修改的规格商品设定了价格区间不能在此处直接修改,请在价格区间中修改');
+                var history = $(this).data('blur');
+                $(this).val(history);
+                $(this).data('blur','');
+            }
+        });
+    </script>
+<!-- 删除 -->
+    <div class="modal fade" id="delete-specification-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">确定要删除当前选中的规格组合?</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                    <button type="button" class="btn btn-primary" data-id="" id="delete-specification-request">是</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $('#combination-container').on('click','.js_specification_delete', function (event) {
+            $('#delete-specification-modal').modal('show');
+            var trIndex = $(this).parents('tr').index();
+            
+            $('#delete-specification-request').one('click',{'trIndex':trIndex},function(obj){
+                $('#combination-container tr:eq('+trIndex+')').remove();
+                combinationContainerEmpty();
+                $('#delete-specification-modal').modal('hide');
+            });
+            
+        });
+    </script>
+<!-- 3规格组合 end -->
+
+
+<!-- 4产品主图 start-->
+    <script>
+        // 单图上传
+        $("#cover-file").fileinput({
+            language: 'zh', //设置语言
+            uploadUrl: '?s=admin/file/upload',  //上传地址
+            showUpload: true, //是否显示上传按钮
+            showRemove:true,
+            dropZoneEnabled: false,
+            showCaption: true,//是否显示标题
+            allowedPreviewTypes: ['image'],
+            allowedFileTypes: ['image'],
+            allowedFileExtensions:  ['jpg', 'png','jpeg'],
+            maxFileSize : 5120,
+            maxFileCount: 1,
+            uploadExtraData: function(previewId, index) {   //额外参数的关键点
+                var obj = {};
+                obj.type = 'goods_thumb';
+                return obj;
+            }
+        });        
+        $('#cover-file').on("fileuploaded", function(event, data) {
+            if(data.response){
+                $('#cover-upload-file').val(data.response.data.filename);
+            }
+        });
+        $('#cover-file').on('fileclear', function(event,id) {
+            $('#cover-upload-file').val('');
+        });
+    </script>
+<!-- 4产品主图 end-->
+
+<!-- 5多视角图片 start -->
+    <script>
+        //多图上传
+        $("#multi-file").fileinput({
+            language: 'zh', //设置语言
+            uploadUrl: '?s=admin/file/upload',  //上传地址
+            showUpload: true, //是否显示上传按钮
+            showRemove:true,
+            dropZoneEnabled: false,
+            showCaption: true,//是否显示标题
+            allowedPreviewTypes: ['image'],
+            allowedFileTypes: ['image'],
+            allowedFileExtensions:  ['jpg', 'png','jpeg'],
+            maxFileSize : 5120,
+            maxFileCount: 20,
+            uploadExtraData: function(previewId, index) {   //额外参数的关键点
+                var obj = {};
+                obj.type = 'goods';
+                return obj;
+            }
+        });
+        $('#multi-file').on("fileuploaded", function(event, data) {
+            if(data.response) {
+                var str = $('#multi-upload-file').val();
+                var newStr = str ? str+'|'+data.response.data.filename : data.response.data.filename;
+                $('#multi-upload-file').val(newStr);
+                $('#multi-upload-file').closest('.form-group').removeClass('has-error');
+                $('#multi-upload-file').closest('.form-group').find('.help-block').hide();
+            }
+        });
+        $('#multi-file').on('fileclear', function(event) {
+            $('#multi-upload-file').val('');
+        });
+    </script>
+<!-- 5多视角图片 end -->
+
+
+<!-- 6产地 start -->
+    <script id="area-template" type="text/html">
+        <span class="js_area_box_div">
+            <select class="form-control js_area_box_select">
+                <option  value="0">请选择</option>
+                {{each areaNextLevelList as value}}
+                    <option value="{{value.id}}" >{{value.name}}</option>
+                {{/each}}
+            </select>
+            {{ if name!='' }}
+            <input type="hidden" name='{{name}}' class="js_area_box_input">
+            {{/if}}
+        </span>
+    </script>
+    <script>
+            function ajaxGetArea(id,elm,htmlType,name){
+                $.ajax({
+                    type:'get',
+                    url:'?s=admin/product/getAreaNextLevelList&parentId='+id,
+                    data:{},
+                    dataType:'json',
+                    success:function (data) {
+                        if(data.status == 0){
+                            if(data.data.list.length>0){
+                                if(typeof(elm) == 'string'){
+                                    elm = $(elm);
+                                }
+                                var html = template('area-template',{areaNextLevelList:data.data.list,name:name});
+                                if(htmlType == 'html'){
+                                    elm.html(html);
+                                }else if(htmlType == 'after'){
+                                    elm.after(html);
+                                }
+                            }
+                            
+                        }
+                    }
+                });
+            }
+
+            //加载首个分类
+            ajaxGetArea(45067,'#js_area_template','html','province_of_origin_id');
+
+
+            //给分类下的下拉框绑定事件
+            $('#js_area_template').on('change','.js_area_box_select',function () {
+                var typeId = $(this).val();//获取当前选中的分类值
+                $(this).siblings('.js_area_box_div').remove();//把当前触发的下拉框下级的去掉
+                
+                var len = $('.js_area_box_input').length;
+                var name = '';
+                if(typeId>0 && len<3){
+                    switch(len){
+                        case 1:
+                            name = 'city_of_origin_id';
+                            break;
+                        case 2:
+                            name = 'district_of_origin_id';
+                            break;
+                    }
+                    ajaxGetArea(typeId,$(this),'after',name);
+                }
+
+                //选中的值赋值于input[type=hidden]
+                $(this).siblings('.js_area_box_input').val(typeId);
+            });
+    </script>
+
+    <script>
+        $('.js_specification_customization').change(function(){
+            if($(this).prop('checked')==true){
+                $(this).siblings('.js_specification_customization_value').attr({'style':'display:  inline;'});
+            }else{
+                $(this).siblings('.js_specification_customization_value').hide();
+            }
+        });
+    </script>
+<!-- 6产地 end -->
+
+
+<!-- 7商品详情App/H5 start -->
+<!-- 7商品详情App/H5 end -->
+
+
+<!-- 8商品项目web start -->
+<!-- 8商品项目web end -->
+
+
+
+<!-- 9菜单选中 start -->
+    <script>
+        var url = '{:url("admin/product/create")}';
+        $('a[href="'+url+'"]').addClass('active');
+        $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
+    </script>
+<!-- 9菜单选中 end -->
+
+<!-- 10文本输入框 start -->
+<script>
+    var editor1;
+    var editor2;
+    KindEditor.ready(function(K) {
+         editor1 = K.create('#html_content_1', {
+            cssPath : '__STATIC__/js/plugins/kindeditor/plugins/code/prettify.css',
+            uploadJson : '/?s=admin/file/upload2',
+            allowFileManager : true,
+            afterCreate : function() {
+            }
+        });
+         editor2 = K.create('#html_content_2', {
+            cssPath : '__STATIC__/js/plugins/kindeditor/plugins/code/prettify.css',
+            uploadJson : '/?s=admin/file/upload2',
+            allowFileManager : true,
+            afterCreate : function() {
+            }
+        });
+    })
+</script>
+<!-- 10文本输入框 end -->
+
+
+<!-- 表单提交验证 start -->
+    <script type="text/javascript">
+        function validateSubmit() {
+            $('#cover-upload-file').closest('.form-group').removeClass('has-error');
+            $('#cover-upload-file').closest('.form-group').find('.help-block').html('');
+            $('.submit-tip').html('');
+           // custom-container
+            var customLength =  $('#custom-container').find('tr').length;
+
+            var valid = true;
+            //图片验证
+            if ($('#cover-upload-file').val() == '') {
+                $('#cover-upload-file').closest('.form-group').addClass('has-error');
+                $('#cover-upload-file').closest('.form-group').find('.help-block').html('请上传封面图片');
+                valid = false;
+            }
+            if(customLength == 0){
+                $('.submit-tip').html('请设置商品规格');
+                valid = false;
+            }
+
+            var result = $("#add-form").data('bootstrapValidator').isValid();
+            if (result && valid) {
+                return true;
+            }
+            return false;
+        }
+
+        $('.js_draft').click(function(){
+            $('#html_content_1').html(editor1.html());
+            $('#html_content_2').html(editor2.html());
+            $('.js_audit_state').val(1);
+             ajaxSubmit('#add-form');
+            // //验证数据
+            // $("#add-form").data('bootstrapValidator').validate();
+            // //数据提交
+            // if($("#add-form").data('bootstrapValidator').isValid()){
+            //     alert(1212);
+            //     ajaxSubmit('#add-form');
+            // }
+            
+        });
+
+        $('.js_release').click(function(){
+            $('#html_content_1').html(editor1.html());
+            $('#html_content_2').html(editor2.html());
+            $('.js_audit_state').val(2);
+            ajaxSubmit('#add-form');
+        });
+        
+        $("#add-form").bootstrapValidator({
+            excluded:[":disabled"],
+            live: 'disabled',
+            message: 'This value is not valid',
+            fields: {
+                title: {
+                    message: 'The title is not valid',
+                    validators: {
+                        notEmpty: {
+                            message: ' 【商品名称】不能为空'
+                        },
+                        stringLength: {
+                            max: 30,
+                            message: '最大长度为30个字符'
+                        },
+                    }
+                }
+            }
+        });
+
+
+    </script>
+    <script src="__STATIC__/js/plugins/jquery/jquery.form.min.js"></script>
+    <script src="__STATIC__/js/plugins/layer/layer.js"></script>
+    <script src="__STATIC__/js/admin/admin.function.js"></script>
+<!-- 表单提交验证 end -->

@@ -27,7 +27,7 @@ class MallGoods extends Model{
      * @return string
      */
     public static function getFormatImg($img){
-        return config('jzdc_domain').'/web/public/uploads/goods_thumb/'.$img;
+        return config('jzdc_doc_path').'/goods_thumb/'.$img;
     }
 
     /**
@@ -36,7 +36,7 @@ class MallGoods extends Model{
      * @return string
      */
     public static function getFormatMultiImg($img){
-        return config('jzdc_domain').'/web/public/uploads/goods/'.$img;
+        return config('jzdc_doc_path').'/goods/'.$img;
     }
 
 }

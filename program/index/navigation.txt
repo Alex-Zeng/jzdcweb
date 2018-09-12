@@ -1,1 +1,0 @@
-<li><a href="./index.php" target="_self"><img wsrc="./program/index/navigation_icon/123.png" /><span>首页</span></a></li><li><a href="./index.php?index.php?jzdc=mall.show_type" target="_self"><img wsrc="./program/index/navigation_icon/161.png" /><span>商品分类</span></a></li>

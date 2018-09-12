@@ -19,79 +19,123 @@ use app\common\model\MallOrderPay;
 use app\common\model\MallReceiver;
 use app\common\model\MallTypeOption;
 use app\common\model\OrderMsg;
+use app\common\model\SmProduct;
+use app\common\model\SmProductSpec;
+use app\common\model\SmProductSpecAttrVal;
+use app\common\model\SmProductSpecPrice;
 use app\common\model\UserGoodsSpecifications;
+use sms\Yunpian;
 use think\Request;
 
 class Order extends Base{
 
     /**
-     * @desc 生成订单
+     * @desc 下单操作
      * @param Request $request
      * @return array
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
      */
     public function make(Request $request){
-//        $jsonStr = '{"receiverId": 81,"detail":[{"list":[{"goods_id":"169","option_id":"8","color_id":"7","quantity":"12","no":"SX00001","requirement":"测试商品名称A"}],"date": "2018-06-12","remark": "请尽快发货"}]}';
-//        $jsonArr = json_decode($jsonStr,true);
-//        $receiverId = $jsonArr['receiverId'];
-//        $detailRows = $jsonArr['detail'];
-        $receiverId = $request->post('receiverId',0,'intval');
-        $channel = $request->post('channel',0,'intval');
+        $receiverId = $request->post('receiverId',0,'intval');  //收货地址ID
+        $channel = $request->post('channel',0,'intval'); //渠道
         $detailRows = $request->post('detail','');
-       // $detailRows = '[{"list":[{"goodsId":"169","option_id":"8","color_id":"7","quantity":"12","no":"SX00001","requirement":"测试商品名称A"}],"date": "2018-06-12","remark": "请尽快发货"}]';
+        // $detailRows = '[{"list":[{"goodsId":"169","specId":"7","quantity":"12","materialCode":"SX00001","materialSpec":"测试商品名称A"}],"date": "2018-06-12","remark": "请尽快发货"}]';
         $detailRows = $detailRows ? json_decode($detailRows,true) : [];
 
-        if($receiverId <= 0 || !$detailRows){
-            return ['status'=>1,'data'=>[],'msg' => '数据异常'];
+        //验证数据
+        if($receiverId <= 0){
+            return ['status'=>1,'data'=>[],'msg'=>'收货地址错误'];
+        }
+        if(!$detailRows){
+            return  ['status'=>1,'data'=>[],'msg'=>'未选择商品,无法下单'];
         }
         foreach ($detailRows as $detailRow){
             foreach ($detailRow['list'] as $detailList){
-                if($detailList['color_id'] == '' && $detailList['option_id'] == ''){
-                    return ['status'=>1,'data'=>[],'msg'=>'规格不能为空'];
+                if(!$detailList['goodsId'] || !$detailList['specId']){
+                    return ['status'=>1,'data'=>[],'msg'=>'商品规格错误'];
                 }
             }
         }
-
+        //认证
         $auth = $this->auth();
         if($auth){
             return $auth;
         }
-
+        //权限
         if($this->groupId != IndexGroup::GROUP_BUYER){
             return ['status'=>1,'data'=>[],'msg'=>'没有权限下单'];
         }
 
         //根据购物清单分商家生成订单
         $goodsRows = [];
-        $model = new MallGoods();
-        $specificationsModel = new MallGoodsSpecifications();
-        $typeOptionModel = new MallTypeOption();
+        $productModel = new SmProduct();
+        $specModel = new SmProductSpec();
+        $specValModel = new SmProductSpecAttrVal();
+        $specPriceModel = new SmProductSpecPrice();
 
-        foreach ($detailRows as $detailRow){
-            foreach ($detailRow['list'] as $detailList){
-                $row = $model->where(['id'=>$detailList['goodsId']])->field(['id','title','supplier','w_price','unit','icon'])->find();
-                if(!$row){
+        //循环遍历数据
+        foreach($detailRows as $detailRow){
+            foreach($detailRow['list'] as $detailList){
+                 //验证商品是否存在
+                $product = $productModel->where(['id'=>$detailList['goodsId']])->find();
+                if(!$product){
                     continue;
                 }
-                $specificationsRow = [];
-                if(isset($detailList['color_id']) && isset($detailList['option_id'])){
-                    $specificationsRow = $specificationsModel->where(['color_id'=>$detailList['color_id'],'option_id'=>$detailList['option_id'],'goods_id'=>$detailList['goodsId']])->find();
+                //商品规格
+                $specRow = $specModel->where(['product_id'=>$detailList['goodsId'],'id'=>$detailList['specId']])->find();
+                if(!$specRow){
+                    continue;
                 }
+
+                $optionInfo = '';
+                //判断是否定制,根据规格查询 所有规格，进行拼接字符
+                if($specRow->is_customized == 1){
+                   $optionInfo = '定制';
+                }else{
+                    $specSetIds = $specRow->spec_set ? explode(',',$specRow->spec_set) : [];
+                    $specVals = $specValModel->where(['id'=>['in',$specSetIds]])->select();
+                    foreach ($specVals as $specVal){
+                        $optionInfo .= $specVal->spec_attr_val.',';
+                    }
+                    $optionInfo = $optionInfo ? substr($optionInfo,0,strlen($optionInfo)-1) : '';
+                }
+                //根据规格以及购买数量查询对应的价格
+                $price = $specRow->price;
+                $specNum = isset($detailList['quantity']) ? $detailList['quantity'] : 1;
+                //是否议价
+                if(!$specRow->is_price_neg_at_phone){
+                    $priceWhere = [
+                        'spec_id' => $specRow->id,
+                        'is_deleted' => 0,
+                        'min_order_qty' => ['lt',$specNum],
+                        'max_order_qty' => ['gt',$specNum]
+                    ];
+                    $priceRow = $specPriceModel->where($priceWhere)->find();
+                    if($priceRow){
+                        $price = $priceRow->price;
+                    }
+                }
+
                 $goodsRows[] = [
-                    'supplier' => $row->supplier,
+                    'supplier' => $product->supplier_id,
                     'goods_id' => $detailList['goodsId'],
-                    'price' => $specificationsRow ? $specificationsRow->w_price : $row->w_price,
-                    'cost_price' => $specificationsRow ? $specificationsRow->cost_price : $row->w_price,
-                    's_id' => $specificationsRow ? $specificationsRow->id : 0,
-                    'title'=>$row->title,
-                    'unit'=>$row->unit,
-                    'quantity'=> isset($detailList['quantity']) ? $detailList['quantity'] : 1,
+                    'price' => $price,
+                    'cost_price' =>'0.00',
+                    'title'=>$product->title,
+                    'unit'=>$specRow->unit,
+                    'quantity'=> $specNum,
                     'date' => isset($detailRow['date']) ? $detailRow['date'] : '',
                     'remark' =>isset($detailRow['remark']) ? $detailRow['remark'] : '',
-                    'no' => $detailList['no'],
-                    'requirement' => $detailList['requirement'],
-                    'color_name' => $specificationsRow ? $specificationsRow->color_name : '',
-                    'option_id' => $specificationsRow ? $specificationsRow->option_id : '',
-                    'icon'=>$row->icon
+                    'materialCode' => $detailList['materialCode'],  //物料编号
+                    'materialSpec' => $detailList['materialSpec'], //物料规格
+                    'optionInfo' => $optionInfo,
+                    'icon'=>$specRow->spec_img_url,
+                    'iconPath' =>$specRow->spec_img_url ? SmProductSpec::getFormatImg($specRow->spec_img_url) : SmProduct::getFormatImg($product->cover_img_url),
+                    'specId' => $detailList['specId'],
+                    'isDiscussPrice' => $specRow->is_price_neg_at_phone   //是否议价
                 ];
             }
         }
@@ -99,28 +143,22 @@ class Order extends Base{
         //获取数据列表，根据供应商进行分类
         $supplierGroup = [];
         foreach($goodsRows as $row){
-            $specificationsInfo = $row['color_name'] ? $row['color_name'] : '';
-            if($row['option_id'] > 0){
-                $typeOptionRow = $typeOptionModel->where(['id'=>$row['option_id']])->find();
-                if($typeOptionRow){
-                    $specificationsInfo .=$specificationsInfo ?  ','.$typeOptionRow->name : $typeOptionRow->name;
-                }
-            }
-
             $supplierGroup[$row['supplier']][] = [
                 'goods_id'=>$row['goods_id'],
                 'title'=>$row['title'],
                 'unit'=>$row['unit'],
                 'price'=>$row['price'],
                 'cost_price'=>$row['cost_price'],
-                's_id'=>$row['s_id'],
+                'specId'=>$row['specId'],
                 'quantity'=>$row['quantity'],
                 'date'=>$row['date'],
                 'remark'=>$row['remark'],
-                'no' => $row['no'],
-                'requirement' => $row['requirement'],
-                'specificationsInfo' => $specificationsInfo,
-                'icon' =>$row['icon']
+                'materialCode' => $row['materialCode'],
+                'materialSpec' => $row['materialSpec'],
+                'specificationsInfo' => $row['optionInfo'],
+                'icon' =>$row['icon'],
+                'iconPath' => $row['iconPath'],
+                'isDiscussPrice' => $row['isDiscussPrice']
             ];
         }
         //循环遍历
@@ -135,6 +173,7 @@ class Order extends Base{
                 $goodsName .= $item['title'].',';
             }
 
+            //计算订单数据信息
             $orderList[$supplierId] = [
                 'total_price' => $totalPrice,
                 'cost_price' => $costPrice,
@@ -146,8 +185,11 @@ class Order extends Base{
             ];
         }
 
+        //.........................
+
         $return = [];
 
+        //查询收货地址数据
         $receiverModel = new MallReceiver();
         $receiverRow = $receiverModel->where(['id'=>$receiverId])->find();
         $areaModel = new IndexArea();
@@ -161,7 +203,8 @@ class Order extends Base{
         $userInfo = $userModel->getInfoById($this->userId);
 
         //生成订单
-        foreach ($orderList as $index => $order){
+        foreach ($orderList as $index => $order) {
+            //订单数据
             $orderModel = new MallOrder();
             $orderNo = getOrderOutId($channel);
             $orderValue = [
@@ -196,92 +239,92 @@ class Order extends Base{
             $userGoodSpecificationsModel = new UserGoodsSpecifications();
             $cartModel = new \app\common\model\MallCart();
             $result = $orderModel->save($orderValue);
-            if($result == true){
+            if ($result == true) {
                 //插入order_goods数据表
                 $counterModel = new Counter();
-                $counterModel->where(['id'=>1])->setInc('order_count',1);
+                $counterModel->where(['id' => 1])->setInc('order_count', 1);
                 $orderGoods = [];
                 $returnGoodsList = [];
-                foreach ($order['list'] as $goodsList){
+                foreach ($order['list'] as $goodsList) {
                     $orderGoods[] = [
                         'buyer' => $userInfo ? $userInfo->username : '',
-                        'order_id' =>  $orderModel->id,
+                        'order_id' => $orderModel->id,
                         'order_state' => MallOrder::STATE_PRICING,
                         'icon' => $goodsList['icon'],
                         'title' => $goodsList['title'],
                         'price' => $goodsList['price'],
                         's_info' => $goodsList['specificationsInfo'],
-                        'shop_id' =>1,
+                        'shop_id' => 1,
                         'snapshot_id' => 0,
                         'quantity' => $goodsList['quantity'],
                         'goods_id' => $goodsList['goods_id'],
-                        'unit' => '',
+                        'unit' => $goodsList['unit'],
                         'time' => time(),
                         'cost_price' => $goodsList['cost_price'],
                         'buyer_id' => $this->userId,
-                        'specifications_no' => $goodsList['no'],
-                        'specifications_name' => $goodsList['requirement'],
-                    ];
+                        'specifications_no' => $goodsList['materialCode'],
+                        'specifications_name' => $goodsList['materialSpec'],
+                        'is_price_neg_at_phone' => $goodsList['isDiscussPrice'],
+                        'product_spec_id' => $goodsList['specId']
+                     ];
 
                     $returnGoodsList[] = [
-                        'goods_id' => $goodsList['goods_id'],
+                        'goodsId' => $goodsList['goods_id'],
                         'title' => $goodsList['title'],
                         'quantity' => $goodsList['quantity'],
-                        'price' => $goodsList['price'],
-                        'no' => $goodsList['no'],
-                        'icon' => MallGoods::getFormatImg($goodsList['icon']),
-                        'requirement' => $goodsList['requirement'],
+                        'price' => getFormatPrice($goodsList['price']),
+                        'unit' => $goodsList['unit'],
+                        'materialCode' => $goodsList['materialCode'],
+                        'icon' => $goodsList['iconPath'],
+                        'materialSpec' => $goodsList['materialSpec'],
                         'specificationsInfo' => $goodsList['specificationsInfo'],
                     ];
                 }
 
                 $result2 = $orderGoodsModel->insertAll($orderGoods);
-                if($result2){
+                if ($result2) {
                     $supplerInfo = $userModel->getInfoById($index);
 
                     //返回数据
                     $return[] = [
-                        'orderNo' =>  $orderNo,
+                        'orderNo' => $orderNo,
                         'totalPrice' => $order['total_price'],
                         'date' => $order['date'],
                         'goods' => $returnGoodsList,
                         'remark' => $order['remark'],
                         'supplierName' => $supplerInfo ? $supplerInfo->real_name : '',
                     ];
-                    foreach ($order['list'] as $list){
-                        $specificationsWhere = ['user_id'=>$this->userId,'goods_id'=>$list['goods_id'],'specifications_id'=>$list['s_id']];
-                        $exist = $userGoodSpecificationsModel->where($specificationsWhere)->find();
-                        if($exist){
-                            $userGoodSpecificationsModel->save(['specifications_no'=>$list['no'],'specifications_name'=>$list['requirement'],'update_time'=>time()],$specificationsWhere);
-                        }else{
-                            $specificationsWhere['specifications_no'] = $list['no'];
-                            $specificationsWhere['specifications_name'] = $list['requirement'];
-                            $specificationsWhere['create_time'] = time();
-                            $userGoodSpecificationsModel->save($specificationsWhere);
+
+                    //保存用户最后一次商品规格物料并删除购物车
+                    foreach ($order['list'] as $list) {
+                        if($list['materialCode']){
+                            $specificationsWhere = ['user_id' => $this->userId, 'goods_id' => $list['goods_id'], 'product_spec_id' => $list['specId']];
+                            $exist = $userGoodSpecificationsModel->where($specificationsWhere)->find();
+                            if ($exist) {
+                                $userGoodSpecificationsModel->save(['specifications_no' => $list['materialCode'], 'specifications_name' => $list['materialSpec'], 'update_time' => time()], $specificationsWhere);
+                            } else {
+                                $specificationsWhere['specifications_no'] = $list['materialCode'];
+                                $specificationsWhere['specifications_name'] = $list['materialSpec'];
+                                $specificationsWhere['create_time'] = time();
+                                $specificationsWhere['update_time'] = time();
+                                $userGoodSpecificationsModel->save($specificationsWhere);
+                            }
                         }
                         //删除购物清单 同步操作,
-                        $cartModel->where(['user_id'=>$this->userId,'goods_id'=>$list['goods_id'],'goods_specifications_id'=>$list['s_id']])->delete();
-//                        if($cartRow){
-//                            if($cartRow['quantity'] <= $list['quantity']){
-//                                $cartModel->where(['user_id'=>$this->userId,'goods_id'=>$list['goods_id']])->delete();
-//                            }else{
-//                                //同一用户不考虑扣减为负，并发量没那么高
-//                                $cartModel->where(['user_id'=>$this->userId,'goods_id'=>$list['goods_id']])->setDec('quantity',$list['quantity']);
-//                            }
-//                        }
+                        $cartModel->where(['user_id' => $this->userId, 'goods_id' => $list['goods_id'], 'product_spec_id' => $list['specId']])->delete();
                     }
                 }
-
-                //添加日志
-
-                //触发消息通知
             }
         }
 
+        //发送邮件通知
+        $emailStr = config('JZDC_OP_EMAIL');
+        $subject='集众电采平台系统订单通知';
+        $content='您好，现有新的订单生成，请及时跟进处理，谢谢。';
+        SendMail($emailStr,$subject,$content);
 
         return ['status'=>0,'data'=>$return,'msg'=>'订单生成成功'];
     }
-
 
     /**
      * @desc 订单状态
@@ -307,11 +350,11 @@ class Order extends Base{
         $pageSize = $request->post('pageSize',10,'intval');
         $pageNumber = $request->post('pageNumber',1,'intval');
 
-        $goodsName = $request->post('goodsName','','trim|addslashes');
-        $companyName = $request->post('companyName','','trim|addslashes');
+        $goodsName = $request->post('goodsName','','trim');
+        $companyName = $request->post('companyName','','trim');
         $startDate = $request->post('startDate','','filterDate');
         $endDate = $request->post('endDate','','filterDate');
-        $orderNo = $request->post('orderNo','','addslashes');
+        $orderNo = $request->post('orderNo','','trim');
 
         if($pageSize > 12){ $pageSize = 12;}
         $start = ($pageNumber - 1)*$pageSize;
@@ -337,7 +380,7 @@ class Order extends Base{
         }
         //
         if($goodsName){
-            $where .=' AND goods_names LIKE %'.$goodsName.'%';
+            $where .=' AND goods_names LIKE \'%'.addslashes($goodsName).'%\'';
         }
         if($startDate){
             $where .=' AND add_time >'.strtotime($startDate);
@@ -346,12 +389,12 @@ class Order extends Base{
             $where .=' and add_time <'.strtotime($endDate.' 23:59:59');
         }
         if($orderNo){
-            $where .= ' AND out_id LIKE \'%'.$orderNo.'%\'';
+            $where .= ' AND out_id LIKE \'%'.addslashes($orderNo).'%\'';
         }
 
         $userModel = new IndexUser();
         if($companyName){
-            $companyRows = $userModel->where(['real_name'=>['like','%'.$companyName.'%']])->find(['id'])->select();
+            $companyRows = $userModel->where(['real_name'=>['like','%'.addslashes($companyName).'%']])->find(['id'])->select();
             $companyIds = '';
             foreach($companyRows as $companyRow){
                 $companyIds .= $companyRow->id.',';
@@ -397,17 +440,28 @@ class Order extends Base{
             }
             $row['companyName']  = $userInfo ? $userInfo->real_name : '';
             $row['groupId'] = $this->groupId;
-            $row['money'] = $row->actual_money;
+            $row['money'] = getFormatPrice($row->actual_money);
             $row['orderDate'] = date('Y-m-d H:i:s',$row->add_time);
 
-            $goodsRows = $orderGoodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.specifications_no','a.specifications_name','b.icon','a.s_info'])->select();
+            $goodsRows = $orderGoodsModel->alias('a')
+                ->join(['sm_product'=>'b'],'a.goods_id=b.id','left')
+                ->join(['sm_product_spec' => 'c'],'a.product_spec_id=c.id','left')
+                ->where(['order_id'=>$row->id])->field(['a.title','a.price','a.quantity','a.unit','a.specifications_no','a.specifications_name','b.cover_img_url','a.s_info','c.spec_img_url'])->select();
 
             foreach($goodsRows as &$goodsRow){
                 $goodsRow['quantity'] = intval($goodsRow->quantity);
-                $goodsRow['icon'] = MallGoods::getFormatImg($goodsRow->icon);
+                $goodsRow['icon'] = $goodsRow->spec_img_url ? SmProductSpec::getFormatImg($goodsRow->spec_img_url) : SmProduct::getFormatImg($goodsRow->cover_img_url);
                 $goodsRow['price'] = getFormatPrice($goodsRow->price);
+                $goodsRow['specUnit'] = $goodsRow->unit;
+                unset($goodsRow->unit);
             }
             $row['goods'] = $goodsRows;
+			$queryStatus = $status == 6 ? true : false;
+            $row['statusMsg'] = getOrderMsg($this->groupId,$row->state,$row->service_type,$queryStatus);
+            $row['cancelType'] = $this->groupId && ($row->state == 1 || $row->state == 0)   ? 1 : 0;
+            $row['confirmType'] = ($this->groupId == IndexGroup::GROUP_BUYER)&& ($row->state == 6) && ($row->service_type == 0 || $row->service_type == 2) ? 1 : 0;
+            $row['actual_money'] = getFormatPrice($row->actual_money);
+            $row['goods_money'] = getFormatPrice($row->goods_money);
             unset($row->add_time);
         }
 
@@ -456,11 +510,20 @@ class Order extends Base{
 
         //查询产品
         $goodsModel = new MallOrderGoods();
-        $goodsRows = $goodsModel->alias('a')->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')->where(['order_id'=>$row->id])->field(['a.id','a.title','a.price','a.quantity','a.s_info','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.icon'])->select();
+        $productModel = new SmProduct();
+        $goodsRows = $goodsModel->alias('a')->join(['sm_product_spec'=>'b'],'a.goods_id=b.id','left')->where(['order_id'=>$row->id])
+                                ->field(['a.id','a.title','a.price','a.quantity','a.unit','a.s_info','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.spec_img_url'])->select();
 
         foreach($goodsRows as &$goodsRow){
             $goodsRow['quantity'] = intval($goodsRow->quantity);
-            $goodsRow['icon'] = MallGoods::getFormatImg($goodsRow->icon);
+            if($goodsRow->spec_img_url){
+                $goodsRow['icon'] = SmProductSpec::getFormatImg($goodsRow->spec_img_url);
+            }else{
+                $product = $productModel->find(['id'=>$goodsRow->goods_id]);
+                $goodsRow['icon'] = SmProduct::getFormatImg($product->cover_img_url);
+            }
+            $goodsRow['price'] = getFormatPrice($goodsRow->price);
+            $goodsRow['specUnit'] = $goodsRow->unit;
         }
 
         //查询支付凭证
@@ -475,8 +538,8 @@ class Order extends Base{
             'buyerName' => $buyerInfo ? $buyerInfo->real_name : '',
             'groupId' => $this->groupId,
             'state' => $row->state,
-            'money' => $row->actual_money,
-            'goods_money'=> $row->goods_money,
+            'money' => getFormatPrice($row->actual_money),
+            'goods_money'=> getFormatPrice($row->goods_money),
             'name' => $row->receiver_name,
             'phone' => $row->receiver_phone,
             'address' => $row->receiver_area_name. $row->receiver_detail,
@@ -492,6 +555,9 @@ class Order extends Base{
             'overDate' => $row->pay_date ? substr($row->pay_date,0,10) : ''
         ];
 
+
+        $data['statusMsg'] = getOrderMsg($this->groupId,$row->state,$row->service_type);
+        $data['isService'] =  $this->groupId == 4 && $row->service_type == 0 && ($row->state == 6 || $row->state == 13 || $row->state == 9 || $row->state == 10 || $row->state == 11)  ? 1 : 0;
         if($this->groupId == IndexGroup::GROUP_SUPPLIER){
             $data['payMethod'] = !$payRow && isset($row->pay_date) ? '账期支付': ($payRow->pay_type == 4 ? '汇票' : '转账');
             $data['payNumber'] = $payRow ? $payRow->number : '';
@@ -569,13 +635,20 @@ class Order extends Base{
 
         $result = $model->save($data,$where);
         if($result !== false){
-            //消息通知
+            //消息通知采购商
             $orderMsgModel = new OrderMsg();
             $userModel = new IndexUser();
             $content = "订单号：{$row->out_id}【{$row->goods_names}】供应商已经发货。";
             $msgData = ['title'=>'订单已发货','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
             $orderMsgModel->save($msgData);
             $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+
+            //短信通知采购商
+            $buyerInfo = $userModel->getInfoById($row->buyer_id);
+            $supplierInfo = $userModel->getInfoById($row->supplier);
+            $yunpian = new Yunpian();
+            $yunpian->send($buyerInfo->phone,['order_id'=>$row->out_id,'express_code'=>$express_code,'express_name'=>$express_name,'supplier'=>$supplierInfo ? $supplierInfo->real_name : ''],Yunpian::TPL_ORDER_SEND);
+
             return ['status'=>0,'data'=>[],'msg'=>'提交成功'];
         }
         return ['status'=>1,'data'=>0,'msg'=>'提交失败'];
@@ -924,7 +997,7 @@ class Order extends Base{
 
                 foreach($goodsRows as $goodsRow){
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('A'.$counter, date('Y-m-d H:i',$row->add_time));
-                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('B'.$counter, $row->out_id);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValueExplicit('B'.$counter, $row->out_id,\PHPExcel_Cell_DataType::TYPE_STRING);
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('C'.$counter, getOrderStatusInfo($row->state,$row->service_type));
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('D'.$counter, isset($buyerMap[$row->buyer_id]) ? $buyerMap[$row->buyer_id]['name'] : '');
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('E'.$counter,  isset($buyerMap[$row->buyer_id]) ? $buyerMap[$row->buyer_id]['contact'] : '');
@@ -972,5 +1045,72 @@ class Order extends Base{
         return ['status'=>0,'data'=>['url'=>config('jzdc_domain').'/web/public/uploads/temp/'.$filename],'msg'=>''];
     }
 
+
+    /**
+     * @desc 采购商供应商订单
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getDeskList(){
+        $type = Request::instance()->get('type',1);
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+
+        //
+        $model = new MallOrder();
+        $where = [];
+        if($this->groupId!= IndexGroup::GROUP_BUYER && $this->groupId != IndexGroup::GROUP_SUPPLIER){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
+        }
+        if($this->groupId == IndexGroup::GROUP_SUPPLIER){
+            $where['supplier'] = $this->userId;
+        }elseif ($this->groupId == IndexGroup::GROUP_BUYER){
+            $where['buyer_id'] = $this->userId;
+        }
+
+        switch ($type){
+            case 1:  //近期成交
+                break;
+            case 2: //待发货
+                $where['state'] = 3;
+                break;
+            case 3: //待售后
+                $where['service_type'] = 1;
+                break;
+            default:
+        }
+
+        $field = ['id','add_time','out_id','supplier','goods_count','actual_money','state','service_type'];
+        $rows = $model->where($where)->order('add_time','desc')->field($field)->select();
+        $supplierIds = [];
+        foreach ($rows as $row){
+            $supplierIds[] = $row->supplier;
+        }
+
+        $userModel = new IndexUser();
+        $supplierInfos = $userModel->where(['id'=>['in',$supplierIds]])->field(['id','real_name'])->select();
+
+        $supplierMap = [];
+        foreach ($supplierInfos as $supplierInfo){
+            $supplierMap[$supplierInfo->id] = $supplierInfo->real_name;
+        }
+
+        $data = [];
+        foreach ($rows as $row){
+            $data[] = [
+                'orderNo'=> $row->out_id,
+                'supplierName' => isset($supplierMap[$row->supplier]) ? $supplierMap[$row->supplier] : '',
+                'orderTime' => date('Y-m-d H:i',$row->add_time),
+                'goodsNumber' => intval($row->goods_count),
+                'totalMoney' => $row->actual_money,
+                'stateInfo'=> getOrderStatusInfo($row->state,$row->service_type)
+            ];
+        }
+        return ['status'=>0,'data'=>['list'=>$data],'msg'=>''];
+    }
 
 }

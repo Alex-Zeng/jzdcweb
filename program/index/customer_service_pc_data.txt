@@ -1,5 +1,0 @@
-<div class=web_name>JZDC在线客服</div>
-
-<div class=c_line>手机：xxxxxx</div>
-<div class=c_line>电话：xxxxxx</div>
-<div class=c_line><a href=./index.php?jzdc=feedback.list  target=&#34;_blank&#34;>留言反馈 </a></div>

@@ -29,6 +29,16 @@ class IndexArea extends Model{
         return $list;
     }
 
+    /**
+     * [getAreaList 通过父级ID返回下一层级数据]
+     * @param  integer $parentId [description]
+     * @return [type]            [description]
+     */
+    public function getAreaList($parentId=45067){
+        $rows = $this->where(['upid' => $parentId])->field(['id','name','level','level'])->select();
+        return $rows;
+    }
+
 
     /**
      * @desc 返回省份列表

@@ -16,6 +16,8 @@ use app\common\model\MallOrderGoods;
 use app\common\model\MallOrderPay;
 use app\common\model\MallShopFinance;
 use app\common\model\OrderMsg;
+use app\common\model\SmProduct;
+use app\common\model\SmProductSpec;
 use sms\Yunpian;
 use think\Request;
 
@@ -79,11 +81,11 @@ class Order extends Base{
 
             $total = 0;
             foreach ($goodsRows as & $goodsRow){
-                $productModel = new MallGoods();
+                $productModel = new SmProduct();
+                $specModel = new SmProductSpec();
                 $productRow = $productModel->where(['id'=>$goodsRow->goods_id])->find();
-                $path = $productRow ? $productRow->icon : '';
-                $goodsRow['icon'] = MallGoods::getFormatImg($path);
-
+                $specRow = $specModel->where(['id'=>$goodsRow->product_spec_id])->find();
+                $goodsRow['icon'] = $specRow && $specRow->spec_img_url ? SmProductSpec::getFormatImg($specRow->spec_img_url) : SmProduct::getFormatImg($productRow->cover_img_url);
                 $total += $goodsRow->price * $goodsRow->quantity;
             }
             $row['total'] = $total;
@@ -105,6 +107,8 @@ class Order extends Base{
             $row['buyerName'] = $buyerInfo ? $buyerInfo->real_name : '';
             $row['buyerPayInfo'] = $buyerPayInfo;
             $row['supplierPayInfo'] = $supplierPayInfo;
+
+            $row['sum_money'] = getFormatPrice($row->sum_money);
         }
 
         $this->assign('list',$rows);
@@ -292,20 +296,12 @@ class Order extends Base{
                    $financeModel->save($financeData);
 
                 //更新交易统计量
-                  $orderGoodsModel = new MallOrderGoods();
-                  $orderGoodsRows = $orderGoodsModel->where(['order_id'=>$row->id])->field(['quantity','goods_id'])->select();
-                  foreach ($orderGoodsRows as $orderGoodsRow){
-                      $goodsModel = new MallGoods();
-                      $goodsModel->where(['id'=>$orderGoodsRow->goods_id])->setInc('sold',$orderGoodsRow->quantity);
-                  }
-                //更新店内会员 订单统计
-//                function update_shop_buyer($pdo,$table_pre,$order){
-//                    $sql="select count(id) as c,sum(`actual_money`) as c2 from ".self::$table_pre."order where `shop_id`=".$order['shop_id']." and `buyer`='".$order['buyer']."' and `state`=6";
-//                    $r=$pdo->query($sql,2)->fetch(2);
-//                    $sql="update ".self::$table_pre."shop_buyer set `money`='".$r['c2']."',`order`='".$r['c']."' where `shop_id`=".$order['shop_id']." and `username`='".$order['buyer']."'";
-//                    $pdo->exec($sql);
-//
-//                }
+//                  $orderGoodsModel = new MallOrderGoods();
+//                  $orderGoodsRows = $orderGoodsModel->where(['order_id'=>$row->id])->field(['quantity','goods_id'])->select();
+//                  foreach ($orderGoodsRows as $orderGoodsRow){
+//                      $goodsModel = new MallGoods();
+//                      $goodsModel->where(['id'=>$orderGoodsRow->goods_id])->setInc('sold',$orderGoodsRow->quantity);
+//                  }
 
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();
@@ -400,7 +396,6 @@ class Order extends Base{
         $result = $model->save(['service_type'=>2],['id'=>$id]);
         if($result == true){
             //更新子订单
-            $model->save(['service_type'=>0],['id'=>$id]);
             $goodsModel = new MallOrderGoods();
             $goodsModel->save(['service_type'=>0],['order_id'=>$id]);
             return ['status'=>0,'data'=>[],'msg'=>'操作成功'];
@@ -523,21 +518,21 @@ class Order extends Base{
                 $orderEnd = $counter + $goodsCount - 1;
 
                 //合并单元格
-                if ($orderEnd > $orderStart) {
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A' . $orderStart . ':A' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B' . $orderStart . ':B' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('C' . $orderStart . ':C' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D' . $orderStart . ':D' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('E' . $orderStart . ':E' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F' . $orderStart . ':F' . $orderEnd);
-
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('N' . $orderStart . ':N' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('O' . $orderStart . ':O' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('P' . $orderStart . ':P' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('Q' . $orderStart . ':Q' . $orderEnd);
-                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('R' . $orderStart . ':R' . $orderEnd);
-
-                }
+//                if ($orderEnd > $orderStart) {
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A' . $orderStart . ':A' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B' . $orderStart . ':B' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('C' . $orderStart . ':C' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D' . $orderStart . ':D' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('E' . $orderStart . ':E' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F' . $orderStart . ':F' . $orderEnd);
+//
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('N' . $orderStart . ':N' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('O' . $orderStart . ':O' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('P' . $orderStart . ':P' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('Q' . $orderStart . ':Q' . $orderEnd);
+//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('R' . $orderStart . ':R' . $orderEnd);
+//
+//                }
                 foreach ($goodsRows as $goodsRow) {
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('A' . $counter, date('Y-m-d H:i', $row->add_time));
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValueExplicit('B'.$counter,$row->out_id,\PHPExcel_Cell_DataType::TYPE_STRING);
@@ -629,10 +624,25 @@ class Order extends Base{
             return ['status'=>1,'data'=>[],'msg'=>'数据错误'];
         }
         $goodsModel = new MallOrderGoods();
+        $productModel = new SmProduct();
 
-        $rows = $goodsModel->alias('a')->join('mall_goods b','a.goods_id=b.id','left')->where(['a.order_id'=>$id])->order('a.id','asc')->field(['b.icon','a.id','a.title','a.price','a.s_info','a.quantity'])->select();
+        $rows = $goodsModel->alias('a')->join( ['sm_product_spec'=>'b'],'a.product_spec_id=b.id','left')
+                                             ->where(['a.order_id'=>$id])
+                                             ->order('a.id','asc')
+                                             ->field(['b.spec_img_url','b.product_id','a.id','a.title','a.price','a.s_info','a.quantity'])
+                                             ->select();
         foreach ($rows as &$row){
-            $row['iconPath'] = MallGoods::getFormatImg($row->icon);
+            if(!$row->spec_img_url){
+                if($row->product_id > 0){
+                    $productRow = $productModel->where(['id'=>$row->product_id])->find();
+                    $iconPath = SmProduct::getFormatImg($productRow->cover_img_url);
+                }else{
+                    $iconPath = '';
+                }
+            }else{
+                $iconPath =  SmProductSpec::getFormatImg($row->spec_img_url);
+            }
+            $row['iconPath'] = $iconPath;
             $row['quantity'] = intval($row->quantity);
         }
 

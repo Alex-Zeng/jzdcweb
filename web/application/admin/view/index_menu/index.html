@@ -124,7 +124,7 @@
                                     <label for="" class="col-md-3">商品类型</label>
                                     <div class="col-md-9">
                                         <select name="type" class="form-control">
-                                            {foreach name=":getTypeLevelList(2)" id="type"}
+                                            {foreach name=":getProductCategory(2)" id="type"}
                                             <option value="{$type.id}" >{if $type.level == 2}&nbsp;&nbsp;&nbsp;&nbsp;|-&nbsp;{/if}{$type.name}</option>
                                             {/foreach}
                                         </select>
@@ -215,7 +215,7 @@
                                     <label for="" class="col-md-3">商品类型</label>
                                     <div class="col-md-9">
                                         <select name="edit_type" class="form-control">
-                                            {foreach name=":getTypeLevelList(2)" id="type"}
+                                            {foreach name=":getProductCategory(2)" id="type"}
                                             <option value="{$type.id}" >{if $type.level == 2}&nbsp;&nbsp;&nbsp;&nbsp;|-&nbsp;{/if}{$type.name}</option>
                                             {/foreach}
                                         </select>

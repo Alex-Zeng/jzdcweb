@@ -48,7 +48,7 @@ class Login{
        $where = [];
 
        //判断账户类型
-        $field = ['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email'];
+        $field = ['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email', 'real_name'];
         if(stripos( $name,'@')){
             $row = $model->where(['email'=>$name])->field($field)->find();
         }else{
@@ -74,7 +74,8 @@ class Login{
             'phone' => $row->phone,
             'email' => $row->email,
             'username' => $row->username,
-            'group' => $row->group
+            'group' => $row->group,
+            'companyName' => $row->real_name
         ];
         //生成token
         $key = config('jzdc_token_key');
@@ -82,7 +83,7 @@ class Login{
             "id" => $row->id,
             "group" => $row->group,
             "time" => time(),
-            "expire" => time() + 5*3600   //过期时间
+            "expire" => time() + config('JZDC_TOKEN_EXPIRE')   //过期时间
         ];
        $jwt = JWT::encode($token,$key);
        $data['token']= $jwt;
@@ -125,7 +126,7 @@ class Login{
 
         //查询user表是否存在
         $model = new IndexUser();
-        $row = $model->where(['phone'=>$phone])->field(['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email'])->find();
+        $row = $model->where(['phone'=>$phone])->field(['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email', 'real_name'])->find();
         if(!$row){
             return ['status'=>-3,'data'=>[],'msg'=>'用户未注册'];
         }else{
@@ -136,7 +137,7 @@ class Login{
                 "id" => $row->id,
                 "group" => $row->group,
                 "time" => time(),
-                "expire" => time() + 5*3600   //过期时间
+                "expire" => time() + config('JZDC_TOKEN_EXPIRE')   //过期时间
             ];
         }
 
@@ -148,7 +149,8 @@ class Login{
             'phone' => $row->phone,
             'email' => $row->email,
             'username' => $row->username,
-            'group' => $row->group
+            'group' => $row->group,
+            'companyName' => $row->real_name
         ];
         //生成token
         $key = config('jzdc_token_key');

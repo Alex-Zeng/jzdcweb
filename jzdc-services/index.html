@@ -7,12 +7,13 @@
     <link rel="stylesheet" href="css/reset.css" type="text/css" />
     <link rel="stylesheet" href="css/index.css" type="text/css" />
     <script src="js/rem.js"></script>
+    <script src="js/config.js"></script>
 </head>
 <body>
 <div class="index-1-wrap">
     <div class="index-header clearfix">
         <i class="index-logo"></i>
-        <i class="close" onclick="window.location.href='http://h5.jizhongdiancai.com'"></i>
+        <i class="close" onclick="back()"></i>
     </div>
     <div class="pass-form">
         <div class="index-menu">
@@ -45,8 +46,12 @@
 </div>
 </body>
 <script>
-document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
-    WeixinJSBridge.call('hideOptionMenu');
-});
+function back () {
+    if (window.jsb) {
+        window.jsb.jsbBack()
+    } else {
+        window.location.href='http://h5.jizhongdiancai.com'
+    }
+}
 </script>
 </html>

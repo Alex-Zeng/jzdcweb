@@ -1,6 +1,12 @@
 {include file="layout/header" title="投诉与建议" keywords="开源WEB开发框架" /}
 
 {include file="layout/left" groupId="$groupId" keywords="开源WEB开发框架" /}
+<style type="text/css">
+    input[type="date"]:before{
+        color:#A9A9A9;
+        content:attr(placeholder);
+    }
+</style>
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <div class="content-header">
@@ -26,10 +32,21 @@
                         <h3 class="card-title">投诉建议</h3>
                     </div>
                     <div class="row" style="padding-top: 15px;padding-right: 15px">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <form class="form-inline ml-3" action="{:url()}"  method="get">
+                                <div class = "input-group">
+                                    <input type = "date"  name="start" class = "form-control"  value="{$start}" placeholder="开始时间">
+                                    <span style="display: inline-block;vertical-align: middle;padding-top: 5px"><hr /></span>
+                                    <input type = "date" name="end" class = "form-control" value="{$end}" placeholder="结束时间">
+                                </div>&nbsp;&nbsp;&nbsp;&nbsp;
+                                <div class = "input-group">
+                                    <input type = "text"  name="contacts" class = "form-control"  value="{$contacts}" placeholder="称呼">
+                                </div>&nbsp;
+                                <div class = "input-group">
+                                    <input type = "text"  name="contact_num" class = "form-control"  value="{$contact_num}" placeholder="联系电话">
+                                </div>&nbsp;
                                 <div class="input-group">
-                                    <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="投诉建议" aria-label="Search">
+                                    <input class="form-control form-control-navbar"  name="content" type="search"  value="{$content}" placeholder="投诉建议" aria-label="Search">
                                     <div class="input-group-append">
                                         <button class="btn btn-primary" id="search" type="submit">查找</button>
                                     </div>
@@ -44,23 +61,31 @@
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                             <tr>
-                                <th width="150px">填写者</th>
-                                <th width="150px">提交时间</th>
+                                <th width="200px">称呼</th>
+                                <th width="180px">提交时间</th>
+                                <th width="200px">联系电话</th>
                                 <th>投诉建议</th>
                             </tr>
                             </thead>
                             <tbody>
                             {volist name='list' id='suggestion'}
                             <tr>
-                                <td>{$suggestion.writer_name}#{$suggestion.writer}</td>
-                                <td>{:date('Y-m-d H:i',$suggestion.write_time)}</td>
-                                <td>{$suggestion.comment}</td>
+                                <td>{:htmlspecialchars($suggestion.contacts)}</td>
+                                <td>{:date('Y-m-d H:i',$suggestion.created_time)}</td>
+                                <td>{$suggestion.contact_num}</td>
+                                <td>{:htmlspecialchars($suggestion.content)}</td>
                             </tr>
                             {/volist}
                             </tbody>
                             <tfoot>
                             <tr>
-                                <td colspan="5">{$page}</td>
+                                <td colspan="4">
+                                    {if  condition="count($list) == 0"}
+                                    没有数据发现
+                                    {else /}
+                                    {$page}
+                                    {/if}
+                                </td>
                             </tr>
                             </tfoot>
                         </table>
@@ -80,7 +105,7 @@
     </div>
 </div>
 
-{include file="layout/footer" title="$title" keywords="开源WEB开发框架" /}
+{include file="layout/footer" title="$title" keywords="" /}
 <script type="text/javascript">
     var url = '{:url("admin/suggestion/index")}';
     $('a[href="'+url+'"]').addClass('active');

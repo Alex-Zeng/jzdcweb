@@ -1,1 +1,0 @@
-TRUNCATE `jzdc_form_registration`;

@@ -14,6 +14,12 @@ use app\common\model\MallGoods;
 use app\common\model\MallGoodsSpecifications;
 use app\common\model\MallTypeOption;
 use app\common\model\MallUnit;
+use app\common\model\SmProduct;
+use app\common\model\SmProductSpec;
+use app\common\model\SmProductSpecAttrs;
+use app\common\model\SmProductSpecAttrVal;
+use app\common\model\SmProductSpecPrice;
+use app\common\model\UserGoodsSpecifications;
 use think\Request;
 
 class MallCart extends Base{
@@ -29,10 +35,19 @@ class MallCart extends Base{
             return $auth;
         }
 
-        $userId = $this->userId;
         $model = new \app\common\model\MallCart();
-        $count = $model->where(['user_id'=>$userId])->count();
 
+        $where = [];
+        $where['a.user_id'] = $this->userId;
+        $where['c.state'] = SmProduct::STATE_FORSALE;
+        $where['c.audit_state'] = SmProduct::AUDIT_RELEASED;
+        $where['c.is_deleted'] = 0;
+        $where['b.is_deleted'] = 0;
+
+        //查询数据
+        $count = $model->alias('a')->join(['sm_product_spec'=>'b'],'b.id=a.product_spec_id','left')
+            ->join(['sm_product'=>'c'],'b.product_id=c.id')
+            ->where($where)->count();
         return ['status'=>0,'data'=>['total'=>$count],'msg'=>''];
     }
 
@@ -44,38 +59,38 @@ class MallCart extends Base{
     public function add(Request $request){
         $id = $request->post('id',0);
         $number = $request->post('number',1);
-        $optionId = $request->post('optionId',0,'intval');
-        $colorId = $request->post('colorId',0,'intval');
-
-        if($optionId == 0 && $colorId == 0){
-            return ['status'=>1,'data'=>[],'msg'=>'请选择商品规格'];
-        }
+        $specId = $request->post('specId',0,'intval');
 
         //验证登录
         $auth = $this->auth();
         if($auth){
             return $auth;
         }
+        //采购商权限
         if($this->groupId != IndexGroup::GROUP_BUYER){
             return ['status'=>1,'data'=>[],'msg'=>'没有权限操作'];
         }
 
-        //查询是否
-        $model = new MallGoods();
-        $row = $model->where(['id'=>$id,'state'=>MallGoods::STATE_SALE])->find();
+        //查询商品是否存在
+        $model = new SmProduct();
+        $row = $model->where(['id'=>$id,'state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'商品不存在或已下架'];
         }
-        //
-        $goodsSpecificationsModel = new MallGoodsSpecifications();
-        $specificationsRow = $goodsSpecificationsModel->where(['color_id'=>$colorId,'option_id'=>$optionId,'goods_id'=>$id])->field(['id','w_price'])->find();
+        //商品规格是否存在
+        $specModel = new SmProductSpec();
+        $specRow = $specModel->where(['id'=>$specId,'is_deleted'=>0])->find();
+        if(!$specRow){
+            return ['status'=>1,'data'=>[],'msg'=>'商品规格不存在'];
+        }
 
+        //加入购物车
         $cartModel = new \app\common\model\MallCart();
-        $where = ['user_id'=>$this->userId,'goods_id'=>$id,'goods_specifications_id'=>$specificationsRow ? $specificationsRow->id : 0];
+        $where = ['user_id'=>$this->userId,'goods_id'=>$id,'product_spec_id'=>$specId];
         $cartRow = $cartModel->where($where)->find();
-        if($cartRow){
-            $result = $cartModel->where($where)->setInc('quantity',$number);
-        }else{
+        if($cartRow){  //存在更新数量
+            $result = $cartModel->save(['quantity'=>$cartRow->quantity+$number,'price' => isset($specRow->price) ? $specRow->price : '0.00'],$where);
+        }else{ //不存在插入数据
             $userModel = new IndexUser();
             $user = $userModel->getInfoById($this->userId);
             $data = [
@@ -84,9 +99,9 @@ class MallCart extends Base{
                 'key' => 0,
                 'goods_id' => $id,
                 'quantity'=>$number,
-                'price' => $specificationsRow ? $specificationsRow->w_price : $row->w_price,
+                'price' => isset($specRow->price) ? $specRow->price : '0.00',
                 'time' => time(),
-                'goods_specifications_id' => $specificationsRow ? $specificationsRow->id : 0
+                'product_spec_id' => $specId
             ];
             $result = $cartModel->save($data);
         }
@@ -111,53 +126,65 @@ class MallCart extends Base{
         //查询数据
         $model = new \app\common\model\MallCart();
 
+        $where = [];
+        $where['a.user_id'] = $this->userId;
+        $where['c.state'] = SmProduct::STATE_FORSALE;
+        $where['c.audit_state'] = SmProduct::AUDIT_RELEASED;
+        $where['c.is_deleted'] = 0;
+        $where['b.is_deleted'] = 0;
         if($ids){
-           // $where['id'] = ['in',explode(',')];
-            $where = [
-              'a.id' => ['in',explode(',',$ids)],
-              'a.user_id' => $this->userId
-            ];
-        }else{
-           $where = [
-               'a.user_id' => $this->userId
-           ];
+            $where['a.id'] = ['in',explode(',',$ids)];
         }
 
-        $rows = $model->alias('a')
-            ->join(config('prefix').'mall_goods b','a.goods_id=b.id','left')
-            ->join(config('prefix').'mall_goods_specifications c','a.goods_specifications_id=c.id','left')
+        $specValModel = new SmProductSpecAttrVal();
+        //查询数据
+        $rows = $model->alias('a')->join(['sm_product_spec'=>'b'],'b.id=a.product_spec_id','left')
+            ->join(['sm_product'=>'c'],'b.product_id=c.id')
             ->where($where)
-            ->field(['b.id','b.icon','b.title','b.supplier','b.w_price','a.id as cart_id','b.unit','a.quantity','c.w_price as goods_price','c.color_id','c.color_name','c.option_id'])->select();
+            ->field(['c.id','c.title','c.supplier_id','c.cover_img_url','b.unit','b.is_price_neg_at_phone','b.spec_img_url','b.is_customized','b.id as spec_id','b.spec_set','a.quantity','b.price','b.min_order_qty','a.id as cart_id'])
+            ->select();
         $supplierData = [];
-        $typeOptionModel = new MallTypeOption();
-        $unitModel = new MallUnit();
         foreach ($rows as $row){
-            $specificationsInfo = $row->color_name ? $row->color_name : '';
-            if($row->option_id > 0){
-                $typeOptionRow = $typeOptionModel->where(['id'=>$row->option_id])->find();
-                if($typeOptionRow){
-                    $specificationsInfo ? $specificationsInfo .=','.$typeOptionRow->name : $specificationsInfo .=$typeOptionRow->name;
+            //查询规格
+            $optionInfo = '';
+            $specPriceDetails = [];
+            if($row->is_customized == 1){
+                $optionInfo = '定制';
+            }else{
+                $specSetIds = $row->spec_set ? explode(',',$row->spec_set) : [];
+                $specVals = $specValModel->where(['id'=>['in',$specSetIds]])->select();
+                foreach ($specVals as $specVal){
+                    $optionInfo .= $specVal->spec_attr_val.',';
                 }
+                $optionInfo = $optionInfo ? substr($optionInfo,0,strlen($optionInfo)-1) : '';
+                $specPriceDetails = (new SmProductSpecPrice())->getPriceDetail($row->spec_id);
             }
-            $unitRow = $unitModel->find(['id'=>$row->unit]);
 
-            $supplierData[$row->supplier][] = [
+            //查询物料编号、物料规格
+            $userSpecificationsModel = new UserGoodsSpecifications();
+            $userSpecificationsRow = $userSpecificationsModel->where(['user_id'=>$this->userId,'product_spec_id'=>$row->spec_id])->order('create_time desc')->find();
+
+            $supplierData[$row->supplier_id][] =[
                 'goodsId' => $row->id,
                 'cartId' => $row->cart_id,
-                'price' => $row->goods_price ?  getFormatPrice($row->goods_price) : getFormatPrice($row->w_price),
+                'specId' => $row->spec_id,
+                'price' => getFormatPrice($row->price),
                 'title' => $row->title,
-                'icon' => MallGoods::getFormatImg($row->icon),
+                'icon' => $row->spec_img_url ? SmProductSpec::getFormatImg($row->spec_img_url) : SmProduct::getFormatImg($row->cover_img_url),
                 'quantity' => intval($row->quantity),
-                'specificationsInfo' => $specificationsInfo,
-                'option_id' => $row->option_id ? $row->option_id : '',
-                'color_id' => $row->color_id ? $row->color_id : '',
-                'no' =>'',
-                'requirement' => '',
-                'unit' => $unitRow ? $unitRow->name : ''
+                'moq' =>  $row->min_order_qty,
+                'specificationsInfo' => $optionInfo, //规格描述
+                'materialCode' => $userSpecificationsRow ? $userSpecificationsRow->specifications_no : '',  //物料编号
+                'materialSpec' => $userSpecificationsRow ? $userSpecificationsRow->specifications_name : '',//物料名称
+                'unit' => $row->unit,  //单位
+                'isDiscussPrice' => $row->is_price_neg_at_phone, //议价
+                "specPriceDetails" => $specPriceDetails,  //价格范围
+                'showPrice' => getSimplePrice($row->is_price_neg_at_phone,$row->price)
             ];
         }
+
         $data = [];
-        foreach ($supplierData as $supplierId => $supplierRow){
+        foreach($supplierData as $supplierId => $supplierRow){
             $userModel = new IndexUser();
             $userInfo = $userModel->getInfoById($supplierId);
 
@@ -166,7 +193,6 @@ class MallCart extends Base{
                 'list' => $supplierRow
             ];
         }
-
         return ['status'=>0,'data'=>$data,'msg'=>''];
     }
 

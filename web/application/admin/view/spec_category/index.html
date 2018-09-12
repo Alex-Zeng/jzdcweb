@@ -1,0 +1,237 @@
+{include file="layout/header" title="$title" keywords="" /}
+
+<link href="__STATIC__/js/plugins/bootstrap-fileinput/css/fileinput.css" media="all" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="__STATIC__/js/plugins/bootstrapvalidator/css/bootstrapValidator.css"/>
+
+{include file="layout/left" groupId="$groupId" keywords="" /}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"></h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">类型规格管理</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <h3 class="card-title">类型规格管理</h3>
+                        </h3>
+                    </div>
+
+                    <div class="row" style="padding-top: 15px;padding-right: 15px">
+                        <div class="col-md-6">
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-primary pull-right" data-toggle="modal" data-id="0" data-name=""  data-option="{}" data-target="#create-modal">新增</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th>规格名称</th>
+                                <th>规格选项</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {volist name='list' id='specKey'}
+                            <tr>
+                                <td>{$specKey.spec_attr_key}</td>
+                                <td>{$specKey.optionInfo}</td>
+                                <td>
+                                    <a href="javascript:void(0)"  class="btn btn-sm btn-primary"  data-id="{$specKey.id}"  data-name="{$specKey.spec_attr_key}" data-option='{$specKey.optionJson}'  data-toggle="modal"   data-target="#create-modal">编辑</a>
+                                    <a href="javascript:void(0)"  class="btn btn-sm btn-danger"  data-id="{$specKey.id}" data-toggle="modal" data-target="#delete-modal">删除</a>
+                                </td>
+                            </tr>
+                            {/volist}
+                            </tbody>
+                            <tfoot>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="modal fade" id="create-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">规格设置</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form role="form" class="" id="add-form">
+                                <div class="form-group">
+                                    <label >规格名称</label>
+                                    <input type="text" class="form-control" name="specKeyName"  maxlength="20" id="specKeyName" placeholder="">
+                                    <input type="hidden"  name="specKeyId"   id="specKeyId" value="" />
+                                </div>
+                                <div class="form-group">
+                                    <input type="button" value="添加规格"  onclick="addSpec();"/>
+                                </div>
+                                <div class="form-group">
+                                    <div class="table-responsive">
+                                        <table class="table table-condensed">
+                                            <thead>
+                                            <tr>
+                                                <th>规格值(非重复)</th>
+                                                <th>操作</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody id="spec_box">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="add-request">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">是否确认删除该规格?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-id="" id="delete-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{include file="layout/footer" title="$title" keywords="" /}
+
+<script id="option-template" type="text/html">
+    <tr>
+        <td>
+            <input style="display:show;" type="text" class="form-control spec_option" maxlength="20" name="showText[]" value="{{name}}" pattern="required">
+        </td>
+        <td><i class="fa fa-trash-o" style="cursor: pointer" title="删除"></i></td>
+    </tr>
+</script>
+
+<script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
+<script type="text/javascript" src="__STATIC__/js/template-web.js"></script>
+<script type="text/javascript">
+
+    function addSpec() {
+        var data = {name:''};
+        var html = template('option-template',data);
+        $('#spec_box').append(html);
+    }
+
+    var url = '{:url("admin/product_category/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+    $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
+    $(function () {
+        $('#create-modal').on('show.bs.modal', function (event) {
+            $('#spec_box').html('');
+            var obj = $(event.relatedTarget);
+            $("#specKeyId").val(obj.data('id'));
+            $("#specKeyName").val(obj.data('name'));
+            //获取option数据
+            var options = obj.data('option');
+            var html = '';
+            for(var i =0; i< options.length;i++){
+                html += template('option-template',{name:options[i]});
+            }
+            $('#spec_box').append(html);
+        });
+        $("#add-request").click(function () {
+            //验证数据
+            var name = $('#specKeyName').val();
+            if(name == ''){
+                alert('规格名称不能为空');
+                return;
+            }
+            var validate = true;
+            var length = 0;
+            $("#spec_box").find('tr>td>.spec_option').each(function () {
+               var val = $(this).val();
+               if(val == ''){
+                   validate = false;
+               }
+               length++;
+            });
+            if(validate == false || length == 0 ){
+                alert('规格值不能为空或必须填写');
+                return;
+            }
+
+            $.ajax({
+                url:"{:url('admin/spec_category/edit')}&categoryId="+"{$categoryId}",
+                type:'post',
+                data: $("#add-form").serialize(),
+                dataType:'json',
+                success:function (data) {
+                    if(data.status == 0){
+                        window.location.reload();
+                    }else{
+                        alert(data.msg);
+                    }
+                }
+            })
+        });
+
+
+
+        $('#delete-modal').on('show.bs.modal', function (event) {
+            var id = $(event.relatedTarget).data('id');
+            $("#delete-request").data('id',id);
+        });
+        $("#delete-request").click(function () {
+            var id = $(this).data('id');
+            if(id <= 0){
+                return;
+            }
+            $.ajax({
+                url:"{:url('admin/spec_category/delete')}&id="+id,
+                type:'post',
+                data: {},
+                dataType:'json',
+                success:function (data) {
+                    if(data.status == 0){
+                        window.location.reload();
+                    }else{
+                        alert(data.msg);
+                    }
+                }
+            })
+        });
+        $(document).delegate('.fa-trash-o','click',function () {
+            $(this).closest('tr').remove();
+        });
+    });
+</script>

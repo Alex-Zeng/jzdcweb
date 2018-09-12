@@ -1,4 +1,15 @@
 <?php
+
+// 定义应用目录
+define('APP_PATH', __DIR__ . '/web/application/');
+// 加载框架引导文件
+require __DIR__ . '/web/thinkphp/start.php';
+
+//    $build = include '/web/build.php';
+//// 运行自动生成
+//    \think\Build::run($build);
+exit;
+
 /**
  *	网站数据展示入口页 示例 ./index.php?jzdc=index.user (jzdc=类名.方法名)
  */
@@ -13,19 +24,6 @@ if(strtolower($_SERVER['HTTP_HOST'])!='www.lansion.cn' && strtolower($_SERVER['H
 	if(is_match( '/^(.*)\.jzdc\.com$/',strtolower($_SERVER['HTTP_HOST']))){header('location:http://www.lansion.cn/index.php?jzdc=mall.shop_index&domain='.$_SERVER['HTTP_HOST']);exit;}
 }
 */
-//解析参数
-if(isset($_GET['s']) && $_GET['s']){
-    // 定义应用目录
-    define('APP_PATH', __DIR__ . '/web/application/');
-// 加载框架引导文件
-    require __DIR__ . '/web/thinkphp/start.php';
-
-//    $build = include '/web/build.php';
-//// 运行自动生成
-//    \think\Build::run($build);
-    exit;
-}
-
 
 $_POST['diy_meta']=de_safe_str($config['web']['diy_meta']);
 //go_domain($config['web']['domain']);

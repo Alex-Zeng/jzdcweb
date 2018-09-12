@@ -106,14 +106,14 @@ class Password{
         if(!$password){
             return ['status'=>1,'data'=>[],'msg'=>'密码不能为空'];
         }elseif (!checkPassword($password)){
-            return ['status'=>1,'data'=>[],'msg'=>'密码必须为4-20位的数字和字母组合'];
+            return ['status'=>1,'data'=>[],'msg'=>'密码必须为6-20位的数字和字母组合'];
         }
 
 
         if(!$confirmPassword){
             return ['status'=>1,'data'=>[],'msg'=>'确认密码不能为空'];
         }elseif (!checkPassword($confirmPassword)){
-            return ['status'=>1,'data'=>[],'msg'=>'密码必须为4-20位的数字和字母组合'];
+            return ['status'=>1,'data'=>[],'msg'=>'密码必须为6-20位的数字和字母组合'];
         }
 
         if($password != $confirmPassword){
@@ -146,7 +146,7 @@ class Password{
                 "id" => $user->id,
                 "group" => 6,
                 "time" => time(),
-                "expire" => time() + 5*3600   //过期时间
+                "expire" => time() + config('JZDC_TOKEN_EXPIRE')   //过期时间
             ];
             $jwt = JWT::encode($token,$key);
             $data['token']= $jwt;

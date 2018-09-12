@@ -69,8 +69,7 @@ class Service extends Base{
         $result = $model->save($data);
         if($result == true){
             //发送邮件通知
-            $email = 'liangjiahui@jizhongdiancai.com';
-           // $email = 'songanwei@jizhongdiancai.com';
+            $email = config('JZDC_SERVICE_EMAIL');
             $subject='集众电采服务预约';
             $content='您好，当前有新的服务预约申请，请及时跟进处理。';
             $result = SendMail($email,$subject,$content);

@@ -78,7 +78,19 @@ function filterDate($value){
  * @return false|int
  */
 function checkPassword($password){
-    return preg_match("/(?=.*[a-z])(?=.*[0-9])[A-Za-z0-9]{4,20}/",$password);
+    return preg_match("/^(?![0-9]+$)(?![a-zA-Z]+$)(?!([^(0-9a-zA-Z)]|[\(\)])+$)([^(0-9a-zA-Z)]|[\(\)]|[a-zA-Z]|[0-9]){6,20}$/",$password);
+}
+
+/**
+ * @desc 验证长度
+ * @param $str
+ * @param $length
+ * @param string $encode
+ * @return bool
+ */
+function checkStrLength($str, $length, $encode = 'UTF8'){
+    $newLen = mb_strlen($str,$encode);
+    return $newLen > $length ? false : true;
 }
 
 /**
@@ -138,16 +150,15 @@ function getImgUrl($content="",$suffix = ''){
 }
 
 function getTypeMap(){
-    $model = new \app\common\model\MallType();
-    $rows = $model->where(['parent'=>0])->field(['id','name','parent'])->select();
+    $model = new \app\common\model\SmProductCategory();
+    $rows = $model->where(['parent_id'=>0,'is_display'=>1,'is_deleted'=>0])->field(['id','name','parent_id'])->select();
     $map = [];
     foreach ($rows as $row){
         $map[$row->id][] = $row->id;
-        $rows2 = $model->where(['parent'=>$row->id])->field(['id','name','parent'])->select();
+        $rows2 = $model->where(['parent_id'=>$row->id,'is_display'=>1,'is_deleted'=>0])->field(['id','name','parent_id'])->select();
         foreach ($rows2 as $row2){
             $map[$row->id][] = $row2->id;
-
-            $rows3 = $model->where(['parent'=>$row2->id])->field(['id','name','parent'])->select();
+            $rows3 = $model->where(['parent_id'=>$row2->id,'is_display'=>1,'is_deleted'=>0])->field(['id','name','parent_id'])->select();
             foreach($rows3 as $row3){
                 $map[$row->id][] = $row3->id;
             }
@@ -170,12 +181,38 @@ function SendMail($tomail, $subject = '', $body = ''){
     $mail->SetFrom(config('JZDC_MAIL_LOGINNAME'), '集众电采');
     $mail->Subject = $subject;
     $mail->MsgHTML($body);
-    $mail->AddAddress($tomail, $tomail);
+
+    if(is_array($tomail)){
+       $emailArr = $tomail;
+    }else{
+       $emailArr = explode(',',$tomail);
+    }
+    for ($i =0; $i < count($emailArr); $i++){
+        $mail->AddAddress($emailArr[$i], $emailArr[$i]);
+    }
     return $mail->Send() ? true : false;
 }
 
+/**
+ * @desc 格式化价格  不够两位小数补零，超过两位末尾为零不显示
+ * @param $price
+ * @param int $length
+ * @return float|string
+ */
 function getFormatPrice($price,$length = 2){
-    return number_format($price,$length,'.','');
+    $floatT = floatval($price);
+    //判断是否有小数
+    $floatArr = explode ( '.', $floatT );
+    if(count($floatArr) > 1){
+        if(strlen($floatArr[1]) <= 2){
+            return number_format($floatT,$length,'.','');
+        }else{
+            return (string)$floatT;
+        }
+
+    }else{
+        return  number_format($floatT,$length,'.','');
+    }
 }
 
 /**
@@ -196,27 +233,6 @@ function getOrderShowStatus(){
 }
 
 
-/*
-case 1:  //待确认
-                    $where .= ' AND state IN (0,1)';
-                    break;
-                case 2: //待付款
-                    $where .=' AND state IN (2,9,10) AND service_type IN (0,2)';
-                    break;
-                case 3: //待发货
-                    $where .=' AND state = 3';
-                    break;
-                case 4: //待收货
-                    $where .=' AND state=6 AND service_type IN(0,2)';
-                    break;
-                case 5: //订单关闭
-                    $where .=' AND state=4';
-                    break;
-                case 6: //售后处理
-                    $where .=' AND ( state IN(11,13) OR (state IN (6,9,10) AND service_type IN(1,2)))';
-                    break;
-                default:
-*/
 function getOrderStatusInfo($status = 0, $serviceType = 0){
     if($status == 4){
         return '订单关闭';
@@ -240,6 +256,65 @@ function getOrderStatusInfo($status = 0, $serviceType = 0){
     }
     return '';
 }
+
+//
+function getOrderMsg($groupId,$status,$serviceType,$show = false){
+    if($show == true){
+		if($serviceType == 1){
+           return '售后处理中';
+        }
+       if($serviceType == 2){
+           return '售后完成';
+        }
+	}
+	
+    switch ($status){
+        case -1:
+            return '全部';
+            break;
+        case 0:
+            return '待核价';
+            break;
+        case 1:
+            return '待签约';
+            break;
+        case 2:
+            return '待采购商打款';
+            break;
+        case 3:
+            return'待发货';
+            break;
+        case 4:
+            return '订单关闭';
+            break;
+        case 6:
+            return '待收货';
+            break;
+        case 7:
+            return '待质检';
+            break;
+        case 8:
+            return '售后处理';
+            break;
+        case 9:
+            return '账期中';
+            break;
+        case 10:
+            return '逾期中';
+            break;
+        case 11:
+            if($groupId == 4){
+                return '交易完成';
+            }else{
+                return '待结算';
+            }
+            break;
+        case 13:
+            return'交易完成';
+            break;
+    }
+}
+
 
 
 /**
@@ -276,4 +351,36 @@ function getDevice(){
     }else{ //微信下载
         return 'androidWechat';
     }
+}
+
+/**
+ * @desc 前端显示价格
+ * @param int $isDiscuss
+ * @param $minPrice
+ * @param $maxPrice
+ * @return float|string
+ */
+function getShowPrice($isDiscuss = 0, $minPrice,$maxPrice){
+    if($isDiscuss == 1){
+        return '电议';
+    }
+    $minPrice = getFormatPrice($minPrice);
+    $maxPrice = getFormatPrice($maxPrice);
+    if($minPrice == $maxPrice){
+        return '¥'.$maxPrice;
+    }
+    return '¥'.$minPrice.'-'.$maxPrice;
+}
+
+/**
+ * @desc 显示价格
+ * @param int $isDiscuss
+ * @param $price
+ * @return string
+ */
+function getSimplePrice($isDiscuss = 0, $price){
+    if($isDiscuss == 1){
+        return '电议';
+    }
+    return getFormatPrice($price);
 }
