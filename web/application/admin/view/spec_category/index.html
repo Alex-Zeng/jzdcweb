@@ -28,7 +28,12 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">
-                            <h3 class="card-title">类型规格管理</h3>
+                            <h3 class="card-title">当前规格分类：
+                                {foreach name="position" id="posit"}
+                                {$posit.name}
+                                {if $key != count($position)-1}&nbsp;>{/if}
+                                {/foreach}
+                            </h3>
                         </h3>
                     </div>
 
