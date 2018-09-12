@@ -90,7 +90,7 @@
                                     <input type="hidden"  name="specKeyId"   id="specKeyId" value="" />
                                 </div>
                                 <div class="form-group">
-                                    <input type="button" value="添加规格"  onclick="addSpec();"/>
+                                    <input type="button" value="添加规格"  class="btn btn-primary" onclick="addSpec();"/>
                                 </div>
                                 <div class="form-group">
                                     <div class="table-responsive">
@@ -136,6 +136,7 @@
 <script id="option-template" type="text/html">
     <tr>
         <td>
+            <input  type="hidden"  name="specValIds[]"   value="{{id}}"   />
             <input style="display:show;" type="text" class="form-control spec_option" maxlength="20" name="showText[]" value="{{name}}" pattern="required">
         </td>
         <td><i class="fa fa-trash-o" style="cursor: pointer" title="删除"></i></td>
@@ -147,11 +148,20 @@
 <script type="text/javascript">
 
     function addSpec() {
-        var data = {name:''};
+        var data = {name:'',id:0};
         var html = template('option-template',data);
         $('#spec_box').append(html);
     }
 
+    function isRepeat(arr){
+        var hash = {};
+        for(var i in arr) {
+            if(hash[arr[i]])
+                return true;
+            hash[arr[i]] = true;
+        }
+        return false;
+    }
     var url = '{:url("admin/product_category/index")}';
     $('a[href="'+url+'"]').addClass('active');
     $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
@@ -165,7 +175,7 @@
             var options = obj.data('option');
             var html = '';
             for(var i =0; i< options.length;i++){
-                html += template('option-template',{name:options[i]});
+                html += template('option-template',{name:options[i].text,id:options[i].id});
             }
             $('#spec_box').append(html);
         });
@@ -178,17 +188,23 @@
             }
             var validate = true;
             var length = 0;
+            var inputT = [];
             $("#spec_box").find('tr>td>.spec_option').each(function () {
-               var val = $(this).val();
+               var val = $(this).val().trim();
                if(val == ''){
                    validate = false;
                }
+                inputT.push(val);
                length++;
             });
             if(validate == false || length == 0 ){
                 alert('规格值不能为空或必须填写');
                 return;
             }
+           if(isRepeat(inputT)){
+               alert('规格值不能设置重复');
+               return;
+           }
 
             $.ajax({
                 url:"{:url('admin/spec_category/edit')}&categoryId="+"{$categoryId}",

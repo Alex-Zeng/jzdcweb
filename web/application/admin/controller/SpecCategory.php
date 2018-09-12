@@ -41,7 +41,7 @@ class SpecCategory extends Base{
             $optionArr = [];
             foreach ($specOptionRows as $specOptionRow){
                 $optionInfo .= $specOptionRow->spec_option_text .',';
-                $optionArr[] =  $specOptionRow->spec_option_text;
+                $optionArr[] = ['id'=>$specOptionRow->id,'text'=>$specOptionRow->spec_option_text];
             }
             $optionInfo = $optionInfo ? substr($optionInfo,0,strlen($optionInfo)-1) : $optionInfo;
             $specKeyRow['optionInfo'] = $optionInfo;
@@ -89,6 +89,7 @@ class SpecCategory extends Base{
         $specKeyName = $request->post('specKeyName','trim');
         $specKeyId = $request->post('specKeyId',0,'intval');
         $showText = $request->post('showText/a');  //数组
+        $specValIds = $request->post('specValIds/a'); //数组
         $model = new SmProductCategory();
         $row = $model->where(['id'=>$categoryId])->find();
         if(!$row){
@@ -112,6 +113,52 @@ class SpecCategory extends Base{
             //更新名称
             $result = $specKeyModel->save(['spec_attr_key'=>$specKeyName,'last_modified_user_id'=>$userId,'last_modified_user'=>$userInfo->username,'last_modified_time'=>time()],['id'=>$specKeyId]);
             if($result !== false){
+                //
+                $newSpecValTexts = $existSpecValIds = $existSpecValMap= $updateSpecValIds = $delSpecValIds = $oldSpecValIds = [];
+                for($j =0; $j < count($specValIds); $j++){
+                    if($specValIds[$j] > 0){
+                        $existSpecValIds[] = $specValIds[$j];
+                        $existSpecValMap[$specValIds[$j]] = $showText[$j];
+                    }
+                    if($specValIds[$j] == 0){
+                        $newSpecValTexts[] =['text' => $showText[$j]];
+                    }
+                }
+                //查询原数据
+                $oldSpecVals = $specOptionModel->where(['category_spec_attr_key_id'=>$specKeyId,'is_deleted'=>0])->select();
+                foreach ($oldSpecVals as $oldSpecVal){
+                  $oldSpecValIds[] = $oldSpecVal->id;
+                }
+                //获取删除的id
+                $delSpecValIds = array_diff($oldSpecValIds,$existSpecValIds);
+                $updateSpecValIds = array_intersect($oldSpecValIds,$existSpecValIds);
+
+                //添加新元素
+                if($newSpecValTexts){
+                    for($i = 0; $i < count($newSpecValTexts); $i++) {
+                        $insertT[] = [
+                            'category_spec_attr_key_id' => $specKeyId,
+                            'spec_option_text' => $newSpecValTexts[$i]['text'],
+                            'created_user_id' => $userId,
+                            'created_user' => $userInfo->username,
+                            'created_time' => time()
+                        ];
+                    }
+                    $specOptionModel->insertAll($insertT);
+                }
+                //删除原数据
+                if($delSpecValIds){
+                    $specOptionModel->save(['is_deleted'=>1,'deleted_user'=>$userInfo->username,'deleted_time'=>time()],['id'=>['in',$delSpecValIds]]);
+                }
+                //修改
+                if($updateSpecValIds){
+                    for ($n =0; $n < count($updateSpecValIds); $n++){
+                        $specOptionModel->save(['spec_option_text'=>$existSpecValMap[$updateSpecValIds[$n]],'last_modified_user_id'=>$userId,'last_modified_time'=>time()],['id'=>$existSpecValIds[$n]]);
+                    }
+                }
+
+
+/*
                 //删除原数据
                 $specOptionModel->where(['category_spec_attr_key_id'=>$specKeyId,'is_deleted'=>0])->delete();
                 if($showText){
@@ -127,7 +174,7 @@ class SpecCategory extends Base{
                     }
                     $specOptionModel->insertAll($deleteT);
                 }
-
+*/
                 return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
             }
 
