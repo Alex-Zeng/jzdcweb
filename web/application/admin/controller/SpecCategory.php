@@ -31,6 +31,17 @@ class SpecCategory extends Base{
             $this->errorTips();
         }
 
+        //获取路径
+        $depthPath = $row->depth_path;
+        //分隔字符串
+        $depthArr = explode('/',$row->depth_path);
+        $depthArr = array_filter($depthArr);
+        $option = [];
+        foreach ($depthArr as  $kVal){
+            $cate = $model->where(['id'=> $kVal])->find();
+            $option[] = ['name'=>$cate->name];
+        }
+
         $specKeyModel = new SmCategorySpecAttrKey();
         $specOptionModel = new SmCategorySpecAttrOptions();
         $specKeyRows = $specKeyModel->where(['category_id'=>$id,'is_deleted'=>0])->select();
@@ -50,6 +61,7 @@ class SpecCategory extends Base{
 
         $this->assign('list',$specKeyRows);
         $this->assign('categoryId',$id);
+        $this->assign('position',$option);
         return $this->fetch();
     }
 
