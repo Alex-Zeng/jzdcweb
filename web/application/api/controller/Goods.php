@@ -124,8 +124,8 @@ class Goods  extends Base {
                 'url' => SmProduct::getFormatImg($row->cover_img_url),
                 'min_price' => getFormatPrice($row->min_price),
                 'max_price' => getFormatPrice($row->max_price),
-                'isDiscussPrice' => $row->is_price_neg_at_phone,
-                'showPrice' => getShowPrice($row->is_price_neg_at_phone,$row->min_price,$row->max_price)
+                'isDiscussPrice' => getBinDecimal($row->is_price_neg_at_phone),
+                'showPrice' => getShowPrice(getBinDecimal($row->is_price_neg_at_phone),$row->min_price,$row->max_price)
             ];
         }
         return ['status'=>0,'data'=>['total'=>$total,'list'=>$list],'msg'=>''];
@@ -275,11 +275,11 @@ class Goods  extends Base {
                 'id' => $row->id,
                 'title' => $row->title,
                 'url' => SmProduct::getFormatImg($row->cover_img_url),
-                'isDiscussPrice' => $row->is_price_neg_at_phone,
+                'isDiscussPrice' => getBinDecimal($row->is_price_neg_at_phone),
                 'min_price' => getFormatPrice($row->min_price),
                 'max_price' => getFormatPrice($row->max_price),
                 'isFavorite' => in_array($row->id,$goodsIdArr) ? 1 : 0,
-                'showPrice' => getShowPrice($row->is_price_neg_at_phone,$row->min_price,$row->max_price)
+                'showPrice' => getShowPrice(getBinDecimal($row->is_price_neg_at_phone),$row->min_price,$row->max_price)
             ];
         }
         //更新搜索历史
@@ -396,7 +396,7 @@ class Goods  extends Base {
         foreach($specRows as $specRow){
             $specSet = [];
             //对于定制
-            if($specRow->is_customized == 1){
+            if(getBinDecimal($specRow->is_customized) == 1){
                 $specSet = [0];
             }else{   //非定制
                 $specSetArr = $specRow->spec_set ? explode(',',$specRow->spec_set) : [];
@@ -418,7 +418,7 @@ class Goods  extends Base {
                 "specUnit" => $specRow->unit,
                 "specImageUrl" => $specRow->spec_img_url ? SmProductSpec::getFormatImg($specRow->spec_img_url) : SmProduct::getFormatImg($product->cover_img_url),
                 "moq" => $specRow->min_order_qty,
-                "isDiscussPrice" => $specRow->is_price_neg_at_phone,
+                "isDiscussPrice" => getBinDecimal($specRow->is_price_neg_at_phone),
                 "materialCode" => $materialCode,
                 "materialSpec" => $materialSpec,
                 "specPriceDetails" => $specPriceDetails,
@@ -433,7 +433,7 @@ class Goods  extends Base {
             "companyName" => $supplierInfo ? $supplierInfo->real_name : '',
             "companyLogo" => IndexUser::getFormatIcon($icon),
             "title" => $product->title,
-            "isDiscussPrice" => $product->is_price_neg_at_phone,
+            "isDiscussPrice" => getBinDecimal($product->is_price_neg_at_phone),
             "minPrice" => getFormatPrice($product->min_price),
             "maxPrice" => getFormatPrice($product->max_price),
             "specAttrs" => $specAttrs,
@@ -442,7 +442,7 @@ class Goods  extends Base {
             "webDetail" => getImgUrl($product->html_content_2),//PC详情
             'detailUrl' =>config('jzdc_domain').url('api/goods/detail',['id'=>$id]), //H5 Url
             'isFavorite' => $isFavorite, //是否收藏
-            'showPrice' => getShowPrice($product->is_price_neg_at_phone,$product->min_price,$product->max_price)
+            'showPrice' => getShowPrice(getBinDecimal($product->is_price_neg_at_phone),$product->min_price,$product->max_price)
         ];
         return ['status'=>0,'data'=>$list,'msg'=>''];
     }

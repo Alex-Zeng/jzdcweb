@@ -148,7 +148,7 @@ class MallCart extends Base{
             //查询规格
             $optionInfo = '';
             $specPriceDetails = [];
-            if($row->is_customized == 1){
+            if(getBinDecimal($row->is_customized) == 1){
                 $optionInfo = '定制';
             }else{
                 $specSetIds = $row->spec_set ? explode(',',$row->spec_set) : [];
@@ -177,7 +177,7 @@ class MallCart extends Base{
                 'materialCode' => $userSpecificationsRow ? $userSpecificationsRow->specifications_no : '',  //物料编号
                 'materialSpec' => $userSpecificationsRow ? $userSpecificationsRow->specifications_name : '',//物料名称
                 'unit' => $row->unit,  //单位
-                'isDiscussPrice' => $row->is_price_neg_at_phone, //议价
+                'isDiscussPrice' => getBinDecimal($row->is_price_neg_at_phone), //议价
                 "specPriceDetails" => $specPriceDetails,  //价格范围
                 'showPrice' => getSimplePrice($row->is_price_neg_at_phone,$row->price)
             ];
