@@ -282,7 +282,7 @@
             //增加分类
             $('.ajax-bind-change').on('click',".category-add",function(){
                 if($('.ajax-bind-change .category-box').length>=5){
-                    alert('最多只能关联五个');
+                    layer.alert('最多只能关联五个');
                     return false;
                 }
                 ajaxGetCategory(0,'.ajax-bind-change .category-box:last','after','add');
@@ -320,7 +320,7 @@
         <tr class="js_specification_tr">
             <td>
                 {{each categoryAttr as colv}}
-                    {{ if colv['spec_attr_key']=='颜色' }}
+                    {{ if colv['spec_attr_key']=='规格' }}
                         <select class="form-control js_specification_attr js_specification_color"  name="spec[category][{{colv['id']}}_{{colv['spec_attr_key']}}][]">
                             <option value="-1">{{colv['spec_attr_key']}}</option>
                             {{each colv['spec_attr_val'] as colvv}}
@@ -330,12 +330,14 @@
                         </select>
                         <input type="text" class="form-control col-md-2 colorText" name="spec[category_text][{{colv['id']}}_{{colv['spec_attr_key']}}][]" style="display: none"/>
                     {{ else }}
-                        <select class="form-control js_specification_attr"  name="spec[category][{{colv['id']}}_{{colv['spec_attr_key']}}][]">
+                        <select class="form-control js_specification_attr js_specification_color"  name="spec[category][{{colv['id']}}_{{colv['spec_attr_key']}}][]">
                             <option value="-1">{{colv['spec_attr_key']}}</option>
                             {{each colv['spec_attr_val'] as colvv}}
                                 <option value="{{colvv['spec_option_text']}}">{{colvv['spec_option_text']}} </option>
                             {{/each}}
+                            <option value="0">自定义</option>
                         </select>
+                        <input type="text" class="form-control col-md-2 colorText" name="spec[category_text][{{colv['id']}}_{{colv['spec_attr_key']}}][]" style="display: none"/>
                     {{/if}}
                 {{/each}}
             </td>
@@ -375,11 +377,11 @@
         //有颜色规格 事件监听选择自定义
         $('#combination-container').on('change','.js_specification_color',function(){
             if($(this).val()==0){
-                $(this).siblings('.colorText').show();
-                $(this).siblings('.colorText').val('');
+                $(this).next('.colorText').show();
+                $(this).next('.colorText').val('');
             }else{
-                $(this).siblings('.colorText').hide();
-                $(this).siblings('.colorText').val('');
+                $(this).next('.colorText').hide();
+                $(this).next('.colorText').val('');
             }
         });
         //单位 事件监听选择自定义
@@ -419,12 +421,12 @@
             //获取主分类选中的ID
             var categoryId = $('#category-template-box .category-box:first .category-value-input').val();
             if(categoryId==0){
-                alert('请先选择分类');
+                layer.alert('请先选择分类');
                 return;
             }
             //获取规格数据并缓存起来
             var categoryAttr = $('#combination-container').data('category'+categoryId);
-            console.log(categoryAttr);
+            // console.log(categoryAttr);
             if(categoryAttr == undefined){
                 $.ajax({
                         type:'get',
@@ -509,25 +511,28 @@
     </div>
     <script id="price-template" type="text/html">
             {{ if priceObj!='' }}
-            {{each priceObj as colv}}
+            {{each priceObj as colv xx}}
                 <tr>
                     <td>
-                        <input type="number" class="min" value="{{colv['js_min_order_qty']}}" style="width: 80px;" />&nbsp;-&nbsp;
-                        <input type="number" class="max"  value="{{colv['js_max_order_qty']}}" style="width: 80px;" />
+                        <input type="number" class="min" value="{{colv['min_order_qty']}}" style="width: 80px;" />&nbsp;-&nbsp;
+                        <input type="number" class="max"  value="{{colv['max_order_qty']}}" style="width: 80px;" />
                     </td>
                     <td>
-                        <input type="number" class="price" value="{{colv['js_price']}}" style="width: 120px;" />
+                        <input type="number" class="price" value="{{colv['price']}}" style="width: 120px;" />
+
                     </td>
                     <td>
+                        <input type="hidden" class="id" value="{{colv['id']}}" style="width: 120px;" />
+                        <a href="javascript:;" class="price-del">删除</a>
                     </td>
                 </tr>
             {{/each}}
-            
             {{/if}}            
     </script>
     <script>
         //价格区间弹出层
-        $('#combination-container').on('click','.js_specification_price', function (event) {
+        $('#combination-container').off('click','.js_specification_price').on('click','.js_specification_price', function (event) {
+            // event.preventDefault();//阻止之前的事件绑定
             //获取当前行的值
             var trIndex = $(this).parents('tr').index();
             var js_price = $(this).parents('tr').find('.js_price').val();
@@ -536,10 +541,9 @@
             //生成html展示
             var trVal =$(this).siblings('.js_specification_price_data').val();
             if(trVal==''){
-                var priceObj =  [{'js_price':js_price,'js_min_order_qty':js_min_order_qty,'js_max_order_qty':js_max_order_qty}];
+                var priceObj =  [{'price':js_price,'min_order_qty':js_min_order_qty,'max_order_qty':js_max_order_qty,'id':""}];
                 var html = template('price-template',{'priceObj':priceObj})
             }else{
-                console.log(trVal);
                 var html = template('price-template',{'priceObj':JSON.parse(trVal)})
             }
             $('#price-modal .modal-content .price-add').html(html);
@@ -547,54 +551,76 @@
 
 
             //点击保存把价格区间全部拿出来存储
-            $('#price-request').on('click',{'trIndex':trIndex},function(obj){
-                
+            $('#price-request').off('click').on('click',{'trIndex':trIndex},function(obj){
+                // obj.preventDefault();//阻止之前的事件绑定
                 //与外部的互相事件绑定
                 var min = $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr:first .min').val();
                 var price = $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr:first .price').val();
                 $('#combination-container .js_specification_tr:eq('+trIndex+') .js_min_order_qty').val(min);
                 $('#combination-container .js_specification_tr:eq('+trIndex+') .js_price').val(price);
-
-                //如果有设置区间则存储起来
-                var trlen = $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr').length;
-                // alert( $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr:eq(0)').html());
-                // alert( $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr:eq(1)').html());
-                if(trlen>=2){
-                    var modelVals = [];
-                    for (var i =0;  i < trlen; i++) {
-                        var trobj = $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr:eq('+i+')');
-                        var vmin = trobj.find('.min').val()
-                        var vmax = trobj.find('.max').val()
-                        var vprice = trobj.find('.price').val()
-                        if(vmin>=vmax){
-                            alert('区间有错1');return;
-                        }
-                        if(parseFloat(vmin)==0.00 || parseFloat(vmax)==0.00  || parseFloat(vprice)==0.00){
-                            alert('区间有错2');return;
-                        }
-
-                       var objd = {'js_min_order_qty':vmin,'js_max_order_qty':vmax,'js_price':vprice};
-                       modelVals.push(objd);
-                    }
-                   
-                    // console.log(modelVals);
-                    // console.log(JSON.stringify(modelVals));
-                    $('#combination-container .js_specification_tr:eq('+trIndex+') .js_specification_price_data').val(JSON.stringify(modelVals));
-                }else{
-                    $('#combination-container .js_specification_tr:eq('+trIndex+') .js_specification_price_data').val('');
-                }
                 
+                //如果1有设置区间则存储起来
+                var trlen = $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr').length;
+                var modelVals = [];
+                for (var i =0;  i < trlen; i++) {
+                    var trobj = $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr:eq('+i+')');
+                    var vmin = eval(trobj.find('.min').val());
+                    var vmax = eval(trobj.find('.max').val());
+                    var vprice = eval(trobj.find('.price').val());
+                    var vid = trobj.find('.id').val();
+                    if(vmin>=vmax){
+                        layer.alert('第'+(i+1)+'区间的最小值不能大于最大值');
+                        return;
+                    }
+                    var nextVmin = $(this).parents('.modal-footer').siblings('.modal-body').find('.price-add tr:eq('+(i+1)+')').find('.min').val();
+                    if(nextVmin!=undefined){
+                        nextVmin = eval(nextVmin);
+                        if(vmax>=nextVmin){
+                            layer.alert('第'+(i+1)+'区间最大值不能少于或等于第'+(i+2)+'区间最小值');
+                            return;break;
+                        }
+                        if((nextVmin-vmax)!=1){
+                            layer.alert('第'+(i+1)+'区间最大值与第'+(i+2)+'区间最小值差值不能大于1');
+                            return;break;
+                        }
+                    }
+
+                   var objd = {'price':vprice,'min_order_qty':vmin,'max_order_qty':vmax,'id':vid};
+                   modelVals.push(objd);
+                }
+                $('#combination-container .js_specification_tr:eq('+trIndex+') .js_specification_price_data').val(JSON.stringify(modelVals));
                 $('#price-modal').modal('hide');
+                obj.stopPropagation(); return false;
             });
+            event.stopPropagation();return false;
         });
         //添加价格区间
         $('body').on('click','#price-add', function (event) {
-
             var priceObj =  [{'js_price':0,'js_min_order_qty':0,'js_max_order_qty':0}];
             var html = template('price-template',{'priceObj':priceObj})    
             $(this).parent('.modal-footer').siblings('.modal-body').find('.price-add').append(html);
         });
-
+        //删除价格区间
+        $('body').on('click','.price-del', function (event) {
+            var trlen = $(this).parents('.modal-body').find('.price-add tr').length;
+            if(trlen==1){
+                layer.alert('最少有一个，不能再删除了');
+            }else{
+                $(this).parents('tr').remove();
+            }
+        });
+        $('body').on('focus','.js_price',function(event){
+            var val = $(this).val();
+            $(this).data('blur',val);
+        });
+        $('body').on('blur','.js_price',function(event){
+            if($(this).parents('.js_specification_tr').find('.js_specification_price_data').val()!=''){
+                layer.alert('当前修改的规格商品设定了价格区间不能在此处直接修改,请在价格区间中修改');
+                var history = $(this).data('blur');
+                $(this).val(history);
+                $(this).data('blur','');
+            }
+        });
     </script>
 <!-- 删除 -->
     <div class="modal fade" id="delete-specification-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
