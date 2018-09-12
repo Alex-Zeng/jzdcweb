@@ -384,3 +384,12 @@ function getSimplePrice($isDiscuss = 0, $price){
     }
     return getFormatPrice($price);
 }
+
+/**
+ * @desc 二进制转十进制
+ * @param $binT
+ * @return float|int
+ */
+function getBinDecimal($binT){
+    return bindec($binT);
+}
