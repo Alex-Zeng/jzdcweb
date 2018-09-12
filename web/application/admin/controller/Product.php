@@ -314,6 +314,16 @@ class Product extends Base{
                                 'max_order_qty' =>  99999999.99,
                                 'price'         =>  $post['spec']['price'][$key]
                             ]);
+                        }else{
+                            $spec_price_section = json_decode($val,true);
+                            foreach ($spec_price_section as $k => $v) {
+                                $data7[] = array_merge($createDefault,[
+                                    'spec_id'       =>  $data4_result[$key]['id'],
+                                    'min_order_qty' =>  $v['min_order_qty'],
+                                    'max_order_qty' =>  $v['max_order_qty'],
+                                    'price'         =>  $v['price']
+                                ]);
+                            }
                         }
                     }
                     if(!empty($data7)){
@@ -726,6 +736,7 @@ class Product extends Base{
                      // dump($data6_plan_param2_data9) ;exit();  
 
                 //商品规格组合价格表     sm_product_spec_price       SmProductSpecPrice未完成
+                    // dump($data4_result);exit();
                     $data7 = [];
                     $data7_result = [];
                     foreach ($post['spec']['price_section'] as $key => $val) {
@@ -736,17 +747,27 @@ class Product extends Base{
                                 'max_order_qty' =>  99999999.99,
                                 'price'         =>  $post['spec']['price'][$key]
                             ]);
+                        }else{
+                            $spec_price_section = json_decode($val,true);
+                            foreach ($spec_price_section as $k => $v) {
+                                $data7[] = array_merge($createDefault,[
+                                    'spec_id'       =>  $data4_result[$key]['id'],
+                                    'min_order_qty' =>  $v['min_order_qty'],
+                                    'max_order_qty' =>  $v['max_order_qty'],
+                                    'price'         =>  $v['price']
+                                ]);
+                            }
                         }
                     }
                     if(!empty($data7)){
-                        // dump($data7);
                         $data7_result = $SmProductSpecPrice->saveAll($data7);
                         if(!$data7_result){
                             Db::rollback(); 
                             return $this->errorMsg('101211',['replace'=>['__REPLACE__'=>'data7_result']]);
                         }
-                        // dump($data7_result);
                     }
+                    
+
                     
                     
                 //商品规格SKU更新  规格
@@ -780,6 +801,51 @@ class Product extends Base{
                     if(!$data4_result_update){
                         Db::rollback(); 
                         return $this->errorMsg('101211',['replace'=>['__REPLACE__'=>'data4_result_update']]);
+                    }
+                }
+
+                $data8 = [];
+                $data8_result = [];
+                foreach ($post['update_spec']['price_section'] as $key => $val) {
+                    $update_spec_price_section = json_decode($val,true);
+                    foreach ($update_spec_price_section as $k => $v) {
+                        if($v['id']>0){
+                            $data8_update = array_merge($updateDefault,[
+                                'min_order_qty' =>  $v['min_order_qty'],
+                                'max_order_qty' =>  $v['max_order_qty'],
+                                'price'         =>  $v['price']
+                            ]);
+                            $data8_update_result =  $SmProductSpecPrice->where(['id'=>$v['id']])->update($data8_update);
+                            if(!$data8_update_result){
+                                Db::rollback(); 
+                                return $this->errorMsg('101211',['replace'=>['__REPLACE__'=>'data8_update_result'.serialize($data8_update)]]);
+                            }
+                        }else{
+                            $data8[] = array_merge($createDefault,[
+                                'spec_id'       =>  $post['update_spec']['id'][$key],
+                                'min_order_qty' =>  $v['min_order_qty'],
+                                'max_order_qty' =>  $v['max_order_qty'],
+                                'price'         =>  $v['price']
+                            ]);
+                            
+                        } 
+                    }
+                }
+                if(count($data8)>0){
+                    $data8_result = $SmProductSpecPrice->saveAll($data8);
+                    if(!$data8_result){
+                        Db::rollback(); 
+                        return $this->errorMsg('101211',['replace'=>['__REPLACE__'=>'data8_result']]);
+                    }
+                }
+            }
+            //商品价格区间删除
+            if(isset($post['delete_spec_price'])){ 
+                foreach ($post['delete_spec_price']['id'] as $key => $val) {
+                    $data8_result_delete = $SmProductSpecPrice->where(['id'=>$val])->update($deleteDefault);
+                    if(!$data8_result_delete){
+                        Db::rollback(); 
+                        return $this->errorMsg('101211',['replace'=>['__REPLACE__'=>'data8_result_delete']]);
                     }
                 }
             }
@@ -900,6 +966,8 @@ class Product extends Base{
                 foreach ($attrValAll as $kk => $vv) {
                     $attrVal[$vv['category_spec_attr_key_id'].'_'.$vv['spec_attr_key']] = $vv['spec_attr_val'];
                 }
+                $price_section = $SmProductSpecPrice->alias('a')->field('a.min_order_qty,a.max_order_qty,a.price,a.id')->where(['spec_id'=>$val['id'],'is_deleted'=>0])->select();
+                // dump($price_section[0]);exit();
                 $spec[] = 
                 [
                     'id'=>$val['id'],
@@ -908,11 +976,13 @@ class Product extends Base{
                     'is_price_neg_at_phone'=>$val['is_price_neg_at_phone'],
                     'min_order_qty'=>$val['min_order_qty'],
                     'price'=>$val['price'],
+                    'price_id'=>$price_section[0]['id'],
                     'spec_img_url'=>$val['spec_img_url'],
                     'spec_img_url_path'=>$SmProduct->getFormatMultiImg($val['spec_img_url']),
-                    'price_section'=>'',
+                    'price_section'=> json_encode($price_section),
                 ];
             }
+
         }
         $row['spec'] = $spec;
         // //读取商品规格
@@ -926,6 +996,7 @@ class Product extends Base{
             // }
          // } 
          // $row['specAttr'] = $specAttr;
+
 
 
         //单位
