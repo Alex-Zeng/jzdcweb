@@ -290,8 +290,9 @@
                                 {elseif condition="$row.audit_state eq 5" /}
                                 <input type="hidden" name="audit_state" class="js_audit_state" value="2">
                                 <button type="button" class="btn btn-primary js_release">修改</button>
-                                {else/}
-                                <p>待审核</p>
+                                {elseif condition="$row.audit_state eq 4"/}
+                                <input type="hidden" name="audit_state" class="js_audit_state" value="2">
+                                <button type="button" class="btn btn-primary js_release">重新发布</button>
                                 {/if}
                                 <small class="submit-tip" style="padding-top: 6px;padding-left: 5px;color: #a94442"></small>
                             </div>
