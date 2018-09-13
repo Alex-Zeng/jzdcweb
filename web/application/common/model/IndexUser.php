@@ -39,7 +39,7 @@ class IndexUser extends Model{
     }
 
     public static function getFormatIcon($icon){
-        return config('jzdc_doc_path').'user_icon/'.$icon;
+        return  $icon ? config('jzdc_doc_path').'user_icon/'.$icon : '';
     }
 
 }
