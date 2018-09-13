@@ -105,24 +105,30 @@ class Index extends Base
         //获取推荐分类的ID
         $condition = ['a.is_recommended'=>1,'b.is_display'=>1,'a.state'=>SmProduct::STATE_FORSALE,'a.audit_state'=>SmProduct::AUDIT_RELEASED,'a.is_deleted'=>0];
 
-        $categoryRows = $productModel->alias('a')->join(['sm_product_category'=>'b'],'a.category_id=b.id','left')
+        $pathRows = $productModel->alias('a')->join(['sm_product_category'=>'b'],'a.category_id=b.id','left')
             ->where($condition)
             ->field(['b.id','SUBSTRING_INDEX(b.depth_path, \'/\', 2) AS `path`'])
             ->group('path')
-            ->limit(8)
             ->select();
+        //获取所有path的数据
+        $pathIds = [];
+        foreach ($pathRows as $pathRow){
+            if(!$pathRow->path){
+                continue;
+            }
+            $cateId = substr($pathRow->path,1,strlen($pathRow->path)-1);
+            $pathIds[] = intval($cateId);
+        }
 
+        //排序取出前8条
+        $categoryRows = $productCategoryModel->where(['id' => ['in',$pathIds]])->order('ordering desc')->limit(8)->field(['id'])->select(
         $dataType = [];
 
         //查询子类
         foreach ($categoryRows as $categoryRow){
-            if(!$categoryRow->path){
-                continue;
-            }
-            $cateId = substr($categoryRow->path,1,strlen($categoryRow->path)-1);
-            $categoryRow = $productCategoryModel->where(['id'=>$cateId])->find();
+            $categoryRow = $productCategoryModel->where(['id'=>$categoryRow->id])->find();
             //获取子集ID
-            $cateAllId =  $productCategoryModel->getChildIds($cateId,true);
+            $cateAllId =  $productCategoryModel->getChildIds($categoryRow->id,true);
 
             $productResult =  $typeLists = [];
             $dataProducts = $productModel->where(['category_id'=>['in',$cateAllId],'is_recommended'=>1,'is_deleted'=>0])->order('created_time desc')->limit(8)->field(['id','min_price','max_price','title','is_price_neg_at_phone','cover_img_url'])->select();
