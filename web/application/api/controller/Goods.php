@@ -438,8 +438,8 @@ class Goods  extends Base {
             "maxPrice" => getFormatPrice($product->max_price),
             "specAttrs" => $specAttrs,
             "specifications" => $specInfo,
-            'detail' => getImgUrl($product->html_content_1),  //H5详情
-            "webDetail" => getImgUrl($product->html_content_2),//PC详情
+            'detail' => getImgUrl($product->html_content_2),  //H5详情
+            "webDetail" => getImgUrl($product->html_content_1),//PC详情
             'detailUrl' =>config('jzdc_domain').url('api/goods/detail',['id'=>$id]), //H5 Url
             'isFavorite' => $isFavorite, //是否收藏
             'showPrice' => getShowPrice(getBinDecimal($product->is_price_neg_at_phone),$product->min_price,$product->max_price)
