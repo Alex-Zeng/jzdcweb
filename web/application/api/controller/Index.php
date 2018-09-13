@@ -131,7 +131,7 @@ class Index extends Base
         }
 
         //排序取出前8条
-        $categoryRows = $productCategoryModel->where(['id' => ['in',$pathIds]])->order('ordering desc')->limit(8)->field(['id'])->select(
+        $categoryRows = $productCategoryModel->where(['id' => ['in',$pathIds]])->order('ordering desc')->limit(8)->field(['id'])->select();
         $dataType = [];
 
         //查询子类
