@@ -3,7 +3,7 @@ namespace app\common\model;
 
 use think\Model;
 
-class FmFactoring extends Model{
+class FmFactoring extends Base{
 
 	protected $table = 'jzdc_factoring';
 
