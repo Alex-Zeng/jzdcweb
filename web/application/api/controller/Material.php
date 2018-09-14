@@ -117,6 +117,7 @@ class Material extends Base{
                 'materialSpec' => $row->specifications_name,
                 'title' => $row->title,
                 'minOrderQty' => $row->min_order_qty,
+                'soldQty' => $row->min_order_qty,
                 'specInfo' => $specInfo,
                 'supplierName' => $row->real_name,
                 'imgUrl' => $row->spec_img_url ? SmProductSpec::getFormatImg($row->spec_img_url) : SmProduct::getFormatImg($row->cover_img_url)
