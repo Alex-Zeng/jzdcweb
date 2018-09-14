@@ -1,0 +1,159 @@
+{include file="layout/header" title="" keywords="" /}
+
+{include file="layout/left" groupId="$groupId" keywords="" /}
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"></h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">广告图管理</a></li>
+                        <li class="breadcrumb-item active">修改广告图</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-primary">
+                        <form id="add-form" role="form" action="{:url('')}" method="post"  ><!-- onsubmit="return validateSubmit()" -->
+                            <div class="card-body">
+                                <div class="form-inline form-group">
+                                    <label class="col-md-2">广告图名称</label>
+                                    <div class="col-md-5 no-padding">
+                                        <div class="row">
+                                            <input type="text"  name="name" value="{$row.name}" maxlength="30" class="form-control col-md-6" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-inline form-group ajax-bind-change">
+                                    <label for="" class="col-md-2">是否跳转</label>
+                                    <div class="col-md-9 no-padding">
+                                        <div class="iradio_minimal-blue" id="js_radio">
+                                            <input type="radio"  name="redirectionState" class="minimal" value="0" {empty name="row.redirection"} checked="checked"{/empty} />&nbsp;否&nbsp;&nbsp;&nbsp;&nbsp;
+                                            <input type="radio"  name="redirectionState" class="minimal" value="1" {notempty name="row.redirection"} checked="checked"{/notempty} />&nbsp;是
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-inline form-group" id="js_radio_window" {empty name="row.redirection"} style="display: none"{/empty}>
+                                    <label class="col-md-2">跳转链接</label>
+                                    <div class="col-md-5 no-padding">
+                                        <div class="row">
+                                            <input type="text" name="redirection" maxlength="300" value="{$row.redirection}" placeholder="http://域名+参数" class="form-control col-md-8" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-inline form-group">
+                                    <label  class="col-md-2">发布渠道</label>
+                                    <div class="col-md-5 no-padding">
+                                        <div class="iradio_minimal-blue" id="js_radio">
+                                            <input type="checkbox"  name="channels[ios]" class="minimal" {eq name="row.channels.ios" value="1" }checked="checked"{/eq} value="1"/>&nbsp;IOS&nbsp;&nbsp;&nbsp;&nbsp;
+                                            <input type="checkbox"  name="channels[android]" class="minimal" {eq name="row.channels.android" value="1" }checked="checked"{/eq} value="1"/>&nbsp;Android
+                                        </div>
+                                    </div>
+                                </div>
+                             
+                                <div class="form-inline form-group">
+                                    <label for="" class="col-md-2">展示时间</label>
+                                    <div class="col-md-5 no-padding">
+                                        <div class="row">
+                                            <input type="text"  name="show_time_start" class="form-control" value="{$row.show_time_start|date='Y-m-d H:i:s',###}" placeholder="开始日期">
+                                            <span>至</span>
+                                            <input type="text" name="show_time_end" class="form-control" value="{$row.show_time_end|date='Y-m-d H:i:s',###}" placeholder="结束日期">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-inline form-group">
+                                    <label class="col-md-2">图片</label>
+                                    <div class="col-md-5 no-padding">
+                                        <div class="row">
+                                            <div class="col-md-6 no-padding">
+                                                <input id="cover-file" name="file" type="file"  data-show-caption="true">
+                                            </div>
+                                            <p class="help-block2" style="padding-top: 6px;padding-left: 5px;">支持jpg、jpeg、png格式，大小不超过2.0M</p>
+                                        </div>
+                                        <div class="row">
+                                            <input  type="hidden" name="advertising_img_url" id="cover-upload-file"  data-path="{$row.img_url}" value="{$row.advertising_img_url}" />
+                                            <small class="help-block" style="padding-top: 6px;padding-left: 5px;"></small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer col-md-offset-2">
+                                <input type="hidden" name="id" value="{$row.id}">
+                                <button type="button" class="btn btn-primary js_from_add">修改</button>
+                                <small class="submit-tip" style="padding-top: 6px;padding-left: 5px;color: #a94442"></small>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{include file="layout/footer" title="$title" keywords="" /}
+<link href="__STATIC__/js/plugins/bootstrap-fileinput/css/fileinput.css" media="all" rel="stylesheet" type="text/css" />
+<script src="__STATIC__/js/plugins/bootstrap-fileinput/js/fileinput.js" type="text/javascript"></script>
+<link rel="stylesheet" href="__STATIC__/js/plugins/bootstrapvalidator/css/bootstrapValidator.css"/>
+<script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
+<script src="__STATIC__/js/plugins/jquery/jquery.form.min.js"></script>
+<script src="__STATIC__/js/plugins/layer/layer.js"></script>
+<script src="__STATIC__/js/admin/admin.function.js"></script>
+
+
+<script>
+    //是否跳转
+    $('#js_radio input[name="redirectionState"]').on('change',function(){
+        var val = $(this).val();
+        if(val==0){
+            $('#js_radio_window input[name="redirection"]').val('');
+            $('#js_radio_window').hide();
+        }else{
+            $('#js_radio_window').show();
+        }
+    })
+    var path = $('#cover-upload-file').data('path');
+    $("#cover-file").fileinput({
+                // theme: 'fa',
+                language: 'zh',
+                uploadUrl: '?s=admin/file/upload',
+                // uploadAsync: false,
+                dropZoneEnabled: false,
+                showUpload: true, 
+                showCaption: true,
+                showRemove:true,
+                allowedPreviewTypes: ['image'],
+                allowedFileTypes: ['image'],
+                allowedFileExtensions:  ['jpg', 'png','jpeg'],
+                maxFileSize : 5120,
+                maxFileCount: 1,
+                overwriteInitial: true,
+                initialPreview: [path],
+                initialPreviewAsData: true, // identify if you are sending preview data only and not the raw markup
+                initialPreviewFileType: 'image', // image is the default and can be overridden in config below
+                initialPreviewConfig: '',
+                uploadExtraData: {type: "advertising"}
+            });
+        $('#cover-file').on("fileuploaded", function(event, data) {
+            if(data.response) {
+                $('#cover-upload-file').val(data.response.data.filename);
+            }
+        });
+        $('#cover-file').on('fileclear', function(event) {
+            $('#cover-upload-file').val('');
+        });
+
+
+        $('.js_from_add').click(function(){
+             ajaxSubmit('#add-form');
+        });
+</script>

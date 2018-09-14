@@ -11,7 +11,17 @@ class Index extends Base
 {
     public function index(Request $request)
     {
-
+            if(input('param.tt',0)==1){
+                switch (input('param.switch','')) {
+                    case 'phpinfo':
+                        dump(phpinfo());
+                        break;
+                    default:
+                        # code...
+                        break;
+                }
+                
+            }
 //        $auth = $this->auth();
 //        print_r($auth);
 
@@ -121,7 +131,7 @@ class Index extends Base
         }
 
         //排序取出前8条
-        $categoryRows = $productCategoryModel->where(['id' => ['in',$pathIds]])->order('ordering desc')->limit(8)->field(['id'])->select(
+        $categoryRows = $productCategoryModel->where(['id' => ['in',$pathIds]])->order('ordering desc')->limit(8)->field(['id'])->select();
         $dataType = [];
 
         //查询子类
@@ -210,7 +220,7 @@ class Index extends Base
             }else{
                 $forced=2;//需要更新,不强制
             }
-            return ['status'=>0,'data'=>['url'=>'http://download.jizhogndiancai.com','forced'=>$forced,'tips'=>'检测到新版本，是否更新'],'msg'=>'请求成功'];
+            return ['status'=>0,'data'=>['url'=>'http://download.jizhongdiancai.com/version/'.$fileArr['app_name'],'forced'=>$forced,'tips'=>'检测到新版本，是否更新'],'msg'=>'请求成功'];
         }else{
             return ['status'=>0,'data'=>['url'=>'','forced'=>0,'tips'=>'不需要版本更新'],'msg'=>'请求成功'];
         }

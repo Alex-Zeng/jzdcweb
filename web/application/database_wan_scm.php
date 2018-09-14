@@ -9,11 +9,11 @@ return [
         // 数据库名
         'database'        => 'jzdcprd',
         // 用户名
-        'username'        => 'jzdcadm',
+        'username'        => 'jzdcusr',//'jzdcadm',
         // 密码
-        'password'        => 'Jzdc@2018',
+        'password'        => '9898%%##AT',//'Jzdc@2018',
         // 端口
-        'hostport'        => '3306',
+        'hostport'        => '23006',//'3306',
         // 连接dsn
         'dsn'             => '',
         // 数据库连接参数

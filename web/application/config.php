@@ -12,6 +12,7 @@
 //通过服务器IP地址自动使用对应配置文件
 switch ($_SERVER['SERVER_NAME']) {
     case 'scm.jizhongdiancai.com':
+    case 'download.jizhongdiancai.com':
         $app_debug = false;
         $app_trace = false;
         $app_status = 'database_wan_scm';
@@ -281,6 +282,11 @@ return [
         ],
         'banner' => [
             'path' => ROOT_PATH.'public'.DS.'uploads/banner',
+            'size' => 5*1024*1024,
+            'ext' => 'jpg,jpeg,png',
+        ],
+        'advertising' => [
+            'path' => ROOT_PATH.'public'.DS.'uploads/advertising',
             'size' => 5*1024*1024,
             'ext' => 'jpg,jpeg,png',
         ],
