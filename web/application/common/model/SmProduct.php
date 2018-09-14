@@ -8,11 +8,6 @@ class SmProduct extends Base{
 	// 设置当前模型对应的完整数据表名称-分类规格表
     protected $table = 'sm_product';
 
-    protected $type = [
-        'is_recommended' => 'boolean',
-        'is_price_neg_at_phone' => 'boolean'
-    ];
-
     const STATE_FORSALE = 1;   //上架
     const STATE_SOLDOUT = 2;  //下架
 
