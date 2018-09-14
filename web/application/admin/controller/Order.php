@@ -480,7 +480,11 @@ class Order extends Base{
             ->setCellValue('O1', '合同编号')
             ->setCellValue('P1', '是否账期支付')
             ->setCellValue('Q1', '账期截止')
-            ->setCellValue('R1', '总价');
+            ->setCellValue('R1', '总价')
+            ->setCellValue('S1','采购商付款日期')
+            ->setCellValue('T1','供应商发货日期')
+            ->setCellValue('U1','采购商收货日期')
+            ->setCellValue('V1','付款至供应商日期');
 
         //查询数据
         $total = $model->where($where)->count();
@@ -490,6 +494,7 @@ class Order extends Base{
         $counter = 2;
         $userModel = new IndexUser();
         $goodsModel = new MallOrderGoods();
+        $orderPayModel = new MallOrderPay();
 
         $objPHPExcel->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
 
@@ -515,22 +520,18 @@ class Order extends Base{
                 $orderStart = $counter;
                 $orderEnd = $counter + $goodsCount - 1;
 
-                //合并单元格
-//                if ($orderEnd > $orderStart) {
-//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A' . $orderStart . ':A' . $orderEnd);
-//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B' . $orderStart . ':B' . $orderEnd);
-//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('C' . $orderStart . ':C' . $orderEnd);
-//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D' . $orderStart . ':D' . $orderEnd);
-//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('E' . $orderStart . ':E' . $orderEnd);
-//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F' . $orderStart . ':F' . $orderEnd);
-//
-//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('N' . $orderStart . ':N' . $orderEnd);
-//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('O' . $orderStart . ':O' . $orderEnd);
-//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('P' . $orderStart . ':P' . $orderEnd);
-//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('Q' . $orderStart . ':Q' . $orderEnd);
-//                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('R' . $orderStart . ':R' . $orderEnd);
-//
-//                }
+                //查询订单支付数据
+
+                $payRows = $orderPayModel->where(['order_id'=>$row->id])->order('create_time asc')->select();
+                $supplierPayDate = $buyerPayDate = '';
+                foreach ($payRows as $payRow){
+                    if(in_array($payRow->pay_type,[1,2])){
+                        $buyerPayDate = $payRow->pay_time ? substr($payRow->pay_time,0,10) : '';
+                    }else{
+                        $supplierPayDate = $payRow->pay_time ? substr($payRow->pay_time,0,10) : '';
+                    }
+                }
+
                 foreach ($goodsRows as $goodsRow) {
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('A' . $counter, date('Y-m-d H:i', $row->add_time));
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValueExplicit('B'.$counter,$row->out_id,\PHPExcel_Cell_DataType::TYPE_STRING);
@@ -550,6 +551,10 @@ class Order extends Base{
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('P' . $counter, $row->pay_date ? '是' : '否');
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('Q' . $counter, $row->pay_date ? substr($row->pay_date, 0, 10) : '');
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('R' . $counter, '¥' .$row->actual_money);
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('S'.$counter, $buyerPayDate);
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('T'.$counter,$row->confirm_delivery_time > 0 ? date('Y-m-d',$row->confirm_delivery_time) : '');
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('U'.$counter,$row->receipt_time > 0 ? date('Y-m-d',$row->receipt_time) : '');
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('V'.$counter, $supplierPayDate);
 
                     $counter++;
                     unset($goodsRows);
