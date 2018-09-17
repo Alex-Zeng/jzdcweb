@@ -348,5 +348,8 @@ return [
     'http_exception_template'    =>  [
         // 定义404错误的重定向页面地址
         404 =>  APP_PATH.'admin/view/tips/error.html',
-    ]
+    ],
+    ////////////////////IOS审核配置参数//////////////////////
+    'JZDC_APP_AUDIT' => true,
+    'JZDC_APP_VERSION' => '1.0.2',
 ];
