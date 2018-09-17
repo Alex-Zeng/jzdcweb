@@ -165,7 +165,7 @@ class MallCart extends Base{
             $where = ['user_id'=>$this->userId,'goods_id'=>$specMap['productId'],'product_spec_id'=>$specMap['specId']];
             $cartRow = $cartModel->where($where)->find();
             if($cartRow){  //存在更新数量
-                $result = $cartModel->save(['quantity'=>$cartRow->quantity+$specMap['soldQty'],'price' => isset($specRow->price) ? $specRow->price : '0.00'],$where);
+                $result = $cartModel->save(['quantity'=>$cartRow->quantity+$specMap['quantity'],'price' => isset($specRow->price) ? $specRow->price : '0.00'],$where);
             }else{ //不存在插入数据
                 $userModel = new IndexUser();
                 $user = $userModel->getInfoById($this->userId);
@@ -174,7 +174,7 @@ class MallCart extends Base{
                     'username' => $user ? $user->username : '',
                     'key' => 0,
                     'goods_id' => $specMap['productId'],
-                    'quantity'=>$specMap['soldQty'],
+                    'quantity'=>$specMap['quantity'],
                     'price' => isset($specRow->price) ? $specRow->price : '0.00',
                     'time' => time(),
                     'product_spec_id' => $specMap['specId']
