@@ -16,7 +16,7 @@ class Extra
      * @desc
      * @return array
      */
-    public function user(){
+    public function factoring(){
         $url = 'http://www.jizhongdiancai.com';
         $imgUrl = '';
         return ['status'=>0,'data'=>['type'=>1,'url'=>$url,'imgUrl' => $imgUrl]];
