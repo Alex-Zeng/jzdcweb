@@ -123,7 +123,7 @@ class MallCart extends Base{
      */
     public function addMore(Request $request){
         //接收参数
-        $contents = $request->post('content');   //[{specId:12,quantity:14,productId:12}]
+        $contents = $request->post('content');   //[{specId:12,soldQty:14,productId:12}]
         $contents = json_decode($contents,true);
         //验证参数
         if(count($contents) == 0){
@@ -143,7 +143,7 @@ class MallCart extends Base{
 
         $specMaps = [];
         foreach ($contents as $content){
-            if($content['specId'] <0 || $content['quantity'] < 0){
+            if($content['specId'] <0 || $content['soldQty'] < 0){
                 return ['status'=>1,'data'=>[],'msg'=>'参数错误'];
             }
             $specRow = $productSpecModel->alias('a')->join(['sm_product'=>'b'],'a.product_id=b.id','left')
@@ -156,7 +156,7 @@ class MallCart extends Base{
             if($specRow->state != SmProduct::STATE_FORSALE || $specRow->audit_state != SmProduct::AUDIT_RELEASED || $specRow->is_deleted != 0){
                 return ['status'=>1,'data'=>[],'msg'=>'商品【'.$specRow->title.'】不存在或已下架'];
             }
-            $specMaps[$content['specId']] = ['productId'=>$specRow['id'],'specId'=>$content['specId'],'quantity'=>$content['quantity']];
+            $specMaps[$content['specId']] = ['productId'=>$specRow['id'],'specId'=>$content['specId'],'quantity'=>$content['soldQty']];
         }
 
         $cartModel = new \app\common\model\MallCart();
@@ -165,7 +165,7 @@ class MallCart extends Base{
             $where = ['user_id'=>$this->userId,'goods_id'=>$specMap['productId'],'product_spec_id'=>$specMap['specId']];
             $cartRow = $cartModel->where($where)->find();
             if($cartRow){  //存在更新数量
-                $result = $cartModel->save(['quantity'=>$cartRow->quantity+$specMap['quantity'],'price' => isset($specRow->price) ? $specRow->price : '0.00'],$where);
+                $result = $cartModel->save(['quantity'=>$cartRow->quantity+$specMap['soldQty'],'price' => isset($specRow->price) ? $specRow->price : '0.00'],$where);
             }else{ //不存在插入数据
                 $userModel = new IndexUser();
                 $user = $userModel->getInfoById($this->userId);
@@ -174,7 +174,7 @@ class MallCart extends Base{
                     'username' => $user ? $user->username : '',
                     'key' => 0,
                     'goods_id' => $specMap['productId'],
-                    'quantity'=>$specMap['quantity'],
+                    'quantity'=>$specMap['soldQty'],
                     'price' => isset($specRow->price) ? $specRow->price : '0.00',
                     'time' => time(),
                     'product_spec_id' => $specMap['specId']
