@@ -9,6 +9,7 @@
 namespace app\admin\controller;
 
 use app\common\model\IndexUser;
+use app\common\model\SmCategorySpecAttrKey;
 use think\Request;
 use app\common\model\SmProductCategory;
 
@@ -23,6 +24,7 @@ class ProductCategory  extends Base{
         $fields = ['id','name','parent_id','is_display','ordering'];
         $rows = $model->where(['parent_id'=>0,'is_deleted'=>0])->field($fields)->select();
 
+        $attrKeyModel = new SmCategorySpecAttrKey();
         $list = [];
         //查询第二层
         foreach($rows as $row){
@@ -32,6 +34,7 @@ class ProductCategory  extends Base{
                 'parent'=>$row->parent_id,
                 'sequence'=>$row->ordering,
                 'display' => $row->is_display,
+                'quantity' => $attrKeyModel->where(['category_id'=>$row->id,'is_deleted'=>0])->count(),
                 'level'=>0,
             ];
             //查询第二层
@@ -43,6 +46,7 @@ class ProductCategory  extends Base{
                     'parent'=>$row2->parent_id,
                     'sequence'=>$row2->ordering,
                     'display' => $row2->is_display,
+                    'quantity' => $attrKeyModel->where(['category_id'=>$row2->id,'is_deleted'=>0])->count(),
                     'level'=>1
                 ];
                 $rows3 = $model->where(['parent_id'=>$row2->id,'is_deleted'=>0])->field($fields)->select();
@@ -53,6 +57,7 @@ class ProductCategory  extends Base{
                         'parent'=>$row3->parent_id,
                         'sequence'=>$row3->ordering,
                         'display' => $row3->is_display,
+                        'quantity' => $attrKeyModel->where(['category_id'=>$row3->id,'is_deleted'=>0])->count(),
                         'level'=>2,
                     ];
                 }

@@ -358,5 +358,7 @@ return [
     //运营邮件通知
     'JZDC_OP_EMAIL' => 'caizijie@jizhongdiancai.com,weiming@jizhongdiancai.com',
 
-
+    ////////////////////IOS审核配置参数//////////////////////
+    'JZDC_APP_AUDIT' => true,
+    'JZDC_APP_VERSION' => '1.0.2',
 ];

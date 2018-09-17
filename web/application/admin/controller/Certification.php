@@ -90,7 +90,7 @@ class Certification extends Base{
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'数据异常'];
         }
-        $result = $model->save(['status'=>2],['id'=>$id]);
+        $result = $model->save(['status'=>2,'audit_time'=>time()],['id'=>$id]);
         if($result !== false){
             $userModel = new \app\common\model\IndexUser();
             $userRow = $userModel->getInfoById($row->writer);
@@ -133,7 +133,7 @@ class Certification extends Base{
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'数据异常'];
         }
-        $result = $model->save(['status'=>3,'refuse_reason'=>$reason],['id'=>$id]);
+        $result = $model->save(['status'=>3,'refuse_reason'=>$reason,'audit_time'=>time()],['id'=>$id]);
         if($result !== false){
             //发送短信通知
             $userModel = new \app\common\model\IndexUser();

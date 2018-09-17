@@ -691,7 +691,7 @@ class Order extends Base{
             $state = MallOrder::STATE_REMITTANCE_SUPPLIER;
         }
 
-        $result = $model->save(['state'=>$state],$where);
+        $result = $model->save(['state'=>$state,'receipt_time'=>time()],$where);
         if($result !== false){
             //消息通知
             $orderMsgModel = new OrderMsg();

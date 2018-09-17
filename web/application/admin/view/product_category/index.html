@@ -53,6 +53,7 @@
                                 <th>分类名称</th>
                                 <th>排序</th>
                                 <th>显示</th>
+                                <th>规格数量</th>
                                 <th width="300px">操作</th>
                             </tr>
                             </thead>
@@ -63,6 +64,7 @@
                                 <td><i style="margin-left:{$type.level*30}px" class="operator fa fa-minus-square-o" onclick="displayData(this);" title="关闭"></i>{$type.name}</td>
                                 <td><input class="form-control sort" id="s1" size="10" type="number"  value="{$type.sequence}"></td>
                                 <td><span class="text-success">{$type.display == '1' ? '是' : '否'}</span></td>
+                                <td>{$type.quantity}</td>
                                 <td>
                                     <a class="btn btn-sm btn-warning" href="{:url('admin/spec_category/index','id='.$type.id)}">规格</a>
                                     <a class="btn btn-sm btn-info" href="{:url('admin/product_category/edit','id='.$type.id)}">编辑</a>
