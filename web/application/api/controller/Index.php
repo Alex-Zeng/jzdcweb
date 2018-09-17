@@ -251,7 +251,7 @@ class Index extends Base
                 break;
         }
         $time = time();
-        $data = $AmAdvertising->field('name,redirection,advertising_img_url')->where($where)->where(['is_deleted'=>0,'show_time_start'=>['<=',$time],'show_time_end'=>['>=',$time]])->find();
+        $data = $AmAdvertising->field('name,redirection,advertising_img_url')->order('id desc')->where($where)->where(['is_deleted'=>0,'show_time_start'=>['<=',$time],'show_time_end'=>['>=',$time]])->find();
         if(empty($data)){
             return ['status'=>0,'data'=>['title'=>'','redirection'=>'','imgUrl'=>'','showTime'=>0],'msg'=>'请求成功'];
         }else{
