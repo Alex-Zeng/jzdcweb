@@ -28,8 +28,8 @@
     <section class="content">
         <div class="row">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
+                <div class="card" >
+                    <div class="card-header navbar-wrapper">
                         <h3 class="card-title">商品分类</h3>
                     </div>
                     <div class="row" style="padding-top: 15px;padding-right: 15px">
@@ -42,18 +42,18 @@
                     </div>
                     <!-- /.card-header -->
                     <div class="card-body">
-                        <table class="table list-table" id="list_table">
+                        <table class="table list-table table-bordered" id="list_table">
                             <colgroup>
                                 <col>
                                 <col width="120px">
                                 <col width="300px">
                             </colgroup>
-                            <thead>
+                            <thead  class="" >
                             <tr>
                                 <th>分类名称</th>
                                 <th>排序</th>
                                 <th>显示</th>
-                                <th>规格数量</th>
+                                <th>规格名称</th>
                                 <th width="300px">操作</th>
                             </tr>
                             </thead>
@@ -64,7 +64,7 @@
                                 <td><i style="margin-left:{$type.level*30}px" class="operator fa fa-minus-square-o" onclick="displayData(this);" title="关闭"></i>{$type.name}</td>
                                 <td><input class="form-control sort" id="s1" size="10" type="number"  value="{$type.sequence}"></td>
                                 <td><span class="text-success">{$type.display == '1' ? '是' : '否'}</span></td>
-                                <td>{$type.quantity}</td>
+                                <td>{$type.text}</td>
                                 <td>
                                     <a class="btn btn-sm btn-warning" href="{:url('admin/spec_category/index','id='.$type.id)}">规格</a>
                                     <a class="btn btn-sm btn-info" href="{:url('admin/product_category/edit','id='.$type.id)}">编辑</a>
@@ -98,7 +98,7 @@
 
 {include file="layout/footer" title="$title" keywords="" /}
 <script src="__STATIC__/js/plugins/layer/layer.js"></script>
-<script src="__STATIC__/js/admin/admin.function.js"></script>
+<script src="__STATIC__/js/admin/admin.function.js"></script>git
 <script type="text/javascript">
     var url = '{:url("admin/product_category/index")}';
     $('a[href="'+url+'"]').addClass('active');
@@ -172,6 +172,6 @@
             success:function (data) {
 
             }
-        })
+        });
     });
 </script>
