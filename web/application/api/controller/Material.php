@@ -241,6 +241,7 @@ class Material extends Base{
      */
     public function edit(Request $request){
         $materialId = $request->post('materialId',0,'intval');
+        $specId = $request->post('specId',0,'intval');
         $materialCode = $request->post('materialCode','','trim');
         $materialSpec = $request->post('materialSpec','','trim');
 
@@ -250,6 +251,10 @@ class Material extends Base{
         }
 
         //验证数据
+        if($materialId == 0 && $specId == 0){
+            return ['status'=>1,'data'=>[],'msg'=>'参数错误'];
+        }
+
         if(!$materialCode){
             return ['status'=>1,'data'=>[],'msg'=>'物料编号必须填写'];
         }
@@ -260,16 +265,35 @@ class Material extends Base{
             return ['status'=>1,'data'=>[],'msg'=>'物料规格最多40个字'];
         }
         $model = new UserGoodsSpecifications();
+        $specModel = new SmProductSpec();
+
         //验证数据是否存在
-        $row = $model->where(['id'=>$materialId,'user_id'=>$this->userId])->find();
-        if(!$row){
-            return ['status'=>1,'data'=>[],'msg'=>'物料编号规格不存在'];
+        if($materialId > 0){
+            $row = $model->where(['id'=>$materialId,'user_id'=>$this->userId])->find();
+            if(!$row){
+                return ['status'=>1,'data'=>[],'msg'=>'物料编号规格不存在'];
+            }
+
+            $result = $model->save(['specifications_no'=>$materialCode,'specifications_name'=>$materialSpec,'update_time'=>time()],['id'=>$materialId]);
+            if($result !== false){
+                return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
+            }
+        }else{
+            $row = $model->where(['product_spec_id'=>$specId,'user_id'=>$this->userId])->find();
+            $specRow = $specModel->find(['id'=>$specId]);
+
+            if(!$row){  //新增
+                $result = $model->save(['user_id'=>$this->userId,'goods_id'=>$specRow ?  $specRow->product_id : 0,'specifications_no'=>$materialCode,'specifications_name'=>$materialSpec,'product_spec_id'=>$specId,'create_time'=>time()]);
+            }else{  //修改
+                $result = $model->save(['specifications_no'=>$materialCode,'specifications_name'=>$materialSpec,'update_time'=>time()],['id'=>$row->id]);
+            }
+
+            if($result !== false){
+                return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
+            }
         }
 
-        $result = $model->save(['specifications_no'=>$materialCode,'specifications_name'=>$materialSpec,'update_time'=>time()],['id'=>$materialId]);
-        if($result !== false){
-            return ['status'=>0,'data'=>[],'msg'=>'修改成功'];
-        }
+
         return ['status'=>1,'data'=>[],'msg'=>'修改失败'];
     }
 

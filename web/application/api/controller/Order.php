@@ -129,8 +129,8 @@ class Order extends Base{
                     'quantity'=> $specNum,
                     'date' => isset($detailRow['date']) ? $detailRow['date'] : '',
                     'remark' =>isset($detailRow['remark']) ? $detailRow['remark'] : '',
-                    'materialCode' => $detailList['materialCode'],  //物料编号
-                    'materialSpec' => $detailList['materialSpec'], //物料规格
+                    'materialCode' => isset($detailList['materialCode']) ? $detailList['materialCode'] : '',  //物料编号
+                    'materialSpec' => isset($detailList['materialSpec']) ? $detailList['materialSpec'] : '', //物料规格
                     'optionInfo' => $optionInfo,
                     'icon'=>$specRow->spec_img_url,
                     'iconPath' =>$specRow->spec_img_url ? SmProductSpec::getFormatImg($specRow->spec_img_url) : SmProduct::getFormatImg($product->cover_img_url),
