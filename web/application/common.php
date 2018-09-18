@@ -418,7 +418,6 @@ function checkCurrentVersion(){
     $header = getallheaders();
     $appVersion = isset($header['app-version']) ? $header['app-version'] : '';
     $appType = isset($header['app-type']) ? $header['app-type'] : '';
-    $audit = $appVersion == config('JZDC_APP_VERSION') && strtolower($appType) == 'ios';
-
+    $audit = ($appVersion == config('JZDC_APP_VERSION')) && (strtolower($appType) == 'ios') &&  config('JZDC_APP_AUDIT');
     return $audit;
 }

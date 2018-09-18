@@ -38,16 +38,19 @@ class Goods  extends Base {
      */
     public function getCategory(){
         $audit = checkCurrentVersion();
-        $flagArr = [1 => 'http://www.jizhongdiancai.com',2=>'http://www.jizhongdiancai.com','3'=>'http://www.jizhongdiancai.com'];
         $model = new MenuMenu();
         $rows = $model->where(['parent_id'=>16,'visible'=>1])->order('sequence','desc')->field(['id','name','url','path','type_id','flag'])->select();
         $data = [];
         foreach($rows as $row){
             $flag = strval($row->flag);
+            if($audit && in_array($flag,[1,2,3])){
+                continue;
+            }
+
             $data[] = [
                 'id' => $row->id,
                 'name' => $row->name,
-                'url' => $audit &&  $flag > 0  && config('JZDC_APP_AUDIT') ? $flagArr[$flag] :  $row->url,
+                'url' =>  $row->url,
                 'img' => MenuMenu::getFormatImg($row->path),
                 'type' => $row->type_id,
                 'flag' => $flag
