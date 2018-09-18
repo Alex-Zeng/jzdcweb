@@ -261,7 +261,7 @@ class Material extends Base{
         }
         $model = new UserGoodsSpecifications();
         //验证数据是否存在
-        $row = $model->where(['id'=>$materialId])->find();
+        $row = $model->where(['id'=>$materialId,'user_id'=>$this->userId])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'物料编号规格不存在'];
         }
@@ -289,7 +289,7 @@ class Material extends Base{
         }
         $model = new UserGoodsSpecifications();
         //验证数据是否存在
-        $row = $model->where(['id'=>$materialId])->find();
+        $row = $model->where(['id'=>$materialId,'user_id'=>$this->userId])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'物料编号规格不存在'];
         }
