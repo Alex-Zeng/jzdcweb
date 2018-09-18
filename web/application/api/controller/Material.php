@@ -116,8 +116,8 @@ class Material extends Base{
                 'materialCode' => $row->specifications_no,
                 'materialSpec' => $row->specifications_name,
                 'title' => $row->title,
-                'minOrderQty' => $row->min_order_qty,
-                'soldQty' => $row->min_order_qty,
+                'minOrderQty' =>(float) $row->min_order_qty,
+                'soldQty' =>(float) $row->min_order_qty,
                 'specInfo' => $specInfo,
                 'supplierName' => $row->real_name,
                 'imgUrl' => $row->spec_img_url ? SmProductSpec::getFormatImg($row->spec_img_url) : SmProduct::getFormatImg($row->cover_img_url)
@@ -214,7 +214,7 @@ class Material extends Base{
                     'specId' => $specRow->product_spec_id,
                     'title' => $specRow->title,
                     'skuCode' => $specRow->sku_code,
-                    'minOrderQty' => $specRow->min_order_qty,
+                    'minOrderQty' => (float)$specRow->min_order_qty,
                     'specInfo' => $specInfo,
                     'supplierName' => $specRow->real_name,
                     'imgUrl' => $specRow->spec_img_url ? SmProductSpec::getFormatImg($specRow->spec_img_url) : SmProduct::getFormatImg($specRow->cover_img_url)
