@@ -17,9 +17,10 @@ class Extra
      * @return array
      */
     public function factoring(){
+        $audit = checkCurrentVersion();
         $url = 'http://www.jizhongdiancai.com';
-        $imgUrl = '';
-        return ['status'=>0,'data'=>['type'=>1,'url'=>$url,'imgUrl' => $imgUrl]];
+        $imgUrl = config('jzdc_doc_path').'/banner/h5.png';
+        return ['status'=>0,'data'=>['type'=> $audit ? 1 : 0,'url'=>$url,'imgUrl' => $imgUrl]];
     }
 
 

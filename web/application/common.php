@@ -408,3 +408,17 @@ if (!function_exists('getallheaders'))
         return $headers;
     }
 }
+
+/**
+ * @desc 验证当前版本审核机制
+ * @return bool
+ */
+function checkCurrentVersion(){
+    //接收IOS参数
+    $header = getallheaders();
+    $appVersion = isset($header['app-version']) ? $header['app-version'] : '';
+    $appType = isset($header['app-type']) ? $header['app-type'] : '';
+    $audit = $appVersion == config('JZDC_APP_VERSION') && strtolower($appType) == 'ios';
+
+    return $audit;
+}

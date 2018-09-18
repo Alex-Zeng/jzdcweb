@@ -478,7 +478,7 @@ class Report extends Base{
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('C' . $counter, $row->username);
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('D' . $counter, $row->company_name);
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('E' . $counter, $row->reg_role);
-                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('F' . $counter, date('Y-m-d',$row->reg_time));
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('F' . $counter, $row->reg_time >0 ? date('Y-m-d',$row->reg_time) : '');
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('G' . $counter, $row->legal_representative);
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('H' . $counter, $row->contact);
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('I' . $counter, $row->ent_phone);

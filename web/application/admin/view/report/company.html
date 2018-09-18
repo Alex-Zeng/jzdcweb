@@ -91,11 +91,19 @@
                                 <td>{$company.username}</td>
                                 <td>{$company.company_name}</td>
                                 <td>{$company.reg_role}</td>
-                                <td>{:date('Y-m-d',$company.reg_time)}</td>
+                                <td>
+                                    {if $company.reg_time gt 0}
+                                    {:date('Y-m-d',$company.reg_time)}
+                                    {/if}
+                                </td>
                                 <td>{$company.legal_representative}</td>
                                 <td>{$company.contact}</td>
                                 <td>{$company.ent_phone}</td>
-                                <td>{:date('Y-m-d',$company.edit_time)}</td>
+                                <td>
+                                    {if $company.edit_time gt 0}
+                                    {:date('Y-m-d',$company.edit_time)}
+                                    {/if}
+                                </td>
                                 <td>{:getCertificationStatus($company.status)} </td>
                                 <td>
                                     {if $company.audit_time gt 0}

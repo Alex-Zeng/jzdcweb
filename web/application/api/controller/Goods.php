@@ -37,13 +37,8 @@ class Goods  extends Base {
      * @return array
      */
     public function getCategory(){
-        //接收IOS参数
-        $header = getallheaders();
-        $appVersion = isset($header['app-version']) ? $header['app-version'] : '';
-        $appType = isset($header['app-type']) ? $header['app-type'] : '';
-        $audit = $appVersion == config('JZDC_APP_VERSION') && strtolower($appType) == 'ios';
-        $flagArr = [1 => 'http://www.jizhongdiancai..com',2=>'http://www.jizhongdiancai.com','3'=>'http://www.jizhongdiancai.com'];
-
+        $audit = checkCurrentVersion();
+        $flagArr = [1 => 'http://www.jizhongdiancai.com',2=>'http://www.jizhongdiancai.com','3'=>'http://www.jizhongdiancai.com'];
         $model = new MenuMenu();
         $rows = $model->where(['parent_id'=>16,'visible'=>1])->order('sequence','desc')->field(['id','name','url','path','type_id','flag'])->select();
         $data = [];
