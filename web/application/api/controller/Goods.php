@@ -406,6 +406,7 @@ class Goods  extends Base {
             //对于定制
             if(getBinDecimal($specRow->is_customized) == 1){
                 $specSet = [0];
+                $specPriceDetails = (new SmProductSpecPrice())->getPriceDetail($specRow->id);
             }else{   //非定制
                 $specSetArr = $specRow->spec_set ? explode(',',$specRow->spec_set) : [];
                 for ($i = 0; $i < count($specSetArr); $i++){
