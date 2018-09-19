@@ -440,8 +440,7 @@ class Material extends Base{
                         }
                         $specInfo = $specInfo ? substr($specInfo, 0, strlen($specInfo) - 1) : $specInfo;
                     }
-
-                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('A'.$counter,$row->specifications_no);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValueExplicit('A'.$counter, $row->specifications_no,\PHPExcel_Cell_DataType::TYPE_STRING);
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValueExplicit('B'.$counter, $row->specifications_name);
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('C'.$counter, $specRow->title);
                     $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('D'.$counter,$specInfo );
