@@ -399,8 +399,9 @@ class Goods  extends Base {
         //商品规格数据
         $specRows = $specModel->where(['product_id'=>$id,'is_deleted'=>0])->select();
         $specInfo = [];
-        $specPriceDetails = [];
+
         foreach($specRows as $specRow){
+            $specPriceDetails = [];
             $specSet = [];
             //对于定制
             if(getBinDecimal($specRow->is_customized) == 1){
