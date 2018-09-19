@@ -7,7 +7,7 @@ return [
         // 服务器地址
         'hostname'        => '127.0.0.1',//'39.104.54.76',
         // 数据库名
-        'database'        => 'jzdcprd',//'jzdc_uat',
+        'database'        => 'jzdc_uat',
         // 用户名
         'username'        => 'jzdcusr',
         // 密码
