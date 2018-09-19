@@ -415,9 +415,17 @@ if (!function_exists('getallheaders'))
  */
 function checkCurrentVersion(){
     //接收IOS参数
-    $header = getallheaders();
-    $appVersion = isset($header['app-version']) ? $header['app-version'] : '';
-    $appType = isset($header['app-type']) ? $header['app-type'] : '';
+    $headers = getallheaders();
+    $appVersion = '';
+    $appType = '';
+    foreach ($headers as $key => $header){
+       if(strtolower($key) == 'app-version'){
+           $appVersion = $header;
+       }
+       if(strtolower($key) == 'app-type'){
+           $appType = $header;
+       }
+    }
     $audit = ($appVersion == config('JZDC_APP_VERSION')) && (strtolower($appType) == 'ios') &&  config('JZDC_APP_AUDIT');
     return $audit;
 }
