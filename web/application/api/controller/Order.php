@@ -938,7 +938,7 @@ class Order extends Base{
         //设置宽度
         $objPHPExcel->getActiveSheet(0)->getColumnDimension('A')->setWidth(16);
         $objPHPExcel->getActiveSheet(0)->getColumnDimension('B')->setWidth(16);
-        $objPHPExcel->getActiveSheet(0)->getColumnDimension('B')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('C')->setWidth(16);
         $objPHPExcel->getActiveSheet(0)->getColumnDimension('D')->setWidth(20);
         $objPHPExcel->getActiveSheet(0)->getColumnDimension('E')->setWidth(20);
         $objPHPExcel->getActiveSheet(0)->getColumnDimension('F')->setWidth(20);
