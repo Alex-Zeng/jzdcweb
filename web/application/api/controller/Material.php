@@ -193,7 +193,7 @@ class Material extends Base{
                 ->join(['sm_product_spec' => 'b'],'a.product_spec_id = b.id','left')
                 ->join(['sm_product' => 'c'],'b.product_id=c.id','left')
                 ->join(['jzdc_index_user' => 'd'],'c.supplier_id=d.id','left')
-                ->where(['a.user_id'=>$this->userId, 'c.state' => SmProduct::STATE_FORSALE, 'c.audit_state' => SmProduct::AUDIT_RELEASED, 'c.is_deleted' =>0, 'b.is_deleted' => 0])
+                ->where(['a.user_id'=>$this->userId,'a.specifications_no'=>$row->specifications_no ,'c.state' => SmProduct::STATE_FORSALE, 'c.audit_state' => SmProduct::AUDIT_RELEASED, 'c.is_deleted' =>0, 'b.is_deleted' => 0])
                 ->field(['a.id','a.specifications_no','a.specifications_name','a.product_spec_id','b.sku_code','b.spec_set','b.is_customized','b.spec_img_url','b.min_order_qty','c.title','c.cover_img_url','d.real_name'])
                 ->select();
             $specList = [];
@@ -259,10 +259,10 @@ class Material extends Base{
         if(!$materialCode){
             return ['status'=>1,'data'=>[],'msg'=>'物料编号必须填写'];
         }
-        if(mb_strlen($materialCode,"utf-8") > 90){
+        if(mb_strlen($materialCode,"utf-8") > 30){
             return ['status'=>1,'data'=>[],'msg'=>'物料编号最多30个字'];
         }
-        if(mb_strlen($materialSpec,'utf-8') > 120){
+        if(mb_strlen($materialSpec,'utf-8') > 40){
             return ['status'=>1,'data'=>[],'msg'=>'物料规格最多40个字'];
         }
         $model = new UserGoodsSpecifications();
@@ -413,7 +413,7 @@ class Material extends Base{
                     ->join(['sm_product_spec' => 'b'], 'a.product_spec_id = b.id', 'left')
                     ->join(['sm_product' => 'c'], 'b.product_id=c.id', 'left')
                     ->join(['jzdc_index_user' => 'd'], 'c.supplier_id=d.id', 'left')
-                    ->where(['a.user_id' => $this->userId, 'c.state' => SmProduct::STATE_FORSALE, 'c.audit_state' => SmProduct::AUDIT_RELEASED, 'c.is_deleted' => 0, 'b.is_deleted' => 0])
+                    ->where(['a.user_id' => $this->userId, 'a.specifications_no'=>$row->specifications_no,'c.state' => SmProduct::STATE_FORSALE, 'c.audit_state' => SmProduct::AUDIT_RELEASED, 'c.is_deleted' => 0, 'b.is_deleted' => 0])
                     ->field(['a.id', 'a.specifications_no', 'a.specifications_name', 'a.product_spec_id', 'b.sku_code', 'b.spec_set', 'b.is_customized', 'b.spec_img_url', 'b.min_order_qty', 'c.title', 'c.cover_img_url', 'd.real_name'])
                     ->select();
 
