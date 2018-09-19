@@ -41,6 +41,7 @@ class Goods  extends Base {
         $model = new MenuMenu();
         $rows = $model->where(['parent_id'=>16,'visible'=>1])->order('sequence','desc')->field(['id','name','url','path','type_id','flag'])->select();
         $data = [];
+        $flagUrl = [1 => '', 2=>'http://h5.jizhongdiancai.com/static/jzdc-services/index.html',3=>'http://h5.jizhongdiancai.com/#/factoring'];
         foreach($rows as $row){
             $flag = strval($row->flag);
             if($audit && in_array($flag,[1,2,3])){
@@ -50,7 +51,7 @@ class Goods  extends Base {
             $data[] = [
                 'id' => $row->id,
                 'name' => $row->name,
-                'url' =>  $row->url,
+                'url' =>  $flag > 0  ? $flagUrl[$flag] : $row->url,
                 'img' => MenuMenu::getFormatImg($row->path),
                 'type' => $row->type_id,
                 'flag' => $flag
