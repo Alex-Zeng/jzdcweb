@@ -179,7 +179,7 @@ class MallCart extends Base{
                     'time' => time(),
                     'product_spec_id' => $specMap['specId']
                 ];
-                $result = $cartModel->save($data);
+                $result = (new \app\common\model\MallCart())->save($data);
             }
         }
 

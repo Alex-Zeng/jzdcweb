@@ -307,7 +307,7 @@ class Order extends Base{
                                 $specificationsWhere['specifications_name'] = $list['materialSpec'];
                                 $specificationsWhere['create_time'] = time();
                                 $specificationsWhere['update_time'] = time();
-                                $userGoodSpecificationsModel->save($specificationsWhere);
+                                (new UserGoodsSpecifications())->save($specificationsWhere);
                             }
                         }
                         //删除购物清单 同步操作,
