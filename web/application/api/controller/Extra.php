@@ -21,7 +21,7 @@ class Extra
 
         if($audit){  //待审状态
             $url = 'http://www.jizhongdiancai.com';
-            $imgUrl = config('jzdc_doc_path').'/banner/h5.png';
+            $imgUrl = '';
         }else{
             $url = 'http://h5.jizhongdiancai.com/static/jzdc-services/finance.html';
             $imgUrl = config('jzdc_domain').'/web/public/static/img/financial_service.png';
