@@ -129,8 +129,8 @@ class Order extends Base{
                     'quantity'=> $specNum,
                     'date' => isset($detailRow['date']) ? $detailRow['date'] : '',
                     'remark' =>isset($detailRow['remark']) ? $detailRow['remark'] : '',
-                    'materialCode' => $detailList['materialCode'],  //物料编号
-                    'materialSpec' => $detailList['materialSpec'], //物料规格
+                    'materialCode' => isset($detailList['materialCode']) ? $detailList['materialCode'] : '',  //物料编号
+                    'materialSpec' => isset($detailList['materialSpec']) ? $detailList['materialSpec'] : '', //物料规格
                     'optionInfo' => $optionInfo,
                     'icon'=>$specRow->spec_img_url,
                     'iconPath' =>$specRow->spec_img_url ? SmProductSpec::getFormatImg($specRow->spec_img_url) : SmProduct::getFormatImg($product->cover_img_url),
@@ -307,7 +307,7 @@ class Order extends Base{
                                 $specificationsWhere['specifications_name'] = $list['materialSpec'];
                                 $specificationsWhere['create_time'] = time();
                                 $specificationsWhere['update_time'] = time();
-                                $userGoodSpecificationsModel->save($specificationsWhere);
+                                (new UserGoodsSpecifications())->save($specificationsWhere);
                             }
                         }
                         //删除购物清单 同步操作,
@@ -691,7 +691,7 @@ class Order extends Base{
             $state = MallOrder::STATE_REMITTANCE_SUPPLIER;
         }
 
-        $result = $model->save(['state'=>$state],$where);
+        $result = $model->save(['state'=>$state,'receipt_time'=>time()],$where);
         if($result !== false){
             //消息通知
             $orderMsgModel = new OrderMsg();
@@ -938,7 +938,7 @@ class Order extends Base{
         //设置宽度
         $objPHPExcel->getActiveSheet(0)->getColumnDimension('A')->setWidth(16);
         $objPHPExcel->getActiveSheet(0)->getColumnDimension('B')->setWidth(16);
-        $objPHPExcel->getActiveSheet(0)->getColumnDimension('B')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('C')->setWidth(16);
         $objPHPExcel->getActiveSheet(0)->getColumnDimension('D')->setWidth(20);
         $objPHPExcel->getActiveSheet(0)->getColumnDimension('E')->setWidth(20);
         $objPHPExcel->getActiveSheet(0)->getColumnDimension('F')->setWidth(20);

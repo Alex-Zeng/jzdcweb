@@ -1,0 +1,190 @@
+{include file="layout/header" title="$title" keywords="" /}
+<link rel="stylesheet" href="__STATIC__/js/plugins/bootstrapvalidator/css/bootstrapValidator.css"/>
+{include file="layout/left" groupId="$groupId" keywords="" /}
+<style type="text/css">
+    hr{
+        width: 10px;
+        border: 1px solid #ced4da;
+        margin-left: 2px;
+        margin-right: 2px;
+    }
+    input[type="date"]:before{
+        color:#A9A9A9;
+        content:attr(placeholder);
+    }
+</style>
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"></h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">企业认证认证数据</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">企业认证认证数据</h3>
+                    </div>
+                    <div class="row" style="padding-top: 15px;padding-right: 15px">
+                        <div class="col-md-8">
+                            <form class="form-inline ml-3" action="{:url()}"  method="get">
+                                <div class="form-group">
+                                    <label style="font-weight: normal;">注册时间：</label>
+                                    <div class = "input-group" style="padding-right: 15px">
+                                        <input type = "date"  name="start" class = "form-control"  value="{$start}" placeholder="开始日期">
+                                        <span style="display: inline-block;vertical-align: middle;padding-top: 5px"><hr /></span>
+                                        <input type = "date" name="end" class = "form-control" value="{$end}" placeholder="结束日期">
+                                    </div>&nbsp;
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-weight: normal;">注册手机：</label>
+                                    <div class="input-group" style="min-width: 280px;padding-right: 15px">
+                                        <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="" aria-label="Search">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" id="search" type="submit">搜索</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-4">
+                            <a class="btn btn-primary pull-right"  target="_blank"  href="{:url('admin/report/company_export',['start'=>$start,'end'=>$end,'k'=>$k])}" >导出</a>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>注册手机</th>
+                                <th>注册用户名</th>
+                                <th>企业名称</th>
+                                <th>认证类型</th>
+                                <th>注册时间</th>
+                                <th>法人代表</th>
+                                <th>联系人</th>
+                                <th>联系电话</th>
+                                <th>提交日期</th>
+                                <th>审核状态</th>
+                                <th>审核日期</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {volist name='list' id='company'}
+                            <tr>
+                                <td>{$key+1}</td>
+                                <td>{$company.phone}</td>
+                                <td>{$company.username}</td>
+                                <td>{$company.company_name}</td>
+                                <td>{$company.reg_role}</td>
+                                <td>
+                                    {if $company.reg_time gt 0}
+                                    {:date('Y-m-d',$company.reg_time)}
+                                    {/if}
+                                </td>
+                                <td>{$company.legal_representative}</td>
+                                <td>{$company.contact}</td>
+                                <td>{$company.ent_phone}</td>
+                                <td>
+                                    {if $company.edit_time gt 0}
+                                    {:date('Y-m-d',$company.edit_time)}
+                                    {/if}
+                                </td>
+                                <td>{:getCertificationStatus($company.status)} </td>
+                                <td>
+                                    {if $company.audit_time gt 0}
+                                    {:date('Y-m-d',$company.audit_time)}
+                                    {else /}
+                                    {/if}
+                                </td>
+                            </tr>
+                            {/volist}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="10">{$page}</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="modal fade" id="refuse-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">企业审核提示</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <div class="container-fluid">
+                    <div class="row">
+                        <!-- left column -->
+                        <div class="col-md-12">
+                            <!-- form start -->
+                            <form role="form" class="" id="refuse-form">
+                                <div class="form-group">
+                                    <label for="">拒绝原因</label>
+                                    <textarea   class="textarea2"  maxlength="200" placeholder="拒绝原因..."  name="reason"  style="width: 100%; height: 100px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="refuse-request" data-id="">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">企业审核提示</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                确认审核通过?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="confirm-request">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{include file="layout/footer" title="$title" keywords="" /}
+<script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
+<script type="text/javascript" src="__STATIC__/js/admin/certification.js"></script>
+<script type="text/javascript">
+    var url = '{:url("admin/report/company")}';
+    $('a[href="'+url+'"]').addClass('active');
+    $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
+</script>

@@ -5,6 +5,7 @@ use app\common\model\IndexArea;
 use app\common\model\MallOrder;
 use app\common\model\SmProduct;
 use app\common\model\SmProductCategory;
+use app\common\model\AmAdvertising;
 use think\Request;
 
 class Index extends Base
@@ -16,6 +17,11 @@ class Index extends Base
                     case 'phpinfo':
                         dump(phpinfo());
                         break;
+                    case 'id':
+                        $SmProduct = new SmProduct();
+                        $result = $SmProduct->field('ORD(is_price_neg_at_phone) as ordis_price_neg_at_phone,ORD(is_recommended) as ordis_recommended,is_recommended,is_price_neg_at_phone')->limit(2)->select();
+                        dump($result);
+                        break;    
                     default:
                         # code...
                         break;
@@ -223,6 +229,33 @@ class Index extends Base
             return ['status'=>0,'data'=>['url'=>'http://download.jizhongdiancai.com/version/'.$fileArr['app_name'],'forced'=>$forced,'tips'=>'检测到新版本，是否更新'],'msg'=>'请求成功'];
         }else{
             return ['status'=>0,'data'=>['url'=>'','forced'=>0,'tips'=>'不需要版本更新'],'msg'=>'请求成功'];
+        }
+    }
+
+    /**
+     * [loadingAdvertising 客户端启动页]
+     * @return [type] [设备类型]
+     */
+    public function loadingAdvertising(){
+        $type = input('param.type','','trim,strtolower');
+        $AmAdvertising = new AmAdvertising();
+        switch ($type) {
+            case 'ios':
+                $where['channels'] = ['in','1,3'];
+                break;
+            case 'android':
+                $where['channels'] = ['in','2,3'];
+                break;
+            default:
+                $where = [];
+                break;
+        }
+        $time = time();
+        $data = $AmAdvertising->field('name,redirection,advertising_img_url')->order('id desc')->where($where)->where(['is_deleted'=>0,'show_time_start'=>['<=',$time],'show_time_end'=>['>=',$time]])->find();
+        if(empty($data)){
+            return ['status'=>0,'data'=>['title'=>'','redirection'=>'','imgUrl'=>'','showTime'=>0],'msg'=>'请求成功'];
+        }else{
+            return ['status'=>0,'data'=>['title'=>$data['name'],'redirection'=>$data['redirection'],'imgUrl'=>$AmAdvertising->getImg($data['advertising_img_url']),'showTime'=>3],'msg'=>'请求成功'];
         }
     }
 }

@@ -73,7 +73,7 @@
                                 <td>{:htmlspecialchars($suggestion.contacts)}</td>
                                 <td>{:date('Y-m-d H:i',$suggestion.created_time)}</td>
                                 <td>{$suggestion.contact_num}</td>
-                                <td>{:htmlspecialchars($suggestion.content)}</td>
+                                <td style="word-break: break-all">{:htmlspecialchars($suggestion.content)}</td>
                             </tr>
                             {/volist}
                             </tbody>

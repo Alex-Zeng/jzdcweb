@@ -230,7 +230,7 @@ class Banner extends Base {
             $this->assign('channels',0);
         }
         $AmAdvertising = new AmAdvertising();
-        $list = $AmAdvertising->where(['is_deleted'=>0])->where($where)->paginate(20,false,['query'=>request()->param()]);
+        $list = $AmAdvertising->where(['is_deleted'=>0])->order('id desc')->where($where)->paginate(20,false,['query'=>request()->param()]);
         $time = time();
         foreach ($list as $key => $val) {
             $list[$key]['channelsName'] = $AmAdvertising->getChannelsName($val['channels']);

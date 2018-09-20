@@ -1006,7 +1006,7 @@ class Product extends Base{
                     'is_price_neg_at_phone'=>$val['is_price_neg_at_phone'],
                     'min_order_qty'=>$val['min_order_qty'],
                     'price'=>$val['price'],
-                    'price_id'=>$price_section[0]['id'],
+                    'price_id'=>isset($price_section[0]['id'])?$price_section[0]['id']:0,
                     'spec_img_url'=>$val['spec_img_url'],
                     'spec_img_url_path'=>$SmProduct->getFormatMultiImg($val['spec_img_url']),
                     'price_section'=> json_encode($price_section),

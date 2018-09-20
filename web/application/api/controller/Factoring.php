@@ -36,11 +36,11 @@ class Factoring extends Base {
 		$groupId = $this->groupId;
 		switch ($groupId) {
 			case IndexGroup::GROUP_BUYER:
-				$dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','4,13'],'buyer_id'=>$userId])->order('id desc')->select();
-		        if(!$dataList){
-		        	$dataList = [];
-		        }
-				break;
+				//$dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','4,13'],'buyer_id'=>$userId])->order('id desc')->select();
+		        // if(!$dataList){
+		        	// $dataList = [];
+		        // }
+				// break;
 			case IndexGroup::GROUP_SUPPLIER:
 				$dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','4,13'],'supplier'=>$userId])->order('id desc')->select();
 		        if(!$dataList){
@@ -149,10 +149,11 @@ class Factoring extends Base {
 
         $factoring_id = input('post.factoringId',0,'intval');
         $FmFactoring = new FmFactoring();
-        $data = $FmFactoring->field('need_account,add_time,order_sn,contact_username,contact_phone,state,loan_account,bank_corporate,bank_address')->where(['user_id'=>$userId,'factoring_id'=>$factoring_id])->find();
+        $data = $FmFactoring->field('need_account,add_time,order_sn,contact_username,contact_phone,state,loan_account,bank_corporate,bank_address,reasons')->where(['user_id'=>$userId,'factoring_id'=>$factoring_id])->find();
         $IndexUser = new IndexUser();
         $user = $IndexUser->field('real_name')->where(['id'=>$userId])->find();
         $factoringDetail = [
+            'orderSn'       =>isset($data->order_sn)?$data->order_sn:'',
             'loanAccount'   =>isset($data->loan_account)?$data->loan_account:'0.00',
             'stateName'     =>isset($data->state)?$FmFactoring->getStateName($data->state):'',
             'needAccount'   =>isset($data->need_account)?$data->need_account:'0.00',
@@ -161,7 +162,8 @@ class Factoring extends Base {
             'contactphone'  =>isset($data->contact_phone)?$data->contact_phone:'',
             'name'          =>isset($user->real_name)?$user->real_name:'',
             'bankCorporate' =>isset($data->bank_corporate)?$data->bank_corporate:'',
-            'bankAddress'   =>isset($data->bank_address)?$data->bank_address:''
+            'bankAddress'   =>isset($data->bank_address)?$data->bank_address:'',
+            'reasons'       =>isset($data->reasons)?$data->reasons:'',
         ];
         return ['status'=>0,'data'=>['factoringDetail'=>$factoringDetail],'msg'=>'详情数据'];
     }

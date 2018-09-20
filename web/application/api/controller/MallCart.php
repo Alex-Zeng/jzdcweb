@@ -112,6 +112,81 @@ class MallCart extends Base{
         return ['status'=>1,'data'=>[],'msg'=>'添加失败'];
     }
 
+
+    /**
+     * @desc 物料规格商品添加到购物车
+     * @param Request $request
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function addMore(Request $request){
+        //接收参数
+        $contents = $request->post('content');   //[{specId:12,soldQty:14,productId:12}]
+        $contents = json_decode($contents,true);
+        //验证参数
+        if(count($contents) == 0){
+            return ['status'=>1,'data'=>[],'msg'=>'请选择商品'];
+        }
+        $productSpecModel = new SmProductSpec();
+
+        //验证登录
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        //采购商权限
+        if($this->groupId != IndexGroup::GROUP_BUYER){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限操作'];
+        }
+
+        $specMaps = [];
+        foreach ($contents as $content){
+            if($content['specId'] <0 || $content['soldQty'] < 0){
+                return ['status'=>1,'data'=>[],'msg'=>'参数错误'];
+            }
+            $specRow = $productSpecModel->alias('a')->join(['sm_product'=>'b'],'a.product_id=b.id','left')
+                ->where(['a.id'=>$content['specId']])
+                ->field(['b.*'])
+                ->find();
+            if(!$specRow){
+                continue;
+            }
+            if($specRow->state != SmProduct::STATE_FORSALE || $specRow->audit_state != SmProduct::AUDIT_RELEASED || $specRow->is_deleted != 0){
+                return ['status'=>1,'data'=>[],'msg'=>'商品【'.$specRow->title.'】不存在或已下架'];
+            }
+            $specMaps[$content['specId']] = ['productId'=>$specRow['id'],'specId'=>$content['specId'],'quantity'=>$content['soldQty']];
+        }
+
+        $cartModel = new \app\common\model\MallCart();
+        //
+        foreach ($specMaps as $specMap){
+            $where = ['user_id'=>$this->userId,'goods_id'=>$specMap['productId'],'product_spec_id'=>$specMap['specId']];
+            $cartRow = $cartModel->where($where)->find();
+            if($cartRow){  //存在更新数量
+                $result = $cartModel->save(['quantity'=>$cartRow->quantity+$specMap['quantity'],'price' => isset($specRow->price) ? $specRow->price : '0.00'],$where);
+            }else{ //不存在插入数据
+                $userModel = new IndexUser();
+                $user = $userModel->getInfoById($this->userId);
+                $data = [
+                    'user_id' => $this->userId,
+                    'username' => $user ? $user->username : '',
+                    'key' => 0,
+                    'goods_id' => $specMap['productId'],
+                    'quantity'=>$specMap['quantity'],
+                    'price' => isset($specRow->price) ? $specRow->price : '0.00',
+                    'time' => time(),
+                    'product_spec_id' => $specMap['specId']
+                ];
+                $result = (new \app\common\model\MallCart())->save($data);
+            }
+        }
+
+        return ['status'=>0,'data'=>[],'msg'=>'成功加入购物车'];
+    }
+
+
     /**
      * @desc 购物车列表
      * @param Request $request
@@ -171,8 +246,8 @@ class MallCart extends Base{
                 'price' => getFormatPrice($row->price),
                 'title' => $row->title,
                 'icon' => $row->spec_img_url ? SmProductSpec::getFormatImg($row->spec_img_url) : SmProduct::getFormatImg($row->cover_img_url),
-                'quantity' => intval($row->quantity),
-                'moq' =>  $row->min_order_qty,
+                'quantity' => (float)$row->quantity,
+                'moq' => (float)$row->min_order_qty,
                 'specificationsInfo' => $optionInfo, //规格描述
                 'materialCode' => $userSpecificationsRow ? $userSpecificationsRow->specifications_no : '',  //物料编号
                 'materialSpec' => $userSpecificationsRow ? $userSpecificationsRow->specifications_name : '',//物料名称

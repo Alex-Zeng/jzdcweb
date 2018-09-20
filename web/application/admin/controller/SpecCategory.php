@@ -51,10 +51,9 @@ class SpecCategory extends Base{
             $optionInfo = '';
             $optionArr = [];
             foreach ($specOptionRows as $specOptionRow){
-                $optionInfo .= $specOptionRow->spec_option_text .',';
+                $optionInfo .= '【'.$specOptionRow->spec_option_text .'】';
                 $optionArr[] = ['id'=>$specOptionRow->id,'text'=>$specOptionRow->spec_option_text];
             }
-            $optionInfo = $optionInfo ? substr($optionInfo,0,strlen($optionInfo)-1) : $optionInfo;
             $specKeyRow['optionInfo'] = $optionInfo;
             $specKeyRow['optionJson'] = json_encode($optionArr,true);
         }

@@ -1,0 +1,117 @@
+{include file="layout/header" title="供应商交易报表" keywords="" /}
+
+{include file="layout/left" groupId="$groupId" keywords="" /}
+<style type="text/css">
+    hr{
+        width: 10px;
+        border: 1px solid #ced4da;
+        margin-left: 2px;
+        margin-right: 2px;
+    }
+    input[type="date"]:before{
+        color:#A9A9A9;
+        content:attr(placeholder);
+    }
+</style>
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"></h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">供应商交易报表</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">供应商交易报表</h3>
+                    </div>
+                    <div class="row" style="padding-top: 15px;padding-right: 15px">
+                        <div class="col-md-9">
+                            <form class="form-inline ml-3" action="{:url()}"  method="get">
+                                <div class="form-group">
+                                    <label style="font-weight: normal;">日期：</label>
+                                    <div class="input-group" style="padding-right: 15px">
+                                        <input type = "date"  name="start" class = "form-control"  value="{$start}" placeholder="开始日期">
+                                        <span style="padding-top: 5px"><hr /></span>
+                                        <input type = "date" name="end" class = "form-control" value="{$end}" placeholder="结束日期">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-weight: normal;">供应商：</label>
+                                    <div class="input-group" style="padding-right: 15px">
+                                        <input class="form-control form-control-navbar"  name="k" type="search"  value="" placeholder="" aria-label="Search">
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" id="search" type="submit">搜索</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-3">
+                            <a class="btn btn-primary pull-right"  target="_blank"  href="{:url('admin/report/supplier_export',['start'=>$start,'end'=>$end,'k'=>$k])}" >导出</a>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th width="150px">序号</th>
+                                <th width="150px">日期</th>
+                                <th>供应商名称</th>
+                                <th>交易订单数</th>
+                                <th>交易金额(¥)</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {volist name='list' id='service'}
+                            <tr>
+                                <td>{$key+1}</td>
+                                <td>{$service.order_date}</td>
+                                <td>{$service.real_name}</td>
+                                <td>{$service.count}</td>
+                                <td>{$service.total_money}</td>
+                            </tr>
+                            {/volist}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="5">{$page}</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="modal fade" id="info-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body ">
+            </div>
+        </div>
+    </div>
+</div>
+
+{include file="layout/footer" title="$title" keywords="" /}
+<script type="text/javascript">
+    var url = '{:url("admin/report/supplier")}';
+    $('.nav-sidebar').find('a[href="'+url+'"]').addClass('active');
+    $('.nav-sidebar').find('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
+</script>

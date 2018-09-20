@@ -393,3 +393,39 @@ function getSimplePrice($isDiscuss = 0, $price){
 function getBinDecimal($binT){
     return bindec($binT);
 }
+
+/**
+ * @desc php不支持方法则自定义
+ */
+if (!function_exists('getallheaders'))
+{
+    function getallheaders(){
+        foreach ($_SERVER as $name => $value) {
+            if (substr($name, 0, 5) == 'HTTP_') {
+                $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+            }
+        }
+        return $headers;
+    }
+}
+
+/**
+ * @desc 验证当前版本审核机制
+ * @return bool
+ */
+function checkCurrentVersion(){
+    //接收IOS参数
+    $headers = getallheaders();
+    $appVersion = '';
+    $appType = '';
+    foreach ($headers as $key => $header){
+       if(strtolower($key) == 'app-version'){
+           $appVersion = $header;
+       }
+       if(strtolower($key) == 'app-type'){
+           $appType = $header;
+       }
+    }
+    $audit = ($appVersion == config('JZDC_APP_VERSION')) && (strtolower($appType) == 'ios') &&  config('JZDC_APP_AUDIT');
+    return $audit;
+}

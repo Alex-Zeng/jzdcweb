@@ -54,12 +54,29 @@
                     'managerIcon'=> 'fa-money',
                     'managerUrl' => url('admin/factoring/index'),
                     'managerVal' => []
-                ],[
+                ],
+                [
+                 'managerKey' => '投诉建议',
+                 'managerIcon'=> 'fa-feed',
+                 'managerUrl' => url('admin/suggestion/index'),
+                  'managerVal' => []
+                ],
+                [
                     'managerKey' => '商品管理',
-                    'managerIcon'=> 'fa-feed',
-                    'managerUrl' => url('admin/suggestion/index'),
+                    'managerIcon'=> 'fa-inbox',
+                    'managerUrl' => '#',
                     'managerVal' => [['name'=>'新增商品','url'=>url('admin/product/create'),'icon'=>'fa-database'],['name'=>'草稿','url'=>url('admin/product/listDraft'),'icon'=>'fa-database'],['name'=>'待审核','url'=>url('admin/product/listPending'),'icon'=>'fa-database'],['name'=>'已审核','url'=>url('admin/product/listpass'),'icon'=>'fa-database']]
-                ]
+                ],[
+                   'managerKey' => '数据报表',
+                   'managerIcon'=> 'fa-bar-chart',
+                   'managerUrl' => '#',
+                   'managerVal' => [   ['name'=>'商品交易报表','url'=>url('admin/report/trade'),'icon'=>'fa-database'],
+                                       ['name'=>'供应商交易报表','url'=>url('admin/report/supplier'),'icon'=>'fa-cubes'],
+                                       ['name'=>'采购商交易报表','url'=>url('admin/report/buyer'),'icon'=>'fa-shopping-cart'],
+                                       ['name'=>'订单数据报表','url'=>url('admin/report/order'),'icon'=>'fa-reorder'],
+                                       ['name'=>'企业注册认证数据','url'=>url('admin/report/company'),'icon'=>'fa-check']
+                                   ]
+                  ]
             ],
             2=>[
                 [
@@ -69,8 +86,8 @@
                     'managerVal' => [['name'=>'全站商品分类','url'=>url('admin/product_category/index'),'icon'=>'fa-cubes']]
                 ],[
                     'managerKey' => '商品管理',
-                    'managerIcon'=> 'fa-feed',
-                    'managerUrl' => url('admin/suggestion/index'),
+                    'managerIcon'=> 'fa-inbox',
+                    'managerUrl' => '#',
                     'managerVal' => [['name'=>'待审核','url'=>url('admin/product/listPending'),'icon'=>'fa-database'],['name'=>'已审核','url'=>url('admin/product/listpass'),'icon'=>'fa-database']]
                 ],[
                     'managerKey' => '系统菜单',

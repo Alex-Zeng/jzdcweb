@@ -37,17 +37,24 @@ class Goods  extends Base {
      * @return array
      */
     public function getCategory(){
+        $audit = checkCurrentVersion();
         $model = new MenuMenu();
         $rows = $model->where(['parent_id'=>16,'visible'=>1])->order('sequence','desc')->field(['id','name','url','path','type_id','flag'])->select();
         $data = [];
+        $flagUrl = [1 => '', 2=>'http://h5.jizhongdiancai.com/static/jzdc-services/index.html',3=>'http://h5.jizhongdiancai.com/#/factoring'];
         foreach($rows as $row){
+            $flag = strval($row->flag);
+            if($audit && in_array($flag,[1,2,3])){
+                continue;
+            }
+
             $data[] = [
                 'id' => $row->id,
                 'name' => $row->name,
-                'url' => $row->url,
+                'url' =>  $flag > 0  ? $flagUrl[$flag] : $row->url,
                 'img' => MenuMenu::getFormatImg($row->path),
                 'type' => $row->type_id,
-                'flag' => strval($row->flag)
+                'flag' => $flag
             ];
         }
         return ['status'=>0,'data'=>$data,'msg'=>''];
@@ -392,12 +399,14 @@ class Goods  extends Base {
         //商品规格数据
         $specRows = $specModel->where(['product_id'=>$id,'is_deleted'=>0])->select();
         $specInfo = [];
-        $specPriceDetails = [];
+
         foreach($specRows as $specRow){
+            $specPriceDetails = [];
             $specSet = [];
             //对于定制
             if(getBinDecimal($specRow->is_customized) == 1){
                 $specSet = [0];
+                $specPriceDetails = (new SmProductSpecPrice())->getPriceDetail($specRow->id);
             }else{   //非定制
                 $specSetArr = $specRow->spec_set ? explode(',',$specRow->spec_set) : [];
                 for ($i = 0; $i < count($specSetArr); $i++){

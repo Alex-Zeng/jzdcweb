@@ -9,6 +9,7 @@
 namespace app\admin\controller;
 
 use app\common\model\IndexUser;
+use app\common\model\SmCategorySpecAttrKey;
 use think\Request;
 use app\common\model\SmProductCategory;
 
@@ -23,36 +24,57 @@ class ProductCategory  extends Base{
         $fields = ['id','name','parent_id','is_display','ordering'];
         $rows = $model->where(['parent_id'=>0,'is_deleted'=>0])->field($fields)->select();
 
+        $attrKeyModel = new SmCategorySpecAttrKey();
         $list = [];
         //查询第二层
         foreach($rows as $row){
+            $subFields = ['CONCAT(\'[\',`spec_attr_key`,\'] \') as text'];
+            $attrKeys = $attrKeyModel->where(['category_id'=>$row->id,'is_deleted'=>0])->field($subFields)->select();
+            $attrKeyStr = '';
+            foreach ($attrKeys as $attrKey){
+                $attrKeyStr .= $attrKey->text;
+            }
+
             $list[] = [
                 'id'=>$row->id,
                 'name'=>$row->name,
                 'parent'=>$row->parent_id,
                 'sequence'=>$row->ordering,
                 'display' => $row->is_display,
+                'text' => $attrKeyStr,
                 'level'=>0,
             ];
             //查询第二层
             $rows2 = $model->where(['parent_id'=>$row->id,'is_deleted'=>0])->field($fields)->select();
             foreach ($rows2 as $row2){
+                $attrKeys = $attrKeyModel->where(['category_id'=>$row2->id,'is_deleted'=>0])->field($subFields)->select();
+                $attrKeyStr = '';
+                foreach ($attrKeys as $attrKey){
+                    $attrKeyStr .= $attrKey->text;
+                }
                 $list[] = [
                     'id'=>$row2->id,
                     'name'=>$row2->name,
                     'parent'=>$row2->parent_id,
                     'sequence'=>$row2->ordering,
                     'display' => $row2->is_display,
+                    'text' => $attrKeyStr,
                     'level'=>1
                 ];
                 $rows3 = $model->where(['parent_id'=>$row2->id,'is_deleted'=>0])->field($fields)->select();
                 foreach ($rows3 as $row3){
+                    $attrKeys = $attrKeyModel->where(['category_id'=>$row3->id,'is_deleted'=>0])->field($subFields)->select();
+                    $attrKeyStr = '';
+                    foreach ($attrKeys as $attrKey){
+                        $attrKeyStr .= $attrKey->text;
+                    }
                     $list[] = [
                         'id'=>$row3->id,
                         'name'=>$row3->name,
                         'parent'=>$row3->parent_id,
                         'sequence'=>$row3->ordering,
                         'display' => $row3->is_display,
+                        'text' => $attrKeyStr,
                         'level'=>2,
                     ];
                 }
