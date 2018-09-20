@@ -81,7 +81,7 @@ class Factoring extends Base{
 						if($row['need_account']<$loan_account){//申请金额小于审批金额
 							return $this->errorMsg('101305');
 						}
-						$request = $FmFactoring->where(['factoring_id'=>$id,'state'=>1])->update(['state'=>3]);
+						$request = $FmFactoring->where(['factoring_id'=>$id,'state'=>1])->update(['state'=>3,'loan_account'=>$loan_account]);
 						if(!$request){
 							return $this->errorMsg('101306');
 						}
