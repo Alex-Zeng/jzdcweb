@@ -36,11 +36,11 @@ class Factoring extends Base {
 		$groupId = $this->groupId;
 		switch ($groupId) {
 			case IndexGroup::GROUP_BUYER:
-				$dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','4,13'],'buyer_id'=>$userId])->order('id desc')->select();
-		        if(!$dataList){
-		        	$dataList = [];
-		        }
-				break;
+				//$dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','4,13'],'buyer_id'=>$userId])->order('id desc')->select();
+		        // if(!$dataList){
+		        	// $dataList = [];
+		        // }
+				// break;
 			case IndexGroup::GROUP_SUPPLIER:
 				$dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','4,13'],'supplier'=>$userId])->order('id desc')->select();
 		        if(!$dataList){
@@ -153,6 +153,7 @@ class Factoring extends Base {
         $IndexUser = new IndexUser();
         $user = $IndexUser->field('real_name')->where(['id'=>$userId])->find();
         $factoringDetail = [
+            'orderSn'       =>isset($data->order_sn)?$data->order_sn:'',
             'loanAccount'   =>isset($data->loan_account)?$data->loan_account:'0.00',
             'stateName'     =>isset($data->state)?$FmFactoring->getStateName($data->state):'',
             'needAccount'   =>isset($data->need_account)?$data->need_account:'0.00',
