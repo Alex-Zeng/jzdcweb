@@ -149,7 +149,7 @@ class Factoring extends Base {
 
         $factoring_id = input('post.factoringId',0,'intval');
         $FmFactoring = new FmFactoring();
-        $data = $FmFactoring->field('need_account,add_time,order_sn,contact_username,contact_phone,state,loan_account,bank_corporate,bank_address')->where(['user_id'=>$userId,'factoring_id'=>$factoring_id])->find();
+        $data = $FmFactoring->field('need_account,add_time,order_sn,contact_username,contact_phone,state,loan_account,bank_corporate,bank_address,reasons')->where(['user_id'=>$userId,'factoring_id'=>$factoring_id])->find();
         $IndexUser = new IndexUser();
         $user = $IndexUser->field('real_name')->where(['id'=>$userId])->find();
         $factoringDetail = [
@@ -162,7 +162,8 @@ class Factoring extends Base {
             'contactphone'  =>isset($data->contact_phone)?$data->contact_phone:'',
             'name'          =>isset($user->real_name)?$user->real_name:'',
             'bankCorporate' =>isset($data->bank_corporate)?$data->bank_corporate:'',
-            'bankAddress'   =>isset($data->bank_address)?$data->bank_address:''
+            'bankAddress'   =>isset($data->bank_address)?$data->bank_address:'',
+            'reasons'       =>isset($data->reasons)?$data->reasons:'',
         ];
         return ['status'=>0,'data'=>['factoringDetail'=>$factoringDetail],'msg'=>'详情数据'];
     }
