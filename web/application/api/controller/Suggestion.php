@@ -26,10 +26,10 @@ class  Suggestion extends Base{
             return ['status'=>1,'data'=>[],'msg'=>'称呼最多输入10个字'];
         }
         if(!checkPhone($contactsNum)){
-            return ['status'=>1,'data'=>[],'msg'=>'反馈内容最多输入500个字'];
+            return ['status'=>1,'data'=>[],'msg'=>'联系电话不正确'];
         }
         if(!checkStrLength($content,500)){
-            return ['status'=>1,'data'=>[],'msg'=>'联系电话不正确'];
+            return ['status'=>1,'data'=>[],'msg'=>'反馈内容最多输入500个字'];
         }
 
         $model = new ComplaintsSuggestions();
