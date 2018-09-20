@@ -74,7 +74,7 @@ class Factoring extends Base{
 						return $this->errorMsg('101303');
 					}
 					if($verify==1){//审核通过
-						$loan_account = input('loan_account',0);
+						$loan_account = input('post.loan_account',0);
 						if($loan_account==0){
 							return $this->errorMsg('101304');
 						}
