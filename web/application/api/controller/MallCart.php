@@ -246,8 +246,8 @@ class MallCart extends Base{
                 'price' => getFormatPrice($row->price),
                 'title' => $row->title,
                 'icon' => $row->spec_img_url ? SmProductSpec::getFormatImg($row->spec_img_url) : SmProduct::getFormatImg($row->cover_img_url),
-                'quantity' => intval($row->quantity),
-                'moq' =>  $row->min_order_qty,
+                'quantity' => (float)$row->quantity,
+                'moq' => (float)$row->min_order_qty,
                 'specificationsInfo' => $optionInfo, //规格描述
                 'materialCode' => $userSpecificationsRow ? $userSpecificationsRow->specifications_no : '',  //物料编号
                 'materialSpec' => $userSpecificationsRow ? $userSpecificationsRow->specifications_name : '',//物料名称
