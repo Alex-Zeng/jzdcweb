@@ -161,13 +161,13 @@ class Index extends Base
                 ];
             }
 
-            $typeLists =  $productCategoryModel->where(['parent_id'=>$cateId,'is_display'=>1,'is_deleted'=>0])->order('ordering desc')->field(['id','name'])->select();
+            $typeLists =  $productCategoryModel->where(['parent_id'=>$categoryRow->id,'is_display'=>1,'is_deleted'=>0])->order('ordering desc')->field(['id','name'])->select();
             foreach ($typeLists as &$typeList){
                 $typeList->id = (string)$typeList->id;
             }
 
             $dataType[] = [
-                'id' => $cateId,
+                'id' => $categoryRow->id,
                 'name' => $categoryRow->name,
                 'pushTypeList' =>$typeLists,
                 'pushGoodsList' => $productResult
