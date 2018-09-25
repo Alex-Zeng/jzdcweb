@@ -49,10 +49,12 @@ class Index
                 $url = url('Index/iphoneNormal');
                 break;
             case 'androidNormal':
+
                 $url = url('Index/androidNormal');
                 break;
             case 'androidWechat':
-                $url = url('Index/androidWechat');
+                $this->androidWechat();return;
+                // $url = url('Index/androidWechat');
                 break;
             default:
                 $url = 'javascript:;';
