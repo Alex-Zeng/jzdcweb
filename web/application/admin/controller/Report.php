@@ -61,14 +61,14 @@ class Report extends Base{
             ->join(['sm_product_spec'=>'b'],'a.product_spec_id=b.id','left')
             ->join(['jzdc_mall_order'=>'c'],'a.order_id=c.id','left')
             ->where($where)
-            ->field(['c.add_time','b.sku_code','a.title','a.s_info','FROM_UNIXTIME(c.add_time, \'%Y-%m-%d\') as order_date','SUM(a.price) as total_price','SUM(a.quantity) as amount'])
+            ->field(['c.add_time','b.sku_code','a.title','a.s_info','FROM_UNIXTIME(c.add_time, \'%Y-%m-%d\') as order_date','SUM(a.price * a.quantity) as total_price','SUM(a.quantity) as amount'])
             ->group('order_date,a.product_spec_id')
             ->count();
         $rows = $model->alias('a')
             ->join(['sm_product_spec'=>'b'],'a.product_spec_id=b.id','left')
             ->join(['jzdc_mall_order'=>'c'],'a.order_id=c.id','left')
             ->where($where)
-            ->field(['c.add_time','b.sku_code','a.title','a.s_info','FROM_UNIXTIME(c.add_time, \'%Y-%m-%d\') as order_date','SUM(a.price) as total_price','SUM(a.quantity) as amount'])
+            ->field(['c.add_time','b.sku_code','a.title','a.s_info','FROM_UNIXTIME(c.add_time, \'%Y-%m-%d\') as order_date','SUM(a.price * a.quantity) as total_price','SUM(a.quantity) as amount'])
             ->group('order_date,a.product_spec_id')
             ->order('order_date desc,a.product_spec_id desc')
             ->paginate(20,$total,['query'=>request()->param()]);
@@ -271,7 +271,7 @@ class Report extends Base{
             ->join(['sm_product_spec'=>'b'],'a.product_spec_id=b.id','left')
             ->join(['jzdc_mall_order'=>'c'],'a.order_id=c.id','left')
             ->where($where)
-            ->field(['c.add_time','b.sku_code','a.title','a.s_info','FROM_UNIXTIME(c.add_time, \'%Y-%m-%d\') as order_date','SUM(a.price) as total_price','SUM(a.quantity) as amount'])
+            ->field(['c.add_time','b.sku_code','a.title','a.s_info','FROM_UNIXTIME(c.add_time, \'%Y-%m-%d\') as order_date','SUM(a.price * a.quantity) as total_price','SUM(a.quantity) as amount'])
             ->group('order_date,a.product_spec_id')
             ->count();
 
@@ -296,7 +296,7 @@ class Report extends Base{
             ->join(['sm_product_spec'=>'b'],'a.product_spec_id=b.id','left')
             ->join(['jzdc_mall_order'=>'c'],'a.order_id=c.id','left')
             ->where($where)
-            ->field(['c.add_time','b.sku_code','a.title','a.s_info','FROM_UNIXTIME(c.add_time, \'%Y-%m-%d\') as order_date','SUM(a.price) as total_price','SUM(a.quantity) as amount'])
+            ->field(['c.add_time','b.sku_code','a.title','a.s_info','FROM_UNIXTIME(c.add_time, \'%Y-%m-%d\') as order_date','SUM(a.price * a.quantity) as total_price','SUM(a.quantity) as amount'])
             ->group('order_date,a.product_spec_id')
             ->order('order_date desc,a.product_spec_id desc')
             ->limit($start, $pageSize)
