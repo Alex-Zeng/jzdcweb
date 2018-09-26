@@ -70,7 +70,7 @@ class Certification extends Base{
         $row->permits_accounts = $row->permits_accounts ? FormUserCert::getFormatImg($row->permits_accounts) : '';
         $row->org_structure_code_permits = $row->org_structure_code_permits ? FormUserCert::getFormatImg($row->org_structure_code_permits) : '';
         $row->tax_registration_cert = $row->tax_registration_cert ? FormUserCert::getFormatImg($row->tax_registration_cert) : '';
-
+        $row->power_attorney = $row->power_attorney ? FormUserCert::getFormatImg($row->power_attorney) : '';
         $this->assign('row',$row);
         return $this->fetch();
     }
