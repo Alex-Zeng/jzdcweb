@@ -6,12 +6,12 @@ class Index
     //苹果下载
     public function iphoneNormal(){
         // 苹果已经上线则去苹果应用市场下载
-        // header('Location: https://itunes.apple.com/cn/app/dai-dai-wang/id1276128703');
-        // exit();
+        header('Location: https://itunes.apple.com/cn/app/%E9%9B%86%E4%BC%97%E7%94%B5%E9%87%87/id1434814844');
+        exit();
         
         // 没有上线用第三方公司则去指引页下载
-        $url = 'itms-services://?action=download-manifest&url=https://www.pgyer.com/app/plist/8f3fad7265f5359172788719080d3dbb/install/s.plist';
-        return view('',['url'=>$url]);
+        // $url = 'itms-services://?action=download-manifest&url=https://www.pgyer.com/app/plist/8f3fad7265f5359172788719080d3dbb/install/s.plist';
+        // return view('',['url'=>$url]);
     }
 
     //安卓下载
@@ -30,8 +30,8 @@ class Index
 
     //安卓应用宝下载
     public function androidWechat(){
-        // header('Location: http://a.app.qq.com/o/simple.jsp?pkgname=com.zhongchuang.daidai');
-        // exit();
+        header('Location: http://android.myapp.com/myapp/detail.htm?apkName=com.jzdc.jzdc&ADTAG=mobile');
+        exit();
     }
 
     public function index(){
@@ -49,10 +49,12 @@ class Index
                 $url = url('Index/iphoneNormal');
                 break;
             case 'androidNormal':
+
                 $url = url('Index/androidNormal');
                 break;
             case 'androidWechat':
-                $url = url('Index/androidWechat');
+                $this->androidWechat();return;
+                // $url = url('Index/androidWechat');
                 break;
             default:
                 $url = 'javascript:;';

@@ -95,6 +95,12 @@
                                 <a href="{$row.legal_identity_card}" target="_blank" ><img src="{$row.legal_identity_card}"  width="150px" height="150px" /></a>
                             </div>
                             {/if}
+                            {if $row.legal_identity_card}
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">委托授权书</label>
+                                <a href="{$row.power_attorney}" target="_blank" ><img src="{$row.power_attorney}"  width="150px" height="150px" /></a>
+                            </div>
+                            {/if}
                             {if $row.agent_identity_card}
                             <div class="form-inline form-group">
                                 <label for="" class="col-md-3">代办人身份证</label>
