@@ -70,7 +70,7 @@ class Goods  extends Base {
      */
     public function getCategoryList(Request $request){
         $model = new SmProductCategory();
-        $field =  ['id','name','icon_h5','icon_web'];
+        $field =  ['id','name','icon_web'];
         //获取一级分类
         $rows = $model->where(['is_display'=>1,'is_deleted'=>0,'parent_id'=>0])->order('ordering','desc')->field($field)->select();
         foreach ($rows as &$row){
@@ -84,11 +84,14 @@ class Goods  extends Base {
                 $rows3 = $model->where(['is_display'=>1,'is_deleted'=>0,'parent_id'=>$row2->id])->order('ordering','desc')->field($field)->select();
                 foreach ($rows3 as &$row3){
                     $row3['path'] = '';
-                    $row3['iconWeb'] = SmProductCategory::getFormatIcon($row3->icon_web);;
+                    $row3['iconWeb'] = SmProductCategory::getFormatIcon($row3->icon_web);
+                    unset($row3->icon_web);
                 }
                 $row2['child'] = $rows3;
+                unset($row2->icon_web);
             }
             $row['child'] = $rows2;
+            unset($row->icon_web);
         }
         return ['status'=>0,'data'=>$rows,'msg'=>''];
     }
