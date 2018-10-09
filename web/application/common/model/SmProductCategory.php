@@ -138,4 +138,15 @@ class SmProductCategory extends Model{
         
         return ['selectedList'=>$zuhe,'levelSelectKeyList'=>$zuhebingzhi,'levelSelectList'=>$zuhebingzhiValue];
     }
+
+
+    /**
+     * @desc返回图标
+     * @param $icon
+     * @return string
+     */
+    public static function getFormatIcon($icon){
+        return $icon ?  config('jzdc_doc_path').'type_icon/'.$icon : '';
+    }
+
 }  

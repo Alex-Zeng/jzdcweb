@@ -21,7 +21,7 @@ class ProductCategory  extends Base{
      */
     public function index(){
         $model = new SmProductCategory();
-        $fields = ['id','name','parent_id','is_display','ordering'];
+        $fields = ['id','name','parent_id','is_display','ordering','icon_h5','icon_web'];
         $rows = $model->where(['parent_id'=>0,'is_deleted'=>0])->field($fields)->select();
 
         $attrKeyModel = new SmCategorySpecAttrKey();
@@ -43,6 +43,8 @@ class ProductCategory  extends Base{
                 'display' => $row->is_display,
                 'text' => $attrKeyStr,
                 'level'=>0,
+                'icon_h5'=>SmProductCategory::getFormatIcon($row->icon_h5),
+                'icon_web'=>SmProductCategory::getFormatIcon($row->icon_web)
             ];
             //查询第二层
             $rows2 = $model->where(['parent_id'=>$row->id,'is_deleted'=>0])->field($fields)->select();
@@ -59,7 +61,9 @@ class ProductCategory  extends Base{
                     'sequence'=>$row2->ordering,
                     'display' => $row2->is_display,
                     'text' => $attrKeyStr,
-                    'level'=>1
+                    'level'=>1,
+                    'icon_h5'=>SmProductCategory::getFormatIcon($row2->icon_h5),
+                    'icon_web'=>SmProductCategory::getFormatIcon($row2->icon_web)
                 ];
                 $rows3 = $model->where(['parent_id'=>$row2->id,'is_deleted'=>0])->field($fields)->select();
                 foreach ($rows3 as $row3){
@@ -76,6 +80,8 @@ class ProductCategory  extends Base{
                         'display' => $row3->is_display,
                         'text' => $attrKeyStr,
                         'level'=>2,
+                        'icon_h5'=>SmProductCategory::getFormatIcon($row3->icon_h5),
+                        'icon_web'=>SmProductCategory::getFormatIcon($row3->icon_web)
                     ];
                 }
             }
@@ -96,6 +102,8 @@ class ProductCategory  extends Base{
             $parent = $request->post('parent',0,'intval');
             $sequence = $request->post('sequence',0,'intval');
             $display = $request->post('is_display',1,'intval');
+            $iconH5 = $request->post('icon_h5','','trim');
+            $iconWeb = $request->post('icon_web','','trim');
 
             $userId = getUserId();
             $userModel = new IndexUser();
@@ -113,7 +121,9 @@ class ProductCategory  extends Base{
                 'level' => $parentRow ?  intval($parentRow->level +1) : 1,
                 'created_user_id' => $userId,
                 'created_user' => $userInfo ? $userInfo->username : '',
-                'created_time' => time()
+                'created_time' => time(),
+                'icon_h5' => $iconH5,
+                'icon_web' => $iconWeb
             ];
 
             $result = $model->save($data);
@@ -135,7 +145,7 @@ class ProductCategory  extends Base{
      */
     public function edit(Request$request,$id){
         $model = new SmProductCategory();
-        $field = ['id','name','parent_id','ordering','is_display'];
+        $field = ['id','name','parent_id','ordering','is_display','icon_h5','icon_web'];
         $row = $model->where(['id'=>$id])->field($field)->find();
 
         if($request->isPost()){
@@ -143,6 +153,8 @@ class ProductCategory  extends Base{
             $parent = $request->post('parent',0,'intval');
             $sequence = $request->post('sequence',0,'intval');
             $display = $request->post('is_display',1,'intval');
+            $iconH5 = $request->post('icon_h5','','trim');
+            $iconWeb = $request->post('icon_web','','trim');
 
             $userId = getUserId();
             $userModel = new IndexUser();
@@ -160,7 +172,9 @@ class ProductCategory  extends Base{
                 'depth_path' =>$parentRow ?  $parentRow->depth_path.'/'.$parentRow->id.'/'.$id : '/'.$id ,
                 'last_modified_user_id' => $userId,
                 'last_modified_user' => $userInfo ? $userInfo->username : '',
-                'last_modified_time' => time()
+                'last_modified_time' => time(),
+                'icon_h5' => $iconH5,
+                'icon_web' => $iconWeb
             ];
             $result = $model->save($data,['id'=>$id]);
             if($result !== false){
@@ -168,6 +182,8 @@ class ProductCategory  extends Base{
             }
         }
         $this->assign('row',$row);
+        $this->assign('preview_icon_h5',SmProductCategory::getFormatIcon($row->icon_h5));
+        $this->assign('preview_icon_web',SmProductCategory::getFormatIcon($row->icon_web));
         return $this->fetch();
     }
 

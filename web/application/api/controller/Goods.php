@@ -70,18 +70,21 @@ class Goods  extends Base {
      */
     public function getCategoryList(Request $request){
         $model = new SmProductCategory();
-        $field =  ['id','name'];
+        $field =  ['id','name','icon_h5','icon_web'];
         //获取一级分类
         $rows = $model->where(['is_display'=>1,'is_deleted'=>0,'parent_id'=>0])->order('ordering','desc')->field($field)->select();
         foreach ($rows as &$row){
             $row['path'] = '';
+            $row['iconWeb'] = SmProductCategory::getFormatIcon($row->icon_web);
             //获取二级分类
             $rows2 = $model->where(['is_display'=>1,'is_deleted'=>0,'parent_id'=>$row->id])->order('ordering','desc')->field($field)->select();
             foreach ($rows2 as &$row2){
                 $row2['path'] = '';
+                $row2['iconWeb'] = SmProductCategory::getFormatIcon($row2->icon_web);;
                 $rows3 = $model->where(['is_display'=>1,'is_deleted'=>0,'parent_id'=>$row2->id])->order('ordering','desc')->field($field)->select();
                 foreach ($rows3 as &$row3){
                     $row3['path'] = '';
+                    $row3['iconWeb'] = SmProductCategory::getFormatIcon($row3->icon_web);;
                 }
                 $row2['child'] = $rows3;
             }
