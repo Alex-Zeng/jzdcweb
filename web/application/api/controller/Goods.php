@@ -395,7 +395,7 @@ class Goods  extends Base {
                 }
             }
         }
-        if(!$specAttrs && $isCustomSpec == 1){
+        if(!$specAttrs && $isCustomSpec){
             $specAttrs[] = ["desc"=> "定制规格","list"=>[ "specAttrValId" => 0, "specAttrVal" => "定制", "isCustom" => 1],"id"=>0];
         }
 
