@@ -1222,8 +1222,10 @@ class Product extends Base{
         }
         //分类
         if($categoryId>0){
-            $productIds = $SmProductsCategories->where(['category_id'=>$categoryId])->column('product_id');
-            $where['a.id'] = ['in',$productIds];
+            // $productIds = $SmProductsCategories->where(['category_id'=>$categoryId])->column('product_id');
+            // $where['a.id'] = ['in',$productIds];
+            $categoryIds = $SmProductCategory->getChildIds($categoryId,true);
+            $where['a.category_id'] = ['in',$categoryIds];
 
             //对分类进行多层级回显
             $categorySelected = $SmProductCategory->getCategorySelected([$categoryId]);
@@ -1288,8 +1290,10 @@ class Product extends Base{
         }
         //分类
         if($categoryId>0){
-            $productIds = $SmProductsCategories->where(['category_id'=>$categoryId])->column('product_id');
-            $where['a.id'] = ['in',$productIds];
+            // $productIds = $SmProductsCategories->where(['category_id'=>$categoryId])->column('product_id');
+            // $where['a.id'] = ['in',$productIds];
+            $categoryIds = $SmProductCategory->getChildIds($categoryId,true);
+            $where['a.category_id'] = ['in',$categoryIds];
 
             //对分类进行多层级回显
             $categorySelected = $SmProductCategory->getCategorySelected([$categoryId]);
@@ -1363,8 +1367,10 @@ class Product extends Base{
         }
         //分类
         if($categoryId>0){
-            $productIds = $SmProductsCategories->where(['category_id'=>$categoryId])->column('product_id');
-            $where['a.id'] = ['in',$productIds];
+            // $productIds = $SmProductsCategories->where(['category_id'=>$categoryId])->column('product_id');
+            // $where['a.id'] = ['in',$productIds];
+            $categoryIds = $SmProductCategory->getChildIds($categoryId,true);
+            $where['a.category_id'] = ['in',$categoryIds];
 
             //对分类进行多层级回显
             $categorySelected = $SmProductCategory->getCategorySelected([$categoryId]);
