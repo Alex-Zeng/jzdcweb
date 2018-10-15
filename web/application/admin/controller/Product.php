@@ -526,6 +526,7 @@ class Product extends Base{
                                 return $this->errorMsg('101207',['replace'=>['__REPLACE__'=>'第'.($kk+1).'行的'.$msg[1].'规格长度过长']]);
                             }
                             $post['spec']['category'][$key][$kk-$lineUpdateCount] = $lineAttr['category_text'][$key][$kk];//好关键的赋值
+                            $vv = $lineAttr['category_text'][$key][$kk];
                         }
                         $checkVal[$kk] = isset($checkVal[$kk])?$checkVal[$kk]:'';
                         $checkVal[$kk]  =  $checkVal[$kk].'|'. $vv;
