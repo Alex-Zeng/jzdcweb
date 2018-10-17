@@ -1,0 +1,114 @@
+{include file="layout/header" title="$title" keywords="" /}
+<link rel="stylesheet" href="__STATIC__/js/plugins/bootstrapvalidator/css/bootstrapValidator.css"/>
+{include file="layout/left" groupId="$groupId" keywords="" /}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"></h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">企业管理</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">企业管理-{$companyRow.company_name}</h3>
+                    </div>
+                    <div class="row" style="padding-top: 15px;padding-right: 15px">
+                        <div class="col-md-6">
+                        </div>
+                        <div class="col-md-6">
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th>部门</th>
+                                <th>姓名</th>
+                                <th>联系号码</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {volist name='rows' id='row'}
+                            <tr  data-companyId="{$row.company_id}"  data-userId="{$row.userId}"  data-userName="{$row.user_name}" class="companyInfo"   {if $row.userId} style="cursor: pointer"  data-toggle="modal"   data-target="#manager-modal" {/if}    >
+                            <td>{$row.org_name}</td>
+                            <td>{$row.user_name}</td>
+                            <td>{$row.mobile}</td>
+                            </tr>
+                            {/volist}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="3">{$page}</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="modal fade" id="manager-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">是否提升 "<code id="showName"></code>" 为该企业管理员账号?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">否</button>
+                <button type="button" class="btn btn-primary" data-companyId=""  data-userId="" id="manager-request">是</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{include file="layout/footer" title="$title" keywords="" /}
+<script type="text/javascript">
+    var url = '{:url("admin/company_info/index")}';
+    $('.nav-sidebar').find('a[href="'+url+'"]').addClass('active');
+    $('.nav-sidebar').find('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
+
+    $("#manager-modal").on('show.bs.modal',function (event) {
+        var target = $(event.relatedTarget);
+        var companyId = $(target).closest('tr').data('companyid');
+        var userId = $(target).closest('tr').data('userid');
+        var userName = $(target).closest('tr').data('username');
+        $("#manager-request").data('companyid',companyId);
+        $("#manager-request").data('userid',userId);
+        $('#showName').html(userName);
+    });
+
+    $("#manager-request").click(function () {
+        var companyId = $(this).data('companyid');
+        var userId = $(this).data('userid');
+        
+        if(companyId <=0 || userId <=0){
+            return;
+        }
+        //调用请求
+        $.ajax({
+            url:'{:url("admin/company_info/responsible")}',
+            type:'post',
+            data:{companyId:companyId,userId:userId},
+            dataType:'json',
+            success:function (data) {
+                if(data.status == 0){
+                    $("#manager-modal").modal('hide');
+                }
+                alert(data.msg);
+            }
+        })
+    });
+</script>

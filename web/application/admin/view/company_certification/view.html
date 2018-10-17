@@ -1,0 +1,134 @@
+{include file="layout/header" title="投诉与建议" keywords="开源WEB开发框架" /}
+
+{include file="layout/left" groupId="$groupId" keywords="开源WEB开发框架" /}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"></h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">企业认证</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-offset-0 col-md-12">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">{$row.company_name}#{$row.id}</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3 pull-right">企业名称</label>
+                                <span class="">{$row.company_name}</span>
+                            </div>
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">注册类型</label>
+                                <span class="">{$row.reg_role}</span>
+                            </div>
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">企业性质</label>
+                                <span class="">{$row.ent_property}</span>
+                            </div>
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">注册资金</label>
+                                <span class="">{$row.reg_capital}</span>
+                            </div>
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">法人代表</label>
+                                <span class="">{$row.legal_representative}</span>
+                            </div>
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">所在地区</label>
+                                <span class="">{$row.company_name}</span>
+                            </div>
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">详细地址</label>
+                                <span class="">{$row.detail_address}</span>
+                            </div>
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">公司固话</label>
+                                <span class="">{$row.ent_phone}</span>
+                            </div>
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">联系人</label>
+                                <span class="">{$row.contact_point}</span>
+                            </div>
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">联系手机</label>
+                                <span class="">{$row.contact_mobile}</span>
+                            </div>
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">审核状态</label>
+                                <span class="">{$row.status == 1 ? '待审核' : ($row.status == 2 ? '已通过' : '已拒绝')}</span>
+                            </div>
+                            {if $row.status == 3}
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">拒绝原因</label>
+                                <span class="">{$row.refuse_reason}</span>
+                            </div>
+                            {/if}
+                            {if $row.permits_accounts}
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">开户许可证</label>
+                                <a href="{$row.permits_accounts}" target="_blank" ><img src="{$row.permits_accounts}"  width="150px" height="150px" /></a>
+                            </div>
+                            {/if}
+                            {if $row.business_license}
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">营业执照副本</label>
+                                <a href="{$row.business_license}" target="_blank" ><img src="{$row.business_license}"  width="150px" height="150px" /></a>
+                            </div>
+                            {/if}
+                            {if $row.legal_identity_card}
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">法人身份证</label>
+                                <a href="{$row.legal_identity_card}" target="_blank" ><img src="{$row.legal_identity_card}"  width="150px" height="150px" /></a>
+                            </div>
+                            {/if}
+                            {if $row.legal_identity_card}
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">委托授权书</label>
+                                <a href="{$row.power_attorney}" target="_blank" ><img src="{$row.power_attorney}"  width="150px" height="150px" /></a>
+                            </div>
+                            {/if}
+                            {if $row.agent_identity_card}
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">代办人身份证</label>
+                                <a href="{$row.agent_identity_card}" target="_blank" ><img src="{$row.agent_identity_card}"  width="150px" height="150px" /></a>
+                            </div>
+                            {/if}
+                            {if $row.org_structure_code_permits}
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">机构代码证</label>
+                                <a href="{$row.org_structure_code_permits}" target="_blank" ><img src="{$row.agent_identity_card}"  width="150px" height="150px" /></a>
+                            </div>
+                            {/if}
+                            {if $row.tax_registration_cert}
+                            <div class="form-inline form-group">
+                                <label for="" class="col-md-3">税务登记证</label>
+                                <a href="{$row.tax_registration_cert}" target="_blank" ><img src="{$row.tax_registration_cert}"  width="150px" height="150px" /></a>
+                            </div>
+                            {/if}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{include file="layout/footer" title="$title" keywords="" /}
+<script type="text/javascript">
+    var url = '{:url("admin/certification/index")}';
+    $('a[href="'+url+'"]').addClass('active');
+</script>

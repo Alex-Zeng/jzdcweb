@@ -45,6 +45,11 @@
                     'managerUrl' => url('admin/certification/index'),
                     'managerVal' => []
                 ],[
+                  'managerKey' => '企业认证',
+                  'managerIcon'=> 'fa-users',
+                  'managerUrl' => url('admin/company_certification/index'),
+                  'managerVal' => []
+                 ],[
                     'managerKey' => '金融服务',
                     'managerIcon'=> 'fa-money',
                     'managerUrl' => url('admin/service/index'),
@@ -98,7 +103,9 @@
                     'managerKey' => '会员中心',
                     'managerUrl' => 'javascript:;',
                     'managerIcon'=> 'fa-group',
-                    'managerVal' => [['name'=>'管理会员','url'=>url('admin/member/index'),'icon'=>'fa-group']]
+                    'managerVal' => [ ['name'=>'管理会员','url'=>url('admin/member/index'),'icon'=>'fa-group'],
+                                      ['name'=>'企业管理','url'=>url('admin/companyInfo/index'),'icon'=>'fa-university']
+                                    ]
                 ]
             ]
         ];
