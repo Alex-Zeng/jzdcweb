@@ -46,16 +46,19 @@ class Base extends Model{
 
 	/**
 	 * [tableDefaultValue 增删改公共使用的数据]
-	 * @param  [type] $action [create/update/delete]
-	 * @return [type]         [description]
+	 * @param  [string] $action [ create/update/delete]
+	 * @param  [int] 	$userId
+	 * @return [array]
 	 */
-	public function tableDefaultValue($action=''){
+	public function tableDefaultValue($action='',$userId){
 		$return = [];
+		$MebUser = new MebUser();
+		$userName = $MebUser->where(['id'=>$userId])->value('user_name');
 		switch ($action) {
 			case 'create':
 				$return = [
-					'created_user_id'		=> getUserId(),
-					'created_user'   		=> getUserName(),
+					'created_user_id'		=> $userId,
+					'created_user'   		=> $userName,
 					'created_time'			=> round(microtime(true),3),
 					'last_modified_user_id'	=> 0,
 					'last_modified_user'   	=> '',
@@ -68,15 +71,15 @@ class Base extends Model{
 				break;
 			case 'update':
 				$return = [
-					'last_modified_user_id'=> getUserId(),
-					'last_modified_user'   => getUserName(),
+					'last_modified_user_id'=> $userId,
+					'last_modified_user'   => $userName,
 					'last_modified_time'   => round(microtime(true),3)
 				];
 				break;
 			case 'delete':
 				$return = [
 					'is_deleted'	=> 1,
-					'deleted_user'	=> getUserName(),
+					'deleted_user'	=> $userName,
 					'deleted_time'	=> round(microtime(true),3)
 				];
 		}
