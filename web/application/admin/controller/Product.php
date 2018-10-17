@@ -526,6 +526,7 @@ class Product extends Base{
                                 return $this->errorMsg('101207',['replace'=>['__REPLACE__'=>'第'.($kk+1).'行的'.$msg[1].'规格长度过长']]);
                             }
                             $post['spec']['category'][$key][$kk-$lineUpdateCount] = $lineAttr['category_text'][$key][$kk];//好关键的赋值
+                            $vv = $lineAttr['category_text'][$key][$kk];
                         }
                         $checkVal[$kk] = isset($checkVal[$kk])?$checkVal[$kk]:'';
                         $checkVal[$kk]  =  $checkVal[$kk].'|'. $vv;
@@ -737,6 +738,9 @@ class Product extends Base{
                             continue;
                         }
                         foreach ($data6_plan_param0[$v['category_spec_attr_key_id'].'_'.$v['spec_attr_key']] as $kk => $vv) {
+                            if($vv == "-1"){
+                                continue;
+                            }
                             if($SmProductSpecAttrVal->where(['spec_attr_key_id'=>$v['id'],'spec_attr_val'=>$vv,'is_deleted'=>0])->count()==0){
                                 $data6[] = array_merge($createDefault,[
                                     'spec_attr_key_id'  => $v['id'],
@@ -805,6 +809,9 @@ class Product extends Base{
                     $data9_plan_param1 = [];
                     foreach ($post['spec']['category'] as $k => $v) {
                         foreach ($v as $kk => $vv) {
+                            if($vv=="-1"){
+                                continue;
+                            }
                             $data9_plan_param1[$kk][] = $data6_plan_param2_data9[$k.'|'.$vv];//spec_set组合
                         }
                     }
@@ -886,6 +893,23 @@ class Product extends Base{
                     if(!$data4_result_delete){
                         Db::rollback(); 
                         return $this->errorMsg('101211',['replace'=>['__REPLACE__'=>'data4_result_delete']]);
+                    }
+
+                    //如果不存在的SmProductSpecAttrVal值就删除
+                    $specResult = $SmProductSpec->where(['id'=>$val])->field('spec_set,product_id')->find();
+                    $specSetArr = explode(',', $specResult['spec_set']);
+                    foreach ($specSetArr as $k => $v) {
+                        if($SmProductSpec->where(['is_deleted'=>0])->where('find_in_set('.$v.',spec_set)')->count()==0){
+                            $SmProductSpecAttrVal->where(['id'=>$v])->update($deleteDefault);
+                        }
+                    }
+                    //如果商品属性的值也没有了，就把商品属性名也给删除了
+                    $allColumn = $SmProductSpecAttrKey->alias('a')->join(['sm_product_spec_attr_val'=>'b'],'b.spec_attr_key_id=a.id','left')->where(['a.product_id'=>$specResult['product_id']])->group('a.id')->column('a.id');
+                    $notDelColumn = $SmProductSpecAttrKey->alias('a')->join(['sm_product_spec_attr_val'=>'b'],'b.spec_attr_key_id=a.id','left')->where(['a.product_id'=>$specResult['product_id'],'b.is_deleted'=>0])->group('a.id')->column('a.id');
+                    foreach ($allColumn as $k => $v) {
+                        if(!in_array($v,$notDelColumn)){
+                            $SmProductSpecAttrKey->where(['id'=>$v])->update($deleteDefault);
+                        }
                     }
                 }
             }
@@ -1040,7 +1064,6 @@ class Product extends Base{
         return view('');
 	}
 
-
     public function imgDelete(){
         $id = input('post.key',0,'intval');
         $SmProductGallery      = new SmProductGallery();
@@ -1084,7 +1107,7 @@ class Product extends Base{
         $productArea = [];
         if(!empty($product)){
             //规格
-            $rows = $SmProductSpec->field('id,sku_code,spec_set,price,unit,is_customized,is_price_neg_at_phone,min_order_qty')->where(['product_id'=>$productId])->select();
+            $rows = $SmProductSpec->field('id,sku_code,spec_set,price,unit,is_customized,is_price_neg_at_phone,min_order_qty')->where(['is_deleted'=>0,'product_id'=>$productId])->select();
             foreach ($rows as $key => $val) {
             	$rows[$key]['attr'] = $SmProductSpecAttrVal->field('spec_attr_val')->where(['id'=>['in',$val['spec_set']]])->select();
             }
@@ -1222,8 +1245,10 @@ class Product extends Base{
         }
         //分类
         if($categoryId>0){
-            $productIds = $SmProductsCategories->where(['category_id'=>$categoryId])->column('product_id');
-            $where['a.id'] = ['in',$productIds];
+            // $productIds = $SmProductsCategories->where(['category_id'=>$categoryId])->column('product_id');
+            // $where['a.id'] = ['in',$productIds];
+            $categoryIds = $SmProductCategory->getChildIds($categoryId,true);
+            $where['a.category_id'] = ['in',$categoryIds];
 
             //对分类进行多层级回显
             $categorySelected = $SmProductCategory->getCategorySelected([$categoryId]);
@@ -1288,8 +1313,10 @@ class Product extends Base{
         }
         //分类
         if($categoryId>0){
-            $productIds = $SmProductsCategories->where(['category_id'=>$categoryId])->column('product_id');
-            $where['a.id'] = ['in',$productIds];
+            // $productIds = $SmProductsCategories->where(['category_id'=>$categoryId])->column('product_id');
+            // $where['a.id'] = ['in',$productIds];
+            $categoryIds = $SmProductCategory->getChildIds($categoryId,true);
+            $where['a.category_id'] = ['in',$categoryIds];
 
             //对分类进行多层级回显
             $categorySelected = $SmProductCategory->getCategorySelected([$categoryId]);
@@ -1363,8 +1390,10 @@ class Product extends Base{
         }
         //分类
         if($categoryId>0){
-            $productIds = $SmProductsCategories->where(['category_id'=>$categoryId])->column('product_id');
-            $where['a.id'] = ['in',$productIds];
+            // $productIds = $SmProductsCategories->where(['category_id'=>$categoryId])->column('product_id');
+            // $where['a.id'] = ['in',$productIds];
+            $categoryIds = $SmProductCategory->getChildIds($categoryId,true);
+            $where['a.category_id'] = ['in',$categoryIds];
 
             //对分类进行多层级回显
             $categorySelected = $SmProductCategory->getCategorySelected([$categoryId]);

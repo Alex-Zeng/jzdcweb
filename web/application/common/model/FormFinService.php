@@ -23,6 +23,7 @@ class FormFinService extends Model{
     const  TYPE_SERVICE = 4;
     const  TYPE_PROPERTY = 5;
     const  TYPE_AUTOMATE = 6;
+    const  TYPE_AUTHENTICATION = 7;
 
 
     public static function getTypeList(){
@@ -33,7 +34,8 @@ class FormFinService extends Model{
             self::TYPE_FINANCE => '金融',
             self::TYPE_SERVICE => '售后',
             self::TYPE_PROPERTY => '知识产权',
-            self::TYPE_AUTOMATE => '自动化'
+            self::TYPE_AUTOMATE => '自动化',
+            self::TYPE_AUTHENTICATION => '企业认证'
         ];
     }
 

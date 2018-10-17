@@ -46,11 +46,15 @@
                             <colgroup>
                                 <col>
                                 <col width="120px">
+                                <col width="200px">
+                                <col width="120px">
                                 <col width="300px">
                             </colgroup>
                             <thead  class="" >
                             <tr>
                                 <th>分类名称</th>
+                                <th>APP/H5图标</th>
+                                <th>Web图标</th>
                                 <th>排序</th>
                                 <th>显示</th>
                                 <th>规格名称</th>
@@ -62,6 +66,8 @@
                             {foreach name="list" id="type"}
                             <tr id="{$type.id}" parent="{$type.parent}">
                                 <td><i style="margin-left:{$type.level*30}px" class="operator fa fa-minus-square-o" onclick="displayData(this);" title="关闭"></i>{$type.name}</td>
+                                <td>{if $type.icon_h5}<img width="40px" src="{$type.icon_h5}" />{/if}</td>
+                                <td>{if $type.icon_web}<img width="40px" src="{$type.icon_web}" />{/if}</td>
                                 <td><input class="form-control sort" id="s1" size="10" type="number"  value="{$type.sequence}"></td>
                                 <td><span class="text-success">{$type.display == '1' ? '是' : '否'}</span></td>
                                 <td>{$type.text}</td>
