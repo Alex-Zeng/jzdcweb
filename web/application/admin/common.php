@@ -107,32 +107,6 @@ function getMemberGroup($group = -1){
     ];return isset($list[$group]) ? $list[$group] : '';
 }
 
-/**
- * @desc 返回
- * @param int $level
- * @return array
- */
-function  getTypeLevelList($level = 2){
-    $model = new \app\common\model\MallType();
-    $rows = $model->where(['parent'=>0])->field(['id','name','parent'])->select();
-    $list = [];
-    foreach ($rows as $row){
-        $list[] = ['id'=>$row->id,'name'=>$row->name,'parent'=>$row->parent,'level'=>1];
-        if($level == 2 || $level == 3){
-            $rows2 = $model->where(['parent'=>$row->id])->field(['id','name','parent'])->select();
-            foreach ($rows2 as $row2){
-                $list[] = ['id'=>$row2->id,'name'=>$row2->name,'parent'=>$row2->parent,'level'=>2];
-                if($level == 3){
-                    $rows3 = $model->where(['parent'=>$row2->id])->field(['id','name','parent'])->select();
-                    foreach($rows3 as $row3){
-                        $list[] = ['id'=>$row3->id,'name'=>$row3->name,'parent'=>$row3->parent,'level'=>3];
-                    }
-                }
-            }
-        }
-    }
-   return $list;
-}
 
 /**
  * @desc 根据层级返回分类列表数据
@@ -216,32 +190,6 @@ function getCertificationStatus($status = -1){
         3 => '<span style="color:#dc3545 !important">已拒绝</span>'
     ];
     return isset($list[$status]) ? $list[$status] : '';
-}
-
-/**
- * @param int $typeId
- * @return array
- * @throws \think\db\exception\DataNotFoundException
- * @throws \think\db\exception\ModelNotFoundException
- * @throws \think\exception\DbException
- */
-function getTypeLevel($typeId = 0){
-    $model = new \app\common\model\MallType();
-    $row = $model->where(['id'=>$typeId])->field(['id','name','parent'])->find();
-    $list = [];
-    if($row){
-        $list[] = $row->name;
-        if($row->parent > 0){
-            $row2 = $model->where(['id'=>$row->parent])->field(['id','name','parent'])->find();
-            $list[] = $row2->name;
-            if($row2->parent > 0){
-                $row3 = $model->where(['id'=>$row2->parent])->field(['id','name','parent'])->find();
-                $list[] = $row3->name;
-            }
-        }
-    }
-
-    return $list;
 }
 
 /**

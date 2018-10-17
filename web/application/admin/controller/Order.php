@@ -10,7 +10,6 @@ namespace app\admin\controller;
 
 use app\common\model\IndexGroup;
 use app\common\model\IndexUser;
-use app\common\model\MallGoods;
 use app\common\model\MallOrder;
 use app\common\model\MallOrderGoods;
 use app\common\model\MallOrderPay;
@@ -294,14 +293,6 @@ class Order extends Base{
                    $beforeMoney  = $financeRow ? $financeRow->after_money : 0;
                    $financeData = ['type'=>9,'time'=>time(),'money'=>$row->actual_money,'before_money'=>$beforeMoney,'after_money'=>$beforeMoney+$row->actual_money,'operator'=>getUserName(),'reason'=>$reason,'shop_id'=>$row->shop_id];
                    $financeModel->save($financeData);
-
-                //更新交易统计量
-//                  $orderGoodsModel = new MallOrderGoods();
-//                  $orderGoodsRows = $orderGoodsModel->where(['order_id'=>$row->id])->field(['quantity','goods_id'])->select();
-//                  foreach ($orderGoodsRows as $orderGoodsRow){
-//                      $goodsModel = new MallGoods();
-//                      $goodsModel->where(['id'=>$orderGoodsRow->goods_id])->setInc('sold',$orderGoodsRow->quantity);
-//                  }
 
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();

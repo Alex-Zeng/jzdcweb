@@ -8,11 +8,8 @@
 
 namespace app\api\controller;
 use app\common\model\IndexUser;
-use app\common\model\MallColor;
 use app\common\model\MallFavorite;
-use app\common\model\MallGoods;
-use app\common\model\MallGoodsSpecifications;
-use app\common\model\MallUnit;
+
 use app\common\model\SmProduct;
 use app\common\model\SmProductCategory;
 use app\common\model\SmProductGallery;
@@ -22,8 +19,6 @@ use app\common\model\SmProductSpecAttrVal;
 use app\common\model\SmProductSpecPrice;
 use app\common\model\UserGoodsSpecifications;
 use app\common\model\UserSearchLog;
-use app\common\model\MallType;
-use app\common\model\MallTypeOption;
 use app\common\model\MenuMenu;
 use think\Request;
 use think\View;
