@@ -37,6 +37,8 @@ class Yunpian{
     const TPL_ORDER_SEND2 = '2275804';
     const TPL_ORDER_SUPPLIER_CONFIRM = '2274868';
     const TPL_ORDER_OUT_DATE = '2274858';
+    const TPL_ORGANIZATION_USER  = '2537412';
+    const TPL_ORGANIZATION_ADMIN = '2537588';
     const CONTENT = '【集众电采】您的验证码是#code#。如非本人操作，请忽略本短信';
     private $apikey = '11236d9bf0fe6a5bcc36adb74e47bf1c';
 
@@ -61,7 +63,7 @@ class Yunpian{
             return false;
         }
         //如果是订单类型
-        if(in_array($type,[self::TPL_ORDER_CANCEL,self::TPL_ORDER_PENDING_SEND,self::TPL_ORDER_SEND,self::TPL_ORDER_SEND2,self::TPL_ORDER_SUPPLIER_CONFIRM,self::TPL_ORDER_OUT_DATE])){
+        if(in_array($type,[self::TPL_ORDER_CANCEL,self::TPL_ORDER_PENDING_SEND,self::TPL_ORDER_SEND,self::TPL_ORDER_SEND2,self::TPL_ORDER_SUPPLIER_CONFIRM,self::TPL_ORDER_OUT_DATE,self::TPL_ORGANIZATION_USER,self::TPL_ORGANIZATION_ADMIN])){
             if(isset($param['order_id'])){
                 $content=str_replace('#order_number#',$param['order_id'],$content);
             }
@@ -71,6 +73,12 @@ class Yunpian{
             }
             if(isset($param['supplier'])){
                 $content=str_replace('#supplier#',$param['supplier'],$content);
+            }
+            if(isset($param['code'])){
+                $content=str_replace('#code#',$param['code'],$content);
+            }
+            if(isset($param['member_phone'])){
+                $content=str_replace('#member_phone#',$param['member_phone'],$content);
             }
         }
 
