@@ -53,7 +53,6 @@
                             <thead>
                             <tr>
                                 <th>企业名称</th>
-                                <th>注册类型</th>
                                 <th>法人代表</th>
                                 <th>公司固话</th>
                                 <th>联系人</th>
@@ -68,14 +67,13 @@
                             {volist name='list' id='company'}
                             <tr>
                                 <td>{$company.company_name}</td>
-                                <td>{$company.reg_role}</td>
                                 <td>{$company.legal_representative}</td>
-                                <td>{$company.ent_phone}</td>
-                                <td>{$company.contact_point}</td>
-                                <td>{$company.username}<br />{$company.phone}</td>
-                                <td>{:date('Y-m-d',$company.edit_time)}</td>
-                                <td>{$company.refuse_reason}</td>
-                                <td>{:getCertificationStatus($company.status)} </td>
+                                <td>{$company.contact_phone}</td>
+                                <td>{$company.contacts}</td>
+                                <td>{$company.last_modified_user}</td>
+                                <td>{:date('Y-m-d',$company.last_modified_time)}</td>
+                                <td>{$company.description}</td>
+                                <td>{:getCertificationStatus($company.state)} </td>
                                 <td>
                                     <a href="{:url('view','id='.$company.id)}"  target="_blank" class="btn btn-sm btn-primary">详情</a>
                                     <a href="javascript:void(0)"  class="btn btn-sm btn-danger"  data-id="{$company.id}" data-toggle="modal"   data-target="#refuse-modal">拒绝</a>
@@ -152,8 +150,84 @@
 
 {include file="layout/footer" title="$title" keywords="" /}
 <script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
-<script type="text/javascript" src="__STATIC__/js/admin/certification.js"></script>
 <script type="text/javascript">
-    var url = '{:url("admin/certification/index")}';
-    $('a[href="'+url+'"]').addClass('active');
+    var url = '{:url("admin/company_certification/index")}';
+    $('.nav-sidebar').find('a[href="'+url+'"]').addClass('active');
+
+    $(function () {
+        $('#refuse-form').bootstrapValidator({
+            live: 'disabled',
+            message: 'This value is not valid',
+            fields: {
+                reason: {
+                    message: 'The reason is not valid',
+                    validators: {
+                        notEmpty: {
+                            message: '拒绝原因不能为空'
+                        },
+                        stringLength: {
+                            min: 2,
+                            max: 200,
+                            message: '最大长度为255个字符'
+                        },
+                    }
+                },
+            }
+        });
+
+        $('#refuse-modal').on('show.bs.modal', function (event) {
+            var id = $(event.relatedTarget).attr('data-id');
+            //赋值
+            $("#refuse-request").data('id',id);
+        });
+
+        $("#refuse-request").click(function () {
+            //验证数据
+            $('#refuse-form').bootstrapValidator('validate');
+            var id = $(this).data('id');
+            //数据提交
+            if ($("#refuse-form").data('bootstrapValidator').isValid()) {
+                $.ajax({
+                    type: 'post',
+                    url: '?s=admin/company_certification/audit',
+                    data: {id:id,state:0,reason:$('textarea[name="reason"]').val()},
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.status == 0) {
+                            window.location.reload();
+                        } else {
+                            alert(data.msg);
+                        }
+                    }
+                });
+            }
+        });
+
+        $('#confirm-modal').on('show.bs.modal', function (event) {
+            var id = $(event.relatedTarget).data('id');
+            //赋值
+            $("#confirm-request").data('id',id);
+        });
+        $("#confirm-request").click(function () {
+            //验证数据
+            var id = $(this).data('id');
+            if(id <= 0){
+                return;
+            }
+            //数据提交
+            $.ajax({
+                type: 'post',
+                url: '?s=admin/company_certification/audit',
+                data: {id:id,state:1},
+                dataType: 'json',
+                success: function (data) {
+                    if (data.status == 0) {
+                        window.location.reload();
+                    } else {
+                        alert(data.msg);
+                    }
+                }
+            });
+        });
+    });
 </script>

@@ -9,6 +9,7 @@
 namespace app\api\controller;
 
 use app\common\model\EmailCode;
+use app\common\model\EntCompany;
 use app\common\model\FormUserCert;
 use app\common\model\IndexArea;
 use app\common\model\IndexGroup;
@@ -38,6 +39,37 @@ class User extends Base
         $this->noauth();
         return ['status' => 0, 'data' => ['groupId' => intval($this->groupId)], 'msg' => ''];
     }
+
+    /**
+     * @desc 返回用户身份角色
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getRole(){
+        $this->noauth();
+        $userModel = new IndexUser();
+        $companyModel = new EntCompany();
+        //获取用户ID
+        $userId = $this->userId;
+        $roleId = 0;   //未加入公司
+        if($userId > 0){
+            $userInfo = $userModel->getInfoById($userId);
+            if($userInfo->company_id > 0){
+                $companyInfo = $companyModel->where(['id'=>$userInfo->company_id,'is_deleted'=>0])->find();
+                if($companyInfo){
+                    if($userId != $companyInfo->responsible_user_id){
+                        $roleId = 1; //公司管理员
+                    }else{
+                        $roleId = 2; //公司非管理员
+                    }
+                }
+            }
+        }
+        return ['status' => 0, 'data' => ['roleId' => intval($roleId)], 'msg' => ''];
+    }
+
 
     /**
      * @desc 添加收货人地址
