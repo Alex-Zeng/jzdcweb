@@ -32,8 +32,8 @@
                                     <select class="form-control" name="status"  placeholder="认证状态">
                                         <option  {if $status eq 0}selected{/if} value="0" >全部审核状态</option>
                                         <option  {if $status eq 1}selected{/if} value="1">待审核</option>
-                                        <option  {if $status eq 2}selected{/if} value="2">已通过</option>
-                                        <option  {if $status eq 3}selected{/if} value="3">已拒绝</option>
+                                        <option  {if $status eq 3}selected{/if} value="3">已通过</option>
+                                        <option  {if $status eq 2}selected{/if} value="2">已拒绝</option>
                                     </select>
                                 </div> &nbsp;&nbsp;
                                 <div class="input-group" style="min-width: 280px">
@@ -73,7 +73,7 @@
                                 <td>{$company.last_modified_user}</td>
                                 <td>{:date('Y-m-d',$company.last_modified_time)}</td>
                                 <td>{$company.description}</td>
-                                <td>{:getCertificationStatus($company.state)} </td>
+                                <td>{:getCertificationStatusNew($company.state)} </td>
                                 <td>
                                     <a href="{:url('view','id='.$company.id)}"  target="_blank" class="btn btn-sm btn-primary">详情</a>
                                     <a href="javascript:void(0)"  class="btn btn-sm btn-danger"  data-id="{$company.id}" data-toggle="modal"   data-target="#refuse-modal">拒绝</a>
@@ -194,7 +194,7 @@
                     dataType: 'json',
                     success: function (data) {
                         if (data.status == 0) {
-                            window.location.reload();
+                          //  window.location.reload();
                         } else {
                             alert(data.msg);
                         }
