@@ -42,6 +42,27 @@ function getVerificationCode($length = 4){
 
 }
 
+
+/**
+ * [getInvitationCode 邀请码]
+ * @param  integer $length [邀请码的长度]
+ * @return [string]          
+ */
+function getInvitationCode($length = 6){
+    $flag = true;
+    $code = '';
+    while($flag){
+        $string = str_shuffle('0123456789ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz');
+        $code = substr($string, 0,6);
+        $EntCode = new app\common\model\EntCode();
+        if($EntCode->where(['code'=>$code])->count()==0){
+            $flag = false;    
+            break;
+        }
+    }
+    return $code;
+}
+
 /**
  * @desc 验证手机号
  * @param $phone

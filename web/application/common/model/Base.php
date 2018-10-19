@@ -2,6 +2,7 @@
 namespace app\common\model;
 
 use think\Model;
+use app\common\model\IndexUser;
 
 class Base extends Model{
 
@@ -52,8 +53,8 @@ class Base extends Model{
 	 */
 	public function tableDefaultValue($action='',$userId){
 		$return = [];
-		$MebUser = new MebUser();
-		$userName = $MebUser->where(['id'=>$userId])->value('user_name');
+		$IndexUser = new IndexUser();
+		$userName = $IndexUser->where(['id'=>$userId])->value('user_name');
 		switch ($action) {
 			case 'create':
 				$return = [
