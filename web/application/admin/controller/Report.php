@@ -9,6 +9,7 @@
 namespace app\admin\controller;
 
 
+use app\common\model\EntCompanyAudit;
 use app\common\model\FormUserCert;
 use app\common\model\IndexGroup;
 use app\common\model\MallOrder;
@@ -197,7 +198,7 @@ class Report extends Base{
      * @return mixed
      */
     public function company(){
-        $model = new FormUserCert();
+        $model = new EntCompanyAudit();
         $k = Request::instance()->get('k','','trim');
         $start = Request::instance()->get('start','');
         $end = Request::instance()->get('end','');
@@ -207,16 +208,16 @@ class Report extends Base{
         }
 
         if(isset($start) && $start && isset($end) && $end){
-            $where['b.reg_time'] = ['between',[strtotime($start),strtotime($end.' 23:59:59')]];
+            $where['a.last_modified_time'] = ['between',[strtotime($start)*1000,strtotime($end.' 23:59:59')*1000]];
         }elseif (isset($start) && $start){
-            $where['b.reg_time'] = ['gt',strtotime($start)];
+            $where['a.last_modified_time'] = ['gt',strtotime($start)*1000];
         }elseif (isset($end) && $end){
-            $where['b.reg_time'] = ['lt',strtotime($end.' 23:59:59')];
+            $where['a.last_modified_time'] = ['lt',strtotime($end.' 23:59:59')*1000];
         }
 
 
-        $fields = ['a.*','b.username','b.phone','b.reg_time','b.contact'];
-        $rows = $model->alias('a')->join(config('prefix').'index_user b','a.writer=b.id','left')->where($where)->field($fields)->order('a.write_time','desc')->paginate(20,false,['query'=>request()->param()]);
+        $fields = ['a.*','b.username','b.phone','a.last_modified_time','b.contact'];
+        $rows = $model->alias('a')->join(config('prefix').'index_user b','a.last_modified_user_id=b.id','left')->where($where)->field($fields)->order('a.last_modified_time','desc')->paginate(20,false,['query'=>request()->param()]);
 
         $this->assign('k',$k);
         $this->assign('list',$rows);

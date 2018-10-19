@@ -23,6 +23,6 @@ class EntCompanyAudit extends Base
      * @return string
      */
     public static function getFormatImg($path){
-        return config('jzdc_domain').'/web/public/uploads/company_cert/'.$path;
+        return $path ? config('jzdc_domain').'/web/public/uploads/company_cert/'.$path : '';
     }
 }
