@@ -9,8 +9,10 @@
 namespace app\api\controller;
 
 
+use app\common\model\EntCode;
 use app\common\model\EntCompany;
 use app\common\model\EntCompanyAudit;
+use app\common\model\EntOrganization;
 use app\common\model\IndexUser;
 use sms\Yunpian;
 use think\Request;
@@ -152,10 +154,21 @@ class CompanyAudit extends Base
 
         $model = new EntCompanyAudit();
         $userModel = new IndexUser();
+        $companyModel = new EntCompany();
         //查询用户数据
         $userInfo = $userModel->getInfoById($this->userId);
         //查询当前数据
         $companyAuditInfo = $model->where(['id'=> $id])->find();
+
+        //
+        $companyIds = [];
+        if($companyAuditInfo){
+            $companyIds[] = $companyAuditInfo->company_id;
+        }
+        $exit = $companyModel->where(['id'=>['not in',$companyIds],'company_name'=>$companyName,'audit_state'=>EntCompany::STATE_PASS])->find();
+        if($exit){
+            return ['status'=>1,'data'=>[],'msg'=>'企业名称已经存在'];
+        }
 
         $data = [
             'edit_time' => time(),
@@ -226,9 +239,21 @@ class CompanyAudit extends Base
         if($auth){
             return $auth;
         }
+        //
+        $codeModel = new EntCode();
+        $companyModel = new EntCompany();
+        $origanizationModel = new EntOrganization();
 
+        //验证邀请码
+        $codeInfo = $codeModel->where(['code'=>$code,'used'=>0])->find();
+        if(!$codeInfo){
+            return ['status'=>1,'data'=>[],'msg'=>'无效验证码'];
+        }
 
+        $companyInfo = $companyModel->where(['id'=>$codeInfo->company_id])->find();
+        $origanizationInfo = $origanizationModel->where(['id'=>$codeInfo->organization_id])->find();
 
+        return ['status'=>0,'data'=>['companyName'=>$companyInfo ? $companyInfo->company_name : '','organizationName'=>$origanizationInfo ? $origanizationInfo->org_name : '']];
     }
 
     /**
@@ -245,11 +270,22 @@ class CompanyAudit extends Base
         if($auth){
             return $auth;
         }
-
+        //
+        $codeModel = new EntCode();
+        $userModel = new IndexUser();
         //验证邀请码
+        $codeInfo = $codeModel->where(['code'=>$code,'used'=>0])->find();
+        if(!$codeInfo){
+            return ['status'=>1,'data'=>[],'msg'=>'无效验证码'];
+        }
 
+        //加入该企业
+        $result = $userModel->save(['company_id'=>$codeInfo->company_id,'organization_id'=>$codeInfo->organization_id],['id'=>$this->userId]);
+        if($result !== false){
+            return ['status'=>0,'data'=>[],'msg'=>'成功加入该企业'];
+        }
 
-
+        return ['status'=>1,'data'=>[],'msg'=>'失败加入该企业'];
     }
 
 }
