@@ -372,5 +372,139 @@ class Company extends Base
         }
     }
 
+    /**
+     * [userAdd 用户添加]
+     * @return [type] [description]
+     */
+    public function userAdd(){
+        //验证用户是否登录及管理员权限
+        if ($auth = $this->auth()) {
+         return $auth;
+        }
+        $companyId = $this->checkCompanyAdmin();
+        if(!$companyId){
+            return ['status'=>1,'data'=>$data,'msg'=>'本操作需管理员权限'];;
+        }
 
+        //获取参数
+        $phone = input('post.phone','','trim');
+        $userName = input('post.userName','','trim,htmlspecialchars');
+        $password = input('post.password','','trim');
+        $passwordConfirm = input('post.passwordConfirm','','trim');
+        $organizationId = input('post.organizationId',0,'intval');
+        $remarks = input('post.remarks','','trim');
+
+        //验证
+        if(!$phone){
+            return  ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
+        }
+        if(!checkPhone($phone)){
+            return  ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
+        }
+        if(!$userName){
+            return ['status'=>1,'data'=>[],'msg' => '用户名不能为空'];
+        }
+        if(checkEmail($userName)){
+            return ['status'=>1,'data'=>[],'msg' => '用户名不能为邮箱'];
+        }
+        if(checkPhone($userName)){
+            return ['status'=>1,'data'=>[],'msg' => '用户名不能为手机号'];
+        }
+        if(!$password){
+            return ['status'=>1,'data'=>[],'msg' => '密码必须填写'];
+        }
+        if(!checkPassword($password)){
+            return ['status'=>1,'data'=>[],'msg'=>'密码必须为6-20位的数字和字母组合'];
+        }
+        if($password!=$passwordConfirm){
+            return ['status'=>1,'data'=>[],'msg' => '两次输入的密码不一致'];
+        }
+        if($organizationId==0){
+            return ['status'=>1,'data'=>[],'msg' => '部门未选择'];
+        }
+        if(mb_strlen($remarks,'utf8')>100){
+            return ['status'=>1,'data'=>[],'msg' => '备注长度不能超过100字符'];
+        }
+
+        //检查账号是否已注册
+        $IndexUser = new IndexUser();
+        $user = $IndexUser->getUserByPhone($phone);
+        if($user){
+            return ['status'=>1,'data'=>[],'msg'=>'手机号已注册'];
+        }
+
+        $u = $IndexUser->where(['username'=>$userName])->whereOr(['phone'=>$userName])->whereOr(['email'=>$userName])->find();
+        if(checkPhone($userName)){
+            return ['status'=>1,'data'=>[],'msg'=>'用户名不能为手机号码'];
+        }
+        if(checkEmail($userName)){
+            return ['status'=>1,'data'=>[],'msg'=>'用户名不能为邮箱'];
+        }
+        if($u){
+            return ['status'=>1,'data'=>[],'msg'=>'用户名称已注册'];
+        }
+
+        $EntOrganization = new EntOrganization();
+        if($EntOrganization->where(['company_id'=>$companyId,'id'=>$organizationId,'is_deleted'=>0])->count()==0){
+            return ['status'=>1,'data'=>[],'msg'=>'公司不存在该部门'];
+        }
+        //注册账户
+        $data = [
+            'username' => $userName,
+            'nickname' => $userName,
+            'company_id'=>$companyId,
+            'organization_id'=>$organizationId,
+            'phone' => $phone,
+            'password' => md5($password),
+            'reg_time' => time(),
+            'reg_ip' => request()->ip(),
+            'group' => 6,
+            'state' => 1
+        ];
+        if($IndexUser->data($data)->save()){
+            return ['status'=>0,'data'=>[],'msg'=>'添加成功'];
+        }else{
+            return ['status'=>1,'data'=>[],'msg'=>'添加失败'];
+        }
+    }
+
+    /**
+     * [getContactList 通讯录]
+     * @return [type] [description]
+     */
+    public function getContactList(){
+        //验证用户是否登录及管理员权限
+        if ($auth = $this->auth()) {
+         return $auth;
+        }
+        $companyId = $this->checkCompanyAdmin();
+        if(!$companyId){
+            return ['status'=>1,'data'=>$data,'msg'=>'本操作需管理员权限'];;
+        }
+
+        
+
+        $EntOrganization = new EntOrganization();
+        $data = $EntOrganization->alias('a')->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0,'b.phone'=>['<>','']])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','left')->field('a.org_name as organizationName,b.phone,b.username as userName')->order('org_name')->select();
+
+        //获取参数
+        $type = input('post.type','list','trim');
+        switch ($type) {
+            case 'object':
+                $arr = [];
+                $dt = [];
+                foreach ($data as $key => $val) {
+                    $arr[$val['organizationName']][] = ['phone'=>$val['phone'],'userName'=>$val['userName']];
+                }
+                foreach ($arr as $k => $v) {
+                    $dt[] = ['organizationName'=>$k,'staffList'=>$v];
+                }
+                return ['status'=>0,'data'=>$dt,'msg'=>'通讯录列表'];
+                break;
+            
+            default:
+                return ['status'=>0,'data'=>$data,'msg'=>'通讯录列表'];
+                break;
+        } 
+    }
 }
