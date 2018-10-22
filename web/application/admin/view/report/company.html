@@ -93,13 +93,13 @@
                                 <td>{$company.telephone}</td>
                                 <td>
                                     {if $company.last_modified_time gt 0}
-                                    {:date('Y-m-d',$company.last_modified_time)}
+                                    {:date('Y-m-d',$company.last_modified_time/1000)}
                                     {/if}
                                 </td>
                                 <td>{:getCertificationStatusNew($company.state)} </td>
                                 <td>
                                     {if $company.audit_time gt 0}
-                                    {:date('Y-m-d',$company.audit_time)}
+                                    {:date('Y-m-d',$company.audit_time / 1000)}
                                     {else /}
                                     {/if}
                                 </td>

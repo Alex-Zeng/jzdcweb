@@ -42,10 +42,10 @@
                             </thead>
                             <tbody>
                             {volist name='rows' id='row'}
-                            <tr  data-companyId="{$row.company_id}"  data-userId="{$row.userId}"  data-userName="{$row.user_name}" class="companyInfo"   {if $row.userId} style="cursor: pointer"  data-toggle="modal"   data-target="#manager-modal" {/if}    >
+                            <tr  data-companyId="{$row.company_id}"  data-userId="{$row.userId}"  data-userName="{$row.username}" class="companyInfo"   {if $row.userId} style="cursor: pointer"  data-toggle="modal"   data-target="#manager-modal" {/if}    >
                             <td>{$row.org_name}</td>
-                            <td>{$row.user_name}</td>
-                            <td>{$row.mobile}</td>
+                            <td>{$row.username}</td>
+                            <td>{$row.phone}</td>
                             </tr>
                             {/volist}
                             </tbody>
