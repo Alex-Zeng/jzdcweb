@@ -54,7 +54,7 @@ class Base extends Model{
 	public function tableDefaultValue($action='',$userId){
 		$return = [];
 		$IndexUser = new IndexUser();
-		$userName = $IndexUser->where(['id'=>$userId])->value('user_name');
+		$userName = $IndexUser->where(['id'=>$userId])->value('username');
 		switch ($action) {
 			case 'create':
 				$return = [
