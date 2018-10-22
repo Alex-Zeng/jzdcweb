@@ -60,8 +60,8 @@ class Company extends Base
 
     /**
      * [checkCompanyAdmin 检验操作者是否为公司管理员]
-     * @param  array  $data [array|string]
-     * @return [int]       [企业ID]
+     * @param  int  $companyId 
+     * @return [bool]       
      */
     public function checkCompanyAdmin($companyId){
         //获取用户ID
