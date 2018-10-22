@@ -9,6 +9,7 @@
 namespace app\admin\controller;
 
 
+use app\common\model\EntCompany;
 use app\common\model\EntCompanyAudit;
 use app\common\model\FormUserCert;
 use app\common\model\IndexGroup;
@@ -95,7 +96,7 @@ class Report extends Base{
      * @return mixed
      */
     public function supplier(){
-       return $this->roleReport(IndexGroup::GROUP_SUPPLIER);
+       return $this->roleReport(1);
     }
 
     /**
@@ -103,7 +104,7 @@ class Report extends Base{
      * @return mixed
      */
     public function buyer(){
-       return $this->roleReport(IndexGroup::GROUP_BUYER);
+       return $this->roleReport(2);
     }
 
     /**
@@ -143,15 +144,13 @@ class Report extends Base{
             $totalMoney = $model->where($where)->field(['sum(`actual_money`) AS money'])->find();
         }
 
-
         $rows = $model->where($where)->order('id','desc')->paginate(10,false,['query'=>request()->param()]);
-        $userModel = new IndexUser();
+        $companyModel = new EntCompany();
         $goodsModel = new MallOrderGoods();
         foreach($rows as &$row){
             $goodsRows = $goodsModel->where(['order_id'=>$row->id])->order('time','desc')->select();
-            $userInfo = $userModel->getInfoById($row->supplier);
-            $buyerInfo = $userModel->getInfoById($row->buyer_id);
-
+            $supplierInfo = $companyModel->getInfoById($row->supplier);
+            $buyerInfo = $companyModel->getInfoById($row->buyer_id);
             $total = 0;
             foreach ($goodsRows as & $goodsRow){
                 $productModel = new SmProduct();
@@ -176,8 +175,8 @@ class Report extends Base{
                     $supplierPayInfo[] = $payRow;
                 }
             }
-            $row['supplierName'] = $userInfo ? $userInfo->real_name : '';
-            $row['buyerName'] = $buyerInfo ? $buyerInfo->real_name : '';
+            $row['supplierName'] = $supplierInfo ? $supplierInfo->company_name : '';
+            $row['buyerName'] = $buyerInfo ? $buyerInfo->company_name : '';
             $row['buyerPayInfo'] = $buyerPayInfo;
             $row['supplierPayInfo'] = $supplierPayInfo;
         }
@@ -330,16 +329,16 @@ class Report extends Base{
         exit;
     }
 
-    protected function roleReport($role = IndexGroup::GROUP_SUPPLIER){
+    protected function roleReport($role = 1){
         $k = Request::instance()->get('k','','trim');
         $start = Request::instance()->get('start','');
         $end = Request::instance()->get('end','');
 
         //查询数据
         $model = new MallOrder();
-        $where = ['b.group'=> $role,'a.state'=>['neq',MallOrder::STATE_CLOSED]];
+        $where = ['a.state'=>['neq',MallOrder::STATE_CLOSED]];
         if($k){
-            $where['b.real_name'] = ['like','%'.$k.'%'];
+            $where['b.company_name'] = ['like','%'.$k.'%'];
         }
 
         if(isset($start) && $start && isset($end) && $end){
@@ -350,24 +349,24 @@ class Report extends Base{
             $where['a.add_time'] = ['lt',strtotime($end.' 23:59:59')];
         }
 
-        if($role == IndexGroup::GROUP_SUPPLIER){
-            $total = $model->alias('a')->join(['jzdc_index_user'=>'b'],'a.supplier=b.id')
-                ->field(['a.add_time','b.real_name','a.actual_money','a.supplier','count(*) as count','FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date','SUM(actual_money) as total_money'])
+        if($role == 1){  //供应商
+            $total = $model->alias('a')->join(['ent_company'=>'b'],'a.supplier=b.id')
+                ->field(['a.add_time','b.company_name','a.actual_money','a.supplier','count(*) as count','FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date','SUM(actual_money) as total_money'])
                 ->where($where) ->group('order_date,a.supplier')->count();
 
-            $rows = $model->alias('a')->join(['jzdc_index_user'=>'b'],'a.supplier=b.id')
+            $rows = $model->alias('a')->join(['ent_company'=>'b'],'a.supplier=b.id')
                 ->where($where) ->group('order_date,a.supplier')->order('order_date desc,supplier desc')
-                ->field(['a.add_time','b.real_name','a.actual_money','a.supplier','count(*) as count','FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date','SUM(actual_money) as total_money'])
+                ->field(['a.add_time','b.company_name','a.actual_money','a.supplier','count(*) as count','FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date','SUM(actual_money) as total_money'])
                 ->paginate(20,$total,['query'=>request()->param()]);
         }
-        if($role == IndexGroup::GROUP_BUYER){
-            $total = $model->alias('a')->join(['jzdc_index_user'=>'b'],'a.buyer_id=b.id')
-                ->field(['a.add_time','b.real_name','a.actual_money','a.buyer_id','count(*) as count','FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date','SUM(actual_money) as total_money'])
+        if($role == 2){ //采购商
+            $total = $model->alias('a')->join(['ent_company'=>'b'],'a.buyer_id=b.id')
+                ->field(['a.add_time','b.company_name','a.actual_money','a.buyer_id','count(*) as count','FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date','SUM(actual_money) as total_money'])
                 ->where($where) ->group('order_date,a.buyer_id')->count();
 
-            $rows = $model->alias('a')->join(['jzdc_index_user'=>'b'],'a.buyer_id=b.id')
+            $rows = $model->alias('a')->join(['ent_company'=>'b'],'a.buyer_id=b.id')
                 ->where($where) ->group('order_date,a.buyer_id')->order('order_date desc,buyer_id desc')
-                ->field(['a.add_time','b.real_name','a.actual_money','a.buyer_id','count(*) as count','FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date','SUM(actual_money) as total_money'])
+                ->field(['a.add_time','b.company_name','a.actual_money','a.buyer_id','count(*) as count','FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date','SUM(actual_money) as total_money'])
                 ->paginate(20,$total,['query'=>request()->param()]);
         }
 
@@ -397,7 +396,7 @@ class Report extends Base{
      * @throws \think\exception\DbException
      */
     public function supplier_export($start = '',$k = '',$end = ''){
-       $this->role_export(IndexGroup::GROUP_SUPPLIER,$start,$k,$end);
+       $this->role_export(1,$start,$k,$end);
     }
 
 
@@ -408,14 +407,14 @@ class Report extends Base{
      * @param string $end
      */
     public function buyer_export($start = '',$k = '', $end = ''){
-       $this->role_export(IndexGroup::GROUP_BUYER,$start,$k,$end);
+       $this->role_export(2,$start,$k,$end);
     }
 
     /**
      * @desc 企业认证数据导出
      */
     public function company_export($start = '',$k = '',$end = ''){
-        $model = new FormUserCert();
+        $model = new EntCompanyAudit();
 
         $where = [];
         if(isset($k) && $k){
@@ -423,15 +422,14 @@ class Report extends Base{
         }
 
         if(isset($start) && $start && isset($end) && $end){
-            $where['b.reg_time'] = ['between',[strtotime($start),strtotime($end.' 23:59:59')]];
+            $where['a.last_modified_time'] = ['between',[strtotime($start)*1000,strtotime($end.' 23:59:59')*1000]];
         }elseif (isset($start) && $start){
-            $where['b.reg_time'] = ['gt',strtotime($start)];
+            $where['a.last_modified_time'] = ['gt',strtotime($start)*1000];
         }elseif (isset($end) && $end){
-            $where['b.reg_time'] = ['lt',strtotime($end.' 23:59:59')];
+            $where['a.last_modified_time'] = ['lt',strtotime($end.' 23:59:59')*1000];
         }
 
-
-        $fields = ['a.*','b.username','b.phone','b.reg_time','b.contact'];
+        $fields = ['a.*','b.username','b.phone','a.last_modified_time','b.contact'];
 
         vendor('PHPExcel.PHPExcel');
         $objPHPExcel = new \PHPExcel();
@@ -440,20 +438,17 @@ class Report extends Base{
         $objPHPExcel->setActiveSheetIndex(0)
             ->setCellValue('A1', '序号')
             ->setCellValue('B1', '注册手机')
-            ->setCellValue('C1', '注册用户名')
+            ->setCellValue('C1', '认证用户名')
             ->setCellValue('D1', '企业名称')
-            ->setCellValue('E1', '认证类型')
-            ->setCellValue('F1', '注册时间')
-            ->setCellValue('G1', '法人代表')
-            ->setCellValue('H1', '联系人')
-            ->setCellValue('I1', '联系电话')
-            ->setCellValue('J1', '提交日期')
-            ->setCellValue('K1', '审核状态')
-            ->setCellValue('L1', '审核日期');
-
+            ->setCellValue('E1', '法人代表')
+            ->setCellValue('F1', '联系人')
+            ->setCellValue('G1', '联系电话')
+            ->setCellValue('H1', '提交日期')
+            ->setCellValue('I1', '提交日期')
+            ->setCellValue('J1', '审核日期');
 
         //查询数据
-        $total = $model->alias('a')->join(config('prefix').'index_user b','a.writer=b.id','left')->where($where)->count();
+        $total = $model->alias('a')->join(config('prefix').'index_user b','a.last_modified_user_id=b.id','left')->where($where)->count();
         $pageSize = 100;
         $page = ceil($total / $pageSize);
 
@@ -472,20 +467,18 @@ class Report extends Base{
 
         for ($i = 0; $i < $page; $i++) {
             $start = $pageSize * $i;
-            $rows = $model->alias('a')->join(config('prefix').'index_user b','a.writer=b.id','left')->where($where)->limit($start, $pageSize)->order('a.write_time', 'desc')->field($fields)->select();
+            $rows = $model->alias('a')->join(config('prefix').'index_user b','a.last_modified_user_id=b.id','left')->where($where)->limit($start, $pageSize)->order('a.last_modified_time', 'desc')->field($fields)->select();
             foreach ($rows as $row) {
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('A' . $counter, $counter-1);
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('B'.$counter,$row->phone);
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('C' . $counter, $row->username);
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('D' . $counter, $row->company_name);
-                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('E' . $counter, $row->reg_role);
-                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('F' . $counter, $row->reg_time >0 ? date('Y-m-d',$row->reg_time) : '');
-                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('G' . $counter, $row->legal_representative);
-                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('H' . $counter, $row->contact);
-                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('I' . $counter, $row->ent_phone);
-                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('J' . $counter, $row->edit_time >0 ? date('Y-m-d',$row->edit_time) : '');
-                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('K' . $counter,    $row->status == 1 ? '待审核': ($row->status == 2 ? '已通过': '已拒绝'));
-                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('L' . $counter,   $row->audit_time >0 ? date('Y-m-d',$row->audit_time) : '');
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('E' . $counter, $row->legal_representative);
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('F' . $counter, $row->contact);
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('G' . $counter, $row->telephone);
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('H' . $counter, $row->last_modified_time > 0 ? date('Y-m-d',$row->last_modified_time / 1000) : '');
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('I' . $counter, $row->state == 1 ? '待审核': ($row->state == 3 ? '已通过': '已拒绝'));
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('J' . $counter, $row->audit_time >0 ? date('Y-m-d',$row->audit_time /1000) : '');
                 $counter++;
                 unset($goodsRows);
                 unset($rows);
@@ -504,12 +497,12 @@ class Report extends Base{
     }
 
 
-    protected function role_export($role = IndexGroup::GROUP_SUPPLIER,$start,$k,$end){
+    protected function role_export($role = 1,$start,$k,$end){
         //查询数据
         $model = new MallOrder();
-        $where = ['b.group'=>$role,'a.state'=>['neq',MallOrder::STATE_CLOSED]];
+        $where = ['a.state'=>['neq',MallOrder::STATE_CLOSED]];
         if($k){
-            $where['b.real_name'] = ['like','%'.$k.'%'];
+            $where['b.company_name'] = ['like','%'.$k.'%'];
         }
 
         if(isset($start) && $start && isset($end) && $end){
@@ -527,19 +520,19 @@ class Report extends Base{
         $objPHPExcel->setActiveSheetIndex(0)
             ->setCellValue('A1', '序号')
             ->setCellValue('B1', '日期')
-            ->setCellValue('C1',  $role == IndexGroup::GROUP_SUPPLIER ?'供应商名称' : '采购商名称')
+            ->setCellValue('C1',  $role == 1 ?'卖家' : '买家')
             ->setCellValue('D1', '交易订单笔数')
             ->setCellValue('E1', '交易金额');
 
         //查询数据
-        if($role == IndexGroup::GROUP_SUPPLIER){
-            $total =$model->alias('a')->join(['jzdc_index_user'=>'b'],'a.supplier=b.id')
-                ->field(['a.add_time','b.real_name','a.actual_money','a.supplier','count(*) as count','FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date','SUM(actual_money) as total_money'])
+        if($role == 1){
+            $total =$model->alias('a')->join(['ent_company'=>'b'],'a.supplier=b.id')
+                ->field(['a.add_time','b.company_name','a.actual_money','a.supplier','count(*) as count','FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date','SUM(actual_money) as total_money'])
                 ->where($where) ->group('order_date,a.supplier')->count();
         }
-        if($role == IndexGroup::GROUP_BUYER){
-            $total =$model->alias('a')->join(['jzdc_index_user'=>'b'],'a.buyer_id=b.id')
-                ->field(['a.add_time','b.real_name','a.actual_money','a.buyer_id','count(*) as count','FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date','SUM(actual_money) as total_money'])
+        if($role == 2){
+            $total =$model->alias('a')->join(['ent_company'=>'b'],'a.buyer_id=b.id')
+                ->field(['a.add_time','b.company_name','a.actual_money','a.buyer_id','count(*) as count','FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date','SUM(actual_money) as total_money'])
                 ->where($where) ->group('order_date,a.buyer_id')->count();
         }
 
@@ -560,26 +553,26 @@ class Report extends Base{
 
         for ($i = 0; $i < $page; $i++) {
             $start = $pageSize * $i;
-            if($role == IndexGroup::GROUP_SUPPLIER) {
-                $rows = $model->alias('a')->join(['jzdc_index_user' => 'b'], 'a.supplier=b.id')
+            if($role == 1) {  //卖家
+                $rows = $model->alias('a')->join(['ent_company' => 'b'], 'a.supplier=b.id')
                     ->where($where)->group('order_date,a.supplier')->order('order_date desc,supplier desc')
                     ->limit($start, $pageSize)
-                    ->field(['a.add_time', 'b.real_name', 'a.actual_money', 'a.supplier', 'count(*) as count', 'FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date', 'SUM(actual_money) as total_money'])
+                    ->field(['a.add_time', 'b.company_name', 'a.actual_money', 'a.supplier', 'count(*) as count', 'FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date', 'SUM(actual_money) as total_money'])
                     ->select();
             }
 
-            if($role == IndexGroup::GROUP_BUYER) {
-                $rows = $model->alias('a')->join(['jzdc_index_user' => 'b'], 'a.buyer_id=b.id')
+            if($role == 2) {  //买家
+                $rows = $model->alias('a')->join(['ent_company' => 'b'], 'a.buyer_id=b.id')
                     ->where($where)->group('order_date,a.buyer_id')->order('order_date desc,buyer_id desc')
                     ->limit($start, $pageSize)
-                    ->field(['a.add_time', 'b.real_name', 'a.actual_money', 'a.buyer_id', 'count(*) as count', 'FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date', 'SUM(actual_money) as total_money'])
+                    ->field(['a.add_time', 'b.company_name', 'a.actual_money', 'a.buyer_id', 'count(*) as count', 'FROM_UNIXTIME(a.add_time, \'%Y-%m-%d\') as order_date', 'SUM(actual_money) as total_money'])
                     ->select();
             }
 
             foreach ($rows as $row) {
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('A' . $counter, $counter-1);
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('B'.$counter,$row->order_date);
-                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('C' . $counter, $row->real_name);
+                $objPHPExcel->setActiveSheetIndex(0)->setCellValue('C' . $counter, $row->company_name);
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('D' . $counter, $row->count);
                 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('E' . $counter, getFormatPrice($row->total_money));
 

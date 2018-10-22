@@ -8,6 +8,7 @@
 
 namespace app\admin\controller;
 
+use app\common\model\EntCompany;
 use app\common\model\IndexGroup;
 use app\common\model\IndexUser;
 use app\common\model\MallOrder;
@@ -71,12 +72,12 @@ class Order extends Base{
 
 
         $rows = $model->where($where)->order('id','desc')->paginate(10,false,['query'=>request()->param()]);
-        $userModel = new IndexUser();
         $goodsModel = new MallOrderGoods();
+        $companyModel = new EntCompany();
         foreach($rows as &$row){
             $goodsRows = $goodsModel->where(['order_id'=>$row->id])->order('time','desc')->select();
-            $userInfo = $userModel->getInfoById($row->supplier);
-            $buyerInfo = $userModel->getInfoById($row->buyer_id);
+            $supplierInfo = $companyModel->getInfoById($row->supplier);
+            $buyerInfo = $companyModel->getInfoById($row->buyer_id);
 
             $total = 0;
             foreach ($goodsRows as & $goodsRow){
@@ -102,8 +103,8 @@ class Order extends Base{
                     $supplierPayInfo[] = $payRow;
                 }
             }
-            $row['supplierName'] = $userInfo ? $userInfo->real_name : '';
-            $row['buyerName'] = $buyerInfo ? $buyerInfo->real_name : '';
+            $row['supplierName'] = $supplierInfo ? $supplierInfo->company_name : '';
+            $row['buyerName'] = $buyerInfo ? $buyerInfo->company_name : '';
             $row['buyerPayInfo'] = $buyerPayInfo;
             $row['supplierPayInfo'] = $supplierPayInfo;
 
@@ -142,8 +143,11 @@ class Order extends Base{
             $result = $model->save($data,['id'=>$id]);
             if($result == true){
                 if($accountPeriod == 1){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
+                    $companyModel = new EntCompany();
+                    $supplierCompanyInfo = $companyModel->getInfoById($row->supplier);
                     $userModel = new IndexUser();
-                    $user = $userModel->getInfoById($row->supplier);
+                    $supplierId = $supplierCompanyInfo->responsible_user_id;
+                    $user = $userModel->getInfoById($supplierId);
                     $yunpian = new Yunpian();
                     $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
 
@@ -151,14 +155,14 @@ class Order extends Base{
                     $orderMsgModel = new OrderMsg();
                     $content = "订单号：{$row->out_id}【{$row->goods_names}】工作人员已完成订单审核，下一步等待签约。";
                     //采购商
-                    $msgData = ['title'=>"待发货",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+                    $msgData = ['title'=>"待发货",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->created_user_id,'create_time'=>time()];
                     $orderMsgModel->save($msgData);
-                    $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+                    $userModel->where(['id'=>$row->created_user_id])->setInc('unread',1);
                     //供应商
-                    $msgData = ['title'=>"待发货",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
+                    $msgData = ['title'=>"待发货",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$supplierId,'create_time'=>time()];
                     $orderMsgModel = new OrderMsg();
                     $orderMsgModel->save($msgData);
-                    $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
+                    $userModel->where(['id'=>$supplierId])->setInc('unread',1);
                 }
                 return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
             }
@@ -170,15 +174,18 @@ class Order extends Base{
                 $orderMsgModel = new OrderMsg();
                 $content = "订单号：{$row->out_id}【{$row->goods_names}】工作人员已完成订单审核，下一步等待签约。";
                 //采购商
-                $msgData = ['title'=>"已核单",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+                $msgData = ['title'=>"已核单",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->created_user_id,'create_time'=>time()];
                 $orderMsgModel->save($msgData);
                 $userModel = new IndexUser();
-                $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+                $userModel->where(['id'=>$row->created_user_id])->setInc('unread',1);
                 //供应商
                 $msgData = ['title'=>"已核单",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
                 $orderMsgModel = new OrderMsg();
                 $orderMsgModel->save($msgData);
-                $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+                $companyModel = new EntCompany();
+                $supplierCompanyInfo = $companyModel->getInfoById($row->supplier);
+                $supplierId = $supplierCompanyInfo->responsible_user_id;
+                $userModel->where(['id'=>$supplierId])->setInc('unread',1);
                 return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
             }
         }
@@ -208,23 +215,27 @@ class Order extends Base{
         if($result == true){
             $userModel = new IndexUser();
             if($accountPeriod == 1){ //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
-                $user = $userModel->getInfoById($row->supplier);
+                $companyModel = new EntCompany();
+                $supplierCompanyInfo = $companyModel->getInfoById($row->supplier);
+                $supplierId = $supplierCompanyInfo->responsible_user_id;
+
+                $user = $userModel->getInfoById($supplierId);
                 $yunpian = new Yunpian();
                 $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
 
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();
                 $content = "订单号：{$row->out_id}【{$row->goods_names}】,现已完成签约，请尽快安排发货。";
-                $msgData = ['title'=>'待发货提醒','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
+                $msgData = ['title'=>'待发货提醒','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$supplierId,'create_time'=>time()];
                 $orderMsgModel->save($msgData);
-                $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
+                $userModel->where(['id'=>$supplierId])->setInc('unread',1);
             }else{
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();
                 $content = "订单号：{$row->out_id}【{$row->goods_names}】现已完成签约。";
-                $msgData = ['title'=>'订单已签约','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+                $msgData = ['title'=>'订单已签约','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->created_user_id,'create_time'=>time()];
                 $orderMsgModel->save($msgData);
-                $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+                $userModel->where(['id'=>$row->created_user_id])->setInc('unread',1);
             }
             return ['status'=>0,'data'=>[],'msg'=>'签约成功'];
         }
@@ -274,32 +285,41 @@ class Order extends Base{
             $userModel = new IndexUser();
             //通知供应商发货短信通知 ||查询供应商手机号,发送短信,并记录短信日志
             if($flag == 1){
-                $user = $userModel->getInfoById($row->supplier);
+
+                $companyModel = new EntCompany();
+                $supplierCompanyInfo = $companyModel->getInfoById($row->supplier);
+                $supplierId = $supplierCompanyInfo->responsible_user_id;
+                $user = $userModel->getInfoById($supplierId);
+
                 $yunpian = new Yunpian();
                 $yunpian->send($user->phone,['order_id'=>$row->out_id],Yunpian::TPL_ORDER_PENDING_SEND);
 
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();
                 $content = "订单号：{$row->out_id}【{$row->goods_names}】已完成签约，请尽快安排发货。";
-                $msgData = ['title'=>'待发货提醒','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
+                $msgData = ['title'=>'待发货提醒','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$supplierId,'create_time'=>time()];
                 $orderMsgModel->save($msgData);
-                $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
+                $userModel->where(['id'=>$supplierId])->setInc('unread',1);
             }
             if($flag == 3){
                  //更新店铺财务记录
-                   $financeModel = new MallShopFinance();
-                   $financeRow = $financeModel->where(['shop_id'=>$row->shop_id])->order('id','desc')->field(['after_money'])->find();
-                   $reason = "收到{$row->out_id}号订单费用{$row->actual_money}元";
-                   $beforeMoney  = $financeRow ? $financeRow->after_money : 0;
-                   $financeData = ['type'=>9,'time'=>time(),'money'=>$row->actual_money,'before_money'=>$beforeMoney,'after_money'=>$beforeMoney+$row->actual_money,'operator'=>getUserName(),'reason'=>$reason,'shop_id'=>$row->shop_id];
-                   $financeModel->save($financeData);
+//                   $financeModel = new MallShopFinance();
+//                   $financeRow = $financeModel->where(['shop_id'=>$row->shop_id])->order('id','desc')->field(['after_money'])->find();
+//                   $reason = "收到{$row->out_id}号订单费用{$row->actual_money}元";
+//                   $beforeMoney  = $financeRow ? $financeRow->after_money : 0;
+//                   $financeData = ['type'=>9,'time'=>time(),'money'=>$row->actual_money,'before_money'=>$beforeMoney,'after_money'=>$beforeMoney+$row->actual_money,'operator'=>getUserName(),'reason'=>$reason,'shop_id'=>$row->shop_id];
+//                   $financeModel->save($financeData);
+                $companyModel = new EntCompany();
+                $supplierCompanyInfo = $companyModel->getInfoById($row->supplier);
+                $supplierId = $supplierCompanyInfo->responsible_user_id;
+
 
                 //更新消息通知
                 $orderMsgModel = new OrderMsg();
                 $content = "订单号：{$row->out_id} 金额：{$row->actual_money},已完成付款。";
-                $msgData = ['title'=>"订单款已付",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
+                $msgData = ['title'=>"订单款已付",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$supplierId,'create_time'=>time()];
                 $orderMsgModel->save($msgData);
-                $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
+                $userModel->where(['id'=>$supplierId])->setInc('unread',1);
             }
             return ['status'=>0,'data'=>[],'msg'=>'成功核价'];
         }
@@ -330,14 +350,17 @@ class Order extends Base{
             $orderMsgModel = new OrderMsg();
             $content = "订单号：{$row->out_id}【{$row->goods_names}】已取消该笔订单。";
             //采购商
-            $msgData = ['title'=>"订单取消",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+            $msgData = ['title'=>"订单取消",'content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->created_user_id,'create_time'=>time()];
             $orderMsgModel->save($msgData);
             $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
             //供应商
-            $msgData['user_id'] = $row->supplier;
+            $companyModel = new EntCompany();
+            $supplierCompanyInfo = $companyModel->getInfoById($row->supplier);
+            $supplierId = $supplierCompanyInfo->responsible_user_id;
+            $msgData['user_id'] = $supplierId;
             $orderMsgModel = new OrderMsg();
             $orderMsgModel->save($msgData);
-            $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
+            $userModel->where(['id'=>$supplierId])->setInc('unread',1);
             return ['status'=>0,'data'=>[],'msg'=>'成功取消订单'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'失败取消订单'];
@@ -423,9 +446,9 @@ class Order extends Base{
             //更新消息通知
             $orderMsgModel = new OrderMsg();
             $content = "订单号：{$row->out_id} 金额：{$row->actual_money},已逾期支付，请尽快付款。";
-            $msgData = ['title'=>'逾期中','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+            $msgData = ['title'=>'逾期中','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->created_user_id,'create_time'=>time()];
             $orderMsgModel->save($msgData);
-            $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+            $userModel->where(['id'=>$row->created_user_id])->setInc('unread',1);
             return ['status'=>0,'data'=>[],'msg'=>'操作逾期成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'操作失败'];
@@ -486,6 +509,7 @@ class Order extends Base{
 
         $counter = 2;
         $userModel = new IndexUser();
+        $companyModel = new EntCompany();
         $goodsModel = new MallOrderGoods();
         $orderPayModel = new MallOrderPay();
 
@@ -505,8 +529,9 @@ class Order extends Base{
             $start = $pageSize * $i;
             $rows = $model->where($where)->limit($start, $pageSize)->order('add_time', 'desc')->select();
             foreach ($rows as $row) {
-                $buyerInfo = $userModel->getInfoById($row->buyer_id);
-                $supplier = $userModel->getInfoById($row->supplier);
+
+                $buyerInfo = $companyModel->getInfoById($row->buyer_id);
+                $supplier = $companyModel->getInfoById($row->supplier);
                 //查询订单商品
                 $goodsRows = $goodsModel->where(['order_id' => $row->id])->select();
                 $goodsCount = count($goodsRows);
@@ -529,9 +554,9 @@ class Order extends Base{
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('A' . $counter, date('Y-m-d H:i', $row->add_time));
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValueExplicit('B'.$counter,$row->out_id,\PHPExcel_Cell_DataType::TYPE_STRING);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('C' . $counter, getOrderState($row->state));
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('D' . $counter, $buyerInfo ? $buyerInfo->real_name : '');
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('E' . $counter, $buyerInfo ? $buyerInfo->nickname : '');
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('F' . $counter, $supplier ? $supplier->real_name : '');
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('D' . $counter, $buyerInfo ? $buyerInfo->company_name : '');
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('E' . $counter, $row->created_user);
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('F' . $counter, $supplier ? $supplier->company_name : '');
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('G' . $counter, $goodsRow->title);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('H' . $counter, $goodsRow->s_info);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('I' . $counter, $goodsRow->quantity);

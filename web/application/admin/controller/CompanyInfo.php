@@ -8,10 +8,9 @@
 
 namespace app\admin\controller;
 
-
 use app\common\model\EntCompany;
 use app\common\model\EntOrganization;
-use app\common\model\MebUser;
+use app\common\model\IndexUser;
 use think\Request;
 
 class CompanyInfo extends Base
@@ -26,7 +25,7 @@ class CompanyInfo extends Base
         $k = Request::instance()->get('k','');
 
         $model = new EntCompany();
-        $userModel = new MebUser();
+        $userModel = new IndexUser();
 
         $where = [];
         if($k){
@@ -43,15 +42,15 @@ class CompanyInfo extends Base
         $data = [];
         $rows = $model->where($where)->order(['id'=>'desc'])->paginate(null,false,['query'=>request()->param()]);
         foreach ($rows as $row){
-            $count = $userModel->where(['company_id'=>$row->id,'is_deleted'=>0])->count();
+            $count = $userModel->where(['company_id'=>$row->id])->count();
             $userInfo =  $userModel->getInfoById($row->responsible_user_id);
 
             $data[] = [
                 'companyId' => $row->id,
                 'companyName' => $row->company_name,
                 'memberCount' => $count,
-                'adminName' => $userInfo ? $userInfo->user_name : '未设置',
-                'adminPhone' => $userInfo ? $userInfo->mobile : '-'
+                'adminName' => $userInfo ? $userInfo->username : '未设置',
+                'adminPhone' => $userInfo ? $userInfo->phone : '-'
             ];
         }
 
@@ -77,10 +76,10 @@ class CompanyInfo extends Base
             $this->errorTips();
         }
         //
-        $field = ['a.id','a.company_id','a.org_name','b.id as userId','b.user_name','b.mobile'];
-        $where = ['a.company_id'=>$companyId,'a.is_deleted'=>0,'b.is_deleted'=>.0];
+        $field = ['a.id','a.company_id','a.org_name','b.id as userId','b.username','b.phone'];
+        $where = ['a.company_id'=>$companyId,'a.is_deleted'=>0];
         $rows = $orgModel->alias('a')
-                         ->join(['meb_user'=>'b'],'a.id=b.organization_id','left')
+                         ->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','left')
                          ->where($where)
                          ->field($field)
                          ->order(['a.id'=>'desc'])

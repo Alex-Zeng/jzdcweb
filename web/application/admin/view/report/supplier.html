@@ -50,7 +50,7 @@
                                 <div class="form-group">
                                     <label style="font-weight: normal;">供应商：</label>
                                     <div class="input-group" style="padding-right: 15px">
-                                        <input class="form-control form-control-navbar"  name="k" type="search"  value="" placeholder="" aria-label="Search">
+                                        <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="" aria-label="Search">
                                     </div>
                                 </div>
                                 <div class="input-group">
@@ -81,7 +81,7 @@
                             <tr>
                                 <td>{$key+1}</td>
                                 <td>{$service.order_date}</td>
-                                <td>{$service.real_name}</td>
+                                <td>{$service.company_name}</td>
                                 <td>{$service.count}</td>
                                 <td>{$service.total_money}</td>
                             </tr>
