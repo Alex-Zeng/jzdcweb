@@ -8,8 +8,8 @@
 
 namespace app\api\controller;
 
+use app\common\model\EntCompany;
 use app\common\model\IndexUser;
-use app\common\model\IndexGroup;
 use app\common\model\SmProduct;
 use app\common\model\SmProductSpec;
 use app\common\model\SmProductSpecAttrs;
@@ -62,9 +62,13 @@ class MallCart extends Base{
         if($auth){
             return $auth;
         }
-        //采购商权限
-        if($this->groupId != IndexGroup::GROUP_BUYER){
-            return ['status'=>1,'data'=>[],'msg'=>'没有权限操作'];
+        //采购权限
+        $userModel = new IndexUser();
+        $companyModel = new EntCompany();
+        $user = $userModel->getInfoById($this->userId);
+        $companyInfo = $companyModel->where(['id'=>$user->company_id])->find();
+        if($user->company_id == 0 || $companyInfo->audit_state != EntCompany::STATE_PASS){
+            return ['status'=>1,'data'=>[],'msg'=>'尚未加入企业或企业审核未通过，无法加入购物车'];
         }
 
         //查询商品是否存在
@@ -87,8 +91,7 @@ class MallCart extends Base{
         if($cartRow){  //存在更新数量
             $result = $cartModel->save(['quantity'=>$cartRow->quantity+$number,'price' => isset($specRow->price) ? $specRow->price : '0.00'],$where);
         }else{ //不存在插入数据
-            $userModel = new IndexUser();
-            $user = $userModel->getInfoById($this->userId);
+
             $data = [
                 'user_id' => $this->userId,
                 'username' => $user ? $user->username : '',
@@ -132,9 +135,14 @@ class MallCart extends Base{
         if($auth){
             return $auth;
         }
-        //采购商权限
-        if($this->groupId != IndexGroup::GROUP_BUYER){
-            return ['status'=>1,'data'=>[],'msg'=>'没有权限操作'];
+
+        //权限验证
+        $userModel = new IndexUser();
+        $companyModel = new EntCompany();
+        $user = $userModel->getInfoById($this->userId);
+        $companyInfo = $companyModel->where(['id'=>$user->company_id])->find();
+        if($user->company_id == 0 || $companyInfo->audit_state != EntCompany::STATE_PASS){
+            return ['status'=>1,'data'=>[],'msg'=>'尚未加入企业或企业审核未通过，无法加入购物车'];
         }
 
         $specMaps = [];
@@ -163,8 +171,6 @@ class MallCart extends Base{
             if($cartRow){  //存在更新数量
                 $result = $cartModel->save(['quantity'=>$cartRow->quantity+$specMap['quantity'],'price' => isset($specRow->price) ? $specRow->price : '0.00'],$where);
             }else{ //不存在插入数据
-                $userModel = new IndexUser();
-                $user = $userModel->getInfoById($this->userId);
                 $data = [
                     'user_id' => $this->userId,
                     'username' => $user ? $user->username : '',

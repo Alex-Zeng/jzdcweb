@@ -8,9 +8,6 @@
 namespace app\api\controller;
 
 
-
-
-use app\common\model\IndexGroup;
 use app\common\model\SmProduct;
 use app\common\model\SmProductSpec;
 use app\common\model\SmProductSpecAttrVal;
@@ -341,10 +338,6 @@ class Material extends Base{
         $auth = $this->auth();
         if($auth){
             return $auth;
-        }
-
-        if($this->groupId != IndexGroup::GROUP_BUYER){
-            return ['status'=>1,'data'=>'','msg'=>'没有权限操作'];
         }
 
         //查询物料规格数量

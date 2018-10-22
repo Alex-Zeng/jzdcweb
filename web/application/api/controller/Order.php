@@ -8,6 +8,7 @@
 namespace app\api\controller;
 
 use app\common\model\Counter;
+use app\common\model\EntCompany;
 use app\common\model\IndexGroup;
 use app\common\model\IndexUser;
 use app\common\model\IndexArea;
@@ -61,9 +62,13 @@ class Order extends Base{
         if($auth){
             return $auth;
         }
-        //权限
-        if($this->groupId != IndexGroup::GROUP_BUYER){
-            return ['status'=>1,'data'=>[],'msg'=>'没有权限下单'];
+        //权限验证
+        $userModel = new IndexUser();
+        $companyModel = new EntCompany();
+        $userInfo = $userModel->getInfoById($this->userId);
+        $companyInfo = $companyModel->where(['id'=>$userInfo->company_id])->find();
+        if($userInfo->company_id == 0 || $companyInfo->audit_state != EntCompany::STATE_PASS){
+            return ['status'=>1,'data'=>[],'msg'=>'尚未加入企业或企业审核未通过，无法下单'];
         }
 
         //根据购物清单分商家生成订单
@@ -78,7 +83,7 @@ class Order extends Base{
             foreach($detailRow['list'] as $detailList){
                  //验证商品是否存在
                 $product = $productModel->where(['id'=>$detailList['goodsId']])->find();
-                if(!$product){
+                if(!$product|| $product->supplier_id == $userInfo->company_id ){
                     continue;
                 }
                 //商品规格
@@ -195,9 +200,6 @@ class Order extends Base{
             array_pop($areaList);
         }
         $areaInfo = $areaList ?  implode(' ',array_reverse($areaList)) : '';
-
-        $userModel = new IndexUser();
-        $userInfo = $userModel->getInfoById($this->userId);
 
         //生成订单
         foreach ($orderList as $index => $order) {

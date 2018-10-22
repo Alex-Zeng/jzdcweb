@@ -12,7 +12,6 @@ use app\common\model\EmailCode;
 use app\common\model\EntCompany;
 use app\common\model\FormUserCert;
 use app\common\model\IndexArea;
-use app\common\model\IndexGroup;
 use app\common\model\IndexUser;
 use app\common\model\MallFavorite;
 use app\common\model\MallOrder;
@@ -367,9 +366,7 @@ class User extends Base
         if ($auth) {
             return $auth;
         }
-        if($this->groupId != IndexGroup::GROUP_SUPPLIER){
-            return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
-        }
+
         //
         $model = new MallOrder();
 
@@ -415,9 +412,7 @@ class User extends Base
             return $auth;
         }
         //
-        if($this->groupId != IndexGroup::GROUP_BUYER){
-            return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
-        }
+
         $model = new MallOrder();
         $condition = [MallOrder::STATE_REMITTANCE,MallOrder::STATE_ACCOUNT_PERIOD,MallOrder::STATE_OVERDUE];
         $payCount = $model->where(['buyer_id' => $this->userId])->whereIn('state',$condition)->count();
