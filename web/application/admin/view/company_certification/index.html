@@ -71,7 +71,11 @@
                                 <td>{$company.contact_phone}</td>
                                 <td>{$company.contacts}</td>
                                 <td>{$company.last_modified_user}</td>
-                                <td>{:date('Y-m-d',$company.last_modified_time)}</td>
+                                <td>
+                                    {if $company.last_modified_time gt 0}
+                                    {:date('Y-m-d',$company.last_modified_time/1000)}
+                                    {/if}
+                                </td>
                                 <td>{$company.description}</td>
                                 <td>{:getCertificationStatusNew($company.state)} </td>
                                 <td>
