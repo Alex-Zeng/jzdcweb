@@ -85,7 +85,7 @@ class MallOrder extends Model{
             $where['supplier'] = $companyId;
         }elseif ($merchantType == 2){
             $where['buyer_id'] = $companyId;
-            if($userId > 0){
+            if($userId > 0){   //查询当前用户
                 //  $where['']
             }
         }
