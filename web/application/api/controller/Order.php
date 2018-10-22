@@ -64,12 +64,13 @@ class Order extends Base{
         }
         //权限验证
         $userModel = new IndexUser();
-        $companyModel = new EntCompany();
-        $userInfo = $userModel->getInfoById($this->userId);
-        $companyInfo = $companyModel->where(['id'=>$userInfo->company_id])->find();
-        if($userInfo->company_id == 0 || $companyInfo->audit_state != EntCompany::STATE_PASS){
-            return ['status'=>1,'data'=>[],'msg'=>'尚未加入企业或企业审核未通过，无法下单'];
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
         }
+        $companyId = $pResult['data']['companyId'];
+        $userInfo = $userModel->getInfoById($this->userId);
+
 
         //根据购物清单分商家生成订单
         $goodsRows = [];
@@ -83,7 +84,7 @@ class Order extends Base{
             foreach($detailRow['list'] as $detailList){
                  //验证商品是否存在
                 $product = $productModel->where(['id'=>$detailList['goodsId']])->find();
-                if(!$product|| $product->supplier_id == $userInfo->company_id ){
+                if(!$product|| $product->supplier_id == $companyId ){
                     continue;
                 }
                 //商品规格
@@ -231,7 +232,9 @@ class Order extends Base{
                 'out_id' => $orderNo,
                 'supplier' => $index,
                 'buyer_comment' => $order['remark'],
-                'buyer_id' => $this->userId
+                'buyer_id' => $companyId,
+                'create_user_id' => $this->userId,
+                'create_user' => $userInfo ? $userInfo->username : ''
             ];
 
             $orderGoodsModel = new MallOrderGoods();
