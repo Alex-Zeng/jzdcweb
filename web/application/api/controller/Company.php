@@ -45,26 +45,36 @@ class Company extends Base
     }
 
     /**
-     * [checkCompanyAdmin 检验操作者是否为公司管理员]
-     * @param  array  $data [array|string]
-     * @return [int]       [企业ID]
+     * [getCompanyId 获取用户ID]
+     * @return [int]
      */
-    public function checkCompanyAdmin($data=[]){
+    public function getCompanyId(){
         //获取用户ID
         $userId = $this->userId;
 
         //获取用户对应的企业ID
         $IndexUser = new IndexUser();
         $companyId = $IndexUser->where(['id'=>$userId])->value('company_id');
-        
+        return $companyId;
+    }
+
+    /**
+     * [checkCompanyAdmin 检验操作者是否为公司管理员]
+     * @param  array  $data [array|string]
+     * @return [int]       [企业ID]
+     */
+    public function checkCompanyAdmin($companyId){
+        //获取用户ID
+        $userId = $this->userId;
+
         //获取企业的管理员并验证当前用户是否为管理员
         $EntCompany = new EntCompany();
         $responsibleUserId = $EntCompany->where(['id'=>$companyId])->value('responsible_user_id');
         if($responsibleUserId!=$userId){
-            return 0;
+            return false;
+        }else{
+            return true;
         }
-
-        return $companyId;
     }
 
     /**
@@ -76,9 +86,9 @@ class Company extends Base
         if ($auth = $this->auth()) {
             return $auth;
         }
-        $companyId = $this->checkCompanyAdmin();
-        if(!$companyId){
-            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];;
+        $companyId = $this->getCompanyId();
+        if($companyId==0){
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
         }
         
         $EntOrganization = new EntOrganization();
@@ -96,10 +106,14 @@ class Company extends Base
         if ($auth = $this->auth()) {
             return $auth;
         }
-        $companyId = $this->checkCompanyAdmin();
-        if(!$companyId){
+        $companyId = $this->getCompanyId();
+        if($companyId==0){
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+        }
+        if(!($this->checkCompanyAdmin($companyId))){
             return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];;
         }
+
 
         //获取参数并验证
         $organizationName = input('post.organizationName','','trim');
@@ -150,8 +164,11 @@ class Company extends Base
         if ($auth = $this->auth()) {
             return $auth;
         }
-        $companyId = $this->checkCompanyAdmin();
-        if(!$companyId){
+        $companyId = $this->getCompanyId();
+        if($companyId==0){
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+        }
+        if(!($this->checkCompanyAdmin($companyId))){
             return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];;
         }
 
@@ -187,9 +204,9 @@ class Company extends Base
         if ($auth = $this->auth()) {
             return $auth;
         }
-        $companyId = $this->checkCompanyAdmin();
-        if(!$companyId){
-            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];;
+        $companyId = $this->getCompanyId();
+        if($companyId==0){
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
         }
 
         //获取参数
@@ -211,9 +228,9 @@ class Company extends Base
         if ($auth = $this->auth()) {
             return $auth;
         }
-        $companyId = $this->checkCompanyAdmin();
-        if(!$companyId){
-            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];;
+        $companyId = $this->getCompanyId();
+        if($companyId==0){
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
         }
 
         //获取参数
@@ -242,8 +259,11 @@ class Company extends Base
         if ($auth = $this->auth()) {
             return $auth;
         }
-        $companyId = $this->checkCompanyAdmin();
-        if(!$companyId){
+        $companyId = $this->getCompanyId();
+        if($companyId==0){
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+        }
+        if(!($this->checkCompanyAdmin($companyId))){
             return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];;
         }
 
@@ -306,8 +326,11 @@ class Company extends Base
         if ($auth = $this->auth()) {
             return $auth;
         }
-        $companyId = $this->checkCompanyAdmin();
-        if(!$companyId){
+        $companyId = $this->getCompanyId();
+        if($companyId==0){
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+        }
+        if(!($this->checkCompanyAdmin($companyId))){
             return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];;
         }
         // dump($companyId);exit();
@@ -347,9 +370,12 @@ class Company extends Base
         if ($auth = $this->auth()) {
             return $auth;
         }
-        $companyId = $this->checkCompanyAdmin();
-        if(!$companyId){
-            return ['status'=>1,'data'=>$data,'msg'=>'本操作需管理员权限'];;
+        $companyId = $this->getCompanyId();
+        if($companyId==0){
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+        }
+        if(!($this->checkCompanyAdmin($companyId))){
+            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];;
         }
 
         //获取参数
@@ -374,6 +400,12 @@ class Company extends Base
 
     /**
      * [userAdd 用户添加]
+     * @param  [string] $phone [手机号]
+     * @param  [string] $userName [用户名]
+     * @param  [string] $password [密码]
+     * @param  [string] $passwordConfirm [确认密码]
+     * @param  [int] $organizationId [部门ID]
+     * @param  [string] $remarks [备注]
      * @return [type] [description]
      */
     public function userAdd(){
@@ -381,9 +413,12 @@ class Company extends Base
         if ($auth = $this->auth()) {
          return $auth;
         }
-        $companyId = $this->checkCompanyAdmin();
-        if(!$companyId){
-            return ['status'=>1,'data'=>$data,'msg'=>'本操作需管理员权限'];;
+        $companyId = $this->getCompanyId();
+        if($companyId==0){
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+        }
+        if(!($this->checkCompanyAdmin($companyId))){
+            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];;
         }
 
         //获取参数
@@ -470,6 +505,7 @@ class Company extends Base
 
     /**
      * [getContactList 通讯录]
+     * @param  [string] $type [获取数据的类型，默认值list，可选object]
      * @return [type] [description]
      */
     public function getContactList(){
@@ -477,15 +513,30 @@ class Company extends Base
         if ($auth = $this->auth()) {
          return $auth;
         }
-        $companyId = $this->checkCompanyAdmin();
-        if(!$companyId){
-            return ['status'=>1,'data'=>$data,'msg'=>'本操作需管理员权限'];;
+        $companyId = $this->getCompanyId();
+        if($companyId==0){
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
         }
 
-        
+        //获取参数
+        $organizationId = input('post.organizationId',0,'intval');
+        $userName = input('post.userName','','trim');
+        $phone = input('post.phone','','trim');
+        $where = [];
+        if($organizationId>0){
+            $where['a.id'] = $organizationId;
+        }
+        if($userName!=''){
+            $where['b.username'] = ['like','%'.$userName.'%'];
+        }
+        if($phone!=''){
+            $where['b.phone'] = $phone;
+        }else{
+            $where['b.phone'] = ['<>',''];
+        }
 
         $EntOrganization = new EntOrganization();
-        $data = $EntOrganization->alias('a')->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0,'b.phone'=>['<>','']])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','left')->field('a.org_name as organizationName,b.phone,b.username as userName')->order('org_name')->select();
+        $data = $EntOrganization->alias('a')->where($where)->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','left')->field('a.org_name as organizationName,b.phone,b.username as userName')->order('org_name')->select();
 
         //获取参数
         $type = input('post.type','list','trim');
