@@ -1113,7 +1113,7 @@ class User extends Base
             return $auth;
         }
         $model = new IndexUser();
-        $row = $model->getInfoById($this->userId);
+        $row = $model->getInfoById($this->user_id);
 
         $return = [
             'contact' => $row->contact,
@@ -1123,9 +1123,14 @@ class User extends Base
             'phone' => $row->phone,
             'email' => $row->email,
             'username' => $row->username,
-            'companyName' => $row->real_name
+            'companyName' => $row->real_name,
+            'isCompanyAdmin'=>0
         ];
-
+        if($row->company_id>0){
+            $EntCompany = new EntCompany();
+            $responsibleUserId = $EntCompany->where(['id'=>$row->company_id])->value('responsible_user_id');
+            $return['isCompanyAdmin'] = $row->id==$responsibleUserId?1:0;
+        }
         return ['status' => 0, 'data' => $return, 'msg' => ''];
     }
 
