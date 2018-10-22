@@ -58,9 +58,9 @@ class CompanyCertification  extends Base
 
         //格式化
         $row->business_licence_uri = $row->business_licence_uri ?  EntCompanyAudit::getFormatImg($row->business_licence_uri) : '';
-        $row->legal_repres_id_card_uri = $row->legal_repres_id_card_uri ?  EntCompanyAudit::getFormatImg($row->legal_repres_id_card_uri) : '';
+        $row->organization_code_uri = $row->organization_code_uri ?  EntCompanyAudit::getFormatImg($row->organization_code_uri) : '';
         $row->agent_id_card_uri = $row->agent_id_card_uri ? EntCompanyAudit::getFormatImg($row->agent_id_card_uri) : '';
-        $row->opening_permit_uri = $row->opening_permit_uri ? EntCompanyAudit::getFormatImg($row->opening_permit_uri) : '';
+        $row->tax_registration_uri = $row->tax_registration_uri ? EntCompanyAudit::getFormatImg($row->tax_registration_uri) : '';
         $row->power_attorney_uri = $row->power_attorney_uri ? EntCompanyAudit::getFormatImg($row->power_attorney_uri) : '';
         $this->assign('row',$row);
         return $this->fetch();
@@ -136,8 +136,8 @@ class CompanyCertification  extends Base
                 'contacts' => $row->contacts,
                 'contact_phone' => $row->contact_phone,
                 'legal_representative'=>$row->legal_representative,
-                'legal_repres_id_card_uri' => $row->legal_repres_id_card_uri,
-                'opening_permit_uri' => $row->opening_permit_uri,
+                'organization_code_uri' => $row->organization_code_uri,
+                'tax_registration_uri' => $row->tax_registration_uri,
                 'business_licence_uri' => $row->business_licence_uri,
                 'power_attorney_uri' => $row->power_attorney_uri,
                 'agent_id_card_uri' => $row->agent_id_card_uri,

@@ -90,13 +90,13 @@ class CompanyAudit extends Base
             'property' => $companyAuditInfo->enterprise_type,   //企业性质
             'isAgent' => $companyAuditInfo->agent_id_card_uri ? 1 : 0,
             'business' => $companyAuditInfo->business_licence_uri, //营业执照
-            'permitsAccount' => $companyAuditInfo->opening_permit_uri, //开户许可
-            'legalIdentityCard' => $companyAuditInfo->legal_repres_id_card_uri, //法人身份
             'agentIdentityCard' => $companyAuditInfo->agent_id_card_uri, //代办人身份
             'attorney' => $companyAuditInfo->power_attorney_uri,//委托书
+            'orgStructureCode' => $companyAuditInfo->organization_code_uri,   //组织机构代码
+            'taxRegistrationCert' => $companyAuditInfo->tax_registration_uri, //税务登记
             'businessPath' => EntCompanyAudit::getFormatImg($companyAuditInfo->business_licence_uri),
-            'permitsAccountPath' =>  EntCompanyAudit::getFormatImg($companyAuditInfo->opening_permit_uri),
-            'legalIdentityCardPath' =>EntCompanyAudit::getFormatImg($companyAuditInfo->legal_repres_id_card_uri),
+            'orgStructureCodePath' => EntCompanyAudit::getFormatImg($companyAuditInfo->organization_code_uri),
+            'taxRegistrationCertPath' => EntCompanyAudit::getFormatImg($companyAuditInfo->tax_registration_uri),
             'agentIdentityCardPath' => EntCompanyAudit::getFormatImg($companyAuditInfo->agent_id_card_uri),
             'attorneyPath' => EntCompanyAudit::getFormatImg($companyAuditInfo->power_attorney_uri),
             'refuseReason' => $companyAuditInfo->description
@@ -117,8 +117,8 @@ class CompanyAudit extends Base
         $capital = $request->post('capital', ''); //资金
         $detailAddress = $request->post('address', '','htmlspecialchars'); //住址
         $businessPath = $request->post('business', '');  //营业执照
-        $permitsAccounts = $request->post('permitsAccount'); //用户许可
-        $legalIdentityCard = $request->post('legalIdentityCard', ''); //法人身份证
+        $orgStructureCodePermits = $request->post('orgStructureCode', ''); //组织机构代码
+        $taxRegistrationCert = $request->post('taxRegistrationCert', ''); //税务登记
         $agentIdentityCard = $request->post('agentIdentityCard', '');//代理人身份证
         $powerOfAttorney = $request->post('attorney', ''); //代办人授权委托书
 
@@ -130,12 +130,6 @@ class CompanyAudit extends Base
         }
         if (!$businessPath) {
             return ['status' => 1, 'data' => [], 'msg' => '营业执照必须上传'];
-        }
-        if (!$permitsAccounts) {
-            return ['status' => 1, 'data' => [], 'msg' => '用户许可必须上传'];
-        }
-        if (!$legalIdentityCard) {
-            return ['status' => 1, 'data' => [], 'msg' => '法人身份证必须上传'];
         }
 
         if ($agent == 1) {
@@ -180,9 +174,9 @@ class CompanyAudit extends Base
             'enterprise_type' => $property,
             'reg_capital' => $capital,
             'legal_representative' => $representative,
-            'legal_repres_id_card_uri' => $legalIdentityCard,
+            'organization_code_uri' => $orgStructureCodePermits,
             'agent_id_card_uri' => $agentIdentityCard,
-            'opening_permit_uri' => $permitsAccounts,
+            'tax_registration_uri' => $taxRegistrationCert,
             'address' => $detailAddress,
             'power_attorney_uri' => $powerOfAttorney,
             'last_modified_user_id' => $this->userId,
@@ -214,6 +208,9 @@ class CompanyAudit extends Base
                 $yunPian = new Yunpian();
                 $yunPian->send($userInfo->phone, [], Yunpian::TPL_CERT_SUBMIT);
             }
+
+            //原数据表写入数据
+
 
             //发送邮件通知
             $emailStr = config('JZDC_OP_EMAIL');
