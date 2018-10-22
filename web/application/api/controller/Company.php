@@ -17,7 +17,6 @@ use app\common\model\EntOrganization;
 
 class Company extends Base
 {
-
     /**
      * @desc 获取企业用户的公司状态
      * @return array|void
@@ -60,7 +59,7 @@ class Company extends Base
 
     /**
      * [checkCompanyAdmin 检验操作者是否为公司管理员]
-     * @param  int  $companyId 
+     * @param[post][int]  $companyId 
      * @return [bool]       
      */
     public function checkCompanyAdmin($companyId){
@@ -79,6 +78,7 @@ class Company extends Base
 
     /**
      * [getOrganization 获取部门列表]
+     * @param[post][int]  $hasTotal [是否获取成员数量]
      * @return [type] [array]
      */
     public function getOrganization(){
@@ -90,15 +90,21 @@ class Company extends Base
         if($companyId==0){
             return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
         }
-        
+
+        $hasTotal = input('post.hasTotal',1,'intval');
         $EntOrganization = new EntOrganization();
-        $data = $EntOrganization->alias('a')->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','left')->field('a.id as organizationId,a.org_name as organizationName,count(b.id) as total')->group('a.id')->select();
+        if($hasTotal>0){
+            $data = $EntOrganization->alias('a')->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','left')->field('a.id as organizationId,a.org_name as organizationName,count(b.id) as total')->group('a.id')->select();
+        }else{
+            $data = $EntOrganization->alias('a')->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->field('a.id as organizationId,a.org_name as organizationName')->select();
+        }
+        
         return ['status'=>0,'data'=>$data,'msg'=>'部门列表'];
     }
 
     /**
      * [organizationAdd 部门添加]
-     * @param  [string] $organizationAdd [部门名称]
+     * @param[post][string] $organizationAdd [部门名称]
      * @return [type] [array]
      */
     public function organizationAdd(){
@@ -155,8 +161,8 @@ class Company extends Base
 
     /**
      * [organizationEdit 部门名称修改]
-     * @param  [int] $organizationId [部门ID]
-     * @param  [string] $organizationName [部门名称]
+     * @param[post][int] $organizationId [部门ID]
+     * @param[post][string] $organizationName [部门名称]
      * @return [type] [array]
      */
     public function organizationEdit(){
@@ -196,7 +202,7 @@ class Company extends Base
 
     /**
      * [organizationUser 获取部门成员]
-     * @param  [int] $organizationId [部门ID]
+     * @param[post][int] $organizationId [部门ID]
      * @return [type] [description]
      */
     public function getOrganizationStaff(){
@@ -220,7 +226,7 @@ class Company extends Base
 
     /**
      * [getStaffDetail 获取职员详情]
-     * @param  [int] $staffId [成员ID]
+     * @param[post][int] $staffId [成员ID]
      * @return [type] [array]
      */
     public function getStaffDetail(){
@@ -250,8 +256,8 @@ class Company extends Base
 
     /**
      * [staffAdd 职员添加]
-     * @param  [int] $organizationId [部门ID]
-     * @param  [string] $phone [手机号码]
+     * @param[post][int] $organizationId [部门ID]
+     * @param[post][string] $phone [手机号码]
      * @return [type] [array]
      */
     public function staffAdd(){
@@ -316,9 +322,9 @@ class Company extends Base
 
     /**
      * [staffEdit 职员修改]
-     * @param  [int] $organizationId [部门ID]
-     * @param  [int] $staffId [成员ID]
-     * @param  [string] $remarks [备注]
+     * @param[post][int] $organizationId [部门ID]
+     * @param[post][int] $staffId [成员ID]
+     * @param[post][string] $remarks [备注]
      * @return [type] [description]
      */
     public function staffEdit(){
@@ -362,7 +368,7 @@ class Company extends Base
 
     /**
      * [staffDelete 删除职员]
-     * @param  [int] $staffId [成员ID]
+     * @param[post][int] $staffId [成员ID]
      * @return [array] [返回值]
      */
     public function staffDelete(){
@@ -400,12 +406,12 @@ class Company extends Base
 
     /**
      * [userAdd 用户添加]
-     * @param  [string] $phone [手机号]
-     * @param  [string] $userName [用户名]
-     * @param  [string] $password [密码]
-     * @param  [string] $passwordConfirm [确认密码]
-     * @param  [int] $organizationId [部门ID]
-     * @param  [string] $remarks [备注]
+     * @param[post][string] $phone [手机号]
+     * @param[post][string] $userName [用户名]
+     * @param[post][string] $password [密码]
+     * @param[post][string] $passwordConfirm [确认密码]
+     * @param[post][int] $organizationId [部门ID]
+     * @param[post][string] $remarks [备注]
      * @return [type] [description]
      */
     public function userAdd(){
@@ -505,7 +511,7 @@ class Company extends Base
 
     /**
      * [getContactList 通讯录]
-     * @param  [string] $type [获取数据的类型，默认值list，可选object]
+     * @param[post][string] $type [获取数据的类型，默认值list，可选object]
      * @return [type] [description]
      */
     public function getContactList(){
