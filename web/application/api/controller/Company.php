@@ -525,24 +525,41 @@ class Company extends Base
         }
 
         //获取参数
+        $likeParam = input('post.likeParam','','trim');
         $organizationId = input('post.organizationId',0,'intval');
         $userName = input('post.userName','','trim');
         $phone = input('post.phone','','trim');
-        $where = [];
-        if($organizationId>0){
-            $where['a.id'] = $organizationId;
-        }
-        if($userName!=''){
-            $where['b.username'] = ['like','%'.$userName.'%'];
-        }
-        if($phone!=''){
-            $where['b.phone'] = $phone;
-        }else{
-            $where['b.phone'] = ['<>',''];
-        }
+        
+        if($likeParam!=''){
+            $whereOr["b.username"] = ["like","%".$likeParam."%"];
 
-        $EntOrganization = new EntOrganization();
-        $data = $EntOrganization->alias('a')->where($where)->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','left')->field('a.org_name as organizationName,b.phone,b.username as userName')->order('org_name')->select();
+            $EntOrganization = new EntOrganization();
+            $organizationIds = $EntOrganization->where(['is_deleted'=>0,'company_id'=>$companyId,'org_name'=>['like','%'.$likeParam.'%']])->column('id');
+            if(count($organizationIds)>0){
+                $whereOr['a.id'] = ['in',$organizationIds];
+            }
+
+            if(is_numeric($likeParam)){
+                $whereOr["b.phone"]=["like","%".$likeParam."%"];
+            }
+            
+            //使用闭包查询，匿名函数需借助use关键字来传参    
+            $data = $EntOrganization->alias('a')->where(function($query) use ($whereOr){
+            $query->whereOr($whereOr);})->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','right')->field('a.org_name as organizationName,b.phone,b.username as userName')->order('org_name')->select();
+        }else{
+            $where = [];
+            if($organizationId>0){
+                $where['a.id'] = $organizationId;
+            }
+            if($userName!=''){
+                $where['b.username'] = ['like','%'.$userName.'%'];
+            }
+            if($phone!=''){
+                $where['b.phone'] = $phone;
+            }
+            $EntOrganization = new EntOrganization();
+            $data = $EntOrganization->alias('a')->where($where)->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','right')->field('a.org_name as organizationName,b.phone,b.username as userName')->order('org_name')->select();
+        }
 
         //获取参数
         $type = input('post.type','list','trim');
