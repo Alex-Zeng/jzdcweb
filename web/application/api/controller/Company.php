@@ -228,7 +228,7 @@ class Company extends Base
         $data['organizationName'] = $organizationName;
         $data['organizationId'] = $organizationId;
 
-        return ['status'=>0,'data'=>$staffList,'msg'=>'成员列表'];
+        return ['status'=>0,'data'=>$data,'msg'=>'成员列表'];
     }
 
     /**
