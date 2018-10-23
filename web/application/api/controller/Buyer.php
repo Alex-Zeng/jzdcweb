@@ -82,11 +82,17 @@ class Buyer extends Base
         //根据用户ID进行查询
         $model = new MallOrder();
         $condition = [MallOrder::STATE_REMITTANCE,MallOrder::STATE_ACCOUNT_PERIOD,MallOrder::STATE_OVERDUE];
-        $payCount = $model->where(['buyer_id' => $companyId])->whereIn('state',$condition)->count();
-        $recieveNumber = $model->where(['buyer_id' => $companyId,'state' => MallOrder::STATE_RECEIVE])->count();
-        $pendingNumber = $model->where(['buyer_id' => $companyId,'state' => MallOrder::STATE_DELIVER])->count();
-        $serviceNumber = $model->where(['buyer_id'=> $companyId,'service_type'=>1])->count();
-        $moneyInfo = $model->where(['buyer_id'=>$companyId,'confirm_delivery_time'=>['gt',0]])->field(['sum(`actual_money`) as money'])->find();
+        $where = [];
+        $where['buyer_id'] = $companyId;
+        if($userId > 0){
+            $where['created_user_id'] = $userId;
+        }
+
+        $payCount = $model->where($where)->whereIn('state',$condition)->count();
+        $recieveNumber = $model->where($where)->where(['state' => MallOrder::STATE_RECEIVE])->count();
+        $pendingNumber = $model->where($where)->where(['state' => MallOrder::STATE_DELIVER])->count();
+        $serviceNumber = $model->where($where)->where(['service_type'=>1])->count();
+        $moneyInfo = $model->where($where)->where(['confirm_delivery_time'=>['gt',0]])->field(['sum(`actual_money`) as money'])->find();
         return [
             'status' => 0,
             'data' => [
@@ -134,11 +140,22 @@ class Buyer extends Base
         }
         $companyId = $pResult['data']['companyId'];
 
+        $companyModel = new EntCompany();
+        $companyInfo = $companyModel->getInfoById($companyId);
+        $userId = 0;
+        if($companyInfo->responsible_user_id != $this->userId){
+            $userId = $this->userId;
+        }
+
         $orderModel = new MallOrder();
         $orderGoodsModel = new MallOrderGoods();
 
         $where = '';
         $where.= 'buyer_id='.$companyId;
+        if($userId > 0){  //查询用户所下单
+            $where['created_user_id'] = $userId;
+        }
+
         //
         if($goodsName){
             $where .=' AND goods_names LIKE \'%'.addslashes($goodsName).'%\'';
@@ -153,7 +170,6 @@ class Buyer extends Base
             $where .= ' AND out_id LIKE \'%'.addslashes($orderNo).'%\'';
         }
 
-        $companyModel = new EntCompany();
         if($companyName){
             $companyRows = $companyModel->where(['real_name'=>['like','%'.addslashes($companyName).'%']])->find(['id'])->select();
             $companyIds = '';
@@ -477,6 +493,231 @@ class Buyer extends Base
         }
 
         return ['status'=>1,'data'=>[],'msg'=>'服务申请失败'];
+    }
+
+
+    /**
+     * @desc 导出订单
+     * @throws \PHPExcel_Exception
+     * @throws \PHPExcel_Reader_Exception
+     * @throws \PHPExcel_Writer_Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function export(Request $request){
+        $status = $request->post('status',-1,'intval');
+        $goodsName = $request->post('goodsName','','trim|addslashes');
+        $companyName = $request->post('companyName','','trim|addslashes');
+        $startDate = $request->post('startDate','','filterDate');
+        $endDate = $request->post('endDate','','filterDate');
+        $orderNo = $request->post('orderNo','','addslashes');
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        //权限验证
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
+        }
+        $companyId = $pResult['data']['companyId'];
+
+        $model = new MallOrder();
+
+        //判断是否为管理员
+        $companyModel = new EntCompany();
+        $companyInfo = $companyModel->getInfoById($companyId);
+        //是否为管理员
+        $userId = 0;
+        if($companyInfo->responsible_user_id != $this->userId){
+            $userId = $this->userId;
+        }
+
+        $where = '';
+        $where.= 'buyer_id='.$companyId;
+        if($userId > 0){
+            $where.=' created_user_id='.$userId;
+        }
+
+        //
+        if($goodsName){
+            $where .=' AND goods_names LIKE %'.$goodsName.'%';
+        }
+        if($startDate){
+            $where .=' AND add_time >'.strtotime($startDate);
+        }
+        if($endDate){
+            $where .=' and add_time <'.strtotime($endDate.' 23:59:59');
+        }
+        if($orderNo){
+            $where .= ' AND out_id LIKE \'%'.$orderNo.'%\'';
+        }
+
+        if($companyName){
+            $companyRows = $companyModel->where(['company_name'=>['like','%'.$companyName.'%']])->find(['id'])->select();
+            $companyIds = '';
+            foreach($companyRows as $companyRow){
+                $companyIds .= $companyRow->id.',';
+            }
+            $companyIds = $companyIds ? substr($companyIds,0,strlen($companyIds)-1) : $companyIds;
+            if($companyIds){
+                $where .=' supplier IN('.$companyIds.')';
+            }
+        }
+
+        if($status != '-1'){
+            switch ($status){
+                case 1:  //待确认
+                    $where .= ' AND state IN (0,1)';
+                    break;
+                case 2: //待付款
+                    $where .=' AND state IN (2,9,10) AND service_type IN (0,2)';
+                    break;
+                case 3: //待发货
+                    $where .=' AND state = 3';
+                    break;
+                case 4: //待收货
+                    $where .=' AND state=6 AND service_type IN(0,2)';
+                    break;
+                case 5: //订单关闭
+                    $where .=' AND state=4';
+                    break;
+                case 6: //售后处理
+                    $where .=' AND ( state IN(11,13) OR (state IN (6,9,10) AND service_type IN(1,2)))';
+                    break;
+                default:
+            }
+        }
+
+        vendor('PHPExcel.PHPExcel');
+        $objPHPExcel = new \PHPExcel();
+        $objPHPExcel->setActiveSheetIndex(0);
+        //设置表头
+        $objPHPExcel->setActiveSheetIndex(0)
+            ->setCellValue('A1', '下单时间')
+            ->setCellValue('B1', '订单号')
+            ->setCellValue('C1', '订单状态')
+            ->setCellValue('D1','采购商')
+            ->setCellValue('E1', '采购商联系人')
+            ->setCellValue('F1', '供应商')
+            ->setCellValue('G1', '商品名称')
+            ->setCellValue('H1','商品规格')
+            ->setCellValue('I1','数量')
+            ->setCellValue('J1','单价')
+            ->setCellValue('K1','小计')
+            ->setCellValue('L1','物料编号')
+            ->setCellValue('M1','物料规格')
+            ->setCellValue('N1','买家留言')
+            ->setCellValue('O1','合同编号')
+            ->setCellValue('P1','是否账期支付')
+            ->setCellValue('Q1','账期截止');
+
+        //查询数据
+        $total = $model->where($where)->count();
+
+        $pageSize = 100;
+        $page = ceil($total/$pageSize);
+
+        $counter = 2;
+        $goodsModel = new MallOrderGoods();
+        $objPHPExcel->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
+
+        //设置宽度
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('A')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('B')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('C')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('D')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('E')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('F')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('G')->setWidth(25);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('H')->setWidth(15);
+
+        for($i =0; $i < $page; $i++){
+            $start = $page*$i;
+            $rows = $model->where($where)->limit($start,$pageSize)->order('add_time','desc')->select();
+
+            //查询
+            $supplierIds = $buyerIds = [];
+            foreach($rows as $row){
+                $supplierIds[] = $row->supplier;
+                $buyerIds[] = $row->buyer_id;
+            }
+
+            $supplierInfos = $companyModel->where(['id'=>['in',$supplierIds]])->select();
+            $buyerInfos = $companyModel->where(['id'=>['in',$buyerIds]])->select();
+            $supplierMap = $buyerMap = [];
+            //转化为key => value
+            foreach ($supplierInfos as $supplierInfo){
+                $supplierMap[$supplierInfo->id] = $supplierInfo->company_name;
+            }
+            foreach($buyerInfos as $buyerInfo){
+                $buyerMap[$buyerInfo->id]['name'] = $buyerInfo ? $buyerInfo->company_name : '';
+                $buyerMap[$buyerInfo->id]['contact'] = $buyerInfo ? $buyerInfo->contacts : '';
+            }
+
+            foreach ($rows as $row){
+                //查询订单商品
+                $goodsRows = $goodsModel->where(['order_id'=>$row->id])->select();
+                $goodsCount = count($goodsRows);
+                $orderStart = $counter;
+                $orderEnd = $counter + $goodsCount -1;
+
+                //合并单元格
+                if($orderEnd > $orderStart){
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A'.$orderStart.':A'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$orderStart.':B'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('C'.$orderStart.':C'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$orderStart.':D'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('E'.$orderStart.':E'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$orderStart.':F'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('N'.$orderStart.':N'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('O'.$orderStart.':O'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('P'.$orderStart.':P'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('Q'.$orderStart.':Q'.$orderEnd);
+                }
+
+                foreach($goodsRows as $goodsRow){
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('A'.$counter, date('Y-m-d H:i',$row->add_time));
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValueExplicit('B'.$counter, $row->out_id,\PHPExcel_Cell_DataType::TYPE_STRING);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('C'.$counter, getOrderStatusInfo($row->state,$row->service_type));
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('D'.$counter, isset($buyerMap[$row->buyer_id]) ? $buyerMap[$row->buyer_id]['name'] : '');
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('E'.$counter,  isset($buyerMap[$row->buyer_id]) ? $buyerMap[$row->buyer_id]['contact'] : '');
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('F'.$counter, isset($supplierMap[$row->supplier]) ? $supplierMap[$row->supplier] : '');
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('G'.$counter, $goodsRow->title);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('H'.$counter, $goodsRow->s_info);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('I'.$counter, $goodsRow->quantity);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('J'.$counter, '¥'.$goodsRow->price);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('K'.$counter, '¥'.$goodsRow->quantity*$goodsRow->price);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('L'.$counter, $goodsRow->specifications_no);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('M'.$counter, $goodsRow->specifications_name);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('N'.$counter, $row->buyer_comment);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('O'.$counter, $row->contract_number);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('P'.$counter, $row->pay_date ? '是' : '否');
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('Q'.$counter, $row->pay_date ? substr($row->pay_date,0,10): '');
+
+                    $counter++;
+                }
+                unset($goodsRows);
+            }
+
+            unset($rows);
+        }
+
+        $filename = 'order_'.$this->userId.'_'.date('YmdHis',time()).'.xls';
+        $objPHPExcel->getActiveSheet()->setTitle('商品订单信息');
+
+        //设置商品
+        //生成excel文件
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+
+        //设置目录
+        $path = ROOT_PATH.'public/uploads/temp/';
+        if(!is_dir($path)){ mkdir($path,0777);}
+
+        $objWriter->save($path.$filename);
+        return ['status'=>0,'data'=>['url'=>config('jzdc_domain').'/web/public/uploads/temp/'.$filename],'msg'=>''];
     }
 
 

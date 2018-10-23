@@ -366,6 +366,19 @@ class Order extends Base{
         if($auth){
             return $auth;
         }
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
+        }
+        $companyId = $pResult['data']['companyId'];
+        //判断是否为管理员
+        $companyModel = new EntCompany();
+        $companyInfo = $companyModel->getInfoById($companyId);
+        //是否为管理员
+        $userId = 0;
+        if($companyInfo->responsible_user_id != $this->userId){
+            $userId = $this->userId;
+        }
 
         $orderModel = new MallOrder();
         $orderGoodsModel = new MallOrderGoods();
@@ -376,9 +389,12 @@ class Order extends Base{
 
         $where = '';
         if($this->groupId == IndexGroup::GROUP_BUYER){
-            $where.= 'buyer_id='.$this->userId;
+            $where.= 'buyer_id='.$companyId;
+            if($userId > 0){
+                $where .=' created_user_id='.$userId;
+            }
         }else{
-            $where .='supplier='.$this->userId;
+            $where .='supplier='.$companyId;
         }
         //
         if($goodsName){
@@ -436,11 +452,11 @@ class Order extends Base{
         foreach ($rows as &$row){
             $userInfo = [];
             if($this->groupId  == IndexGroup::GROUP_SUPPLIER){
-                $userInfo = $userModel->getInfoById($row->buyer_id);
+                $userInfo = $companyModel->getInfoById($row->buyer_id);
             }elseif ($this->groupId == IndexGroup::GROUP_BUYER){
-                $userInfo = $userModel->getInfoById($row->supplier);
+                $userInfo = $companyModel->getInfoById($row->supplier);
             }
-            $row['companyName']  = $userInfo ? $userInfo->real_name : '';
+            $row['companyName']  = $userInfo ? $userInfo->company_name : '';
             $row['groupId'] = $this->groupId;
             $row['money'] = getFormatPrice($row->actual_money);
             $row['orderDate'] = date('Y-m-d H:i:s',$row->add_time);
@@ -484,6 +500,13 @@ class Order extends Base{
         if($auth){
             return $auth;
         }
+        //权限验证
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
+        }
+        $companyId = $pResult['data']['companyId'];
+
         //订单号
         $model = new MallOrder();
         $where['out_id'] = $no;
@@ -493,9 +516,9 @@ class Order extends Base{
         }
 
         if($this->groupId == IndexGroup::GROUP_BUYER){
-            $where['buyer_id'] = $this->userId;
+            $where['buyer_id'] = $companyId;
         }else{
-            $where['supplier'] = $this->userId;
+            $where['supplier'] = $companyId;
         }
 
         $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','actual_money','goods_money','receiver_name','receiver_phone','receiver_detail','express_name','express_code','state','send_time','estimated_time','pay_date','out_id','buyer_comment','buyer_id','supplier','service_type'])->find();
@@ -504,11 +527,9 @@ class Order extends Base{
         }
 
         //采购商供应商
-        $userModel = new IndexUser();
-        $userInfo = [];
-
-        $supplierInfo = $userModel->getInfoById($row->supplier);
-        $buyerInfo = $userModel->getInfoById($row->buyer_id);
+        $companyModel = new EntCompany();
+        $sellerInfo = $companyModel->getInfoById($row->supplier);
+        $buyerInfo = $companyModel->getInfoById($row->buyer_id);
 
         //查询产品
         $goodsModel = new MallOrderGoods();
@@ -535,9 +556,9 @@ class Order extends Base{
         //express expressCode sendDate estimatedDate
         $data = [
             'orderNo' => $row->out_id,
-            'companyName' => $this->groupId == IndexGroup::GROUP_SUPPLIER ? ($supplierInfo ? $supplierInfo->real_name : '') : ($buyerInfo ? $buyerInfo->real_name : '') ,
-            'supplierName' => $supplierInfo ? $supplierInfo->real_name : '',
-            'buyerName' => $buyerInfo ? $buyerInfo->real_name : '',
+            'companyName' => $this->groupId == IndexGroup::GROUP_SUPPLIER ? ($sellerInfo ? $sellerInfo->company_name : '') : ($buyerInfo ? $buyerInfo->company_name : '') ,
+            'supplierName' => $sellerInfo ? $sellerInfo->company_name : '',
+            'buyerName' => $buyerInfo ? $buyerInfo->company_name : '',
             'groupId' => $this->groupId,
             'state' => $row->state,
             'money' => getFormatPrice($row->actual_money),
@@ -611,13 +632,19 @@ class Order extends Base{
         if($auth){
             return $auth;
         }
+        //权限验证
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
+        }
+        $companyId = $pResult['data']['companyId'];
 
         $model = new MallOrder();
         $where['out_id'] = $orderNo;
         if($this->groupId != IndexGroup::GROUP_SUPPLIER){
             return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
         }
-        $where['supplier'] = $this->userId;
+        $where['supplier'] = $companyId;
         $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','goods_names','state','pay_date','out_id','buyer_comment','buyer_id','supplier'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
@@ -637,19 +664,23 @@ class Order extends Base{
 
         $result = $model->save($data,$where);
         if($result !== false){
+
             //消息通知采购商
             $orderMsgModel = new OrderMsg();
             $userModel = new IndexUser();
+            $companyModel = new EntCompany();
+
             $content = "订单号：{$row->out_id}【{$row->goods_names}】供应商已经发货。";
-            $msgData = ['title'=>'订单已发货','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->buyer_id,'create_time'=>time()];
+            $msgData = ['title'=>'订单已发货','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->created_user_id,'create_time'=>time()];
             $orderMsgModel->save($msgData);
-            $userModel->where(['id'=>$row->buyer_id])->setInc('unread',1);
+            $userModel->where(['id'=>$row->created_user_id])->setInc('unread',1);
 
             //短信通知采购商
-            $buyerInfo = $userModel->getInfoById($row->buyer_id);
-            $supplierInfo = $userModel->getInfoById($row->supplier);
+            $buyerUserInfo = $userModel->getInfoById($row->created_user_id);
+            $sellerInfo = $companyModel->getInfoById($row->supplier);
+
             $yunpian = new Yunpian();
-            $yunpian->send($buyerInfo->phone,['order_id'=>$row->out_id,'express_code'=>$express_code,'express_name'=>$express_name,'supplier'=>$supplierInfo ? $supplierInfo->real_name : ''],Yunpian::TPL_ORDER_SEND);
+            $yunpian->send($buyerUserInfo->phone,['order_id'=>$row->out_id,'express_code'=>$express_code,'express_name'=>$express_name,'supplier'=>$sellerInfo ? $sellerInfo->company_name : ''],Yunpian::TPL_ORDER_SEND);
 
             return ['status'=>0,'data'=>[],'msg'=>'提交成功'];
         }
@@ -670,6 +701,13 @@ class Order extends Base{
         if($auth){
             return $auth;
         }
+        //权限验证
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
+        }
+        $companyId = $pResult['data']['companyId'];
+
         if(!$orderNo){
             return ['status'=>1,'data'=>[],'msg'=>'订单号不能为空'];
         }
@@ -678,6 +716,7 @@ class Order extends Base{
         }
         $model = new MallOrder();
         $where['out_id'] = $orderNo;
+        $where['buyer_id'] = $companyId;
         $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','goods_names','state','pay_date','out_id','buyer_comment','buyer_id','supplier','service_type','is_account_period'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
@@ -698,10 +737,13 @@ class Order extends Base{
             //消息通知
             $orderMsgModel = new OrderMsg();
             $userModel = new IndexUser();
+            $companyModel = new EntCompany();
+            $sellerInfo = $companyModel->getInfoById($row->supplier);
+
             $content = "订单号：{$row->out_id}【{$row->goods_names}】买家已经确认收货。";
-            $msgData = ['title'=>'买家已确认收货','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
+            $msgData = ['title'=>'买家已确认收货','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$sellerInfo->responsible_user_id,'create_time'=>time()];
             $orderMsgModel->save($msgData);
-            $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
+            $userModel->where(['id'=>$sellerInfo->responsible_user_id])->setInc('unread',1);
             return ['status'=>0,'data'=>[],'msg'=>'确认收货成功'];
         }
         return ['status'=>1,'data'=>0,'msg'=>'确认收货失败'];
@@ -725,6 +767,13 @@ class Order extends Base{
         if($auth){
             return $auth;
         }
+        //权限验证
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
+        }
+        $companyId = $pResult['data']['companyId'];
+
         if($this->groupId != IndexGroup::GROUP_BUYER){
             return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
         }
@@ -732,7 +781,7 @@ class Order extends Base{
         //查询数据
         $model = new MallOrder();
         $where['out_id'] = $orderNo;
-        $where['buyer_id'] = $this->userId;
+        $where['buyer_id'] = $companyId;
         $row = $model->where($where)->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
@@ -745,10 +794,13 @@ class Order extends Base{
         if($result !== false){
             $orderMsgModel = new OrderMsg();
             $userModel = new IndexUser();
+            $companyModel = new EntCompany();
+            $sellerInfo = $companyModel->getInfoById($row->supplier);
+
             $content = "订单号：{$row->out_id}【{$row->goods_names}】已取消该笔订单。";
-            $msgData = ['title'=>'订单取消','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->supplier,'create_time'=>time()];
+            $msgData = ['title'=>'订单取消','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$sellerInfo->responsible_user_id,'create_time'=>time()];
             $orderMsgModel->save($msgData);
-            $userModel->where(['id'=>$row->supplier])->setInc('unread',1);
+            $userModel->where(['id'=>$sellerInfo->responsible_user_id])->setInc('unread',1);
             return ['status'=>0,'data'=>[],'msg'=>'订单取消成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'订单取消失败'];
@@ -774,6 +826,13 @@ class Order extends Base{
         if($auth){
             return $auth;
         }
+        //权限验证
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
+        }
+        $companyId = $pResult['data']['companyId'];
+
         if($this->groupId != IndexGroup::GROUP_BUYER){
             return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
         }
@@ -781,7 +840,7 @@ class Order extends Base{
         //查询数据
         $model = new MallOrder();
         $where['out_id'] = $orderNo;
-        $where['buyer_id'] = $this->userId;
+        $where['buyer_id'] = $companyId;
         $row = $model->where($where)->field(['id','state',])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
@@ -831,7 +890,24 @@ class Order extends Base{
         if($auth){
             return $auth;
         }
+        //权限验证
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
+        }
+        $companyId = $pResult['data']['companyId'];
+
         $model = new MallOrder();
+
+        //判断是否为管理员
+        $companyModel = new EntCompany();
+        $companyInfo = $companyModel->getInfoById($companyId);
+        //是否为管理员
+        $userId = 0;
+        if($companyInfo->responsible_user_id != $this->userId){
+            $userId = $this->userId;
+        }
+
 
         if($this->groupId != IndexGroup::GROUP_BUYER && $this->groupId != IndexGroup::GROUP_SUPPLIER && $this->groupId != IndexGroup::GROUP_MEMBER){
             return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
@@ -839,9 +915,12 @@ class Order extends Base{
 
         $where = '';
         if($this->groupId == IndexGroup::GROUP_BUYER){
-            $where.= 'buyer_id='.$this->userId;
+            $where.= 'buyer_id='.$companyId;
+            if($userId > 0){
+                $where.=' created_user_id='.$userId;
+            }
         }else{
-            $where .='supplier='.$this->userId;
+            $where .='supplier='.$companyId;
         }
         //
         if($goodsName){
@@ -857,9 +936,8 @@ class Order extends Base{
             $where .= ' AND out_id LIKE \'%'.$orderNo.'%\'';
         }
 
-        $userModel = new IndexUser();
         if($companyName){
-            $companyRows = $userModel->where(['real_name'=>['like','%'.$companyName.'%']])->find(['id'])->select();
+            $companyRows = $companyModel->where(['company_name'=>['like','%'.$companyName.'%']])->find(['id'])->select();
             $companyIds = '';
             foreach($companyRows as $companyRow){
                 $companyIds .= $companyRow->id.',';
@@ -933,7 +1011,7 @@ class Order extends Base{
         $page = ceil($total/$pageSize);
 
         $counter = 2;
-        $userModel = new IndexUser();
+        $companyModel = new EntCompany();
         $goodsModel = new MallOrderGoods();
         $objPHPExcel->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
 
@@ -958,16 +1036,16 @@ class Order extends Base{
                 $buyerIds[] = $row->buyer_id;
             }
 
-            $supplierInfos = $userModel->where(['id'=>['in',$supplierIds]])->select();
-            $buyerInfos = $userModel->where(['id'=>['in',$buyerIds]])->select();
+            $supplierInfos = $companyModel->where(['id'=>['in',$supplierIds]])->select();
+            $buyerInfos = $companyModel->where(['id'=>['in',$buyerIds]])->select();
             $supplierMap = $buyerMap = [];
             //转化为key => value
             foreach ($supplierInfos as $supplierInfo){
-                $supplierMap[$supplierInfo->id] = $supplierInfo->real_name;
+                $supplierMap[$supplierInfo->id] = $supplierInfo->company_name;
             }
             foreach($buyerInfos as $buyerInfo){
-                $buyerMap[$buyerInfo->id]['name'] = $buyerInfo->real_name ? $buyerInfo->real_name : '';
-                $buyerMap[$buyerInfo->id]['contact'] = $buyerInfo->contact ? $buyerInfo->contact : '';
+                $buyerMap[$buyerInfo->id]['name'] = $buyerInfo->company_name ? $buyerInfo->company_name : '';
+                $buyerMap[$buyerInfo->id]['contacts'] = $buyerInfo->contacts ? $buyerInfo->contacts : '';
             }
 
             foreach ($rows as $row){

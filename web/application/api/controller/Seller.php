@@ -394,11 +394,11 @@ class Seller  extends Base
 
             $userModel = new IndexUser();
             $content = "订单号：{$row->out_id}【{$row->goods_names}】供应商已经发货。";
-            $msgData = ['title'=>'订单已发货','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$buyerInfo->responsible_user_id,'create_time'=>time()];
+            $msgData = ['title'=>'订单已发货','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$row->created_user_id,'create_time'=>time()];
 
             $orderMsgModel->save($msgData);
             $userModel->where(['id'=>$buyerInfo->responsible_user_id])->setInc('unread',1);
-            $userInfo = $userModel->getInfoById($buyerInfo->responsible_user_id);
+            $userInfo = $userModel->getInfoById($row->created_user_id);
 
             //短信通知买家管理员
             if($userInfo){
@@ -410,5 +410,214 @@ class Seller  extends Base
         }
         return ['status'=>1,'data'=>0,'msg'=>'提交失败'];
     }
+
+    /**
+     * @desc 卖家导出订单
+     * @throws \PHPExcel_Exception
+     * @throws \PHPExcel_Reader_Exception
+     * @throws \PHPExcel_Writer_Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function export(Request $request){
+        $status = $request->post('status',-1,'intval');
+        $goodsName = $request->post('goodsName','','trim|addslashes');
+        $companyName = $request->post('companyName','','trim|addslashes');
+        $startDate = $request->post('startDate','','filterDate');
+        $endDate = $request->post('endDate','','filterDate');
+        $orderNo = $request->post('orderNo','','addslashes');
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        //权限验证
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
+        }
+        $companyId = $pResult['data']['companyId'];
+
+        $model = new MallOrder();
+
+        //判断是否为管理员
+        $companyModel = new EntCompany();
+
+        $where = '';
+        $where .='supplier='.$companyId;
+        //
+        if($goodsName){
+            $where .=' AND goods_names LIKE %'.$goodsName.'%';
+        }
+        if($startDate){
+            $where .=' AND add_time >'.strtotime($startDate);
+        }
+        if($endDate){
+            $where .=' and add_time <'.strtotime($endDate.' 23:59:59');
+        }
+        if($orderNo){
+            $where .= ' AND out_id LIKE \'%'.$orderNo.'%\'';
+        }
+
+        if($companyName){
+            $companyRows = $companyModel->where(['company_name'=>['like','%'.$companyName.'%']])->find(['id'])->select();
+            $companyIds = '';
+            foreach($companyRows as $companyRow){
+                $companyIds .= $companyRow->id.',';
+            }
+            $companyIds = $companyIds ? substr($companyIds,0,strlen($companyIds)-1) : $companyIds;
+            if($companyIds){
+                $where .=' supplier IN('.$companyIds.')';
+            }
+        }
+
+        if($status != '-1'){
+            switch ($status){
+                case 1:  //待确认
+                    $where .= ' AND state IN (0,1)';
+                    break;
+                case 2: //待付款
+                    $where .=' AND state IN (2,9,10) AND service_type IN (0,2)';
+                    break;
+                case 3: //待发货
+                    $where .=' AND state = 3';
+                    break;
+                case 4: //待收货
+                    $where .=' AND state=6 AND service_type IN(0,2)';
+                    break;
+                case 5: //订单关闭
+                    $where .=' AND state=4';
+                    break;
+                case 6: //售后处理
+                    $where .=' AND ( state IN(11,13) OR (state IN (6,9,10) AND service_type IN(1,2)))';
+                    break;
+                default:
+            }
+        }
+
+        vendor('PHPExcel.PHPExcel');
+        $objPHPExcel = new \PHPExcel();
+        $objPHPExcel->setActiveSheetIndex(0);
+        //设置表头
+        $objPHPExcel->setActiveSheetIndex(0)
+            ->setCellValue('A1', '下单时间')
+            ->setCellValue('B1', '订单号')
+            ->setCellValue('C1', '订单状态')
+            ->setCellValue('D1','采购商')
+            ->setCellValue('E1', '采购商联系人')
+            ->setCellValue('F1', '供应商')
+            ->setCellValue('G1', '商品名称')
+            ->setCellValue('H1','商品规格')
+            ->setCellValue('I1','数量')
+            ->setCellValue('J1','单价')
+            ->setCellValue('K1','小计')
+            ->setCellValue('L1','买家留言')
+            ->setCellValue('M1','合同编号')
+            ->setCellValue('N1','是否账期支付')
+            ->setCellValue('O1','账期截止');
+
+        //查询数据
+        $total = $model->where($where)->count();
+
+        $pageSize = 100;
+        $page = ceil($total/$pageSize);
+
+        $counter = 2;
+        $companyModel = new EntCompany();
+        $goodsModel = new MallOrderGoods();
+        $objPHPExcel->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
+
+        //设置宽度
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('A')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('B')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('C')->setWidth(16);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('D')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('E')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('F')->setWidth(20);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('G')->setWidth(25);
+        $objPHPExcel->getActiveSheet(0)->getColumnDimension('H')->setWidth(15);
+
+        for($i =0; $i < $page; $i++){
+            $start = $page*$i;
+            $rows = $model->where($where)->limit($start,$pageSize)->order('add_time','desc')->select();
+
+            //查询
+            $supplierIds = $buyerIds = [];
+            foreach($rows as $row){
+                $supplierIds[] = $row->supplier;
+                $buyerIds[] = $row->buyer_id;
+            }
+
+            $supplierInfos = $companyModel->where(['id'=>['in',$supplierIds]])->select();
+            $buyerInfos = $companyModel->where(['id'=>['in',$buyerIds]])->select();
+            $supplierMap = $buyerMap = [];
+            //转化为key => value
+            foreach ($supplierInfos as $supplierInfo){
+                $supplierMap[$supplierInfo->id] = $supplierInfo->company_name;
+            }
+            foreach($buyerInfos as $buyerInfo){
+                $buyerMap[$buyerInfo->id]['name'] = $buyerInfo->company_name ? $buyerInfo->company_name : '';
+                $buyerMap[$buyerInfo->id]['contacts'] = $buyerInfo->contacts ? $buyerInfo->contacts : '';
+            }
+
+            foreach ($rows as $row){
+                //查询订单商品
+                $goodsRows = $goodsModel->where(['order_id'=>$row->id])->select();
+                $goodsCount = count($goodsRows);
+                $orderStart = $counter;
+                $orderEnd = $counter + $goodsCount -1;
+
+                //合并单元格
+                if($orderEnd > $orderStart){
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A'.$orderStart.':A'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$orderStart.':B'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('C'.$orderStart.':C'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$orderStart.':D'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('E'.$orderStart.':E'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$orderStart.':F'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('N'.$orderStart.':N'.$orderEnd);
+                    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('O'.$orderStart.':O'.$orderEnd);
+                }
+
+                foreach($goodsRows as $goodsRow){
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('A'.$counter, date('Y-m-d H:i',$row->add_time));
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValueExplicit('B'.$counter, $row->out_id,\PHPExcel_Cell_DataType::TYPE_STRING);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('C'.$counter, getOrderStatusInfo($row->state,$row->service_type));
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('D'.$counter, isset($buyerMap[$row->buyer_id]) ? $buyerMap[$row->buyer_id]['name'] : '');
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('E'.$counter,  isset($buyerMap[$row->buyer_id]) ? $buyerMap[$row->buyer_id]['contact'] : '');
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('F'.$counter, isset($supplierMap[$row->supplier]) ? $supplierMap[$row->supplier] : '');
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('G'.$counter, $goodsRow->title);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('H'.$counter, $goodsRow->s_info);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('I'.$counter, $goodsRow->quantity);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('J'.$counter, '¥'.$goodsRow->price);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('K'.$counter, '¥'.$goodsRow->quantity*$goodsRow->price);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('L'.$counter, $row->buyer_comment);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('M'.$counter, $row->contract_number);
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('N'.$counter, $row->pay_date ? '是' : '否');
+                    $objPHPExcel->setActiveSheetIndex(0) ->setCellValue('O'.$counter, $row->pay_date ? substr($row->pay_date,0,10): '');
+                    $counter++;
+                }
+                unset($goodsRows);
+            }
+
+            unset($rows);
+        }
+
+        $filename = 'order_'.$this->userId.'_'.date('YmdHis',time()).'.xls';
+        $objPHPExcel->getActiveSheet()->setTitle('商品订单信息');
+
+        //设置商品
+        //生成excel文件
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+
+        //设置目录
+        $path = ROOT_PATH.'public/uploads/temp/';
+        if(!is_dir($path)){ mkdir($path,0777);}
+
+        $objWriter->save($path.$filename);
+        return ['status'=>0,'data'=>['url'=>config('jzdc_domain').'/web/public/uploads/temp/'.$filename],'msg'=>''];
+    }
+
 
 }
