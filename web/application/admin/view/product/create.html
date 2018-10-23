@@ -36,7 +36,7 @@
                                         <div class="row">
                                           <select class="form-control col-md-6 select2" name="supplier_id">
                                                 {volist name=":getSupplierList()"  id='user'}
-                                                <option  value="{$user.id}">{$user.real_name}</option>
+                                                <option  value="{$user.id}">{$user.company_name}</option>
                                                 {/volist}
                                           </select>
                                         </div>

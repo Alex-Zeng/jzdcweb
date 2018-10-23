@@ -87,8 +87,11 @@ function getGoodsMallState($state = -1,$style = 0){
  * @throws \think\exception\DbException
  */
 function getSupplierList(){
-    $user = new \app\common\model\IndexUser();
-    $rows = $user->where(['group'=> 5])->field(['id','real_name'])->select();
+    $EntCompany = new \app\common\model\EntCompany();
+    $rows = $EntCompany->where(['is_deleted'=>0,'audit_state'=>3])->field('id,company_name')->select();
+    // 1.0.3不分供应商和采购商角色企业信息需从company表获取
+    // $user = new \app\common\model\IndexUser();
+    // $rows = $user->where(['group'=> 5])->field(['id','real_name'])->select();
     return $rows;
 }
 
