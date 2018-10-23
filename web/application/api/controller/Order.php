@@ -70,6 +70,9 @@ class Order extends Base{
         }
         $companyId = $pResult['data']['companyId'];
         $userInfo = $userModel->getInfoById($this->userId);
+        $companyModel = new EntCompany();
+        $buyerInfo = $companyModel->getInfoById($companyId);
+
 
 
         //根据购物清单分商家生成订单
@@ -214,7 +217,7 @@ class Order extends Base{
                 'goods_money' => $order['total_price'],
                 'actual_money' => $order['total_price'],
                 'cashier' => 'jzdc',
-                'buyer' => $userInfo ? $userInfo->username : '',
+                'buyer' => $buyerInfo ? $buyerInfo->company_name : '',
                 'add_time' => time(),
                 'received_money' => $order['total_price'],
                 'state' => MallOrder::STATE_PRICING,
@@ -249,7 +252,7 @@ class Order extends Base{
                 $returnGoodsList = [];
                 foreach ($order['list'] as $goodsList) {
                     $orderGoods[] = [
-                        'buyer' => $userInfo ? $userInfo->username : '',
+                        'buyer' => $buyerInfo ? $buyerInfo->company_name : '',
                         'order_id' => $orderModel->id,
                         'order_state' => MallOrder::STATE_PRICING,
                         'icon' => $goodsList['icon'],
@@ -285,7 +288,7 @@ class Order extends Base{
 
                 $result2 = $orderGoodsModel->insertAll($orderGoods);
                 if ($result2) {
-                    $supplerInfo = $userModel->getInfoById($index);
+                    $supplerInfo = $companyModel->getInfoById($index);
 
                     //返回数据
                     $return[] = [
@@ -294,7 +297,7 @@ class Order extends Base{
                         'date' => $order['date'],
                         'goods' => $returnGoodsList,
                         'remark' => $order['remark'],
-                        'supplierName' => $supplerInfo ? $supplerInfo->real_name : '',
+                        'supplierName' => $supplerInfo ? $supplerInfo->company_name : '',
                     ];
 
                     //保存用户最后一次商品规格物料并删除购物车
@@ -410,9 +413,9 @@ class Order extends Base{
             $where .= ' AND out_id LIKE \'%'.addslashes($orderNo).'%\'';
         }
 
-        $userModel = new IndexUser();
+        $companyModel = new EntCompany();
         if($companyName){
-            $companyRows = $userModel->where(['real_name'=>['like','%'.addslashes($companyName).'%']])->find(['id'])->select();
+            $companyRows = $companyModel->where(['company_name'=>['like','%'.addslashes($companyName).'%']])->find(['id'])->select();
             $companyIds = '';
             foreach($companyRows as $companyRow){
                 $companyIds .= $companyRow->id.',';
@@ -1171,12 +1174,12 @@ class Order extends Base{
             $supplierIds[] = $row->supplier;
         }
 
-        $userModel = new IndexUser();
-        $supplierInfos = $userModel->where(['id'=>['in',$supplierIds]])->field(['id','real_name'])->select();
+        $companyModel = new EntCompany();
+        $supplierInfos = $companyModel->where(['id'=>['in',$supplierIds]])->field(['id','company_name'])->select();
 
         $supplierMap = [];
         foreach ($supplierInfos as $supplierInfo){
-            $supplierMap[$supplierInfo->id] = $supplierInfo->real_name;
+            $supplierMap[$supplierInfo->id] = $supplierInfo->company_name;
         }
 
         $data = [];

@@ -10,6 +10,7 @@ namespace app\api\controller;
 
 use app\common\model\EmailCode;
 use app\common\model\EntCompany;
+use app\common\model\EntCompanyAudit;
 use app\common\model\FormUserCert;
 use app\common\model\IndexArea;
 use app\common\model\IndexUser;
@@ -662,6 +663,49 @@ class User extends Base
             $subject='集众电采平台系统认证通知';
             $content='现有用户提交企业认证申请，请及时跟进，谢谢。';
             SendMail($emailStr,$subject,$content);
+
+            ////////////////////////////////////写入新数据表//////////////////////////////////////////////
+            $companyAuditModel = new EntCompanyAudit();
+            if($userInfo->company_id > 0){  //更新
+                $data = [
+                    'company_name' => $companyName,
+                    'business_licence_uri' => $businessPath,
+                    'status' => EntCompanyAudit::STATE_PENDING,
+                    'enterprise_type' => $property,
+                    'reg_capital' => $capital,
+                    'legal_representative' => $representative,
+                    'organization_code_uri' => $orgStructureCodePermits,
+                    'agent_id_card_uri' => $agentIdentityCard,
+                    'tax_registration_uri' => $taxRegistrationCert,
+                    'address' => $detailAddress,
+                    'power_attorney_uri' => $powerOfAttorney,
+                    'last_modified_user_id' => $this->userId,
+                    'last_modified_user' => $userInfo->username,
+                    'last_modified_time' => microtime(true)*1000,
+                ];
+                $companyAuditModel->save($data,['company_id'=>$userInfo->company_id]);
+            }else{ //插入
+                $data = [
+                    'company_name' => $companyName,
+                    'business_licence_uri' => $businessPath,
+                    'status' => EntCompanyAudit::STATE_PENDING,
+                    'enterprise_type' => $property,
+                    'reg_capital' => $capital,
+                    'legal_representative' => $representative,
+                    'organization_code_uri' => $orgStructureCodePermits,
+                    'agent_id_card_uri' => $agentIdentityCard,
+                    'tax_registration_uri' => $taxRegistrationCert,
+                    'address' => $detailAddress,
+                    'power_attorney_uri' => $powerOfAttorney,
+                    'last_modified_user_id' => $this->userId,
+                    'last_modified_user' => $userInfo->username,
+                    'last_modified_time' => microtime(true)*1000,
+                    'created_user_id' => $this->userId,
+                    'created_user' => $userInfo->username,
+                    'created_time' => microtime(true)*1000
+                ];
+                $companyAuditModel->save($data);
+            }
 
             return ['status' => 0, 'data' => [], 'msg' => '已提交认证信息,等待审核...'];
         }

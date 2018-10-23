@@ -166,9 +166,6 @@ class CompanyAudit extends Base
         }
 
         $data = [
-            'edit_time' => time(),
-            'writer' => $this->userId,
-            'editor' => $this->userId,
             'company_name' => $companyName,
             'business_licence_uri' => $businessPath,
             'status' => EntCompanyAudit::STATE_PENDING,
