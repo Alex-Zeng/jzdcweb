@@ -10,9 +10,15 @@ namespace app\api\controller;
 
 
 use app\common\model\EntCompany;
+use app\common\model\IndexUser;
 use app\common\model\MallOrder;
+use app\common\model\MallOrderGoods;
+use app\common\model\MallOrderPay;
+use app\common\model\OrderMsg;
 use app\common\model\SmProduct;
 use app\common\model\SmProductSpec;
+use sms\Yunpian;
+use think\Request;
 
 class Seller  extends Base
 {
@@ -218,4 +224,191 @@ class Seller  extends Base
 
         return ['status'=>0,'data'=>['total'=>$count,'list'=>$rows],'msg'=>''];
     }
+
+
+    /**
+     * @desc 卖家详情
+     * @param Request $request
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function detail(Request $request){
+        $no = $request->post('no','');
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        //权限验证
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
+        }
+        $companyId = $pResult['data']['companyId'];
+
+        //订单号
+        $model = new MallOrder();
+        $where['out_id'] = $no;
+        $where['supplier'] = $companyId;
+
+
+        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','actual_money','goods_money','receiver_name','receiver_phone','receiver_detail','express_name','express_code','state','send_time','estimated_time','pay_date','out_id','buyer_comment','buyer_id','supplier','service_type'])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
+        }
+
+        //买家卖家企业信息
+        $companyModel = new EntCompany();
+        $sellerInfo = $companyModel->getInfoById($row->supplier);
+        $buyerInfo = $companyModel->getInfoById($row->buyer_id);
+
+        //查询产品
+        $goodsModel = new MallOrderGoods();
+        $productModel = new SmProduct();
+        $goodsRows = $goodsModel->alias('a')->join(['sm_product_spec'=>'b'],'a.goods_id=b.id','left')->where(['order_id'=>$row->id])
+            ->field(['a.id','a.title','a.price','a.quantity','a.unit','a.s_info','a.goods_id','a.specifications_no','a.specifications_name','a.service_type','b.spec_img_url'])->select();
+
+        foreach($goodsRows as &$goodsRow){
+            $goodsRow['quantity'] = intval($goodsRow->quantity);
+            if($goodsRow->spec_img_url){
+                $goodsRow['icon'] = SmProductSpec::getFormatImg($goodsRow->spec_img_url);
+            }else{
+                $product = $productModel->find(['id'=>$goodsRow->goods_id]);
+                $goodsRow['icon'] = SmProduct::getFormatImg($product->cover_img_url);
+            }
+            $goodsRow['price'] = getFormatPrice($goodsRow->price);
+            $goodsRow['specUnit'] = $goodsRow->unit;
+        }
+
+        //查询支付凭证
+        $payModel = new MallOrderPay();
+        $payRow = $payModel->where(['order_id'=>$row->id,'pay_type'=>['in',[3,4]]])->order('id','desc')->find();
+
+        //express expressCode sendDate estimatedDate
+        $data = [
+            'orderNo' => $row->out_id,
+            'companyName' => $sellerInfo ? $sellerInfo->company_name : '',
+            'supplierName' => $sellerInfo ? $sellerInfo->company_name : '',
+            'buyerName' => $buyerInfo ? $buyerInfo->company_name : '',
+            'groupId' => $this->groupId,
+            'state' => $row->state,
+            'money' => getFormatPrice($row->actual_money),
+            'goods_money'=> getFormatPrice($row->goods_money),
+            'name' => $row->receiver_name,
+            'phone' => $row->receiver_phone,
+            'address' => $row->receiver_area_name. $row->receiver_detail,
+            'time' => date('Y-m-d H:i',$row->add_time),
+            'date' => $row->delivery_time > 0 ? date('Y-m-d',$row->delivery_time) : '',
+            'remark' => $row->buyer_comment,
+            'express' => $row->express_name ? $row->express_name : '',   //物流
+            'expressCode' => $row->express_code ? $row->express_code : '', //物流单号
+            'sendDate' => $row->send_time > 0 ? date('Y-m-d',$row->send_time) : '', //发货日期
+            'estimatedDate' => $row->estimated_time > 0 ? date('Y-m-d',$row->estimated_time) : '',  //到达日期
+            'serviceType' => $row->service_type,
+            'goods' => $goodsRows,
+            'overDate' => $row->pay_date ? substr($row->pay_date,0,10) : ''
+        ];
+        $data['statusMsg'] = getOrderMsg($this->groupId,$row->state,$row->service_type);
+        $data['isService'] =  $this->groupId == 4 && $row->service_type == 0 && ($row->state == 6 || $row->state == 13 || $row->state == 9 || $row->state == 10 || $row->state == 11)  ? 1 : 0;
+        $data['payMethod'] = !$payRow && isset($row->pay_date) ? '账期支付': ($payRow->pay_type == 4 ? '汇票' : '转账');
+        $data['payNumber'] = $payRow ? $payRow->number : '';
+        $data['payImg'] = $payRow ? MallOrderPay::getFormatPicture($payRow->picture) : '';
+        $data['payDate'] = $payRow && $payRow->pay_time ? substr($payRow->pay_time,0,10) : '';
+
+        return ['status'=>0,'data'=>$data,'msg'=>''];
+    }
+
+
+    /**
+     * @desc 卖家确认发货
+     * @param Request $request
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function delivery(Request $request){
+        $orderNo = $request->post('no','');
+        $express_name= $request->post('express','');   //物流公司
+        $express_code = $request->post('expressCode',''); // 物流单号
+        $send_time = $request->post('sendDate',''); //发货日期
+        $estimated_time = $request->post('estimatedDate',''); //到达日期
+        //
+        if(!$orderNo){
+            return ['status'=>1,'data'=>[],'msg'=>'订单号不能为空'];
+        }
+        if(!$express_name){
+            return ['status'=>1,'data'=>[],'msg'=>'物流公司不能为空'];
+        }
+        if(!$express_code){
+            return ['status'=>1,'data'=>[],'msg'=>'物流单号不能为空'];
+        }
+        if(!$send_time){
+            return ['status'=>1,'data'=>[],'msg'=>'发货日期不能为空'];
+        }
+        if(!$estimated_time){
+            return ['status'=>1,'data'=>[],'msg'=>'到达日期不能为空'];
+        }
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        //权限验证
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
+        }
+        $companyId = $pResult['data']['companyId'];
+
+        $model = new MallOrder();
+        $where['out_id'] = $orderNo;
+        $where['supplier'] = $companyId;
+
+        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','goods_names','state','pay_date','out_id','buyer_comment','buyer_id','supplier'])->find();
+        if(!$row){
+            return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
+        }
+        if($row->state != MallOrder::STATE_DELIVER){
+            return ['status'=>1,'data'=>[],'msg'=>'订单状态操作错误'];
+        }
+
+        $data = [
+            'express_name' =>$express_name,
+            'express_code' => $express_code,
+            'send_time' => strtotime($send_time),
+            'estimated_time' => strtotime($estimated_time),
+            'confirm_delivery_time' => time(),
+            'state' => MallOrder::STATE_RECEIVE
+        ];
+
+        $result = $model->save($data,$where);
+        if($result !== false){
+            //消息通知买家
+            $orderMsgModel = new OrderMsg();
+            $companyModel = new EntCompany();
+
+            $sellerInfo = $companyModel->getInfoById($companyId);
+            $buyerInfo = $companyModel->getInfoById($row->buyer_id);
+
+            $userModel = new IndexUser();
+            $content = "订单号：{$row->out_id}【{$row->goods_names}】供应商已经发货。";
+            $msgData = ['title'=>'订单已发货','content' => $content,'order_no' => $row->out_id,'order_id'=>$row->id,'user_id'=>$buyerInfo->responsible_user_id,'create_time'=>time()];
+
+            $orderMsgModel->save($msgData);
+            $userModel->where(['id'=>$buyerInfo->responsible_user_id])->setInc('unread',1);
+            $userInfo = $userModel->getInfoById($buyerInfo->responsible_user_id);
+
+            //短信通知买家管理员
+            if($userInfo){
+                $yunpian = new Yunpian();
+                $yunpian->send($userInfo->phone,['order_id'=>$row->out_id,'express_code'=>$express_code,'express_name'=>$express_name,'supplier'=>$sellerInfo ? $sellerInfo->company_name : ''],Yunpian::TPL_ORDER_SEND);
+            }
+
+            return ['status'=>0,'data'=>[],'msg'=>'提交成功'];
+        }
+        return ['status'=>1,'data'=>0,'msg'=>'提交失败'];
+    }
+
 }
