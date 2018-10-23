@@ -219,9 +219,16 @@ class Company extends Base
         $organizationId = input('post.organizationId',0,'intval');
 
         $IndexUser = new IndexUser();
-        $data = $IndexUser->where(['company_id'=>$companyId,'organization_id'=>$organizationId])->field('id as staffId,username as staffName,phone,remarks')->select();
+        $staffList = $IndexUser->where(['company_id'=>$companyId,'organization_id'=>$organizationId])->field('id as staffId,username as staffName,phone,remarks')->select();
 
-        return ['status'=>0,'data'=>$data,'msg'=>'成员列表'];
+        $EntOrganization = new EntOrganization();
+        $organizationName = $EntOrganization->where(['company_id'=>$companyId,'id'=>$organizationId])->value('org_name');
+
+        $data['staffList'] =$staffList;
+        $data['organizationName'] = $organizationName;
+        $data['organizationId'] = $organizationId;
+
+        return ['status'=>0,'data'=>$staffList,'msg'=>'成员列表'];
     }
 
     /**
