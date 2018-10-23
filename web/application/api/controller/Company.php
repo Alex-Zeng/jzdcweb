@@ -251,13 +251,11 @@ class Company extends Base
 
         //查询改用户信息
         $IndexUser = new IndexUser();
-        $data = $IndexUser->where(['company_id'=>$companyId,'id'=>$staffId])->field('id as staffId,username as staffName,phone,remarks,organization_id')->find();
+        $data = $IndexUser->where(['company_id'=>$companyId,'id'=>$staffId])->field('id as staffId,username as staffName,phone,remarks,organization_id as organizationId')->find();
 
         $EntOrganization = new EntOrganization();
-        $data['organizationName'] = $EntOrganization->where(['id'=>$data['organization_id']])->value('org_name');
-        if(isset($data['organization_id'])){
-            unset($data['organization_id']);
-        }
+        $data['organizationName'] = $EntOrganization->where(['id'=>$data['organizationId']])->value('org_name');
+        
         return ['status'=>0,'data'=>$data,'msg'=>'成员详细信息'];
     }
 
