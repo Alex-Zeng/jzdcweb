@@ -139,4 +139,28 @@ class Base extends Controller
         return ['status'=>0,'data'=>['companyId'=>$userInfo->company_id],'msg'=>''];
     }
 
+    /**
+     * [checkCompanyPermissionReturnCompanyId 检验是否为企业管理员]
+     * @param  [type] $userId [用户ID，不传则获取当前登录者没登录则为空]
+     * @return  [是则返回CompanyId,否则返回false]
+     */
+    protected function checkCompanyPermissionReturnCompanyId($userId=null){
+        $IndexUser = new IndexUser();
+        $EntCompany = new EntCompany();
+
+        if(is_null($userId)){
+            $userId = $this->userId;
+        }
+        $companyId = $IndexUser->where(['id'=>$userId])->value('company_id');
+        if(empty($companyId)){  
+            return false;
+        }
+
+        if($EntCompany->where(['id'=>$companyId,'audit_state'=>EntCompany::STATE_PASS,'responsible_user_id'=>$userId,'is_deleted'=>0])->value('id')>0){
+            return $companyId;
+        }else{
+            return false;
+        }
+    }
+
 }

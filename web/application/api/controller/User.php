@@ -1096,12 +1096,25 @@ class User extends Base
         if ($auth) {
             return $auth;
         }
-
-        $model = new IndexUser();
-        $result = $model->save([$field => $value], ['id' => $this->userId]);
-        if ($result !== false) {
-            return ['status' => 0, 'data' => [], 'msg' => '修改成功'];
+        if(in_array($field, ['contact', 'tel'])){
+            $model = new IndexUser();
+            $result = $model->save([strtr($field,['contact'=>'nickname']) => $value], ['id' => $this->userId]);
+            if ($result !== false) {
+                return ['status' => 0, 'data' => [], 'msg' => '修改成功'];
+            }
         }
+        if(in_array($field, ['icon'])){
+            //验证是否为企业管理员
+            $companyId = $this->checkCompanyPermissionReturnCompanyId();
+            if($companyId>0){
+                $EntCompany = new EntCompany();
+                $result = $EntCompany->save(['logo_uri' => $value], ['id' => $companyId]);
+                if ($result !== false) {
+                    return ['status' => 0, 'data' => [], 'msg' => '修改成功'];
+                }
+            }
+        }
+
         return ['status' => 1, 'data' => [], 'msg' => '修改失败'];
     }
 
@@ -1115,11 +1128,14 @@ class User extends Base
         $model = new IndexUser();
         $row = $model->getInfoById($this->userId);
 
+        //1.0.3用户认证可通过企业邀请，引申出企业身份一对多人，所以企业信息需要分离
+        $EntCompany = new EntCompany();
+        $logo = $EntCompany->where(['id'=>$row->company_id])->value('logo_uri');
         $return = [
-            'contact' => $row->contact,
+            'contact' => $row->nickname,
             'tel' => $row->tel ? $row->tel : '',
-            'icon' => $row->icon ? $row->icon : '',
-            'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : '',
+            'icon' => $logo ? $logo : '',
+            'path' => $logo ? EntCompany::getFormatLogo($logo) : '',
             'phone' => $row->phone,
             'email' => $row->email,
             'username' => $row->username,

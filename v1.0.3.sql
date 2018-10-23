@@ -35,6 +35,7 @@ CREATE TABLE `ent_company` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '表的主键ID',
   `tenant_id` int(11) NOT NULL DEFAULT '0' COMMENT '关联租户表的主键ID',
   `company_name` varchar(30) NOT NULL DEFAULT '' COMMENT '公司名称',
+  `logo_uri` varchar(200) not null default '' comment '公司logo',
   `enterprise_type` tinyint(1) NOT NULL DEFAULT '0' COMMENT '企业性质，枚举值。未知（Unknown=0）；有限责任公司（Ltd=1）；中外合资企业（SinoForeign=2）；个体工商户（Privately=3）；合伙企业（Partnership=4）。',
   `reg_capital` varchar(20) NOT NULL DEFAULT '' COMMENT '公司的注册资金',
   `address` varchar(100) NOT NULL DEFAULT '' COMMENT '公司地址',

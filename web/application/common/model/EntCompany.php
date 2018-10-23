@@ -15,4 +15,8 @@ class EntCompany extends Base{
         return $this->where(['id'=>$id])->find();
     }
 
+    public static function getFormatLogo($logo){
+        return  $logo ? config('jzdc_doc_path').'user_icon/'.$logo : '';
+    }
+
 }
