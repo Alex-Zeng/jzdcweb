@@ -13,6 +13,7 @@ use app\common\model\EntCode;
 use app\common\model\EntCompany;
 use app\common\model\EntCompanyAudit;
 use app\common\model\EntOrganization;
+use app\common\model\FormUserCert;
 use app\common\model\IndexUser;
 use sms\Yunpian;
 use think\Request;
@@ -181,7 +182,7 @@ class CompanyAudit extends Base
             'power_attorney_uri' => $powerOfAttorney,
             'last_modified_user_id' => $this->userId,
             'last_modified_user' => $userInfo->username,
-            'last_modified_time' => microtime(),
+            'last_modified_time' => microtime(true)*1000,
         ];
 
         if($companyAuditInfo){
@@ -196,7 +197,7 @@ class CompanyAudit extends Base
         }else{ //添加数据
             $data['created_user_id'] = $this->userId;
             $data['created_user'] = $userInfo->username;
-            $data['created_time'] = microtime();
+            $data['created_time'] = microtime(true)*1000;
             $result = $model->save($data);
         }
 
@@ -209,7 +210,35 @@ class CompanyAudit extends Base
                 $yunPian->send($userInfo->phone, [], Yunpian::TPL_CERT_SUBMIT);
             }
 
-            //原数据表写入数据
+            /////////////////////////原数据表写入数据
+            $model = new FormUserCert();
+            $row = $model->where(['writer' => $this->userId])->order('id', 'desc')->find();
+            //保存数据
+            $data = [
+                'edit_time' => time(),
+                'writer' => $this->userId,
+                'editor' => $this->userId,
+                'company_name' => $companyName,
+                'business_license' => $businessPath,
+                'status' => 1,
+                'reg_role' => '采购商',
+                'ent_property' => getCompanyProperty($property),
+                'reg_capital' => $capital,
+                'legal_representative' => $representative,
+                'legal_identity_card' => '',
+                'agent_identity_card' => $agentIdentityCard,
+                'permits_accounts' => '',
+                'org_structure_code_permits' => $orgStructureCodePermits,
+                'tax_registration_cert' => $taxRegistrationCert,
+                'detail_address' => $detailAddress,
+                'power_attorney' => $powerOfAttorney
+            ];
+            if ($row) { //再次提交审核
+                $$model->save($data, ['id' => $row->id]);
+            } else { //
+                $data['write_time'] = time();
+               $model->save($data);
+            }
 
 
             //发送邮件通知

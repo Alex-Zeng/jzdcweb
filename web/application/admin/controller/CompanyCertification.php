@@ -79,9 +79,6 @@ class CompanyCertification  extends Base
         }
 
         return $this->auditRefuse($id,$reason);
-
-
-
     }
 
     /**
@@ -122,10 +119,6 @@ class CompanyCertification  extends Base
 
         //开启事务
         $model->startTrans();
-//        $result = $model->save(['state'=>3],['id'=>$id]);
-//        if($result === false){
-//            $commit = false;
-//        }
         if($commit ){
             $data = [
                 'company_name'=>$row->company_name,
@@ -147,18 +140,18 @@ class CompanyCertification  extends Base
             if($companyRow){  //更新数据
                 $data['last_modified_user_id'] = '';
                 $data['last_modified_user'] = '';
-                $data['last_modified_time'] = time();
+                $data['last_modified_time'] = microtime(true)*1000;
                 $result = $companyModel->save($data,['id'=>$companyRow->id]);
                 $companyId = $companyRow->id;
-                $responsibleId = $companyRow->responsible_user_id;//
+                $responsibleId = $companyRow->responsible_user_id;
             }else{
                 $data['responsible_user_id'] = $row->created_user_id;
                 $data['created_user_id'] = 0;
                 $data['created_user'] = '';
-                $data['created_time'] = time();
+                $data['created_time'] = microtime(true)*1000;
                 $result = $companyModel->save($data);
                 $companyId = $companyModel->id;
-                $responsibleId = $row->created_user_id;//
+                $responsibleId = $row->created_user_id;
             }
             if($result === false){
                 $commit = false;
@@ -273,7 +266,7 @@ class CompanyCertification  extends Base
                 $data['last_modified_time'] = time();
                 $result = $companyModel->save($data,['id'=>$companyRow->id]);
                 $companyId = $companyRow->id;
-                $responsibleId = $companyRow->responsible_user_id;//
+                $responsibleId = $companyRow->responsible_user_id;
             }else{
                 $data['responsible_user_id'] = $row->created_user_id;
                 $data['created_user_id'] = 0;
@@ -281,7 +274,7 @@ class CompanyCertification  extends Base
                 $data['created_time'] = time();
                 $result = $companyModel->save($data);
                 $companyId = $companyModel->id;
-                $responsibleId = $row->created_user_id;//
+                $responsibleId = $row->created_user_id;
             }
             if($result === false){
                 $commit = false;
