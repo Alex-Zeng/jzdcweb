@@ -86,12 +86,13 @@ class Company extends Base
         if ($auth = $this->auth()) {
             return $auth;
         }
+        $hasTotal = input('post.hasTotal',1,'intval');
         $companyId = $this->getCompanyId();
         if($companyId==0){
-            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+            $data = $hasTotal>0?[]:(object)[];
+            return ['status'=>1,'data'=>$data,'msg'=>'请进行企业认证后操作'];;
         }
 
-        $hasTotal = input('post.hasTotal',1,'intval');
         $EntOrganization = new EntOrganization();
         if($hasTotal>0){
             $data = $EntOrganization->alias('a')->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','left')->field('a.id as organizationId,a.org_name as organizationName,count(b.id) as total')->group('a.id')->select();
@@ -212,14 +213,14 @@ class Company extends Base
         }
         $companyId = $this->getCompanyId();
         if($companyId==0){
-            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+            return ['status'=>1,'data'=>(object)[],'msg'=>'请进行企业认证后操作'];;
         }
 
         //获取参数
         $organizationId = input('post.organizationId',0,'intval');
 
         $IndexUser = new IndexUser();
-        $staffList = $IndexUser->where(['company_id'=>$companyId,'organization_id'=>$organizationId])->field('id as staffId,username as staffName,phone,remarks')->select();
+        $staffList = $IndexUser->where(['company_id'=>$companyId,'organization_id'=>$organizationId])->field('id as staffId,nickname as staffName,phone,remarks')->select();
 
         $EntOrganization = new EntOrganization();
         $organizationName = $EntOrganization->where(['company_id'=>$companyId,'id'=>$organizationId])->value('org_name');
@@ -243,7 +244,7 @@ class Company extends Base
         }
         $companyId = $this->getCompanyId();
         if($companyId==0){
-            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+            return ['status'=>1,'data'=>(object)[],'msg'=>'请进行企业认证后操作'];;
         }
 
         //获取参数
@@ -251,7 +252,7 @@ class Company extends Base
 
         //查询改用户信息
         $IndexUser = new IndexUser();
-        $data = $IndexUser->where(['company_id'=>$companyId,'id'=>$staffId])->field('id as staffId,username as staffName,phone,remarks,organization_id as organizationId')->find();
+        $data = $IndexUser->where(['company_id'=>$companyId,'id'=>$staffId])->field('id as staffId,nickname as staffName,phone,remarks,organization_id as organizationId')->find();
 
         $EntOrganization = new EntOrganization();
         $data['organizationName'] = $EntOrganization->where(['id'=>$data['organizationId']])->value('org_name');
@@ -272,10 +273,10 @@ class Company extends Base
         }
         $companyId = $this->getCompanyId();
         if($companyId==0){
-            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+            return ['status'=>1,'data'=>(object)[],'msg'=>'请进行企业认证后操作'];
         }
         if(!($this->checkCompanyAdmin($companyId))){
-            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];;
+            return ['status'=>1,'data'=>(object)[],'msg'=>'本操作需管理员权限'];
         }
 
         //获取参数
@@ -284,34 +285,55 @@ class Company extends Base
 
         //验证信息
         if(!checkPhone($phone)){
-            return ['status'=>1,'data'=>[],'msg'=>'请输入正确的手机号码'];
+            return ['status'=>1,'data'=>(object)[],'msg'=>'请输入正确的手机号码'];
         }
         $IndexUser = new IndexUser();
         $result = $IndexUser->where(['phone'=>$phone])->field('id,company_id,organization_id')->find();
         if($result){
             if($result['company_id']>0 && $result['company_id']!=$companyId){
-                return ['status'=>1,'data'=>[],'msg'=>'该用户已经挂在别的企业中'];
+                return ['status'=>1,'data'=>(object)[],'msg'=>'该用户已经挂在别的企业中'];
             }else if($result['company_id'] = $companyId && $result['organization_id']>0){
-                return ['status'=>1,'data'=>[],'msg'=>'该用户已经在企业组织架构内'];
+                return ['status'=>1,'data'=>(object)[],'msg'=>'该用户已经在企业组织架构内'];
             }else{
                 $EntCode = new EntCode();
-                if($EntCode->where(['phone'=>$phone,'company_id'=>$companyId,'expire_time'=>['>',time()]])->count()>0){
-                    return ['status'=>1,'data'=>[],'msg'=>'已对该手机号码发送了邀请，验证码还在有效期内'];
+                $result = $EntCode->where(['phone'=>$phone,'company_id'=>$companyId,'used'=>0])->field('code,id,create_time,send_times')->order('id desc')->find();
+                if(empty($result)){
+                    $code = getInvitationCode();
+                    $type = 'create';
+                }else{
+                    if($result['send_times']<5){
+                        $type = 'update';
+                        $code = $result['code'];
+                        $entCodeId = $result['id'];
+                    }else if($result['send_times']>=5 && (time()-$result['create_time'])>3600){
+                        $type = 'create';
+                        $code = getInvitationCode();
+                    }else{
+                        return ['status'=>1,'data'=>(object)[],'msg'=>'一小时内最多对一个手机号只能发送5次邀请'];
+                    }
                 }
                 //发送短信
-                $code = getInvitationCode();
                 $param['code'] = $code;
                 $yunpian = new \sms\Yunpian();
                 $result = true;//$yunpian->send($phone,$param,\sms\Yunpian::TPL_ORGANIZATION_USER);
                 if(!$result){
-                    return ['status'=>1,'data'=>[],'msg'=>'验证码发送失败'];
+                    return ['status'=>1,'data'=>(object)[],'msg'=>'验证码发送失败'];
                 }
-                //入库
-                $time = time();
-                $data = ['phone'=>$phone,'code'=>$code,'company_id'=>$companyId,'organization_id'=>$organizationId,'create_time'=>$time,'expire_time'=>$time+25200];//7天有效期
-                $result = $EntCode->data($data)->save();
-                if(!$result){
-                    return ['status'=>1,'data'=>[],'msg'=>'验证码分配失败'];
+                switch ($type) {
+                    case 'create': //入库
+                        $data = ['phone'=>$phone,'code'=>$code,'company_id'=>$companyId,'organization_id'=>$organizationId,'create_time'=>time(),'send_times'=>1];
+                        $result = $EntCode->data($data)->save();
+                        if(!$result){
+                            return ['status'=>1,'data'=>(object)[],'msg'=>'验证码分配失败'];
+                        }
+                        break;
+                    
+                    default:
+                        $result = $EntCode->where(['id'=>$entCodeId])->setInc('send_times');
+                        if(!$result){
+                            return ['status'=>1,'data'=>(object)[],'msg'=>'验证码分配失败'];
+                        }
+                        break;
                 }
                 $msg = "邀请用户加入";
                 $data = ['redirect'=>'registered','redirectionInfo'=>'已成功向尾号'.mb_substr($phone,-4,4).'发送验证码,绑定完成后，您将会收到通知'];
@@ -339,10 +361,10 @@ class Company extends Base
         }
         $companyId = $this->getCompanyId();
         if($companyId==0){
-            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];
         }
         if(!($this->checkCompanyAdmin($companyId))){
-            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];;
+            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];
         }
         // dump($companyId);exit();
         //获取参数
@@ -383,10 +405,10 @@ class Company extends Base
         }
         $companyId = $this->getCompanyId();
         if($companyId==0){
-            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];
         }
         if(!($this->checkCompanyAdmin($companyId))){
-            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];;
+            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];
         }
 
         //获取参数
@@ -422,14 +444,14 @@ class Company extends Base
     public function userAdd(){
         //验证用户是否登录及管理员权限
         if ($auth = $this->auth()) {
-         return $auth;
+            return $auth;
         }
         $companyId = $this->getCompanyId();
         if($companyId==0){
-            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];
         }
         if(!($this->checkCompanyAdmin($companyId))){
-            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];;
+            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];
         }
 
         //获取参数
@@ -536,7 +558,7 @@ class Company extends Base
         $phone = input('post.phone','','trim');
         
         if($likeParam!=''){
-            $whereOr["b.username"] = ["like","%".$likeParam."%"];
+            $whereOr["b.nickname"] = ["like","%".$likeParam."%"];
 
             $EntOrganization = new EntOrganization();
             $organizationIds = $EntOrganization->where(['is_deleted'=>0,'company_id'=>$companyId,'org_name'=>['like','%'.$likeParam.'%']])->column('id');
@@ -550,20 +572,20 @@ class Company extends Base
             
             //使用闭包查询，匿名函数需借助use关键字来传参    
             $data = $EntOrganization->alias('a')->where(function($query) use ($whereOr){
-            $query->whereOr($whereOr);})->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','right')->field('a.org_name as organizationName,b.phone,b.username as userName')->order('org_name')->select();
+            $query->whereOr($whereOr);})->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','right')->field('a.org_name as organizationName,b.id as staffId,b.phone,b.nickname as staffName')->order('org_name')->select();
         }else{
             $where = [];
             if($organizationId>0){
                 $where['a.id'] = $organizationId;
             }
             if($userName!=''){
-                $where['b.username'] = ['like','%'.$userName.'%'];
+                $where['b.nickname'] = ['like','%'.$userName.'%'];
             }
             if($phone!=''){
                 $where['b.phone'] = $phone;
             }
             $EntOrganization = new EntOrganization();
-            $data = $EntOrganization->alias('a')->where($where)->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','right')->field('a.org_name as organizationName,b.phone,b.username as userName')->order('org_name')->select();
+            $data = $EntOrganization->alias('a')->where($where)->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','right')->field('a.org_name as organizationName,b.id as staffId,b.phone,b.nickname as staffName')->order('org_name')->select();
         }
 
         //获取参数
@@ -573,7 +595,7 @@ class Company extends Base
                 $arr = [];
                 $dt = [];
                 foreach ($data as $key => $val) {
-                    $arr[$val['organizationName']][] = ['phone'=>$val['phone'],'userName'=>$val['userName']];
+                    $arr[$val['organizationName']][] = ['phone'=>$val['phone'],'staffId'=>$val['staffId'],'staffName'=>$val['staffName']];
                 }
                 foreach ($arr as $k => $v) {
                     $dt[] = ['organizationName'=>$k,'staffList'=>$v];

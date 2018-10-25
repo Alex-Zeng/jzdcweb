@@ -7,4 +7,5 @@ class EntCode extends Base{
 
 	protected $table = 'ent_code';
 
+	protected $type = ['create_time' => 'integer'];
 }
