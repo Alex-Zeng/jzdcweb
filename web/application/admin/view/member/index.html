@@ -69,7 +69,7 @@
                             {volist name='list' id='member'}
                             <tr>
                                 <!--<td><input type="checkbox" /> </td>-->
-                                <td>{if $member.icon}<img src="{$member.icon}"  width="100px" height="100px"/>{/if}</td>
+                                <td>{if $member.logoUri}<img src="{$member.logoUri}"  width="100px" height="100px"/>{/if}</td>
                                 <td>{:htmlspecialchars($member.username)}<br />{$member.phone}<br/>{$member.companyName}<br />{$member.email}</td>
                                 <td>{:getMemberGroup($member.group)}</td>
                                 <td>{:date('Y-m-d H:i',$member.reg_time)}</td>
