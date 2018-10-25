@@ -266,9 +266,15 @@ class CompanyAudit extends Base
         $codeModel = new EntCode();
         $companyModel = new EntCompany();
         $origanizationModel = new EntOrganization();
+        $userModel = new IndexUser();
+
+        $userInfo = $userModel->getInfoById($this->userId);
+        if($userInfo->company_id > 0){
+            return ['status'=>1,'data'=>[],'msg'=>'已加入企业'];
+        }
 
         //验证邀请码
-        $codeInfo = $codeModel->where(['code'=>$code,'used'=>0])->find();
+        $codeInfo = $codeModel->where(['code'=>$code,'used'=>0,'phone'=>$userInfo->phone])->find();
         if(!$codeInfo){
             return ['status'=>1,'data'=>[],'msg'=>'无效验证码'];
         }
@@ -296,8 +302,13 @@ class CompanyAudit extends Base
         //
         $codeModel = new EntCode();
         $userModel = new IndexUser();
+
+        $userInfo = $userModel->getInfoById($this->userId);
+        if($userInfo->company_id > 0){
+            return ['status'=>1,'data'=>[],'msg'=>'已加入企业'];
+        }
         //验证邀请码
-        $codeInfo = $codeModel->where(['code'=>$code,'used'=>0])->find();
+        $codeInfo = $codeModel->where(['code'=>$code,'used'=>0,'phone'=>$userInfo->phone])->find();
         if(!$codeInfo){
             return ['status'=>1,'data'=>[],'msg'=>'无效验证码'];
         }
