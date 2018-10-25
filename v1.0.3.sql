@@ -93,7 +93,7 @@ CREATE TABLE `ent_code` (
   `organization_id` int(11) NOT NULL DEFAULT '0' COMMENT '部门ID',
   `code` varchar(10) NOT NULL DEFAULT '' COMMENT '验证码',
   `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `expire_time` int(11) NOT NULL DEFAULT '0' COMMENT '过期时间',
+  `send_times` int(11) NOT NULL DEFAULT '0' COMMENT '发送次数',
   `used` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否使用0否1是',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='企业邀请验证码';

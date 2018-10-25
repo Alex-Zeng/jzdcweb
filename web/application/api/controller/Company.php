@@ -526,6 +526,7 @@ class Company extends Base
             'password' => md5($password),
             'reg_time' => time(),
             'reg_ip' => request()->ip(),
+            'remarks'=>$remarks,
             'group' => 6,
             'state' => 1
         ];
