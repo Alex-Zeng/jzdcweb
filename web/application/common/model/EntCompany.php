@@ -16,7 +16,7 @@ class EntCompany extends Base{
     }
 
     public static function getFormatLogo($logo){
-        return  $logo ? config('jzdc_doc_path').'user_icon/'.$logo : '';
+        return  $logo ? config('jzdc_doc_path').'company_logo/'.$logo : '';
     }
 
 }
