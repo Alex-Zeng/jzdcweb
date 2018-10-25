@@ -90,7 +90,7 @@ class Company extends Base
         $companyId = $this->getCompanyId();
         if($companyId==0){
             $data = $hasTotal>0?[]:(object)[];
-            return ['status'=>1,'data'=>$data,'msg'=>'请进行企业认证后操作'];;
+            return ['status'=>1,'data'=>$data,'msg'=>'请进行企业认证后操作'];
         }
 
         $EntOrganization = new EntOrganization();
@@ -115,10 +115,10 @@ class Company extends Base
         }
         $companyId = $this->getCompanyId();
         if($companyId==0){
-            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];
         }
         if(!($this->checkCompanyAdmin($companyId))){
-            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];;
+            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];
         }
 
 
@@ -173,10 +173,10 @@ class Company extends Base
         }
         $companyId = $this->getCompanyId();
         if($companyId==0){
-            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];
         }
         if(!($this->checkCompanyAdmin($companyId))){
-            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];;
+            return ['status'=>1,'data'=>[],'msg'=>'本操作需管理员权限'];
         }
 
         //获取参数
@@ -213,7 +213,7 @@ class Company extends Base
         }
         $companyId = $this->getCompanyId();
         if($companyId==0){
-            return ['status'=>1,'data'=>(object)[],'msg'=>'请进行企业认证后操作'];;
+            return ['status'=>1,'data'=>(object)[],'msg'=>'请进行企业认证后操作'];
         }
 
         //获取参数
@@ -244,7 +244,7 @@ class Company extends Base
         }
         $companyId = $this->getCompanyId();
         if($companyId==0){
-            return ['status'=>1,'data'=>(object)[],'msg'=>'请进行企业认证后操作'];;
+            return ['status'=>1,'data'=>(object)[],'msg'=>'请进行企业认证后操作'];
         }
 
         //获取参数
@@ -548,7 +548,7 @@ class Company extends Base
         }
         $companyId = $this->getCompanyId();
         if($companyId==0){
-            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];;
+            return ['status'=>1,'data'=>[],'msg'=>'请进行企业认证后操作'];
         }
 
         //获取参数
