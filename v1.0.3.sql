@@ -141,3 +141,7 @@ UPDATE `jzdc_mall_order` SET created_user_id = buyer_id,created_user=buyer;
 ALTER TABLE `sm_product` ADD COLUMN `audit_time`  int(11) NOT NULL DEFAULT 0 COMMENT '审核时间';
 UPDATE `sm_product` SET audit_time = created_time;
 
+
+
+alter table jzdc_factoring add company_id int not null default 0 comment '企业ID';
+UPDATE jzdc_factoring set company_id = user_id;

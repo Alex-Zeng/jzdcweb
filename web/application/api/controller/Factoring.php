@@ -5,23 +5,22 @@ use app\common\model\FmFactoring;
 use app\common\model\IndexUser;
 use app\common\model\IndexGroup;
 use app\common\model\MallOrder;
+use app\common\model\EntCompany;
 
 class Factoring extends Base {
 
-	//获取用户实名
+	//获取企业名字
 	public function getName(){
 		//验证登录
 		$auth = $this->auth();
 		if($auth){
 			return $auth;
 		}
-  		$userId = $this->userId;
+        $userId = $this->userId;
+
         $IndexUser = new IndexUser();
-        $data = $IndexUser->field('real_name as name')->where(['id'=>$userId])->find();
-        if(!$data){
-        	$data['real_name'] = '';
-        }
-        return ['status'=>0,'data'=>['name'=>$data['name']],'msg'=>'请求成功'];
+        $company_name = $IndexUser->alias('a')->join(['ent_company b'],'a.company_id=b.id','left')->where(['a.id'=>$userId])->value('company_name');
+        return ['status'=>0,'data'=>['name'=>(string)$company_name],'msg'=>'请求成功'];
 
 	}
 
@@ -33,25 +32,16 @@ class Factoring extends Base {
 			return $auth;
 		}
 		$userId = $this->userId;
-		$groupId = $this->groupId;
-		switch ($groupId) {
-			case IndexGroup::GROUP_BUYER:
-				//$dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','4,13'],'buyer_id'=>$userId])->order('id desc')->select();
-		        // if(!$dataList){
-		        	// $dataList = [];
-		        // }
-				// break;
-			case IndexGroup::GROUP_SUPPLIER:
-				$dataList = db('mall_order')->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','4,13'],'supplier'=>$userId])->order('id desc')->select();
-		        if(!$dataList){
-		        	$dataList = [];
-		        }
-				break;
-			default:
-				$dataList = [];
-				break;
-		}
-        
+
+        $IndexUser = new IndexUser();
+        $companyId = ($IndexUser->where(['id'=>$userId])->value('company_id'))+0;
+
+        $MallOrder = new MallOrder();
+		$dataList = $MallOrder->field('id as orderId,out_id as orderSn,actual_money as account')->where(['state'=>['not in','4,13'],'supplier'=>$companyId])->order('id desc')->select();
+        if(!$dataList){
+        	$dataList = [];
+        }
+
         return ['status'=>0,'data'=>['orderList'=>$dataList],'msg'=>'请求成功'];
 	}
 
@@ -63,7 +53,7 @@ class Factoring extends Base {
          return $auth;
         }
         $userId = $this->userId;
-        $groupId = $this->groupId;
+
         //接收参数
         $data['order_id'] = input('post.orderId',0,'intval');
         $data['contact_username']  = input('post.contactUsername','','trim');
@@ -78,18 +68,11 @@ class Factoring extends Base {
             return ['status'=>-2,'data'=>'','msg'=>$result];
         }
 
+        $IndexUser = new IndexUser();
+        $companyId = ($IndexUser->where(['id'=>$userId])->value('company_id'))+0;
+
         $MallOrder = new MallOrder();
-		switch ($groupId) {
-			case IndexGroup::GROUP_BUYER:
-				$order = $MallOrder->field('out_id,actual_money')->where(['state'=>['not in','4,13'],'buyer_id'=>$userId,'id'=>$data['order_id']])->order('id desc')->find();
-				break;
-			case IndexGroup::GROUP_SUPPLIER:
-				$order = $MallOrder->field('out_id,actual_money')->where(['state'=>['not in','4,13'],'supplier'=>$userId,'id'=>$data['order_id']])->order('id desc')->find();
-				break;
-			default:
-				$order = '';
-				break;
-		}
+        $order = $MallOrder->field('out_id,actual_money')->where(['state'=>['not in','4,13'],'supplier'=>$companyId,'id'=>$data['order_id']])->order('id desc')->find();
         //验证订单号及获取订单编号
         if(!$order){
             return ['status'=>-2,'data'=>'','msg'=>'所选择的订单有误'];
@@ -103,6 +86,7 @@ class Factoring extends Base {
         $data['order_sn'] = $order['out_id'];
         $data['add_time'] = time();
         $data['user_id'] = $userId;
+        $data['company_id'] = $companyId;
         $data['state']  = 1;
 
         $FmFactoring = new FmFactoring();
@@ -149,9 +133,11 @@ class Factoring extends Base {
 
         $factoring_id = input('post.factoringId',0,'intval');
         $FmFactoring = new FmFactoring();
-        $data = $FmFactoring->field('need_account,add_time,order_sn,contact_username,contact_phone,state,loan_account,bank_corporate,bank_address,reasons')->where(['user_id'=>$userId,'factoring_id'=>$factoring_id])->find();
-        $IndexUser = new IndexUser();
-        $user = $IndexUser->field('real_name')->where(['id'=>$userId])->find();
+        $data = $FmFactoring->field('need_account,add_time,order_sn,contact_username,contact_phone,state,loan_account,bank_corporate,bank_address,reasons,company_id')->where(['user_id'=>$userId,'factoring_id'=>$factoring_id])->find();
+        
+        $EntCompany = new EntCompany();
+        $company_id = isset($data['company_id'])?$data['company_id']:0;
+        $companyName = $EntCompany->where(['id'=>$company_id])->value('company_name');
         $factoringDetail = [
             'orderSn'       =>isset($data->order_sn)?$data->order_sn:'',
             'loanAccount'   =>isset($data->loan_account)?$data->loan_account:'0.00',
@@ -160,7 +146,7 @@ class Factoring extends Base {
             'dataTime'      =>isset($data->add_time)?date('Y-m-d H:i:s',$data->add_time):'',
             'contactUsername'=>isset($data->contact_username)?$data->contact_username:'',
             'contactphone'  =>isset($data->contact_phone)?$data->contact_phone:'',
-            'name'          =>isset($user->real_name)?$user->real_name:'',
+            'name'          =>(string)$companyName,
             'bankCorporate' =>isset($data->bank_corporate)?$data->bank_corporate:'',
             'bankAddress'   =>isset($data->bank_address)?$data->bank_address:'',
             'reasons'       =>isset($data->reasons)?$data->reasons:'',
