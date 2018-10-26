@@ -7,6 +7,7 @@
  */
 
 namespace app\api\controller;
+use app\common\model\EntCompany;
 use app\common\model\IndexUser;
 use app\common\model\MallFavorite;
 
