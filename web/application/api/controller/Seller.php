@@ -71,15 +71,16 @@ class Seller  extends Base
         if($pResult['status'] == 1){
             return $pResult;
         }
+        $companyId = $pResult['data']['companyId'];
 
         $model = new MallOrder();
         $startTime = strtotime(date("Y-m-d 00:00:00", strtotime("-1 day")));
         $endTime = strtotime(date('Y-m-d 23:59:59', strtotime("-1 day")));
         //
-        $yesterdayCount = $model->where(['supplier' => $this->userId])->where('add_time', '>', $startTime)->where('add_time', '<', $endTime)->count();
-        $total = $model->where(['supplier' => $this->userId])->count();
-        $pendingNumber = $model->where(['supplier' => $this->userId, 'state' => MallOrder::STATE_DELIVER])->count();
-        $serviceNumber = $model->where(['supplier'=> $this->userId,'state'=>MallOrder::STATE_RECEIVE,'service_type'=>1])->order(['supplier'=> $this->userId,'state'=>MallOrder::STATE_FINISH,'service_type'=>1])->count();
+        $yesterdayCount = $model->where(['supplier' => $companyId])->where('add_time', '>', $startTime)->where('add_time', '<', $endTime)->count();
+        $total = $model->where(['supplier' => $companyId])->count();
+        $pendingNumber = $model->where(['supplier' => $companyId, 'state' => MallOrder::STATE_DELIVER])->count();
+        $serviceNumber = $model->where(['supplier'=> $companyId,'state'=>MallOrder::STATE_RECEIVE,'service_type'=>1])->count();
         //在售商品总数
         $productModel = new SmProduct();
         //交易金额   $where['confirm_delivery_time'] = ['>',0];
@@ -619,5 +620,98 @@ class Seller  extends Base
         return ['status'=>0,'data'=>['url'=>config('jzdc_domain').'/web/public/uploads/temp/'.$filename],'msg'=>''];
     }
 
+
+    /**
+     * @desc 商品数目
+     * @param Request $request
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getProductNumber(Request $request){
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        //权限验证
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
+        }
+        $companyId = $pResult['data']['companyId'];
+
+        $model = new SmProduct();
+        $where = [
+            'is_deleted' =>0,
+            'state' => SmProduct::STATE_FORSALE,
+            'audit_state' => SmProduct::AUDIT_RELEASED,
+            'supplier_id' => $companyId
+        ];
+        $count = $model->where($where)->count();
+        return ['status'=>0,'data'=>['total'=>$count],'msg'=>''];
+    }
+
+    /**
+     * @desc 商品列表
+     * @param Request $request
+     * @return array|void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getProductList(Request $request){
+        $keyword = $request->post('keyword',''); //关键字
+        $pageSize = $request->post('pageSize',10,'intval');
+        $pageNumber = $request->post('pageNumber',1,'intval');
+        if($pageSize > 12){ $pageSize = 12;}
+
+        $start = ($pageNumber - 1)*$pageSize;
+
+        $auth = $this->auth();
+        if($auth){
+            return $auth;
+        }
+        //权限验证
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
+        }
+        $companyId = $pResult['data']['companyId'];
+
+        $model = new SmProduct();
+        $orderGoodsModel = new MallOrderGoods();
+
+        $where = [
+          'is_deleted' =>0,
+          'state' => SmProduct::STATE_FORSALE,
+          'audit_state' => SmProduct::AUDIT_RELEASED,
+          'supplier_id' => $companyId
+        ];
+
+        //关键字
+        $where['title|spu_code'] = ['like','%'.$keyword.'%'];
+
+        $total = $model->where($where)->count();
+        $fields = ['id','title','spu_code','cover_img_url','audit_time'];
+        $rows = $model->where($where)->limit($start,$pageSize)->order([])->field($fields)->select();
+
+
+        $list = [];
+        foreach ($rows as $row){
+             $count = $orderGoodsModel->alias('a')->join(['jzdc_mall_order'=>'b'],'a.order_id=b.id','left')
+                                      ->where(['a.goods_id'=>$row->id,'b.state'=>['neq',MallOrder::STATE_CLOSED]])
+                                      ->count();
+             $list[] = [
+                 'title' => $row->title,
+                 'spuCode' => $row->spu_code,
+                 'salesNumber' => $count,
+                 'releaseTime' => date('Y-m-d H:i', $row->audit_time),
+                 'imgUrl' => SmProduct::getFormatImg($row->cover_img_url)
+             ];
+        }
+
+        return ['status'=>0,'data'=>['total'=>$total,'list'=>$list],'msg'=>''];
+    }
 
 }

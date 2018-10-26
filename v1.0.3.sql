@@ -109,6 +109,7 @@ UPDATE `ent_company_audit` SET audit_time = audit_time*1000,created_time = creat
 
 
 -- 更新企业数据信息表
+
 INSERT INTO `ent_company` ( `id`, `company_name`, `enterprise_type`, `reg_capital`, `address`, `telephone`, `contacts`, `contact_phone`, `legal_representative`, `tax_registration_uri`, `organization_code_uri`, `business_licence_uri`, `power_attorney_uri`, `agent_id_card_uri`, `responsible_user_id`, `audit_state`, `remarks`, `created_user_id`, `created_user`, `created_time`, `last_modified_user_id`, `last_modified_time` )
 SELECT B.id, CASE WHEN B.real_name IS NULL THEN '' ELSE B.real_name END, CASE WHEN A.`ent_property` = '股份有限公司' THEN 1 WHEN A.`ent_property` = '中外合资企业' THEN 2 WHEN A.`ent_property` = '个体工商户' THEN 3 WHEN A.`ent_property` = '合伙企业' THEN 4 ELSE 0 END AS CCC, A.reg_capital, A.detail_address, A.ent_phone, CASE WHEN B.contact IS NULL THEN '' ELSE B.contact END, A.contact_mobile, A.legal_representative, A.tax_registration_cert, A.org_structure_code_permits, A.business_license, A.power_attorney, A.agent_identity_card, A.writer, CASE WHEN A.`status` = 2 THEN 3 WHEN A.`status` = 3 THEN 2 ELSE A.`status` END, A.refuse_reason, A.writer, CASE WHEN B.username IS NULL THEN '' ELSE B.username END, A.write_time, A.editor, A.edit_time FROM `jzdc_form_user_cert` AS A LEFT JOIN `jzdc_index_user` AS B ON A.writer = B.id;
 -- 更新时间为毫秒
@@ -127,9 +128,16 @@ INSERT INTO `ent_organization`(id,company_id,org_name) SELECT id,id,'未设置' 
 
 -- 更新user表company_id
 UPDATE `jzdc_index_user` AS A LEFT JOIN `jzdc_form_user_cert` AS B ON A.id = B.writer SET A.company_id = A.id WHERE (A.`group` = 4 OR A.`group` = 5) AND B. STATUS = 2;
+-- 更新user表organization_id
+UPDATE `jzdc_index_user` SET organization_id = company_id;
 
 
 -- 订单表添加字段
 ALTER TABLE `jzdc_mall_order` ADD COLUMN `created_user_id`  int(11) NOT NULL DEFAULT 0 COMMENT '用户ID',ADD COLUMN `created_user`  varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '用户名称';
 -- 更新数据
 UPDATE `jzdc_mall_order` SET created_user_id = buyer_id,created_user=buyer;
+
+--商品数据表新增审核时间
+ALTER TABLE `sm_product` ADD COLUMN `audit_time`  int(11) NOT NULL DEFAULT 0 COMMENT '审核时间';
+UPDATE `sm_product` SET audit_time = created_time;
+
