@@ -102,8 +102,8 @@
                                 <td colspan="4" >
                                     {:date('Y-m-d',$order.add_time)}&nbsp&nbsp;
                                     订单号: {$order.out_id}&nbsp;&nbsp;
-                                    采购商: {:htmlspecialchars($order.buyerName)}&nbsp;&nbsp;
-                                    供应商: {:htmlspecialchars($order.supplierName)}&nbsp;&nbsp;
+                                    买家: {:htmlspecialchars($order.buyerName)}&nbsp;&nbsp;
+                                    卖家: {:htmlspecialchars($order.supplierName)}&nbsp;&nbsp;
                                     账期截止日: {:substr($order.pay_date,0,10)}
                                 </td>
                             </tr>
@@ -148,7 +148,7 @@
                                         </tbody>
                                     </table>
                                     <div class="">
-                                        <p>采购商支付:
+                                        <p>买家支付:
                                             {if $order.buyerPayInfo}
                                             {foreach name="$order.buyerPayInfo" id="buyer"}
                                             {$buyer.pay_type == 1 ? '转账' : '汇票'},{$buyer.number},
@@ -159,7 +159,7 @@
                                             无
                                             {/if}
                                         </p>
-                                        <p>支付至供应商:
+                                        <p>支付至卖家:
                                             {if $order.supplierPayInfo}
                                             {foreach name="$order.supplierPayInfo" id="supplierInfo"}
                                             {$supplierInfo.pay_type == 3 ? '转账' : '汇票'},{$supplierInfo.number},
@@ -187,7 +187,7 @@
                                     {elseif $order.state == 1}<!-- 待签约-->
                                     <a href="javascript:void(0)" data-id="{$order.id}"  class="btn btn-sm btn-primary" data-toggle="modal" data-target="#sign-modal">签约</a>
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
-                                    {elseif $order.state == 2}<!-- 待采购商打款-->
+                                    {elseif $order.state == 2}<!-- 待买家打款-->
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-primary" data-tag ="1" data-toggle="modal" data-target="#remittance-modal" >收款</a>
                                     <a href="javascript:void(0)" data-id="{$order.id}" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancel-modal">取消订单</a>
                                     {elseif $order.state == 3}<!-- 待发货-->
@@ -337,7 +337,7 @@
         </div>
     </div>
 </div>
-<!--待采购商打款-->
+<!--待买家打款-->
 <div class="modal fade" id="remittance-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -412,12 +412,12 @@
         </div>
     </div>
 </div>
-<!--待采购商打款-->
+<!--待买家打款-->
 <div class="modal fade" id="transfer-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">转账供应商</h5>
+                <h5 class="modal-title">转账卖家</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>

@@ -90,8 +90,8 @@
                                 <td colspan="4" >
                                     {:date('Y-m-d',$order.add_time)}&nbsp&nbsp;
                                     订单号: {$order.out_id}&nbsp;&nbsp;
-                                    采购商: {:htmlspecialchars($order.buyerName)}&nbsp;&nbsp;
-                                    供应商: {:htmlspecialchars($order.supplierName)}&nbsp;&nbsp;
+                                    买家: {:htmlspecialchars($order.buyerName)}&nbsp;&nbsp;
+                                    卖家: {:htmlspecialchars($order.supplierName)}&nbsp;&nbsp;
                                     账期截止日: {:substr($order.pay_date,0,10)}
                                 </td>
                             </tr>
@@ -136,7 +136,7 @@
                                         </tbody>
                                     </table>
                                     <div class="">
-                                        <p>采购商支付:
+                                        <p>买家支付:
                                             {if $order.buyerPayInfo}
                                             {foreach name="$order.buyerPayInfo" id="buyer"}
                                             {$buyer.pay_type == 1 ? '转账' : '汇票'},{$buyer.number},
@@ -147,7 +147,7 @@
                                             无
                                             {/if}
                                         </p>
-                                        <p>支付至供应商:
+                                        <p>支付至卖家:
                                             {if $order.supplierPayInfo}
                                             {foreach name="$order.supplierPayInfo" id="supplierInfo"}
                                             {$supplierInfo.pay_type == 3 ? '转账' : '汇票'},{$supplierInfo.number},

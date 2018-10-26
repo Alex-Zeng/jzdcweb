@@ -183,9 +183,15 @@ class CompanyAudit extends Base
         ];
 
         if($companyAuditInfo){
-            if($companyAuditInfo->created_user_id != $this->userId || $companyAuditInfo->company_id != $userInfo->company_id){
+            if($companyAuditInfo->created_user_id != $this->userId || $companyAuditInfo->company_id != $userInfo->company_id ){
                 return ['status' => 1, 'data' => [], 'msg' => '无权限操作'];
             }
+
+            $companyInfo = $companyModel->getInfoById($companyAuditInfo->company_id);
+            if($companyInfo && $companyInfo->responsible_user_id != $this->userId){
+                return ['status' => 1, 'data' => [], 'msg' => '无权限操作'];
+            }
+
             if($companyAuditInfo->state == EntCompanyAudit::STATE_PENDING) {
                 return ['status' => 0, 'data' => [], 'msg' => '已提交审核，请勿重复提交...'];
             }
