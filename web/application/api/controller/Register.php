@@ -118,7 +118,8 @@ class Register{
                 'email' => '',
                 'username' => $username,
                 'group' => 6,
-                'companyName' => ''
+                'companyName' => '',
+                'roleId'=>0
             ];
             //生成token
             $key = config('jzdc_token_key');
