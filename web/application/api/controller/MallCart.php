@@ -270,6 +270,7 @@ class MallCart extends Base{
         foreach($supplierData as $supplierId => $supplierRow){
             $companyInfo = $companyModel->getInfoById($supplierId);
             $data[] = [
+                'buyAble' => $supplierId == $companyId ? 0 : 1,
                 'supplierName' => $companyInfo ? ($companyInfo->company_name ? $companyInfo->company_name : '') : '',
                 'list' => $supplierRow
             ];

@@ -441,7 +441,7 @@ class Goods  extends Base {
         //返回结果
         $list = [
             "imgList" => $imgList,
-            "companyName" => $supplierInfo ? $supplierInfo->conpany_name : '',
+            "companyName" => $supplierInfo ? $supplierInfo->company_name : '',
             "companyLogo" => EntCompany::getFormatLogo($logoUri),
             "title" => $product->title,
             "isDiscussPrice" => getBinDecimal($product->is_price_neg_at_phone),
