@@ -1164,7 +1164,7 @@ class Product extends Base{
 				break;
 			case 'sellUp':
 				$where['state'] = 2; 
-				$update = array_merge($SmProduct->filedDefaultValue('update'),['state'=>1]);
+				$update = array_merge($SmProduct->filedDefaultValue('update'),['state'=>1,'audit_time'=>time()]);
 				$msg = '上架';	
 				break;
 			case 'pushUp':
@@ -1187,15 +1187,18 @@ class Product extends Base{
 				switch ($state) {
 		            case 1://审核通过
 		                $auditState = SmProduct::AUDIT_RELEASED;
+                        $updt = ['state'=>1,'audit_state'=>$auditState,'audit_time'=>time()];
 		                break;
 		            case 2://审核失败
 		                $auditState = SmProduct::AUDIT_NOTAPPROVED;
+                        $updt = ['audit_state'=>$auditState];
 		                break;
 		            default:
 		                $auditState = SmProduct::AUDIT_PENDING;
+                        $updt = ['audit_state'=>$auditState];
 		                break;
 				}
-				$update = array_merge($SmProduct->filedDefaultValue('update'),['state'=>1,'audit_state'=>$auditState]);
+				$update = array_merge($SmProduct->filedDefaultValue('update'),$updt);
 				$where['audit_state'] = SmProduct::AUDIT_PENDING; 
 				$msg = '审核';
 				break;
