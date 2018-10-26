@@ -137,7 +137,7 @@ ALTER TABLE `jzdc_mall_order` ADD COLUMN `created_user_id`  int(11) NOT NULL DEF
 -- 更新数据
 UPDATE `jzdc_mall_order` SET created_user_id = buyer_id,created_user=buyer;
 
---商品数据表新增审核时间
+-- 商品数据表新增审核时间
 ALTER TABLE `sm_product` ADD COLUMN `audit_time`  int(11) NOT NULL DEFAULT 0 COMMENT '审核时间';
 UPDATE `sm_product` SET audit_time = created_time;
 

@@ -295,8 +295,6 @@ class Buyer extends Base
         }
 
         //查询支付凭证
-        $payModel = new MallOrderPay();
-        $payRow = $payModel->where(['order_id'=>$row->id,'pay_type'=>['in',[3,4]]])->order('id','desc')->find();
 
         $data = [
             'orderNo' => $row->out_id,

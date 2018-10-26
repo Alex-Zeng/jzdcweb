@@ -84,9 +84,9 @@ class Seller  extends Base
         //在售商品总数
         $productModel = new SmProduct();
         //交易金额   $where['confirm_delivery_time'] = ['>',0];
-        $moneyInfo = $model->where(['supplier'=>$this->userId,'confirm_delivery_time'=>['gt',0]])->field(['sum(`actual_money`) as money'])->find();
+        $moneyInfo = $model->where(['supplier'=>$companyId,'confirm_delivery_time'=>['gt',0]])->field(['sum(`actual_money`) as money'])->find();
         //在售商品访问量
-        $goodsInfo = $productModel->where(['state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0,'supplier_id'=>$this->userId])->field(['count(*) as count','sum(page_view) as visit'])->find();
+        $goodsInfo = $productModel->where(['state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0,'supplier_id'=>$companyId])->field(['count(*) as count','sum(page_view) as visit'])->find();
 
         return [
             'status' => 0,
@@ -620,37 +620,6 @@ class Seller  extends Base
         return ['status'=>0,'data'=>['url'=>config('jzdc_domain').'/web/public/uploads/temp/'.$filename],'msg'=>''];
     }
 
-
-    /**
-     * @desc 商品数目
-     * @param Request $request
-     * @return array|void
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     */
-    public function getProductNumber(Request $request){
-        $auth = $this->auth();
-        if($auth){
-            return $auth;
-        }
-        //权限验证
-        $pResult = $this->checkCompanyPermission();
-        if($pResult['status'] == 1){
-            return $pResult;
-        }
-        $companyId = $pResult['data']['companyId'];
-
-        $model = new SmProduct();
-        $where = [
-            'is_deleted' =>0,
-            'state' => SmProduct::STATE_FORSALE,
-            'audit_state' => SmProduct::AUDIT_RELEASED,
-            'supplier_id' => $companyId
-        ];
-        $count = $model->where($where)->count();
-        return ['status'=>0,'data'=>['total'=>$count],'msg'=>''];
-    }
 
     /**
      * @desc 商品列表
