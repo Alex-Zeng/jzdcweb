@@ -202,6 +202,11 @@ class MallCart extends Base{
         }
         //查询数据
         $model = new \app\common\model\MallCart();
+        $userModel = new IndexUser();
+        $companyModel = new EntCompany();
+
+        $userInfo = $userModel->getInfoById($this->userId);
+        $companyId = $userInfo ? $userInfo->company_id : 0;
 
         $where = [];
         $where['a.user_id'] = $this->userId;
@@ -256,17 +261,16 @@ class MallCart extends Base{
                 'unit' => $row->unit,  //单位
                 'isDiscussPrice' => getBinDecimal($row->is_price_neg_at_phone), //议价
                 "specPriceDetails" => $specPriceDetails,  //价格范围
-                'showPrice' => getSimplePrice($row->is_price_neg_at_phone,$row->price)
+                'showPrice' => getSimplePrice($row->is_price_neg_at_phone,$row->price),
+                'buyAble' => $row->supplier_id == $companyId ? 0 : 1
             ];
         }
 
         $data = [];
         foreach($supplierData as $supplierId => $supplierRow){
-            $userModel = new IndexUser();
-            $userInfo = $userModel->getInfoById($supplierId);
-
+            $companyInfo = $companyModel->getInfoById($supplierId);
             $data[] = [
-                'supplierName' => $userInfo ? ($userInfo->real_name ? $userInfo->real_name : '') : '',
+                'supplierName' => $companyInfo ? ($companyInfo->company_name ? $companyInfo->company_name : '') : '',
                 'list' => $supplierRow
             ];
         }
