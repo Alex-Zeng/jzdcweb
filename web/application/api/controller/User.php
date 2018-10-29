@@ -59,7 +59,7 @@ class User extends Base
             if($userInfo->company_id > 0){
                 $companyInfo = $companyModel->where(['id'=>$userInfo->company_id,'is_deleted'=>0])->find();
                 if($companyInfo){
-                    if($userId != $companyInfo->responsible_user_id){
+                    if($userId == $companyInfo->responsible_user_id){
                         $roleId = 1; //公司管理员
                     }else{
                         $roleId = 2; //公司非管理员
