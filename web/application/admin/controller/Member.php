@@ -33,6 +33,7 @@ class Member extends Base{
         $rows = $model->where([])->order(['id'=>'desc'])->paginate(null,false,['query'=>request()->param()]);
         foreach ($rows as &$row){
             $companyInfo = $companyModel->getInfoById($row->company_id);
+            $row->icon = $row->icon ? IndexUser::getFormatIcon($row->icon) : '';
             $row->logoUri = $companyInfo ? EntCompany::getFormatLogo($companyInfo->logo_uri) : '';
             $row->companyName = $companyInfo ? $companyInfo->company_name : '';
         }
