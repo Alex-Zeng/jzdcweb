@@ -70,39 +70,33 @@ class CompanyAudit extends Base
 
         if($userInfo->company_id == 0){  //未关联公司
             //查询
-
             $where['created_user_id'] = $this->userId;
-            return ['status'=>1,'data'=>['status'=>0],'msg'=>'无企业认证信息'];
         }else{ //已关联公司
             $where['company_id'] = $userInfo->company_id;
         }
-        $companyAuditInfo = $model->where(['created_user_id'=> $this->userId])->find();
-        if(!$companyAuditInfo){
-            return ['status'=>1,'data'=>['status'=>0],'msg'=>'无企业认证信息'];
-        }
+        $companyAuditInfo = $model->where($where)->find();
 
         $data = [
-            'status'=>$companyAuditInfo->state,  //认证状态
-            'id' => $companyAuditInfo->id,  //ID
-            'companyName' => $companyAuditInfo->company_name,  //企业名称
-            'representative' => $companyAuditInfo->legal_representative, //法定代表人
-            'capital' => $companyAuditInfo->reg_capital,  //注册资金
-            'address' => $companyAuditInfo->address,  //企业地址
-            'property' => $companyAuditInfo->enterprise_type,   //企业性质
-            'isAgent' => $companyAuditInfo->agent_id_card_uri ? 1 : 0,
-            'business' => $companyAuditInfo->business_licence_uri, //营业执照
-            'agentIdentityCard' => $companyAuditInfo->agent_id_card_uri, //代办人身份
-            'attorney' => $companyAuditInfo->power_attorney_uri,//委托书
-            'orgStructureCode' => $companyAuditInfo->organization_code_uri,   //组织机构代码
-            'taxRegistrationCert' => $companyAuditInfo->tax_registration_uri, //税务登记
-            'businessPath' => EntCompanyAudit::getFormatImg($companyAuditInfo->business_licence_uri),
-            'orgStructureCodePath' => EntCompanyAudit::getFormatImg($companyAuditInfo->organization_code_uri),
-            'taxRegistrationCertPath' => EntCompanyAudit::getFormatImg($companyAuditInfo->tax_registration_uri),
-            'agentIdentityCardPath' => EntCompanyAudit::getFormatImg($companyAuditInfo->agent_id_card_uri),
-            'attorneyPath' => EntCompanyAudit::getFormatImg($companyAuditInfo->power_attorney_uri),
-            'refuseReason' => $companyAuditInfo->description
+            'status'=>$companyAuditInfo ? $companyAuditInfo->state : 0,  //认证状态
+            'id' => $companyAuditInfo ?  $companyAuditInfo->id : 0,  //ID
+            'companyName' => $companyAuditInfo ? $companyAuditInfo->company_name : '',  //企业名称
+            'representative' => $companyAuditInfo ? $companyAuditInfo->legal_representative : '', //法定代表人
+            'capital' => $companyAuditInfo ? $companyAuditInfo->reg_capital: '',  //注册资金
+            'address' => $companyAuditInfo ? $companyAuditInfo->address : '',  //企业地址
+            'property' => $companyAuditInfo ? $companyAuditInfo->enterprise_type : '',   //企业性质
+            'isAgent' => $companyAuditInfo ? ($companyAuditInfo->agent_id_card_uri ? 1 : 0) : 0,
+            'business' => $companyAuditInfo ? $companyAuditInfo->business_licence_uri : '', //营业执照
+            'agentIdentityCard' => $companyAuditInfo ? $companyAuditInfo->agent_id_card_uri : '', //代办人身份
+            'attorney' => $companyAuditInfo ? $companyAuditInfo->power_attorney_uri : '',//委托书
+            'orgStructureCode' => $companyAuditInfo ? $companyAuditInfo->organization_code_uri : '',   //组织机构代码
+            'taxRegistrationCert' => $companyAuditInfo ? $companyAuditInfo->tax_registration_uri : '', //税务登记
+            'businessPath' =>$companyAuditInfo ? EntCompanyAudit::getFormatImg($companyAuditInfo->business_licence_uri) : '',
+            'orgStructureCodePath' => $companyAuditInfo ? EntCompanyAudit::getFormatImg($companyAuditInfo->organization_code_uri) : '',
+            'taxRegistrationCertPath' => $companyAuditInfo ? EntCompanyAudit::getFormatImg($companyAuditInfo->tax_registration_uri) : '',
+            'agentIdentityCardPath' => $companyAuditInfo ? EntCompanyAudit::getFormatImg($companyAuditInfo->agent_id_card_uri) : '',
+            'attorneyPath' => $companyAuditInfo ? EntCompanyAudit::getFormatImg($companyAuditInfo->power_attorney_uri) : '',
+            'refuseReason' => $companyAuditInfo ? $companyAuditInfo->description : ''
         ];
-
         return ['status'=>0,'data'=>$data,'msg'=>''];
     }
 
