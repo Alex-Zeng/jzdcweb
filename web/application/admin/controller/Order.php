@@ -482,9 +482,9 @@ class Order extends Base{
             ->setCellValue('A1', '下单时间')
             ->setCellValue('B1', '订单号')
             ->setCellValue('C1', '订单状态')
-            ->setCellValue('D1', '采购商')
+            ->setCellValue('D1', '买家')
             ->setCellValue('E1', '用户名')
-            ->setCellValue('F1', '供应商')
+            ->setCellValue('F1', '卖家')
             ->setCellValue('G1', '商品名称')
             ->setCellValue('H1', '商品规格')
             ->setCellValue('I1', '数量')
@@ -496,11 +496,11 @@ class Order extends Base{
             ->setCellValue('O1', '合同编号')
             ->setCellValue('P1', '是否账期支付')
             ->setCellValue('Q1', '账期截止')
-            ->setCellValue('R1', '总价')
-            ->setCellValue('S1','采购商付款日期')
-            ->setCellValue('T1','供应商发货日期')
-            ->setCellValue('U1','采购商收货日期')
-            ->setCellValue('V1','付款至供应商日期');
+            ->setCellValue('R1', '买家付款日期')
+            ->setCellValue('S1','卖家发货日期')
+            ->setCellValue('T1','买家收货日期')
+            ->setCellValue('U1','付款至卖家日期')
+            ->setCellValue('V1','付款至卖家日期');
 
         //查询数据
         $total = $model->where($where)->count();
@@ -508,7 +508,6 @@ class Order extends Base{
         $page = ceil($total / $pageSize);
 
         $counter = 2;
-        $userModel = new IndexUser();
         $companyModel = new EntCompany();
         $goodsModel = new MallOrderGoods();
         $orderPayModel = new MallOrderPay();
@@ -568,11 +567,10 @@ class Order extends Base{
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('O' . $counter, $row->contract_number);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('P' . $counter, $row->pay_date ? '是' : '否');
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('Q' . $counter, $row->pay_date ? substr($row->pay_date, 0, 10) : '');
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('R' . $counter, '¥' .$row->actual_money);
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('S'.$counter, $buyerPayDate);
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('T'.$counter,$row->confirm_delivery_time > 0 ? date('Y-m-d',$row->confirm_delivery_time) : '');
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('U'.$counter,$row->receipt_time > 0 ? date('Y-m-d',$row->receipt_time) : '');
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('V'.$counter, $supplierPayDate);
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('R' . $counter, $buyerPayDate);
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('S'.$counter, $row->confirm_delivery_time > 0 ? date('Y-m-d',$row->confirm_delivery_time) : '');
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('T'.$counter,$row->receipt_time > 0 ? date('Y-m-d',$row->receipt_time) : '');
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('U'.$counter,$supplierPayDate);
 
                     $counter++;
                     unset($goodsRows);

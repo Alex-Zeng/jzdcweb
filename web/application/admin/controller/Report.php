@@ -581,8 +581,8 @@ class Report extends Base{
                 unset($rows);
             }
         }
-        $filename = $role == IndexGroup::GROUP_SUPPLIER ? '供应商交易报表_' . date('YmdHi', time()) . '.xls' : '采购商交易报表_' . date('YmdHi', time()) . '.xls';
-        $title = IndexGroup::GROUP_SUPPLIER ? '供应商交易报表信息' : '采购商交易报表信息';
+        $filename = $role == IndexGroup::GROUP_SUPPLIER ? '卖家交易报表_' . date('YmdHi', time()) . '.xls' : '买家交易报表_' . date('YmdHi', time()) . '.xls';
+        $title = IndexGroup::GROUP_SUPPLIER ? '卖家交易报表信息' : '买家交易报表信息';
         $objPHPExcel->getActiveSheet()->setTitle($title);
         header("Content-Type: application/force-download");
         header("Content-Type: application/octet-stream");
