@@ -68,16 +68,17 @@ class Login{
         }
 
         if($row['company_id']>0){
+            $roleId = 2;
             $EntCompany = new EntCompany();
             $company = $EntCompany->field('responsible_user_id,company_name')->where(['id'=>$row['company_id']])->find();
         }else{
+            $roleId = 0;
             $company = ['responsible_user_id'=>0,'company_name'=>''];
         }
         if($company['responsible_user_id']>0 && $company['responsible_user_id']==$row['id']){
             $roleId = 1;
-        }else{
-            $roleId = 2;
         }
+
         $data = [
             'contact' => $row->contact,
             'tel' => $row->tel ? $row->tel : '',
@@ -155,16 +156,17 @@ class Login{
         }
 
         if($row['company_id']>0){
+            $roleId = 2;
             $EntCompany = new EntCompany();
             $company = $EntCompany->field('responsible_user_id,company_name')->where(['id'=>$row['company_id']])->find();
         }else{
+            $roleId = 0;
             $company = ['responsible_user_id'=>0,'company_name'=>''];
         }
         if($company['responsible_user_id']>0 && $company['responsible_user_id']==$row['id']){
             $roleId = 1;
-        }else{
-            $roleId = 2;
         }
+        
         $data = [
             'contact' => $row->contact,
             'tel' => $row->tel ? $row->tel : '',
