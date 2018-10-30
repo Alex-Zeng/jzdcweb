@@ -46,13 +46,12 @@ class Seller  extends Base
         $companyModel = new EntCompany();
         $companyInfo = $companyModel->getInfoById($companyId);
         //是否为管理员
-        $userId = 0;
         if($companyInfo->responsible_user_id != $this->userId){
-            $userId = $this->userId;
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限操作'];
         }
 
         $orderModel = new MallOrder();
-        $data = $orderModel->getDeskList(MallOrder::ROLE_SELLER,$type,$companyId,$userId);
+        $data = $orderModel->getDeskList(MallOrder::ROLE_SELLER,$type,$companyId,0);
         return ['status'=>0,'data'=>['list'=>$data],'msg'=>''];
     }
 
@@ -136,6 +135,13 @@ class Seller  extends Base
         }
         $companyId = $pResult['data']['companyId'];
 
+        //判断是否为管理员
+        $companyModel = new EntCompany();
+        $companyInfo = $companyModel->getInfoById($companyId);
+        //是否为管理员
+        if($companyInfo->responsible_user_id != $this->userId){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限操作'];
+        }
 
         $orderModel = new MallOrder();
         $orderGoodsModel = new MallOrderGoods();
@@ -247,6 +253,13 @@ class Seller  extends Base
             return $pResult;
         }
         $companyId = $pResult['data']['companyId'];
+        //判断是否为管理员
+        $companyModel = new EntCompany();
+        $companyInfo = $companyModel->getInfoById($companyId);
+        //是否为管理员
+        if($companyInfo->responsible_user_id != $this->userId){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限操作'];
+        }
 
         //订单号
         $model = new MallOrder();
@@ -362,6 +375,13 @@ class Seller  extends Base
             return $pResult;
         }
         $companyId = $pResult['data']['companyId'];
+        //判断是否为管理员
+        $companyModel = new EntCompany();
+        $companyInfo = $companyModel->getInfoById($companyId);
+        //是否为管理员
+        if($companyInfo->responsible_user_id != $this->userId){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限操作'];
+        }
 
         $model = new MallOrder();
         $where['out_id'] = $orderNo;
@@ -439,6 +459,13 @@ class Seller  extends Base
             return $pResult;
         }
         $companyId = $pResult['data']['companyId'];
+        //判断是否为管理员
+        $companyModel = new EntCompany();
+        $companyInfo = $companyModel->getInfoById($companyId);
+        //是否为管理员
+        if($companyInfo->responsible_user_id != $this->userId){
+            return ['status'=>1,'data'=>[],'msg'=>'没有权限操作'];
+        }
 
         $model = new MallOrder();
 

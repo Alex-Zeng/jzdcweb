@@ -79,15 +79,15 @@ class MallOrder extends Model{
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function getDeskList($merchantType,$orderType,$companyId,$userId){
+    public function getDeskList($merchantType,$orderType,$companyId,$userId = 0){
         $where = [];
-        if($merchantType == 1){
-            $where['supplier'] = $companyId;
-        }elseif ($merchantType == 2){
+        if($merchantType == 1){   //买家
             $where['buyer_id'] = $companyId;
             if($userId > 0){   //查询当前用户
-                //  $where['']
+                  $where['created_user_id'] = $userId;
             }
+        }elseif ($merchantType == 2){ //卖家
+            $where['supplier'] = $companyId;
         }
         switch ($orderType){
             case 1:  //近期成交
