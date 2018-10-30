@@ -288,7 +288,7 @@ class Buyer extends Base
                 $goodsRow['icon'] = SmProductSpec::getFormatImg($goodsRow->spec_img_url);
             }else{
                 $product = $productModel->find(['id'=>$goodsRow->goods_id]);
-                $goodsRow['icon'] = SmProduct::getFormatImg($product->cover_img_url);
+                $goodsRow['icon'] = $product ? SmProduct::getFormatImg($product->cover_img_url) : '';
             }
             $goodsRow['price'] = getFormatPrice($goodsRow->price);
             $goodsRow['specUnit'] = $goodsRow->unit;
