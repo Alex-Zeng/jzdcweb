@@ -153,7 +153,7 @@ class Buyer extends Base
         $where = '';
         $where.= 'buyer_id='.$companyId;
         if($userId > 0){  //查询用户所下单
-            $where['created_user_id'] = $userId;
+            $where .=' AND created_user_id='.$userId;
         }
 
         //
