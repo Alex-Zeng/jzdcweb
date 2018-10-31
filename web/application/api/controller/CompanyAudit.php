@@ -231,7 +231,7 @@ class CompanyAudit extends Base
                 'power_attorney' => $powerOfAttorney
             ];
             if ($row) { //再次提交审核
-                $$model->save($data, ['id' => $row->id]);
+                $model->save($data, ['id' => $row->id]);
             } else { //
                 $data['write_time'] = time();
                $model->save($data);
