@@ -152,9 +152,9 @@ class Buyer extends Base
 
         $where = '';
         $where.= 'buyer_id='.$companyId;
-        if($userId > 0){  //查询用户所下单
-            $where .=' AND created_user_id='.$userId;
-        }
+       // if($userId > 0){  //查询用户所下单
+        $where .=' AND created_user_id='.$userId;
+       // }
 
         //
         if($goodsName){
@@ -249,7 +249,7 @@ class Buyer extends Base
      * @throws \think\exception\DbException
      */
     public function detail(Request $request){
-        $no = $request->post('no','');
+        $no = $request->post('no','','trim');
         $auth = $this->auth();
         if($auth){
             return $auth;
@@ -535,9 +535,7 @@ class Buyer extends Base
 
         $where = '';
         $where.= 'buyer_id='.$companyId;
-        if($userId > 0){
-            $where.=' created_user_id='.$userId;
-        }
+        $where.=' created_user_id='.$userId;
 
         //
         if($goodsName){
