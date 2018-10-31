@@ -236,8 +236,8 @@ class Order extends Base{
                 'supplier' => $index,
                 'buyer_comment' => $order['remark'],
                 'buyer_id' => $companyId,
-                'create_user_id' => $this->userId,
-                'create_user' => $userInfo ? $userInfo->username : ''
+                'created_user_id' => $this->userId,
+                'created_user' => $userInfo ? $userInfo->username : ''
             ];
 
             $orderGoodsModel = new MallOrderGoods();
