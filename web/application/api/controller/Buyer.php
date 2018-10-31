@@ -70,23 +70,13 @@ class Buyer extends Base
         }
         $companyId = $pResult['data']['companyId'];
 
-        //判断是否为管理员
-        $companyModel = new EntCompany();
-        $companyInfo = $companyModel->getInfoById($companyId);
-        //是否为管理员
-        $userId = 0;
-        if($companyInfo->responsible_user_id != $this->userId){
-            $userId = $this->userId;
-        }
-
         //根据用户ID进行查询
         $model = new MallOrder();
         $condition = [MallOrder::STATE_REMITTANCE,MallOrder::STATE_ACCOUNT_PERIOD,MallOrder::STATE_OVERDUE];
         $where = [];
         $where['buyer_id'] = $companyId;
-        if($userId > 0){
-            $where['created_user_id'] = $userId;
-        }
+        $where['created_user_id'] = $this->userId;
+
 
         $payCount = $model->where($where)->whereIn('state',$condition)->count();
         $recieveNumber = $model->where($where)->where(['state' => MallOrder::STATE_RECEIVE])->count();
@@ -141,11 +131,6 @@ class Buyer extends Base
         $companyId = $pResult['data']['companyId'];
 
         $companyModel = new EntCompany();
-        $companyInfo = $companyModel->getInfoById($companyId);
-        $userId = 0;
-        if($companyInfo->responsible_user_id != $this->userId){
-            $userId = $this->userId;
-        }
 
         $orderModel = new MallOrder();
         $orderGoodsModel = new MallOrderGoods();
@@ -153,7 +138,7 @@ class Buyer extends Base
         $where = '';
         $where.= 'buyer_id='.$companyId;
        // if($userId > 0){  //查询用户所下单
-        $where .=' AND created_user_id='.$userId;
+        $where .=' AND created_user_id='.$this->userId;
        // }
 
         //
@@ -526,16 +511,16 @@ class Buyer extends Base
 
         //判断是否为管理员
         $companyModel = new EntCompany();
-        $companyInfo = $companyModel->getInfoById($companyId);
+ //       $companyInfo = $companyModel->getInfoById($companyId);
         //是否为管理员
-        $userId = 0;
-        if($companyInfo->responsible_user_id != $this->userId){
-            $userId = $this->userId;
-        }
+//        $userId = 0;
+//        if($companyInfo->responsible_user_id != $this->userId){
+//            $userId = $this->userId;
+//        }
 
         $where = '';
         $where.= 'buyer_id='.$companyId;
-        $where.=' created_user_id='.$userId;
+        $where.=' created_user_id='.$this->userId;
 
         //
         if($goodsName){
