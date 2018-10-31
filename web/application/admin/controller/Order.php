@@ -617,8 +617,8 @@ class Order extends Base{
         }
 
         //更新order_goods数据
-        $goodsModel = new MallOrderGoods();
         foreach($goods as $orderGoodsId => $item){
+            $goodsModel = new MallOrderGoods();
             $goodsModel->save(['price'=> $item['price'],'quantity'=>$item['quantity']],['id'=>$orderGoodsId]);
         }
         //更新order价格
