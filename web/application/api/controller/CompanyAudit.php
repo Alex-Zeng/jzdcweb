@@ -162,7 +162,7 @@ class CompanyAudit extends Base
         $data = [
             'company_name' => $companyName,
             'business_licence_uri' => $businessPath,
-            'status' => EntCompanyAudit::STATE_PENDING,
+            'state' => EntCompanyAudit::STATE_PENDING,
             'enterprise_type' => $property,
             'reg_capital' => $capital,
             'legal_representative' => $representative,
