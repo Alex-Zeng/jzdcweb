@@ -559,8 +559,8 @@ class Order extends Base{
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('G' . $counter, $goodsRow->title);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('H' . $counter, $goodsRow->s_info);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('I' . $counter, $goodsRow->quantity);
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('J' . $counter, '¥' . $goodsRow->price);
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('K' . $counter, '¥' . getFormatPrice($goodsRow->quantity * $goodsRow->price,4));
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('J' . $counter, $goodsRow->price);
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('K' . $counter, getFormatPrice($goodsRow->quantity * $goodsRow->price,4));
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('L' . $counter, $goodsRow->specifications_no);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('M' . $counter, $goodsRow->specifications_name);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('N' . $counter, $row->buyer_comment);
