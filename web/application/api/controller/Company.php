@@ -573,7 +573,7 @@ class Company extends Base
             
             //使用闭包查询，匿名函数需借助use关键字来传参    
             $data = $EntOrganization->alias('a')->where(function($query) use ($whereOr){
-            $query->whereOr($whereOr);})->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','right')->field('a.org_name as organizationName,b.id as staffId,b.phone,b.nickname as staffName')->order('org_name')->select();
+            $query->whereOr($whereOr);})->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','right')->field('a.org_name as organizationName,b.id as staffId,b.phone,b.nickname as staffName,b.remarks')->order('org_name')->select();
         }else{
             $where = [];
             if($organizationId>0){
@@ -586,7 +586,7 @@ class Company extends Base
                 $where['b.phone'] = $phone;
             }
             $EntOrganization = new EntOrganization();
-            $data = $EntOrganization->alias('a')->where($where)->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','right')->field('a.org_name as organizationName,b.id as staffId,b.phone,b.nickname as staffName')->order('org_name')->select();
+            $data = $EntOrganization->alias('a')->where($where)->where(['a.company_id'=>$companyId,'a.is_deleted'=>0,'a.parent_id'=>0])->join(['jzdc_index_user'=>'b'],'a.id=b.organization_id','right')->field('a.org_name as organizationName,b.id as staffId,b.phone,b.nickname as staffName,b.remarks')->order('org_name')->select();
         }
 
         //获取参数
@@ -596,7 +596,7 @@ class Company extends Base
                 $arr = [];
                 $dt = [];
                 foreach ($data as $key => $val) {
-                    $arr[$val['organizationName']][] = ['phone'=>$val['phone'],'staffId'=>$val['staffId'],'staffName'=>$val['staffName']];
+                    $arr[$val['organizationName']][] = ['phone'=>$val['phone'],'staffId'=>$val['staffId'],'staffName'=>$val['staffName'],'remarks'=>$val['remarks']];
                 }
                 foreach ($arr as $k => $v) {
                     $dt[] = ['organizationName'=>$k,'staffList'=>$v];
