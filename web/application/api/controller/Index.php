@@ -147,7 +147,7 @@ class Index extends Base
             $cateAllId =  $productCategoryModel->getChildIds($categoryRow->id,true);
 
             $productResult =  $typeLists = [];
-            $dataProducts = $productModel->where(['category_id'=>['in',$cateAllId],'is_recommended'=>1,'is_deleted'=>0])->order('created_time desc')->limit(8)->field(['id','min_price','max_price','title','is_price_neg_at_phone','cover_img_url'])->select();
+            $dataProducts = $productModel->where(['category_id'=>['in',$cateAllId],'is_recommended'=>1,'is_deleted'=>0,'state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED])->order('created_time desc')->limit(8)->field(['id','min_price','max_price','title','is_price_neg_at_phone','cover_img_url'])->select();
 
             foreach($dataProducts as $dataProduct){
                 $productResult[] =[
