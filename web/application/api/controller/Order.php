@@ -648,7 +648,7 @@ class Order extends Base{
             return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
         }
         $where['supplier'] = $companyId;
-        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','goods_names','state','pay_date','out_id','buyer_comment','buyer_id','supplier'])->find();
+        $row = $model->where($where)->field(['id','receiver_area_name','add_time','delivery_time','receiver_name','receiver_phone','receiver_detail','goods_names','state','pay_date','out_id','buyer_comment','buyer_id','supplier','created_user_id'])->find();
         if(!$row){
             return ['status'=>1,'data'=>[],'msg'=>'订单不存在'];
         }
