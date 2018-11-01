@@ -252,11 +252,11 @@ class Goods  extends Base {
                 ->select();
         }else{ //供应商搜索
             $total = $model->alias('a')->join(['ent_company b'],'a.supplier_id=b.id','left')
-                ->where(['a.state'=>SmProduct::STATE_FORSALE,'a.audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])
+                ->where(['a.state'=>SmProduct::STATE_FORSALE,'a.audit_state'=>SmProduct::AUDIT_RELEASED,'a.is_deleted'=>0])
                 ->where('b.company_name','like','%'.$keywords.'%')
                 ->count();
             $rows = $model->alias('a')->join(['ent_company b'],'a.supplier_id=b.id')
-                ->where(['a.state'=>SmProduct::STATE_FORSALE,'a.audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])
+                ->where(['a.state'=>SmProduct::STATE_FORSALE,'a.audit_state'=>SmProduct::AUDIT_RELEASED,'a.is_deleted'=>0])
                 ->where('b.company_name','like','%'.$keywords.'%')
                 ->limit($start,$pageSize)
                 ->order('a.min_price',$sort)
