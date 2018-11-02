@@ -287,7 +287,7 @@ class Buyer extends Base
             'companyName' => $buyerInfo ? $buyerInfo->company_name : '' ,
             'supplierName' => $sellerInfo ? $sellerInfo->company_name : '',
             'buyerName' => $buyerInfo ? $buyerInfo->company_name : '',
-            'groupId' => $this->groupId,
+            'groupId' => IndexGroup::GROUP_BUYER,
             'state' => $row->state,
             'money' => getFormatPrice($row->actual_money),
             'goods_money'=> getFormatPrice($row->goods_money),
@@ -307,8 +307,8 @@ class Buyer extends Base
         ];
 
 
-        $data['statusMsg'] = getOrderMsg($this->groupId,$row->state,$row->service_type);
-        $data['isService'] =  $this->groupId == 4 && $row->service_type == 0 && ($row->state == 6 || $row->state == 13 || $row->state == 9 || $row->state == 10 || $row->state == 11)  ? 1 : 0;
+        $data['statusMsg'] = getOrderMsg(IndexGroup::GROUP_BUYER,$row->state,$row->service_type);
+        $data['isService'] =  $row->service_type == 0 && ($row->state == 6 || $row->state == 13 || $row->state == 9 || $row->state == 10 || $row->state == 11)  ? 1 : 0;
         $data['payMethod'] = '';
         $data['payNumber'] = '';
         $data['payImg'] = '';
