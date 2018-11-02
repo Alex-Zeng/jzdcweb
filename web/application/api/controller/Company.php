@@ -315,7 +315,7 @@ class Company extends Base
                 //发送短信
                 $param['code'] = $code;
                 $yunpian = new \sms\Yunpian();
-                $result = true;//$yunpian->send($phone,$param,\sms\Yunpian::TPL_ORGANIZATION_USER);
+                $result = $yunpian->send($phone,$param,\sms\Yunpian::TPL_ORGANIZATION_USER);
                 if(!$result){
                     return ['status'=>1,'data'=>(object)[],'msg'=>'验证码发送失败'];
                 }
