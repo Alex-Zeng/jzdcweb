@@ -499,8 +499,7 @@ class Order extends Base{
             ->setCellValue('R1', '买家付款日期')
             ->setCellValue('S1','卖家发货日期')
             ->setCellValue('T1','买家收货日期')
-            ->setCellValue('U1','付款至卖家日期')
-            ->setCellValue('V1','付款至卖家日期');
+            ->setCellValue('U1','付款至卖家日期');
 
         //查询数据
         $total = $model->where($where)->count();
@@ -533,10 +532,6 @@ class Order extends Base{
                 $supplier = $companyModel->getInfoById($row->supplier);
                 //查询订单商品
                 $goodsRows = $goodsModel->where(['order_id' => $row->id])->select();
-                $goodsCount = count($goodsRows);
-                $orderStart = $counter;
-                $orderEnd = $counter + $goodsCount - 1;
-
                 //查询订单支付数据
 
                 $payRows = $orderPayModel->where(['order_id'=>$row->id])->order('create_time asc')->select();
@@ -559,8 +554,8 @@ class Order extends Base{
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('G' . $counter, $goodsRow->title);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('H' . $counter, $goodsRow->s_info);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('I' . $counter, $goodsRow->quantity);
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('J' . $counter, $goodsRow->price);
-                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('K' . $counter, getFormatPrice($goodsRow->quantity * $goodsRow->price,4));
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('J' . $counter, '¥'.$goodsRow->price);
+                    $objPHPExcel->setActiveSheetIndex(0)->setCellValue('K' . $counter, '¥'.number_format($goodsRow->quantity * $goodsRow->price,4));
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('L' . $counter, $goodsRow->specifications_no);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('M' . $counter, $goodsRow->specifications_name);
                     $objPHPExcel->setActiveSheetIndex(0)->setCellValue('N' . $counter, $row->buyer_comment);

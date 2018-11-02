@@ -10,6 +10,7 @@ namespace app\api\controller;
 
 
 use app\common\model\EntCompany;
+use app\common\model\IndexGroup;
 use app\common\model\IndexUser;
 use app\common\model\MallOrder;
 use app\common\model\MallOrderGoods;
@@ -221,8 +222,8 @@ class Seller  extends Base
             }
             $row['goods'] = $goodsRows;
             $queryStatus = $status == 6 ? true : false;
-            $row['statusMsg'] = getOrderMsg($this->groupId,$row->state,$row->service_type,$queryStatus);
-            $row['cancelType'] = $this->groupId && ($row->state == 1 || $row->state == 0)   ? 1 : 0;
+            $row['statusMsg'] = getOrderMsg(IndexGroup::GROUP_SUPPLIER,$row->state,$row->service_type,$queryStatus);
+            $row['cancelType'] =  0;
             $row['confirmType'] = 0;
             $row['actual_money'] = getFormatPrice($row->actual_money);
             $row['goods_money'] = getFormatPrice($row->goods_money);
