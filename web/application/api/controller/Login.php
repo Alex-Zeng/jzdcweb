@@ -10,6 +10,7 @@ namespace app\api\controller;
 
 use app\common\model\Code;
 use app\common\model\IndexUser;
+use app\common\model\EntCompany;
 use think\Request;
 use Firebase\JWT\JWT;
 
@@ -48,7 +49,7 @@ class Login{
        $where = [];
 
        //判断账户类型
-        $field = ['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email', 'real_name'];
+        $field = ['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email', 'real_name','company_id'];
         if(stripos( $name,'@')){
             $row = $model->where(['email'=>$name])->field($field)->find();
         }else{
@@ -66,6 +67,18 @@ class Login{
             return ['status'=>1,'data'=>[],'msg'=>'密码不正确'];
         }
 
+        if($row['company_id']>0){
+            $roleId = 2;
+            $EntCompany = new EntCompany();
+            $company = $EntCompany->field('responsible_user_id,company_name')->where(['id'=>$row['company_id']])->find();
+        }else{
+            $roleId = 0;
+            $company = ['responsible_user_id'=>0,'company_name'=>''];
+        }
+        if($company['responsible_user_id']>0 && $company['responsible_user_id']==$row['id']){
+            $roleId = 1;
+        }
+
         $data = [
             'contact' => $row->contact,
             'tel' => $row->tel ? $row->tel : '',
@@ -75,7 +88,8 @@ class Login{
             'email' => $row->email,
             'username' => $row->username,
             'group' => $row->group,
-            'companyName' => $row->real_name
+            'companyName' => $company['company_name'],
+            'roleId'=> $roleId
         ];
         //生成token
         $key = config('jzdc_token_key');
@@ -126,7 +140,7 @@ class Login{
 
         //查询user表是否存在
         $model = new IndexUser();
-        $row = $model->where(['phone'=>$phone])->field(['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email', 'real_name'])->find();
+        $row = $model->where(['phone'=>$phone])->field(['id','username','password','group','nickname','icon','state', 'contact', 'tel', 'phone', 'email', 'real_name','company_id'])->find();
         if(!$row){
             return ['status'=>-3,'data'=>[],'msg'=>'用户未注册'];
         }else{
@@ -141,6 +155,18 @@ class Login{
             ];
         }
 
+        if($row['company_id']>0){
+            $roleId = 2;
+            $EntCompany = new EntCompany();
+            $company = $EntCompany->field('responsible_user_id,company_name')->where(['id'=>$row['company_id']])->find();
+        }else{
+            $roleId = 0;
+            $company = ['responsible_user_id'=>0,'company_name'=>''];
+        }
+        if($company['responsible_user_id']>0 && $company['responsible_user_id']==$row['id']){
+            $roleId = 1;
+        }
+        
         $data = [
             'contact' => $row->contact,
             'tel' => $row->tel ? $row->tel : '',
@@ -150,7 +176,9 @@ class Login{
             'email' => $row->email,
             'username' => $row->username,
             'group' => $row->group,
-            'companyName' => $row->real_name
+            'companyName' => $company['company_name'],
+            'roleId'=> $roleId
+
         ];
         //生成token
         $key = config('jzdc_token_key');

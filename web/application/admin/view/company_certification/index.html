@@ -1,18 +1,7 @@
 {include file="layout/header" title="$title" keywords="" /}
 <link rel="stylesheet" href="__STATIC__/js/plugins/bootstrapvalidator/css/bootstrapValidator.css"/>
 {include file="layout/left" groupId="$groupId" keywords="" /}
-<style type="text/css">
-    hr{
-        width: 10px;
-        border: 1px solid #ced4da;
-        margin-left: 2px;
-        margin-right: 2px;
-    }
-    input[type="date"]:before{
-        color:#A9A9A9;
-        content:attr(placeholder);
-    }
-</style>
+<!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <div class="content-header">
         <div class="container-fluid">
@@ -23,7 +12,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active">企业认证认证数据</li>
+                        <li class="breadcrumb-item active">企业认证</li>
                     </ol>
                 </div><!-- /.col -->
             </div><!-- /.row -->
@@ -34,34 +23,28 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">企业认证认证数据</h3>
+                        <h3 class="card-title">企业认证</h3>
                     </div>
                     <div class="row" style="padding-top: 15px;padding-right: 15px">
-                        <div class="col-md-8">
+                        <div class="col-md-6">
                             <form class="form-inline ml-3" action="{:url()}"  method="get">
-                                <div class="form-group">
-                                    <label style="font-weight: normal;">提交时间：</label>
-                                    <div class = "input-group" style="padding-right: 15px">
-                                        <input type = "date"  name="start" class = "form-control"  value="{$start}" placeholder="开始日期">
-                                        <span style="display: inline-block;vertical-align: middle;padding-top: 5px"><hr /></span>
-                                        <input type = "date" name="end" class = "form-control" value="{$end}" placeholder="结束日期">
-                                    </div>&nbsp;
-                                </div>
-                                <div class="form-group">
-                                    <label style="font-weight: normal;">认证手机：</label>
-                                    <div class="input-group" style="min-width: 280px;padding-right: 15px">
-                                        <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="" aria-label="Search">
-                                    </div>
-                                </div>
-                                <div class="form-group">
+                                <div class="input-group">
+                                    <select class="form-control" name="status"  placeholder="认证状态">
+                                        <option  {if $status eq 0}selected{/if} value="0" >全部审核状态</option>
+                                        <option  {if $status eq 1}selected{/if} value="1">待审核</option>
+                                        <option  {if $status eq 3}selected{/if} value="3">已通过</option>
+                                        <option  {if $status eq 2}selected{/if} value="2">已拒绝</option>
+                                    </select>
+                                </div> &nbsp;&nbsp;
+                                <div class="input-group" style="min-width: 280px">
+                                    <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="企业名称/法人代表/联系人" aria-label="Search">
                                     <div class="input-group-append">
-                                        <button class="btn btn-primary" id="search" type="submit">搜索</button>
+                                        <button class="btn btn-primary" id="search" type="submit">查找</button>
                                     </div>
                                 </div>
                             </form>
                         </div>
-                        <div class="col-md-4">
-                            <a class="btn btn-primary pull-right"  target="_blank"  href="{:url('admin/report/company_export',['start'=>$start,'end'=>$end,'k'=>$k])}" >导出</a>
+                        <div class="col-md-6">
                         </div>
                     </div>
                     <!-- /.card-header -->
@@ -69,39 +52,36 @@
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                             <tr>
-                                <th>序号</th>
-                                <th>认证手机</th>
-                                <th>认证用户名</th>
                                 <th>企业名称</th>
                                 <th>法人代表</th>
+                                <th>公司固话</th>
                                 <th>联系人</th>
-                                <th>联系电话</th>
-                                <th>提交日期</th>
-                                <th>审核状态</th>
-                                <th>审核日期</th>
+                                <th>填写者</th>
+                                <th>提交时间</th>
+                                <th>拒绝原因</th>
+                                <th>审核状态 </th>
+                                <th>操作</th>
                             </tr>
                             </thead>
                             <tbody>
                             {volist name='list' id='company'}
                             <tr>
-                                <td>{$key+1}</td>
-                                <td>{$company.phone}</td>
-                                <td>{$company.username}</td>
                                 <td>{$company.company_name}</td>
                                 <td>{$company.legal_representative}</td>
-                                <td>{$company.contact}</td>
-                                <td>{$company.telephone}</td>
+                                <td>{$company.contact_phone}</td>
+                                <td>{$company.contacts}</td>
+                                <td>{$company.last_modified_user}</td>
                                 <td>
                                     {if $company.last_modified_time gt 0}
                                     {:date('Y-m-d',$company.last_modified_time/1000)}
                                     {/if}
                                 </td>
+                                <td>{$company.description}</td>
                                 <td>{:getCertificationStatusNew($company.state)} </td>
                                 <td>
-                                    {if $company.audit_time gt 0}
-                                    {:date('Y-m-d',$company.audit_time / 1000)}
-                                    {else /}
-                                    {/if}
+                                    <a href="{:url('view','id='.$company.id)}"  target="_blank" class="btn btn-sm btn-primary">详情</a>
+                                    <a href="javascript:void(0)"  class="btn btn-sm btn-danger"  data-id="{$company.id}" data-toggle="modal"   data-target="#refuse-modal">拒绝</a>
+                                    <a href="javascript:void(0)"  class="btn btn-sm btn-primary"  data-id="{$company.id}" data-toggle="modal"  data-name="{$company.company_name}"  data-target="#confirm-modal">通过</a>
                                 </td>
                             </tr>
                             {/volist}
@@ -162,7 +142,7 @@
                 </button>
             </div>
             <div class="modal-body ">
-                确认审核通过?
+                 确认审核通过?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
@@ -174,9 +154,84 @@
 
 {include file="layout/footer" title="$title" keywords="" /}
 <script type="text/javascript" src="__STATIC__/js/plugins/bootstrapvalidator/js/bootstrapValidator.js"></script>
-<script type="text/javascript" src="__STATIC__/js/admin/certification.js"></script>
 <script type="text/javascript">
-    var url = '{:url("admin/report/company")}';
-    $('a[href="'+url+'"]').addClass('active');
-    $('a[href="'+url+'"]').parent().parent().parent().addClass('menu-open');
+    var url = '{:url("admin/company_certification/index")}';
+    $('.nav-sidebar').find('a[href="'+url+'"]').addClass('active');
+
+    $(function () {
+        $('#refuse-form').bootstrapValidator({
+            live: 'disabled',
+            message: 'This value is not valid',
+            fields: {
+                reason: {
+                    message: 'The reason is not valid',
+                    validators: {
+                        notEmpty: {
+                            message: '拒绝原因不能为空'
+                        },
+                        stringLength: {
+                            min: 2,
+                            max: 200,
+                            message: '最大长度为255个字符'
+                        },
+                    }
+                },
+            }
+        });
+
+        $('#refuse-modal').on('show.bs.modal', function (event) {
+            var id = $(event.relatedTarget).attr('data-id');
+            //赋值
+            $("#refuse-request").data('id',id);
+        });
+
+        $("#refuse-request").click(function () {
+            //验证数据
+            $('#refuse-form').bootstrapValidator('validate');
+            var id = $(this).data('id');
+            //数据提交
+            if ($("#refuse-form").data('bootstrapValidator').isValid()) {
+                $.ajax({
+                    type: 'post',
+                    url: '?s=admin/company_certification/audit',
+                    data: {id:id,state:0,reason:$('textarea[name="reason"]').val()},
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.status == 0) {
+                            window.location.reload();
+                        } else {
+                            alert(data.msg);
+                        }
+                    }
+                });
+            }
+        });
+
+        $('#confirm-modal').on('show.bs.modal', function (event) {
+            var id = $(event.relatedTarget).data('id');
+            //赋值
+            $("#confirm-request").data('id',id);
+        });
+        $("#confirm-request").click(function () {
+            //验证数据
+            var id = $(this).data('id');
+            if(id <= 0){
+                return;
+            }
+            //数据提交
+            $.ajax({
+                type: 'post',
+                url: '?s=admin/company_certification/audit',
+                data: {id:id,state:1},
+                dataType: 'json',
+                success: function (data) {
+                    if (data.status == 0) {
+                        window.location.reload();
+                    } else {
+                        alert(data.msg);
+                    }
+                }
+            });
+        });
+    });
 </script>

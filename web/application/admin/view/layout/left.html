@@ -40,11 +40,16 @@
                     'managerIcon'=> 'fa-cart-arrow-down',
                     'managerVal' => [['name'=>'管理订单','url'=>url('admin/order/index'),'icon'=>'fa-database']] 
                 ],[
-                    'managerKey' => '企业认证',
-                    'managerIcon'=> 'fa-users',
-                    'managerUrl' => url('admin/certification/index'),
+                    'managerKey' => '企业管理',
+                    'managerIcon'=> 'fa-university',
+                    'managerUrl' => url('admin/companyInfo/index'),
                     'managerVal' => []
                 ],[
+                  'managerKey' => '企业认证',
+                  'managerIcon'=> 'fa-users',
+                  'managerUrl' => url('admin/company_certification/index'),
+                  'managerVal' => []
+                 ],[
                     'managerKey' => '金融服务',
                     'managerIcon'=> 'fa-money',
                     'managerUrl' => url('admin/service/index'),
@@ -71,8 +76,8 @@
                    'managerIcon'=> 'fa-bar-chart',
                    'managerUrl' => '#',
                    'managerVal' => [   ['name'=>'商品交易报表','url'=>url('admin/report/trade'),'icon'=>'fa-database'],
-                                       ['name'=>'供应商交易报表','url'=>url('admin/report/supplier'),'icon'=>'fa-cubes'],
-                                       ['name'=>'采购商交易报表','url'=>url('admin/report/buyer'),'icon'=>'fa-shopping-cart'],
+                                       ['name'=>'卖家交易报表','url'=>url('admin/report/supplier'),'icon'=>'fa-cubes'],
+                                       ['name'=>'买家交易报表','url'=>url('admin/report/buyer'),'icon'=>'fa-shopping-cart'],
                                        ['name'=>'订单数据报表','url'=>url('admin/report/order'),'icon'=>'fa-reorder'],
                                        ['name'=>'企业注册认证数据','url'=>url('admin/report/company'),'icon'=>'fa-check']
                                    ]
@@ -98,7 +103,8 @@
                     'managerKey' => '会员中心',
                     'managerUrl' => 'javascript:;',
                     'managerIcon'=> 'fa-group',
-                    'managerVal' => [['name'=>'管理会员','url'=>url('admin/member/index'),'icon'=>'fa-group']]
+                    'managerVal' => [ ['name'=>'管理会员','url'=>url('admin/member/index'),'icon'=>'fa-group'],
+                                    ]
                 ]
             ]
         ];

@@ -7,7 +7,7 @@ class Index extends Base
 {
     public function index()
     {	
-    	$this->redirect('goods/index');
+    	$this->redirect('order/index');
         return $this->fetch();
     }
 

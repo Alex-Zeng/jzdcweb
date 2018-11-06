@@ -7,12 +7,10 @@
  */
 
 namespace app\api\controller;
+use app\common\model\EntCompany;
 use app\common\model\IndexUser;
-use app\common\model\MallColor;
 use app\common\model\MallFavorite;
-use app\common\model\MallGoods;
-use app\common\model\MallGoodsSpecifications;
-use app\common\model\MallUnit;
+
 use app\common\model\SmProduct;
 use app\common\model\SmProductCategory;
 use app\common\model\SmProductGallery;
@@ -22,8 +20,6 @@ use app\common\model\SmProductSpecAttrVal;
 use app\common\model\SmProductSpecPrice;
 use app\common\model\UserGoodsSpecifications;
 use app\common\model\UserSearchLog;
-use app\common\model\MallType;
-use app\common\model\MallTypeOption;
 use app\common\model\MenuMenu;
 use think\Request;
 use think\View;
@@ -255,13 +251,13 @@ class Goods  extends Base {
                 ->field(['a.id','a.is_price_neg_at_phone','a.title','a.min_price','a.max_price','a.cover_img_url'])
                 ->select();
         }else{ //供应商搜索
-            $total = $model->alias('a')->join(config('prefix').'index_user b','a.supplier_id=b.id','left')
-                ->where(['a.state'=>SmProduct::STATE_FORSALE,'a.audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])
-                ->where('b.real_name','like','%'.$keywords.'%')
+            $total = $model->alias('a')->join(['ent_company b'],'a.supplier_id=b.id','left')
+                ->where(['a.state'=>SmProduct::STATE_FORSALE,'a.audit_state'=>SmProduct::AUDIT_RELEASED,'a.is_deleted'=>0])
+                ->where('b.company_name','like','%'.$keywords.'%')
                 ->count();
-            $rows = $model->alias('a')->join(config('prefix').'index_user b','a.supplier_id=b.id')
-                ->where(['a.state'=>SmProduct::STATE_FORSALE,'a.audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0])
-                ->where('b.real_name','like','%'.$keywords.'%')
+            $rows = $model->alias('a')->join(['ent_company b'],'a.supplier_id=b.id')
+                ->where(['a.state'=>SmProduct::STATE_FORSALE,'a.audit_state'=>SmProduct::AUDIT_RELEASED,'a.is_deleted'=>0])
+                ->where('b.company_name','like','%'.$keywords.'%')
                 ->limit($start,$pageSize)
                 ->order('a.min_price',$sort)
                 ->field(['a.id','a.is_price_neg_at_phone','a.title','a.min_price','a.max_price','a.cover_img_url'])
@@ -342,8 +338,8 @@ class Goods  extends Base {
         }
 
         //获取商家
-        $userModel = new IndexUser();
-        $supplierInfo = $userModel->getInfoById($product->supplier_id);
+        $EntCompany = new EntCompany();
+        $supplierInfo = $EntCompany->getInfoById($product->supplier_id);
 
         //是否收藏
         $isFavorite = 0;
@@ -441,12 +437,12 @@ class Goods  extends Base {
             ];
         }
 
-        $icon = $supplierInfo ? $supplierInfo->icon : '';
+        $logoUri = $supplierInfo ? $supplierInfo->logo_uri : '';
         //返回结果
         $list = [
             "imgList" => $imgList,
-            "companyName" => $supplierInfo ? $supplierInfo->real_name : '',
-            "companyLogo" => IndexUser::getFormatIcon($icon),
+            "companyName" => $supplierInfo ? $supplierInfo->company_name : '',
+            "companyLogo" => EntCompany::getFormatLogo($logoUri),
             "title" => $product->title,
             "isDiscussPrice" => getBinDecimal($product->is_price_neg_at_phone),
             "minPrice" => getFormatPrice($product->min_price),

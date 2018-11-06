@@ -8,12 +8,8 @@
 
 namespace app\api\controller;
 
+use app\common\model\EntCompany;
 use app\common\model\IndexUser;
-use app\common\model\IndexGroup;
-use app\common\model\MallGoods;
-use app\common\model\MallGoodsSpecifications;
-use app\common\model\MallTypeOption;
-use app\common\model\MallUnit;
 use app\common\model\SmProduct;
 use app\common\model\SmProductSpec;
 use app\common\model\SmProductSpecAttrs;
@@ -66,9 +62,13 @@ class MallCart extends Base{
         if($auth){
             return $auth;
         }
-        //采购商权限
-        if($this->groupId != IndexGroup::GROUP_BUYER){
-            return ['status'=>1,'data'=>[],'msg'=>'没有权限操作'];
+        //采购权限
+        $userModel = new IndexUser();
+        $companyModel = new EntCompany();
+        $user = $userModel->getInfoById($this->userId);
+        $companyInfo = $companyModel->where(['id'=>$user->company_id])->find();
+        if($user->company_id == 0 || $companyInfo->audit_state != EntCompany::STATE_PASS){
+            return ['status'=>1,'data'=>[],'msg'=>'尚未加入企业或企业审核未通过，无法加入购物车'];
         }
 
         //查询商品是否存在
@@ -91,8 +91,7 @@ class MallCart extends Base{
         if($cartRow){  //存在更新数量
             $result = $cartModel->save(['quantity'=>$cartRow->quantity+$number,'price' => isset($specRow->price) ? $specRow->price : '0.00'],$where);
         }else{ //不存在插入数据
-            $userModel = new IndexUser();
-            $user = $userModel->getInfoById($this->userId);
+
             $data = [
                 'user_id' => $this->userId,
                 'username' => $user ? $user->username : '',
@@ -136,9 +135,14 @@ class MallCart extends Base{
         if($auth){
             return $auth;
         }
-        //采购商权限
-        if($this->groupId != IndexGroup::GROUP_BUYER){
-            return ['status'=>1,'data'=>[],'msg'=>'没有权限操作'];
+
+        //权限验证
+        $userModel = new IndexUser();
+        $companyModel = new EntCompany();
+        $user = $userModel->getInfoById($this->userId);
+        $companyInfo = $companyModel->where(['id'=>$user->company_id])->find();
+        if($user->company_id == 0 || $companyInfo->audit_state != EntCompany::STATE_PASS){
+            return ['status'=>1,'data'=>[],'msg'=>'尚未加入企业或企业审核未通过，无法加入购物车'];
         }
 
         $specMaps = [];
@@ -167,8 +171,6 @@ class MallCart extends Base{
             if($cartRow){  //存在更新数量
                 $result = $cartModel->save(['quantity'=>$cartRow->quantity+$specMap['quantity'],'price' => isset($specRow->price) ? $specRow->price : '0.00'],$where);
             }else{ //不存在插入数据
-                $userModel = new IndexUser();
-                $user = $userModel->getInfoById($this->userId);
                 $data = [
                     'user_id' => $this->userId,
                     'username' => $user ? $user->username : '',
@@ -200,6 +202,11 @@ class MallCart extends Base{
         }
         //查询数据
         $model = new \app\common\model\MallCart();
+        $userModel = new IndexUser();
+        $companyModel = new EntCompany();
+
+        $userInfo = $userModel->getInfoById($this->userId);
+        $companyId = $userInfo ? $userInfo->company_id : 0;
 
         $where = [];
         $where['a.user_id'] = $this->userId;
@@ -254,17 +261,17 @@ class MallCart extends Base{
                 'unit' => $row->unit,  //单位
                 'isDiscussPrice' => getBinDecimal($row->is_price_neg_at_phone), //议价
                 "specPriceDetails" => $specPriceDetails,  //价格范围
-                'showPrice' => getSimplePrice($row->is_price_neg_at_phone,$row->price)
+                'showPrice' => getSimplePrice($row->is_price_neg_at_phone,$row->price),
+                'buyAble' => $row->supplier_id == $companyId ? 0 : 1
             ];
         }
 
         $data = [];
         foreach($supplierData as $supplierId => $supplierRow){
-            $userModel = new IndexUser();
-            $userInfo = $userModel->getInfoById($supplierId);
-
+            $companyInfo = $companyModel->getInfoById($supplierId);
             $data[] = [
-                'supplierName' => $userInfo ? ($userInfo->real_name ? $userInfo->real_name : '') : '',
+                'buyAble' => $supplierId == $companyId ? 0 : 1,
+                'supplierName' => $companyInfo ? ($companyInfo->company_name ? $companyInfo->company_name : '') : '',
                 'list' => $supplierRow
             ];
         }

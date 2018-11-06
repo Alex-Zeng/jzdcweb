@@ -9,9 +9,10 @@
 namespace app\api\controller;
 
 use app\common\model\EmailCode;
+use app\common\model\EntCompany;
+use app\common\model\EntCompanyAudit;
 use app\common\model\FormUserCert;
 use app\common\model\IndexArea;
-use app\common\model\IndexGroup;
 use app\common\model\IndexUser;
 use app\common\model\MallFavorite;
 use app\common\model\MallOrder;
@@ -38,6 +39,37 @@ class User extends Base
         $this->noauth();
         return ['status' => 0, 'data' => ['groupId' => intval($this->groupId)], 'msg' => ''];
     }
+
+    /**
+     * @desc 返回用户身份角色
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getRole(){
+        $this->noauth();
+        $userModel = new IndexUser();
+        $companyModel = new EntCompany();
+        //获取用户ID
+        $userId = $this->userId;
+        $roleId = 0;   //未加入公司
+        if($userId > 0){
+            $userInfo = $userModel->getInfoById($userId);
+            if($userInfo->company_id > 0){
+                $companyInfo = $companyModel->where(['id'=>$userInfo->company_id,'is_deleted'=>0])->find();
+                if($companyInfo){
+                    if($userId == $companyInfo->responsible_user_id){
+                        $roleId = 1; //公司管理员
+                    }else{
+                        $roleId = 2; //公司非管理员
+                    }
+                }
+            }
+        }
+        return ['status' => 0, 'data' => ['roleId' => intval($roleId)], 'msg' => ''];
+    }
+
 
     /**
      * @desc 添加收货人地址
@@ -335,9 +367,13 @@ class User extends Base
         if ($auth) {
             return $auth;
         }
-        if($this->groupId != IndexGroup::GROUP_SUPPLIER){
-            return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
+        //权限验证
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
         }
+        $companyId = $pResult['data']['companyId'];
+
         //
         $model = new MallOrder();
 
@@ -345,17 +381,17 @@ class User extends Base
         $endTime = strtotime(date('Y-m-d 23:59:59', strtotime("-1 day")));
 
         //
-        $yesterdayCount = $model->where(['supplier' => $this->userId])->where('add_time', '>', $startTime)->where('add_time', '<', $endTime)->count();
-        $total = $model->where(['supplier' => $this->userId])->count();
-        $pendingNumber = $model->where(['supplier' => $this->userId, 'state' => MallOrder::STATE_DELIVER])->count();
-        $serviceNumber = $model->where(['supplier'=> $this->userId,'state'=>MallOrder::STATE_RECEIVE,'service_type'=>1])->order(['supplier'=> $this->userId,'state'=>MallOrder::STATE_FINISH,'service_type'=>1])->count();
+        $yesterdayCount = $model->where(['supplier' => $companyId])->where('add_time', '>', $startTime)->where('add_time', '<', $endTime)->count();
+        $total = $model->where(['supplier' => $companyId])->count();
+        $pendingNumber = $model->where(['supplier' => $companyId, 'state' => MallOrder::STATE_DELIVER])->count();
+        $serviceNumber = $model->where(['supplier'=> $companyId,'state'=>MallOrder::STATE_RECEIVE,'service_type'=>1])->order(['supplier'=> $this->userId,'state'=>MallOrder::STATE_FINISH,'service_type'=>1])->count();
         //在售商品总数
         $productModel = new SmProduct();
         //交易金额   $where['confirm_delivery_time'] = ['>',0];
-        $moneyInfo = $model->where(['supplier'=>$this->userId,'confirm_delivery_time'=>['gt',0]])->field(['sum(`actual_money`) as money'])->find();
+        $moneyInfo = $model->where(['supplier'=>$companyId,'confirm_delivery_time'=>['gt',0]])->field(['sum(`actual_money`) as money'])->find();
 
         //在售商品访问量
-        $goodsInfo = $productModel->where(['state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0,'supplier_id'=>$this->userId])->field(['count(*) as count','sum(page_view) as visit'])->find();
+        $goodsInfo = $productModel->where(['state'=>SmProduct::STATE_FORSALE,'audit_state'=>SmProduct::AUDIT_RELEASED,'is_deleted'=>0,'supplier_id'=>$companyId])->field(['count(*) as count','sum(page_view) as visit'])->find();
         //
         return [
             'status' => 0,
@@ -382,17 +418,32 @@ class User extends Base
         if ($auth) {
             return $auth;
         }
-        //
-        if($this->groupId != IndexGroup::GROUP_BUYER){
-            return ['status'=>1,'data'=>[],'msg'=>'没有权限'];
+        //权限验证
+        $pResult = $this->checkCompanyPermission();
+        if($pResult['status'] == 1){
+            return $pResult;
         }
+        $companyId = $pResult['data']['companyId'];
+        $companyModel = new EntCompany();
+        $userId = 0;
+        $companyInfo = $companyModel->getInfoById($companyId);
+        if($companyInfo->responsible_user_id != $this->userId){
+            $userId = $this->userId;
+        }
+
+        $where = [];
+        $where['buyer_id'] = $companyId;
+        if($userId > 0){
+            $where['created_user_id'] = $userId;
+        }
+
         $model = new MallOrder();
         $condition = [MallOrder::STATE_REMITTANCE,MallOrder::STATE_ACCOUNT_PERIOD,MallOrder::STATE_OVERDUE];
-        $payCount = $model->where(['buyer_id' => $this->userId])->whereIn('state',$condition)->count();
-        $recieveNumber = $model->where(['buyer_id' => $this->userId,'state' => MallOrder::STATE_RECEIVE])->count();
-        $pendingNumber = $model->where(['buyer_id' => $this->userId,'state' => MallOrder::STATE_DELIVER])->count();
-        $serviceNumber = $model->where(['buyer_id'=> $this->userId,'service_type'=>1])->count();
-        $moneyInfo = $model->where(['buyer_id'=>$this->userId,'confirm_delivery_time'=>['gt',0]])->field(['sum(`actual_money`) as money'])->find();
+        $payCount = $model->where($where)->whereIn('state',$condition)->count();
+        $recieveNumber = $model->where($where)->where(['state' => MallOrder::STATE_RECEIVE])->count();
+        $pendingNumber = $model->where($where)->where(['state' => MallOrder::STATE_DELIVER])->count();
+        $serviceNumber = $model->where($where)->where(['service_type'=>1])->count();
+        $moneyInfo = $model->where($where)->where(['confirm_delivery_time'=>['gt',0]])->field(['sum(`actual_money`) as money'])->find();
         return [
             'status' => 0,
             'data' => [
@@ -612,6 +663,49 @@ class User extends Base
             $subject='集众电采平台系统认证通知';
             $content='现有用户提交企业认证申请，请及时跟进，谢谢。';
             SendMail($emailStr,$subject,$content);
+
+            ////////////////////////////////////写入新数据表//////////////////////////////////////////////
+            $companyAuditModel = new EntCompanyAudit();
+            if($userInfo->company_id > 0){  //更新
+                $data = [
+                    'company_name' => $companyName,
+                    'business_licence_uri' => $businessPath,
+                    'status' => EntCompanyAudit::STATE_PENDING,
+                    'enterprise_type' => $property,
+                    'reg_capital' => $capital,
+                    'legal_representative' => $representative,
+                    'organization_code_uri' => $orgStructureCodePermits,
+                    'agent_id_card_uri' => $agentIdentityCard,
+                    'tax_registration_uri' => $taxRegistrationCert,
+                    'address' => $detailAddress,
+                    'power_attorney_uri' => $powerOfAttorney,
+                    'last_modified_user_id' => $this->userId,
+                    'last_modified_user' => $userInfo->username,
+                    'last_modified_time' => microtime(true)*1000,
+                ];
+                $companyAuditModel->save($data,['company_id'=>$userInfo->company_id]);
+            }else{ //插入
+                $data = [
+                    'company_name' => $companyName,
+                    'business_licence_uri' => $businessPath,
+                    'status' => EntCompanyAudit::STATE_PENDING,
+                    'enterprise_type' => $property,
+                    'reg_capital' => $capital,
+                    'legal_representative' => $representative,
+                    'organization_code_uri' => $orgStructureCodePermits,
+                    'agent_id_card_uri' => $agentIdentityCard,
+                    'tax_registration_uri' => $taxRegistrationCert,
+                    'address' => $detailAddress,
+                    'power_attorney_uri' => $powerOfAttorney,
+                    'last_modified_user_id' => $this->userId,
+                    'last_modified_user' => $userInfo->username,
+                    'last_modified_time' => microtime(true)*1000,
+                    'created_user_id' => $this->userId,
+                    'created_user' => $userInfo->username,
+                    'created_time' => microtime(true)*1000
+                ];
+                $companyAuditModel->save($data);
+            }
 
             return ['status' => 0, 'data' => [], 'msg' => '已提交认证信息,等待审核...'];
         }
@@ -1069,12 +1163,25 @@ class User extends Base
         if ($auth) {
             return $auth;
         }
-
-        $model = new IndexUser();
-        $result = $model->save([$field => $value], ['id' => $this->userId]);
-        if ($result !== false) {
-            return ['status' => 0, 'data' => [], 'msg' => '修改成功'];
+        if(in_array($field, ['contact', 'tel'])){
+            $model = new IndexUser();
+            $result = $model->save([strtr($field,['contact'=>'nickname']) => $value], ['id' => $this->userId]);
+            if ($result !== false) {
+                return ['status' => 0, 'data' => [], 'msg' => '修改成功'];
+            }
         }
+        if(in_array($field, ['icon'])){
+            //验证是否为企业管理员
+            $companyId = $this->checkCompanyPermissionReturnCompanyId();
+            if($companyId>0){
+                $EntCompany = new EntCompany();
+                $result = $EntCompany->save(['logo_uri' => $value], ['id' => $companyId]);
+                if ($result !== false) {
+                    return ['status' => 0, 'data' => [], 'msg' => '修改成功'];
+                }
+            }
+        }
+
         return ['status' => 1, 'data' => [], 'msg' => '修改失败'];
     }
 
@@ -1088,11 +1195,14 @@ class User extends Base
         $model = new IndexUser();
         $row = $model->getInfoById($this->userId);
 
+        //1.0.3用户认证可通过企业邀请，引申出企业身份一对多人，所以企业信息需要分离
+        $EntCompany = new EntCompany();
+        $logo = $EntCompany->where(['id'=>$row->company_id])->value('logo_uri');
         $return = [
-            'contact' => $row->contact,
+            'contact' => $row->nickname,
             'tel' => $row->tel ? $row->tel : '',
-            'icon' => $row->icon ? $row->icon : '',
-            'path' => $row->icon ? IndexUser::getFormatIcon($row->icon) : '',
+            'icon' => $logo ? $logo : '',
+            'path' => $logo ? EntCompany::getFormatLogo($logo) : '',
             'phone' => $row->phone,
             'email' => $row->email,
             'username' => $row->username,

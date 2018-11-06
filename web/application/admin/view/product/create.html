@@ -5,6 +5,28 @@
     #custom-container > tr> td > input{
         width: 130px !important;
     }
+    .product-pd-tem-list.current .product-pd-img-show {
+        border: 2px solid red;
+        border-radius: 10px;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+    }
+
+    .product-pd-tem-list.active .product-pd-img-show{
+        border: 2px solid red;
+        border-radius: 10px;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+    }
+
+    .product-pd-img-show {
+        width: 225px;
+        height: 500px;
+        border: 2px solid #fff;
+        position: relative;
+        cursor: pointer;
+        overflow: hidden;
+    }
 </style>
 <div class="content-wrapper">
     <div class="content-header">
@@ -31,12 +53,12 @@
                         <form id="add-form" role="form" action="{:url('')}" method="post"  ><!-- onsubmit="return validateSubmit()" -->
                             <div class="card-body">
                                 <div class="form-inline form-group">
-                                    <label  class="col-md-2">*选择供应商</label>
+                                    <label  class="col-md-2">*选择商家</label>
                                     <div class="col-md-5 no-padding">
                                         <div class="row">
                                           <select class="form-control col-md-6 select2" name="supplier_id">
                                                 {volist name=":getSupplierList()"  id='user'}
-                                                <option  value="{$user.id}">{$user.real_name}</option>
+                                                <option  value="{$user.id}">{$user.company_name}</option>
                                                 {/volist}
                                           </select>
                                         </div>
@@ -63,7 +85,6 @@
                                 <div class="form-inline form-group">
                                     <div class="col-md-12 no-padding">
                                         <button type="button" class="btn btn-primary" id="combination-container-add">添加规格组合</button>
-
                                         <input type="checkbox" class="js_specification_customization" name="custom_switch" /> 定制
                                         <div style="display: none; " class="js_specification_customization_value">
                                             定制单价：<input type="number"  name="custom_price" min="0" class="form-control col-md-6" />
@@ -147,19 +168,36 @@
                                         <div class="row" id="js_area_template"></div>
                                     </div>
                                 </div>
+
                                 <div class="form-inline form-group">
-                                    <label class="col-md-2">商品详情Web</label>
+                                    <label class="col-md-2">使用Web模板</label>
                                     <div class="col-md-7 no-padding">
                                         <div class="row">
-                                            <textarea id="html_content_1" class="textarea goods-content" placeholder="商品详情..."  name="html_content_1"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                            <button type="button" class="btn btn-primary"  data-toggle="modal" data-type="1" data-target="#template-modal">使用模板</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-inline form-group">
+                                    <label class="col-md-2">商品详情Web</label>
+                                    <div class="col-md-8 no-padding">
+                                        <div class="row">
+                                            <textarea id="html_content_1" class="textarea goods-content" placeholder="商品详情..."  name="html_content_1"  style="width:940px; height: 400px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-inline form-group">
+                                    <label class="col-md-2">使用移动端模板</label>
+                                    <div class="col-md-7 no-padding">
+                                        <div class="row">
+                                            <button type="button" class="btn btn-primary" data-toggle="modal"  data-type="2" data-target="#template-modal">使用模板</button>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="form-inline form-group">
                                     <label class="col-md-2">商品详情APP/H5</label>
-                                    <div class="col-md-7 no-padding">
+                                    <div class="col-md-8 no-padding">
                                         <div class="row">
-                                            <textarea id="html_content_2" class="textarea goods-content" placeholder="商品详情..."  name="html_content_2"  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                            <textarea id="html_content_2" class="textarea goods-content" placeholder="商品详情..."  name="html_content_2"  style="width:960px; height: 400px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -177,6 +215,562 @@
         </div>
     </section>
 </div>
+
+
+<div class="modal fade" id="template-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">选择产品描述模板</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>请选择模板：</p>
+                        </div>
+                        <div class="col-md-6">
+                            <code>注：确认使用模板后，会清空当前已编辑的内容</code>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 product-pd-tem-list text-center">
+                            <div class="product-pd-img-show">
+                                <img src="__STATIC__/img/product_detail_template_01.png"  width="225px"  />
+                            </div>
+                            <div class="product-pd-footer">
+                                <p>模板一</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 product-pd-tem-list text-center">
+                            <div class="product-pd-img-show">
+                                <img src="__STATIC__/img/product_detail_template_02.png"  width="225px"  />
+                            </div>
+                            <div class="product-pd-footer">
+                                <p>模板二</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 product-pd-tem-list text-center">
+                            <div class="product-pd-img-show">
+                                <img src="__STATIC__/img/product_detail_template_03.png"  width="225px"  />
+                            </div>
+                            <div class="product-pd-footer">
+                                <p>模板三</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="confirm-request" data-type="">确认使用</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--模板html1-->
+<div class="template-html" style="display: none">
+    <div  style="width: 760px;margin:15px auto;padding:0 auto">
+    <fieldset style="border:1px solid #2475E2;border-radius:10px;margin-bottom:10px;">
+        <legend style="left:33%;height:30px;font-size:30px;font-weight:400;color:rgba(36,117,226,1);line-height:24px;text-align:center;">视频介绍</legend>
+        <div class="content" style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;">
+            文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
+        </div>
+        <br />
+        <div style="height:auto;margin:15px auto;text-align: center">
+            <embed src="" type="video/x-ms-asf-plugin" width="100%" height="400" autostart="false" loop="true" style="margin:0 auto;" />
+        </div>
+    </fieldset>
+    <fieldset style="border:1px solid #2475E2;border-radius:10px;margin-bottom:10px;">
+        <legend style="left:33%;background:white;width:33%;height:30px;font-size:30px;font-weight:400;color:rgba(36,117,226,1);line-height:24px;text-align:center;">标题</legend>
+        <div class="content" style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;">
+            文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
+        </div>
+        <p>
+            <br />
+        </p>
+        <div  style="height:auto;max-width: 100%;text-align: center">
+            <img style="margin-bottom:5px;max-width: 100%;" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+        </div>
+    </fieldset>
+    <fieldset style="border:1px solid #2475E2;border-radius:10px;margin-bottom:10px;">
+        <legend style="left:33%;background:white;width:33%;height:30px;font-size:30px;font-weight:400;color:rgba(36,117,226,1);line-height:24px;text-align:center;">商品实拍</legend>
+        <div  style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;">
+            文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
+        </div>
+        <p>
+            <br />
+        </p>
+        <div  style="height:auto;padding:0px 10px;">
+            <img  style="margin-bottom:5px;max-width: 100%;" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+            <div  style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;padding: 10px;">
+                文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
+            </div>
+            <img style="margin-bottom:5px;max-width: 100%" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+            <div  style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;padding: 10px;">
+                文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
+            </div>
+        </div>
+    </fieldset>
+    </div>
+</div>
+<!--模板1-->
+
+<!--模板html2-->
+<div class="template-html" style="display: none">
+    <div  style="width: 760px;margin:15px auto;padding:0 auto">
+        <!-- 一级标题 -->
+        <div style="width:100%;height:auto;padding-bottom:15px;padding:20px; 0px">
+            <img  style="max-width:94%;" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+        </div>
+
+        <div style="text-align:center;background-color:#5B96E3;padding:10px 0px;margin-bottom:10px;">
+            <h3 style="color:#ffffff;line-height:15px;">商品信息</h3>
+            <p style="color:#ffffff;line-height:15px;">PRODUCT INFORMATION</p>
+        </div>
+
+        <!-- 参数表图片 -->
+        <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+            <div  style="min-width: 200px; display:table-cell;height:44px;line-height:44px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                <span style="display:table-cell;min-width:55px;height:44px;color:#fff;font-size:22px;background-color:#017fd9;float:left;">01</span>
+                <span style="display:table-cell;min-width:160px;height:44px;line-height:44px;font-size:22px;color:#2475E2;">特点描述</span>
+            </div>
+            <div style="display: table-cell">
+                <span style="min-width: 100px;height: 12px;background-color: #E5F1FF;position:relative;top: 16px;"></span>
+            </div>
+        </div>
+        <div style="font:400 14px  MicrosoftYaHei ;color:  #666;width:100%; margin: 15px auto ">
+            <p>
+                请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定请输入自定义文字请输入自定义文字请输入自定
+            </p>
+        </div>
+
+        <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+            <div  style="min-width: 200px; display:table-cell;height:44px;line-height:44px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                <span style="display:table-cell;min-width:55px;height:44px;color:#fff;font-size:22px;background-color:#017fd9;float:left;">02</span>
+                <span style="display:table-cell;min-width:160px;height:44px;line-height:44px;font-size:22px;color:#2475E2;">特点描述</span>
+            </div>
+            <div style="display: table-cell">
+                <span style="min-width: 100px;height: 12px;background-color: #E5F1FF;position:relative;top: 16px;"></span>
+            </div>
+        </div>
+        <div style="font:400 14px  MicrosoftYaHei ;color:  #666;width:100%; margin: 15px auto ">
+            <p>
+                请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定请输入自定义文字请输入自定义文字请输入自定
+            </p>
+        </div>
+
+        <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+            <div  style="min-width: 200px; display:table-cell;height:44px;line-height:44px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                <span style="display:table-cell;min-width:55px;height:44px;color:#fff;font-size:22px;background-color:#017fd9;float:left;">03</span>
+                <span style="display:table-cell;min-width:160px;height:44px;line-height:44px;font-size:22px;color:#2475E2;">特点描述</span>
+            </div>
+            <div style="display: table-cell">
+                <span style="min-width: 100px;height: 12px;background-color: #E5F1FF;position:relative;top: 16px;"></span>
+            </div>
+        </div>
+        <div style="font:400 14px  MicrosoftYaHei ;color:  #666;width:100%; margin: 15px auto ">
+            <p>
+                请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定请输入自定义文字请输入自定义文字请输入自定
+            </p>
+        </div>
+
+        <div style="text-align:center;background-color:#5B96E3;padding:10px 0px;margin-bottom:10px;">
+            <h3 style="color:#ffffff;line-height:15px;">商品实拍</h3>
+            <p style="color:#ffffff;line-height:15px;">PRODUCT PHOTOGRAPHY</p>
+        </div>
+        <!-- 商品实拍 -->
+        <div  style=" margin: 15px auto;text-align:center">
+            <img style="width: 94%;" src="__STATIC__/img/product_detail_default-01.jpg" alt=""/>
+        </div>
+        <div  style=" margin: 15px auto;text-align:center">
+            <img style="width: 94%;" src="__STATIC__/img/product_detail_default-01.jpg" alt=""/>
+        </div>
+
+        <div style="width:100%;">
+            <div  style="float:left; margin: 15px auto;width: 50%;text-align:center">
+                <img style="width: 90%;" src="__STATIC__/img/product_detail_default-01.jpg" alt=""/>
+            </div>
+            <div  style="float:right; margin: 15px auto;width: 50%;text-align:center">
+                <img style="width: 90%;" src="__STATIC__/img/product_detail_default-01.jpg" alt=""/>
+            </div>
+        </div>
+    </div>
+</div>
+<!--模板2-->
+
+<!--模板html3-->
+<div class="template-html" style="display: none">
+    <div  style="width: 760px;margin:15px auto;padding:0 auto">
+        <!-- 一级标题 -->
+        <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+            <div style="min-width: 200px; display:table-cell;height:44px;line-height:44px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                <span style="display:table-cell;min-width:55px;height:44px;color:#fff;font-size:22px;background-color:#017fd9;float:left;">01</span>
+                <span style="display:table-cell;min-width:160px;height:44px;line-height:44px;font-size:22px;color:#2475E2;">一级标题</span>
+            </div>
+            <div style="display: table-cell">
+                <span style="min-width: 100px;height: 12px;background-color: #E5F1FF;position:relative;top: 16px;"></span>
+            </div>
+        </div>
+        <div style="font:400 14px  MicrosoftYaHei ;color:  #666;">
+            <p>
+                请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定请输入自定义文字请输入自定义文字请输入自定
+            </p>
+        </div>
+        <div style="width:100%;height:auto;padding:20px 0px;text-align: center">
+            <img  style="max-width:94%;" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+        </div>
+
+        <!-- 参数表图片 -->
+        <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+            <div  style="min-width: 200px; display:table-cell;height:44px;line-height:44px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                <span style="display:table-cell;min-width:55px;height:44px;color:#fff;font-size:22px;background-color:#017fd9;float:left;">02</span>
+                <span style="display:table-cell;min-width:160px;height:44px;line-height:44px;font-size:22px;color:#2475E2;">商品参数</span>
+            </div>
+            <div style="display: table-cell">
+                <span style="min-width: 100px;height: 12px;background-color: #E5F1FF;position:relative;top: 16px;"></span>
+            </div>
+        </div>
+        <div  style="width:100%;height:auto; padding:20px 0px;text-align: center">
+            <img style="max-width:94%;" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+        </div>
+
+        <!-- 商品简介 -->
+        <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+            <div style="min-width: 200px; display:table-cell;height:44px;line-height:44px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                <span style="display:table-cell;min-width:55px;height:44px;color:#fff;font-size:22px;background-color:#017fd9;float:left;">03</span>
+                <span style="display:table-cell;min-width:160px;height:44px;line-height:44px;font-size:22px;color:#2475E2;">商品简介</span>
+            </div>
+            <div style="display: table-cell">
+                <span style="min-width: 100px;height: 12px;background-color: #E5F1FF;position:relative;top: 16px;"></span>
+            </div>
+        </div>
+        <div style="font:400 14px  MicrosoftYaHei ;color:  #666;width:100%; margin: 15px auto ">
+            <p>
+                请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定请输入自定义文字请输入自定义文字请输入自定
+            </p>
+        </div>
+
+        <!-- 商品展示 -->
+        <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+            <div style="min-width: 200px; display:table-cell;height:44px;line-height:44px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                <span style="display:table-cell;min-width:55px;height:44px;color:#fff;font-size:22px;background-color:#017fd9;float:left;">04</span>
+                <span style="display:table-cell;min-width:160px;height:44px;line-height:44px;font-size:22px;color:#2475E2;">商品展示</span>
+            </div>
+            <div style="display: table-cell">
+                <span style="min-width: 100px;height: 12px;background-color: #E5F1FF;position:relative;top: 16px;"></span>
+            </div>
+        </div>
+
+        <div style="font:400 14px  MicrosoftYaHei ;color:  #666;width: 100%;margin: 15px auto ;">
+            <div  style="float:left; margin: 15px auto;width: 470px;height: 300px;">
+                <img style="width: 100%;height: 100%;" src="__STATIC__/img/product_detail_default-01.jpg" alt=""/>
+            </div>
+            <!-- 特点1 -->
+            <div  style="float:right; width: 240px ;left: 490px;margin: 15px auto">
+                <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+                    <div style="min-width: 200px; display:table-cell;height:30px;line-height:30px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                        <span style="display:table-cell;min-width:55px;height:30px;color:#fff;font-size:18px;background-color:#017fd9;float:left;">01</span>
+                        <span style="display:table-cell;min-width:160px;height:30px;line-height:30px;font-size:18px;color:#2475E2;">特点一</span>
+                    </div>
+                </div>
+                <div style="width: 100%; margin: 0 auto;">
+                    <p style="color:#666;font-size:14px;letter-spacing:1px;margin:15px 0 25px 0;">
+                        LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。
+                    </p>
+                </div>
+            </div>
+            <div style="clear:both"></div>
+            <!-- 特点2 -->
+            <div  style=" margin: 15px auto">
+                <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+                    <div style="min-width: 200px; display:table-cell;height:30px;line-height:30px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                        <span style="display:table-cell;min-width:55px;height:30px;color:#fff;font-size:18px;background-color:#017fd9;float:left;">02</span>
+                        <span style="display:table-cell;min-width:160px;height:30px;line-height:30px;font-size:18px;color:#2475E2;">特点二</span>
+                    </div>
+                </div>
+                <div style="width: auto; margin: 0 auto;">
+                    <p style="color:#666;font-size:14px;letter-spacing:1px;margin:15px 0 25px 0;">
+                        LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。
+                    </p>
+                </div>
+                <div style="width:100%;height:auto;text-align: center;">
+                    <img style="max-width:94%" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+                </div>
+            </div>
+
+            <!-- 特点3 -->
+            <div style=" margin: 15px auto">
+                <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+                    <div style="min-width: 200px; display:table-cell;height:30px;line-height:30px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                        <span style="display:table-cell;min-width:55px;height:30px;color:#fff;font-size:18px;background-color:#017fd9;float:left;">03</span>
+                        <span style="display:table-cell;min-width:160px;height:30px;line-height:30px;font-size:18px;color:#2475E2;">特点三</span>
+                    </div>
+                </div>
+                <div style="width: auto; margin: 0 auto;">
+                    <p style="color:#666;font-size:14px;letter-spacing:1px;margin:15px 0 25px 0;">
+                        LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。
+                    </p>
+                </div>
+                <div style="width:100%;height:auto;margin:15px auto;text-align: center">
+                    <img style="max-width:94%" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--模板3-->
+
+<!--模板app1-->
+<div class="template-app-html" style="display: none">
+    <div  style="width: 450px;margin:15px auto;padding:0 auto">
+        <fieldset style="border:1px solid #2475E2;border-radius:10px;margin-bottom:10px;">
+            <legend style="left:33%;height:30px;font-size:30px;font-weight:400;color:rgba(36,117,226,1);line-height:24px;text-align:center;">视频介绍</legend>
+            <div class="content" style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;">
+                文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
+            </div>
+            <br />
+            <div style="height:auto;margin:15px auto;text-align: center">
+                <embed src="" type="video/x-ms-asf-plugin" width="100%" height="400" autostart="false" loop="true" style="margin:0 auto;" />
+            </div>
+        </fieldset>
+        <fieldset style="border:1px solid #2475E2;border-radius:10px;margin-bottom:10px;">
+            <legend style="left:33%;background:white;width:33%;height:30px;font-size:30px;font-weight:400;color:rgba(36,117,226,1);line-height:24px;text-align:center;">标题</legend>
+            <div class="content" style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;">
+                文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
+            </div>
+            <p>
+                <br />
+            </p>
+            <div class="imgs" style="height:auto;max-width: 100%">
+                <img style="margin-bottom:5px;max-width: 100%;" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+            </div>
+        </fieldset>
+        <fieldset style="border:1px solid #2475E2;border-radius:10px;margin-bottom:10px;">
+            <legend style="left:33%;background:white;width:33%;height:30px;font-size:30px;font-weight:400;color:rgba(36,117,226,1);line-height:24px;text-align:center;">商品实拍</legend>
+            <div  style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;">
+                文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
+            </div>
+            <p>
+                <br />
+            </p>
+            <div class="imgs" style="height:auto;padding:0px 10px;">
+                <img  style="margin-bottom:5px;max-width: 100%;" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+                <div  style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;padding: 10px;">
+                    文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
+                </div>
+                <img style="margin-bottom:5px;max-width: 100%" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+                <div  style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;padding: 10px;">
+                    文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+<!--模板1-->
+
+<!--模板app2-->
+<div class="template-app-html" style="display: none">
+    <div  style="width: 100%;margin:15px auto;padding:0 auto">
+        <!-- 一级标题 -->
+        <div style="width:100%;height:auto;padding-bottom:15px;padding:20px; 0px">
+            <img  style="max-width:94%;" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+        </div>
+
+        <div style="text-align:center;background-color:#5B96E3;padding:10px 0px;margin-bottom:10px;">
+            <h5 style="color:#ffffff;">商品信息</h5>
+            <p style="color:#ffffff;font-size: 20px">PRODUCT INFORMATION</p>
+        </div>
+
+        <!-- 参数表图片 -->
+        <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+            <div  style="min-width: 200px; display:table-cell;height:44px;line-height:44px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                <span style="display:table-cell;min-width:55px;height:44px;color:#fff;font-size:22px;background-color:#017fd9;float:left;">01</span>
+                <span style="display:table-cell;min-width:160px;height:44px;line-height:44px;font-size:22px;color:#2475E2;">特点描述</span>
+            </div>
+            <div style="display: table-cell">
+                <span style="min-width: 100px;height: 12px;background-color: #E5F1FF;position:relative;top: 16px;"></span>
+            </div>
+        </div>
+        <div style="font:400 14px  MicrosoftYaHei ;color:  #666;width:100%; margin: 15px auto ">
+            <p>
+                请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定请输入自定义文字请输入自定义文字请输入自定
+            </p>
+        </div>
+
+        <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+            <div  style="min-width: 200px; display:table-cell;height:44px;line-height:44px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                <span style="display:table-cell;min-width:55px;height:44px;color:#fff;font-size:22px;background-color:#017fd9;float:left;">02</span>
+                <span style="display:table-cell;min-width:160px;height:44px;line-height:44px;font-size:22px;color:#2475E2;">特点描述</span>
+            </div>
+            <div style="display: table-cell">
+                <span style="min-width: 100px;height: 12px;background-color: #E5F1FF;position:relative;top: 16px;"></span>
+            </div>
+        </div>
+        <div style="font:400 14px  MicrosoftYaHei ;color:  #666;width:100%; margin: 15px auto ">
+            <p>
+                请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定请输入自定义文字请输入自定义文字请输入自定
+            </p>
+        </div>
+
+        <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+            <div  style="min-width: 200px; display:table-cell;height:44px;line-height:44px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                <span style="display:table-cell;min-width:55px;height:44px;color:#fff;font-size:22px;background-color:#017fd9;float:left;">03</span>
+                <span style="display:table-cell;min-width:160px;height:44px;line-height:44px;font-size:22px;color:#2475E2;">特点描述</span>
+            </div>
+            <div style="display: table-cell">
+                <span style="min-width: 100px;height: 12px;background-color: #E5F1FF;position:relative;top: 16px;"></span>
+            </div>
+        </div>
+        <div style="font:400 14px  MicrosoftYaHei ;color:  #666;width:100%; margin: 15px auto ">
+            <p>
+                请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定请输入自定义文字请输入自定义文字请输入自定
+            </p>
+        </div>
+
+        <div style="text-align:center;background-color:#5B96E3;padding:10px 0px;margin-bottom:10px;">
+            <h5 style="color:#ffffff;">商品实拍</h5>
+            <p style="color:#ffffff;font-size: 20px;">PRODUCT PHOTOGRAPHY</p>
+        </div>
+        <!-- 商品实拍 -->
+        <div  style=" margin: 15px auto;text-align:center">
+            <img style="width: 94%;" src="__STATIC__/img/product_detail_default-01.jpg" alt=""/>
+        </div>
+        <div  style=" margin: 15px auto;text-align:center">
+            <img style="width: 94%;" src="__STATIC__/img/product_detail_default-01.jpg" alt=""/>
+        </div>
+        <div  style=" margin: 15px auto;text-align:center">
+            <img style="width: 94%;" src="__STATIC__/img/product_detail_default-01.jpg" alt=""/>
+        </div>
+    </div>
+</div>
+<!--模板1-->
+
+<!--模板app3-->
+<div class="template-app-html" style="display: none">
+    <div  style="width: 100%;margin:15px auto;padding:0 auto">
+        <!-- 一级标题 -->
+        <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+            <div style="min-width: 200px; display:table-cell;height:44px;line-height:44px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                <span style="display:table-cell;min-width:55px;height:44px;color:#fff;font-size:22px;background-color:#017fd9;float:left;">01</span>
+                <span style="display:table-cell;min-width:160px;height:44px;line-height:44px;font-size:22px;color:#2475E2;">一级标题</span>
+            </div>
+            <div style="display: table-cell">
+                <span style="min-width: 100px;height: 12px;background-color: #E5F1FF;position:relative;top: 16px;"></span>
+            </div>
+        </div>
+        <div style="font:400 14px  MicrosoftYaHei ;color:  #666;">
+            <p>
+                请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定请输入自定义文字请输入自定义文字请输入自定
+            </p>
+        </div>
+        <div style="width:100%;height:auto;padding:20px 0px;">
+            <img  style="max-width:94%;" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+        </div>
+
+        <!-- 参数表图片 -->
+        <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+            <div  style="min-width: 200px; display:table-cell;height:44px;line-height:44px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                <span style="display:table-cell;min-width:55px;height:44px;color:#fff;font-size:22px;background-color:#017fd9;float:left;">02</span>
+                <span style="display:table-cell;min-width:160px;height:44px;line-height:44px;font-size:22px;color:#2475E2;">商品参数</span>
+            </div>
+            <div style="display: table-cell">
+                <span style="min-width: 100px;height: 12px;background-color: #E5F1FF;position:relative;top: 16px;"></span>
+            </div>
+        </div>
+        <div  style="width:100%;height:auto;padding:20px 0px;">
+            <img style="max-width:94%;" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+        </div>
+
+        <!-- 商品简介 -->
+        <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+            <div style="min-width: 200px; display:table-cell;height:44px;line-height:44px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                <span style="display:table-cell;min-width:55px;height:44px;color:#fff;font-size:22px;background-color:#017fd9;float:left;">03</span>
+                <span style="display:table-cell;min-width:160px;height:44px;line-height:44px;font-size:22px;color:#2475E2;">商品简介</span>
+            </div>
+            <div style="display: table-cell">
+                <span style="min-width: 100px;height: 12px;background-color: #E5F1FF;position:relative;top: 16px;"></span>
+            </div>
+        </div>
+        <div style="font:400 14px  MicrosoftYaHei ;color:  #666;width:100%; margin: 15px auto ">
+            <p>
+                请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定请输入自定义文字请输入自定义文字请输入自定
+            </p>
+        </div>
+        <!-- 商品展示 -->
+        <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+            <div style="min-width: 200px; display:table-cell;height:44px;line-height:44px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                <span style="display:table-cell;min-width:55px;height:44px;color:#fff;font-size:22px;background-color:#017fd9;float:left;">04</span>
+                <span style="display:table-cell;min-width:160px;height:44px;line-height:44px;font-size:22px;color:#2475E2;">商品展示</span>
+            </div>
+            <div style="display: table-cell">
+                <span style="min-width: 100px;height: 12px;background-color: #E5F1FF;position:relative;top: 16px;"></span>
+            </div>
+        </div>
+
+        <div style="font:400 14px  MicrosoftYaHei ;color:  #666;width: 100%;margin: 15px auto ;">
+            <div  style=" margin: 15px auto">
+                <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+                    <div style="min-width: 200px; display:table-cell;height:30px;line-height:30px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                        <span style="display:table-cell;min-width:55px;height:30px;color:#fff;font-size:18px;background-color:#017fd9;float:left;">01</span>
+                        <span style="display:table-cell;min-width:160px;height:30px;line-height:30px;font-size:18px;color:#2475E2;">特点一</span>
+                    </div>
+                </div>
+                <div style="width: auto; margin: 0 auto;">
+                    <p style="color:#666;font-size:14px;letter-spacing:1px;margin:15px 0 25px 0;">
+                        LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。
+                    </p>
+                </div>
+                <div style="width:100%;height:auto;text-align: center;">
+                    <img style="max-width:94%" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+                </div>
+            </div>
+            <div style="clear:both"></div>
+            <!-- 特点2 -->
+            <div  style=" margin: 15px auto">
+                <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+                    <div style="min-width: 200px; display:table-cell;height:30px;line-height:30px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                        <span style="display:table-cell;min-width:55px;height:30px;color:#fff;font-size:18px;background-color:#017fd9;float:left;">02</span>
+                        <span style="display:table-cell;min-width:160px;height:30px;line-height:30px;font-size:18px;color:#2475E2;">特点二</span>
+                    </div>
+                </div>
+                <div style="width: auto; margin: 0 auto;">
+                    <p style="color:#666;font-size:14px;letter-spacing:1px;margin:15px 0 25px 0;">
+                        LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。
+                    </p>
+                </div>
+                <div style="width:100%;height:auto;text-align: center;">
+                    <img style="max-width:94%" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+                </div>
+            </div>
+            <div style="clear:both"></div>
+            <!-- 特点3 -->
+            <div style=" margin: 15px auto">
+                <div  style="display:table;position:relative;font-family:'Microsoft YaHei';">
+                    <div style="min-width: 200px; display:table-cell;height:30px;line-height:30px;text-align:center;border:1px solid #017fd9;font-size:16px;color:#cf1724;position:relative;">
+                        <span style="display:table-cell;min-width:55px;height:30px;color:#fff;font-size:18px;background-color:#017fd9;float:left;">03</span>
+                        <span style="display:table-cell;min-width:160px;height:30px;line-height:30px;font-size:18px;color:#2475E2;">特点三</span>
+                    </div>
+                </div>
+                <div style="width: auto; margin: 0 auto;">
+                    <p style="color:#666;font-size:14px;letter-spacing:1px;margin:15px 0 25px 0;">
+                        LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。LED 被称为第四代照明光源或绿色光源，具有节能、环保、寿命长、体积小等特点。
+                    </p>
+                </div>
+                <div style="width:100%;height:auto;margin:15px auto;text-align: center">
+                    <img style="max-width:94%" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--模板3-->
+
 
 {include file="layout/footer" title="$title" keywords="" /}
 <link href="__STATIC__/js/plugins/bootstrap-fileinput/css/fileinput.css" media="all" rel="stylesheet" type="text/css" />
@@ -821,17 +1415,21 @@
     var editor1;
     var editor2;
     KindEditor.ready(function(K) {
-         editor1 = K.create('#html_content_1', {
+        editor1 = K.create('#html_content_1', {
             cssPath : '__STATIC__/js/plugins/kindeditor/plugins/code/prettify.css',
             uploadJson : '/?s=admin/file/upload2',
             allowFileManager : true,
+            resizeType : 1,
+            filterMode: false,
             afterCreate : function() {
             }
         });
-         editor2 = K.create('#html_content_2', {
+        editor2 = K.create('#html_content_2', {
             cssPath : '__STATIC__/js/plugins/kindeditor/plugins/code/prettify.css',
             uploadJson : '/?s=admin/file/upload2',
             allowFileManager : true,
+            resizeType : 1,
+            filterMode: false,
             afterCreate : function() {
             }
         });
@@ -910,7 +1508,45 @@
             }
         });
 
-
+        //模板选择
+        $("#template-modal").on('show.bs.modal',function (event) {
+            var type = $(event.relatedTarget).data('type');
+            $('#confirm-request').data('type', type);
+        });
+        $(".product-pd-tem-list").hover(function(){
+            $(this).addClass("active");
+            var index1 = $(this).index();
+            $(".product-preview-img").eq(index1).show();
+        },function(){
+            $(this).removeClass("active");
+            var index2 = $(this).index();
+            $(".product-preview-img").eq(index2).hide();
+        }).click(function(){
+            $(this).addClass("current").siblings().removeClass("current","active");
+        });
+        $("#confirm-request").click(function () {
+            var type = $(this).data('type');
+            if(type == 1){
+                var temIndex =  $(".product-pd-tem-list.current").index();
+                $(".template-html").each(function(index){
+                    if(index == temIndex){
+                        var getHtml = $(this).html();
+                        editor1.html(getHtml);
+                    };
+                });
+            }
+            if(type == 2){
+                var temIndex =  $(".product-pd-tem-list.current").index();
+                $(".template-app-html").each(function(index){
+                    if(index == temIndex){
+                        var getHtml = $(this).html();
+                        editor2.html(getHtml);
+                    };
+                });
+            }
+            //关闭模态框
+            $("#template-modal").modal('hide');
+        });
     </script>
     <script src="__STATIC__/js/plugins/jquery/jquery.form.min.js"></script>
     <script src="__STATIC__/js/plugins/layer/layer.js"></script>

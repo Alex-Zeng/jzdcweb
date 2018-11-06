@@ -7,6 +7,7 @@
  */
 namespace app\admin\controller;
 
+use app\common\model\EntCompany;
 use app\common\model\IndexGroup;
 use app\common\model\IndexUser;
 use think\Request;
@@ -27,9 +28,14 @@ class Member extends Base{
         if($group > 0){
             $model->where(['group'=>$group]);
         }
+
+        $companyModel = new EntCompany();
         $rows = $model->where([])->order(['id'=>'desc'])->paginate(null,false,['query'=>request()->param()]);
         foreach ($rows as &$row){
+            $companyInfo = $companyModel->getInfoById($row->company_id);
             $row->icon = $row->icon ? IndexUser::getFormatIcon($row->icon) : '';
+            $row->logoUri = $companyInfo ? EntCompany::getFormatLogo($companyInfo->logo_uri) : '';
+            $row->companyName = $companyInfo ? $companyInfo->company_name : '';
         }
 
         $this->assign('k',$k);

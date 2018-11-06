@@ -23,6 +23,9 @@ class MallOrder extends Model{
     const  STATE_REMITTANCE_SUPPLIER = 11; //打款供应商
     const  STATE_FINISH = 13; //交易完成
 
+    const ROLE_BUYER = 1;    //买家
+    const ROLE_SELLER = 2;   //卖家
+
 
     public static function getStateList(){
         return  [
@@ -63,5 +66,69 @@ class MallOrder extends Model{
         }
         return $this->where($where)->sum('actual_money');//number_format(
     }
+
+
+    /**
+     * @desc 获取买家 买家订单
+     * @param $merchantType  商家类型
+     * @param $orderType  订单类型   1=近期成交  2=待发货  3=待售后
+     * @param $companyId  企业ID
+     * @param $userId 用户ID
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getDeskList($merchantType,$orderType,$companyId,$userId = 0){
+        $where = [];
+        if($merchantType == 1){   //买家
+            $where['buyer_id'] = $companyId;
+            if($userId > 0){   //查询当前用户
+                  $where['created_user_id'] = $userId;
+            }
+        }elseif ($merchantType == 2){ //卖家
+            $where['supplier'] = $companyId;
+        }
+        switch ($orderType){
+            case 1:  //近期成交
+                break;
+            case 2: //待发货
+                $where['state'] = 3;
+                break;
+            case 3: //待售后
+                $where['service_type'] = 1;
+                break;
+            default:
+        }
+
+        $field = ['id','add_time','out_id','supplier','goods_count','actual_money','state','service_type'];
+        $rows = $this->where($where)->order('add_time','desc')->field($field)->select();
+        $supplierIds = [];
+        foreach ($rows as $row){
+            $supplierIds[] = $row->supplier;
+        }
+
+        $companyModel = new EntCompany();
+        $supplierInfos = $companyModel->where(['id'=>['in',$supplierIds]])->field(['id','company_name'])->select();
+
+        $supplierMap = [];
+        foreach ($supplierInfos as $supplierInfo){
+            $supplierMap[$supplierInfo->id] = $supplierInfo->company_name;
+        }
+
+        $data = [];
+        foreach ($rows as $row){
+            $data[] = [
+                'orderNo'=> $row->out_id,
+                'supplierName' => isset($supplierMap[$row->supplier]) ? $supplierMap[$row->supplier] : '',
+                'orderTime' => date('Y-m-d H:i',$row->add_time),
+                'goodsNumber' => intval($row->goods_count),
+                'totalMoney' => $row->actual_money,
+                'stateInfo'=> getOrderStatusInfo($row->state,$row->service_type)
+            ];
+        }
+        return $data;
+    }
+
 
 }

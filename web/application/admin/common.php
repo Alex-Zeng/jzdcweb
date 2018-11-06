@@ -87,8 +87,11 @@ function getGoodsMallState($state = -1,$style = 0){
  * @throws \think\exception\DbException
  */
 function getSupplierList(){
-    $user = new \app\common\model\IndexUser();
-    $rows = $user->where(['group'=> 5])->field(['id','real_name'])->select();
+    $EntCompany = new \app\common\model\EntCompany();
+    $rows = $EntCompany->where(['is_deleted'=>0,'audit_state'=>3])->field('id,company_name')->select();
+    // 1.0.3不分供应商和采购商角色企业信息需从company表获取
+    // $user = new \app\common\model\IndexUser();
+    // $rows = $user->where(['group'=> 5])->field(['id','real_name'])->select();
     return $rows;
 }
 
@@ -107,32 +110,6 @@ function getMemberGroup($group = -1){
     ];return isset($list[$group]) ? $list[$group] : '';
 }
 
-/**
- * @desc 返回
- * @param int $level
- * @return array
- */
-function  getTypeLevelList($level = 2){
-    $model = new \app\common\model\MallType();
-    $rows = $model->where(['parent'=>0])->field(['id','name','parent'])->select();
-    $list = [];
-    foreach ($rows as $row){
-        $list[] = ['id'=>$row->id,'name'=>$row->name,'parent'=>$row->parent,'level'=>1];
-        if($level == 2 || $level == 3){
-            $rows2 = $model->where(['parent'=>$row->id])->field(['id','name','parent'])->select();
-            foreach ($rows2 as $row2){
-                $list[] = ['id'=>$row2->id,'name'=>$row2->name,'parent'=>$row2->parent,'level'=>2];
-                if($level == 3){
-                    $rows3 = $model->where(['parent'=>$row2->id])->field(['id','name','parent'])->select();
-                    foreach($rows3 as $row3){
-                        $list[] = ['id'=>$row3->id,'name'=>$row3->name,'parent'=>$row3->parent,'level'=>3];
-                    }
-                }
-            }
-        }
-    }
-   return $list;
-}
 
 /**
  * @desc 根据层级返回分类列表数据
@@ -218,30 +195,14 @@ function getCertificationStatus($status = -1){
     return isset($list[$status]) ? $list[$status] : '';
 }
 
-/**
- * @param int $typeId
- * @return array
- * @throws \think\db\exception\DataNotFoundException
- * @throws \think\db\exception\ModelNotFoundException
- * @throws \think\exception\DbException
- */
-function getTypeLevel($typeId = 0){
-    $model = new \app\common\model\MallType();
-    $row = $model->where(['id'=>$typeId])->field(['id','name','parent'])->find();
-    $list = [];
-    if($row){
-        $list[] = $row->name;
-        if($row->parent > 0){
-            $row2 = $model->where(['id'=>$row->parent])->field(['id','name','parent'])->find();
-            $list[] = $row2->name;
-            if($row2->parent > 0){
-                $row3 = $model->where(['id'=>$row2->parent])->field(['id','name','parent'])->find();
-                $list[] = $row3->name;
-            }
-        }
-    }
+function getCertificationStatusNew($status = -1){
+    $list = [
+        1 => '<span style="color:#0069d9 !important">待审核</span>',
+        2 => '<span style="color:#dc3545 !important">已拒绝</span>',
+        3 => '<span style="color:#28a745!important">已通过</span>'
 
-    return $list;
+    ];
+    return isset($list[$status]) ? $list[$status] : '';
 }
 
 /**

@@ -1096,9 +1096,10 @@ class Product extends Base{
 
         $where['a.id'] = $productId;
         $product = $SmProduct
-                ->field('a.id,a.spu_code,a.cover_img_url,a.html_content_1,a.html_content_2,a.province_of_origin_id,a.city_of_origin_id,a.district_of_origin_id,a.title,b.nickname as supplier_name')
+                ->field('a.id,a.spu_code,a.cover_img_url,a.html_content_1,a.html_content_2,a.province_of_origin_id,a.city_of_origin_id,a.district_of_origin_id,a.title,b.company_name as supplier_name')
                 ->alias('a')
-                ->join('jzdc_index_user b','a.supplier_id=b.id','LEFT')->where($where)->find();
+                ->join(['ent_company b'],'a.supplier_id=b.id','LEFT')->where($where)->find();
+                
         $product['cover_img_url'] = $SmProduct->getFormatImg($product['cover_img_url']);
 
         $rows = [];
@@ -1163,7 +1164,7 @@ class Product extends Base{
 				break;
 			case 'sellUp':
 				$where['state'] = 2; 
-				$update = array_merge($SmProduct->filedDefaultValue('update'),['state'=>1]);
+				$update = array_merge($SmProduct->filedDefaultValue('update'),['state'=>1,'audit_time'=>time()]);
 				$msg = '上架';	
 				break;
 			case 'pushUp':
@@ -1186,15 +1187,18 @@ class Product extends Base{
 				switch ($state) {
 		            case 1://审核通过
 		                $auditState = SmProduct::AUDIT_RELEASED;
+                        $updt = ['state'=>1,'audit_state'=>$auditState,'audit_time'=>time()];
 		                break;
 		            case 2://审核失败
 		                $auditState = SmProduct::AUDIT_NOTAPPROVED;
+                        $updt = ['audit_state'=>$auditState];
 		                break;
 		            default:
 		                $auditState = SmProduct::AUDIT_PENDING;
+                        $updt = ['audit_state'=>$auditState];
 		                break;
 				}
-				$update = array_merge($SmProduct->filedDefaultValue('update'),['state'=>1,'audit_state'=>$auditState]);
+				$update = array_merge($SmProduct->filedDefaultValue('update'),$updt);
 				$where['audit_state'] = SmProduct::AUDIT_PENDING; 
 				$msg = '审核';
 				break;
@@ -1258,9 +1262,9 @@ class Product extends Base{
         }
         
         $productList = $SmProduct
-                ->field('a.id,a.state,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.real_name as supplier_name,a.is_recommended')
+                ->field('a.id,a.state,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.company_name as supplier_name,a.is_recommended')
                 ->alias('a')
-                ->join('jzdc_index_user b','a.supplier_id=b.id','LEFT')->where($where)->order('id desc')->paginate(20,false,['query'=>request()->param()]);
+                ->join(['ent_company b'],'a.supplier_id=b.id','LEFT')->where($where)->order('id desc')->paginate(20,false,['query'=>request()->param()]);
         foreach ($productList as $key => $val) {
             $productList[$key]['spec_count'] = $SmProductSpec->where(['product_id'=>$val['id']])->count();
             //     $user = $userModel->getInfoById($row->supplier);
@@ -1326,9 +1330,9 @@ class Product extends Base{
         }
         
         $productList = $SmProduct
-                ->field('a.id,a.state,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.real_name as supplier_name,a.is_recommended')
+                ->field('a.id,a.state,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.company_name as supplier_name,a.is_recommended')
                 ->alias('a')
-                ->join('jzdc_index_user b','a.supplier_id=b.id','LEFT')->where($where)->order('id desc')->paginate(20,false,['query'=>request()->param()]);
+                ->join(['ent_company b'],'a.supplier_id=b.id','LEFT')->where($where)->order('id desc')->paginate(20,false,['query'=>request()->param()]);
         foreach ($productList as $key => $val) {
             $productList[$key]['spec_count'] = $SmProductSpec->where(['product_id'=>$val['id']])->count();
             //     $user = $userModel->getInfoById($row->supplier);
@@ -1403,9 +1407,9 @@ class Product extends Base{
         }
         
         $productList = $SmProduct
-                ->field('a.id,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.real_name as supplier_name')
+                ->field('a.id,a.audit_state,a.cover_img_url,a.title,a.supplier_id,b.company_name as supplier_name')
                 ->alias('a')
-                ->join('jzdc_index_user b','a.supplier_id=b.id','LEFT')->where($where)->order('id desc')->paginate(20,false,['query'=>request()->param()]);
+                ->join(['ent_company b'],'a.supplier_id=b.id','LEFT')->where($where)->order('id desc')->paginate(20,false,['query'=>request()->param()]);
         foreach ($productList as $key => $val) {
             $productList[$key]['spec_count'] = $SmProductSpec->where(['product_id'=>$val['id']])->count();
             $productList[$key]['cover_img_url'] = $val->cover_img_url ? $SmProduct::getFormatImg($val->cover_img_url) : '';

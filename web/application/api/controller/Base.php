@@ -7,6 +7,7 @@
  */
 namespace app\api\controller;
 
+use app\common\model\EntCompany;
 use app\common\model\IndexUser;
 use Firebase\JWT\JWT;
 use think\Exception;
@@ -106,6 +107,60 @@ class Base extends Controller
 
         $this->userId = $data->id;
         $this->groupId = $data->group;
+    }
+
+
+    /**
+     * 用户企业权限
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    protected function checkCompanyPermission(){
+        $userModel = new IndexUser();
+        $companyModel = new EntCompany();
+
+        $userInfo = $userModel->getInfoById($this->userId);
+        if(!$userInfo){
+            return ['status'=>1,'data'=>[],'msg'=>'用户不存在'];
+        }
+        if($userInfo->company_id == 0){
+            return ['status'=>1,'data'=>[],'msg'=>'用户尚未加入企业'];
+        }
+        $companyInfo = $companyModel->getInfoById($userInfo->company_id);
+        if(!$companyInfo){
+            return ['status'=>1,'data'=>[],'msg'=>'企业信息不存在'];
+        }
+        if($companyInfo->audit_state != EntCompany::STATE_PASS){
+            return ['status'=>1,'data'=>[],'msg'=>'企业尚未通过审核'];
+        }
+
+        return ['status'=>0,'data'=>['companyId'=>$userInfo->company_id],'msg'=>''];
+    }
+
+    /**
+     * [checkCompanyPermissionReturnCompanyId 检验是否为企业管理员]
+     * @param  [type] $userId [用户ID，不传则获取当前登录者没登录则为空]
+     * @return  [是则返回CompanyId,否则返回false]
+     */
+    protected function checkCompanyPermissionReturnCompanyId($userId=null){
+        $IndexUser = new IndexUser();
+        $EntCompany = new EntCompany();
+
+        if(is_null($userId)){
+            $userId = $this->userId;
+        }
+        $companyId = $IndexUser->where(['id'=>$userId])->value('company_id');
+        if(empty($companyId)){  
+            return false;
+        }
+
+        if($EntCompany->where(['id'=>$companyId,'audit_state'=>EntCompany::STATE_PASS,'responsible_user_id'=>$userId,'is_deleted'=>0])->value('id')>0){
+            return $companyId;
+        }else{
+            return false;
+        }
     }
 
 }

@@ -27,10 +27,10 @@
                         <div class="col-md-11">
                             <form class="form-inline" action="{:url()}"  method="get">
                                 <div class="input-group">
-                                    <select class="form-control" name="supplier_id"  placeholder="供应商">
-                                        <option value="0" {if $supplier_id eq 0}selected{/if}>全部供应商</option>
+                                    <select class="form-control" name="supplier_id"  placeholder="商家">
+                                        <option value="0" {if $supplier_id eq 0}selected{/if}>全部商家</option>
                                         {volist name=":getSupplierList()"  id='user'}
-                                        <option  {if $supplier_id eq $user.id}selected{/if} value="{$user.id}">{$user.real_name}</option>
+                                        <option  {if $supplier_id eq $user.id}selected{/if} value="{$user.id}">{$user.company_name}</option>
                                         {/volist}
                                     </select>
                                 </div>&nbsp;&nbsp;
@@ -86,7 +86,7 @@
                             <tr>
                                 <th width="150px">封面图片</th>
                                 <th >商品名称</th>
-                                <th>供应商</th>
+                                <th>商家</th>
                                 <th>规格数量</th>
                                 <th>状态</th>
                                 <th width="230px">操作</th>

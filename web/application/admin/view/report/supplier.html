@@ -1,4 +1,4 @@
-{include file="layout/header" title="供应商交易报表" keywords="" /}
+{include file="layout/header" title="卖家交易报表" keywords="" /}
 
 {include file="layout/left" groupId="$groupId" keywords="" /}
 <style type="text/css">
@@ -23,7 +23,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active">供应商交易报表</li>
+                        <li class="breadcrumb-item active">卖家交易报表</li>
                     </ol>
                 </div><!-- /.col -->
             </div><!-- /.row -->
@@ -34,7 +34,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">供应商交易报表</h3>
+                        <h3 class="card-title">卖家交易报表</h3>
                     </div>
                     <div class="row" style="padding-top: 15px;padding-right: 15px">
                         <div class="col-md-9">
@@ -48,9 +48,9 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label style="font-weight: normal;">供应商：</label>
+                                    <label style="font-weight: normal;">卖家：</label>
                                     <div class="input-group" style="padding-right: 15px">
-                                        <input class="form-control form-control-navbar"  name="k" type="search"  value="" placeholder="" aria-label="Search">
+                                        <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="" aria-label="Search">
                                     </div>
                                 </div>
                                 <div class="input-group">
@@ -71,7 +71,7 @@
                             <tr>
                                 <th width="150px">序号</th>
                                 <th width="150px">日期</th>
-                                <th>供应商名称</th>
+                                <th>商家名称</th>
                                 <th>交易订单数</th>
                                 <th>交易金额(¥)</th>
                             </tr>
@@ -81,7 +81,7 @@
                             <tr>
                                 <td>{$key+1}</td>
                                 <td>{$service.order_date}</td>
-                                <td>{$service.real_name}</td>
+                                <td>{$service.company_name}</td>
                                 <td>{$service.count}</td>
                                 <td>{$service.total_money}</td>
                             </tr>
