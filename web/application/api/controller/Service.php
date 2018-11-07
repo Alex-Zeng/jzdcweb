@@ -7,6 +7,7 @@
  */
 namespace app\api\controller;
 
+use app\common\model\FbMerchant;
 use app\common\model\FormFinService;
 use think\Request;
 
@@ -79,6 +80,66 @@ class Service extends Base{
             return ['status'=>0, 'data'=>[],'msg'=>'添加成功'];
         }
         return ['status'=>1,'data'=>[],'msg'=>'添加失败'];
+    }
+
+
+    /**
+     * @desc 招商信息收集
+     * @param Request $request
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function merchant(Request $request){
+        $companyName = $request->post('companyName','','trim');
+        $contact = $request->post('contact','','trim');
+        $contactNum = $request->post('contactNum','','trim');
+
+        if(!$companyName){
+            return ['status'=>1,'data'=>[],'msg'=>'企业名称不能为空'];
+        }
+        if(!$contact){
+            return ['status'=>1,'data'=>[],'msg'=>'姓名不能为空'];
+        }
+
+        if(mb_strlen($companyName,"utf-8") > 100){
+            return ['status'=>1,'data'=>[],'msg'=>'企业名称最多100个字'];
+        }
+        if(mb_strlen($contact,"utf-8") > 50){
+            return ['status'=>1,'data'=>[],'msg'=>'姓名最多50个字'];
+        }
+
+        if(!$contactNum){
+            return ['status'=>1,'data'=>[],'msg'=>'手机号不能为空'];
+        }
+        if(!checkPhone($contactNum)){
+            return ['status'=>1,'data'=>[],'msg'=>'手机号格式不正确'];
+        }
+
+        $model = new FbMerchant();
+        $row = $model->where(['contact_num'=>$contactNum])->find();
+        if($row){
+            return ['status'=>1,'data'=>[],'msg'=>'该手机号已经提交'];
+        }
+
+        $data = [
+            'name' => $companyName,
+            'contacts' => $contact,
+            'contact_num' => $contactNum,
+            'created_time' => time()
+        ];
+        $result = $model->save($data);
+
+        if($result){
+            //发送邮件通知
+            $email = config('JZDC_SERVICE_EMAIL');
+            $subject='集众电采服务预约';
+            $content='您好，当前有新的招商服务，请及时跟进处理。';
+            $result = SendMail($email,$subject,$content);
+            return ['status'=>0,'data'=>[],'msg'=>'提交成功'];
+        }
+        return ['status'=>1,'data'=>[],'msg'=>'提交失败'];
     }
 
 }
