@@ -1,0 +1,91 @@
+{include file="layout/header" title="招商服务" keywords="" /}
+
+{include file="layout/left" groupId="$groupId" keywords="" /}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark"></h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">招商服务</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">招商服务</h3>
+                    </div>
+                    <div class="row" style="padding-top: 15px;padding-right: 15px">
+                        <div class="col-md-6">
+                            <form class="form-inline ml-3" action="{:url()}"  method="get">
+                                <div class="input-group">
+                                    <input class="form-control form-control-navbar"  name="k" type="search"  value="{$k}" placeholder="企业名称/姓名/手机号" aria-label="Search">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" id="search" type="submit">查找</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th >企业名称</th>
+                                <th >姓名</th>
+                                <th width="200px">手机号</th>
+                                <th width="200px">提交时间</th>
+
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {volist name='list' id='service'}
+                            <tr>
+                                <td>{:htmlspecialchars($service.name)}</td>
+                                <td>{:htmlspecialchars($service.contacts)}</td>
+                                <td>{$service.contact_num}</td>
+                                <td>{:date('Y-m-d H:i',$service.created_time)}</td>
+                            </tr>
+                            {/volist}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="4">{$page}</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="modal fade" id="info-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body ">
+            </div>
+        </div>
+    </div>
+</div>
+
+{include file="layout/footer" title="$title" keywords="" /}
+<script type="text/javascript">
+    var url = '{:url("admin/service/merchant")}';
+    $('a[href="'+url+'"]').addClass('active');
+</script>

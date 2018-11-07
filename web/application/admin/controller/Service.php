@@ -7,6 +7,7 @@
  */
 namespace app\admin\controller;
 
+use app\common\model\FbMerchant;
 use app\common\model\FormFinService;
 use think\Request;
 use app\common\model\IndexUser;
@@ -41,6 +42,25 @@ class Service extends Base {
         $this->assign('page',$rows->render());
         $this->assign('typeList',$typeList);
         $this->assign('type',$type);
+        return $this->fetch();
+    }
+
+    /**
+     * @desc 招商服务
+     * @return mixed
+     * @throws \think\exception\DbException
+     */
+    public function merchant(){
+        $model = new FbMerchant();
+        $k = Request::instance()->get('k','');
+        if(isset($k) && $k){
+            $model->where('name|contacts|contact_num','like','%'.$k.'%');
+        }
+        $rows = $model->order(['created_time'=>'desc'])->paginate(20,false,['query'=>\request()->param()]);
+
+        $this->assign('k',$k);
+        $this->assign('list',$rows);
+        $this->assign('page',$rows->render());
         return $this->fetch();
     }
 

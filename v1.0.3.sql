@@ -145,3 +145,13 @@ UPDATE `sm_product` SET audit_time = created_time;
 
 alter table jzdc_factoring add company_id int not null default 0 comment '企业ID';
 UPDATE jzdc_factoring set company_id = user_id;
+
+-- 新增招商信息数据表
+CREATE TABLE `fb_merchant` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL DEFAULT '' COMMENT '企业名称',
+  `contacts` varchar(50) NOT NULL DEFAULT '' COMMENT '联系人',
+  `contact_num` varchar(15) NOT NULL DEFAULT '' COMMENT '联系电话',
+  `created_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='企业招商信息数据表';
