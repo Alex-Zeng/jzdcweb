@@ -55,8 +55,8 @@
                             <tbody>
                             {volist name='list' id='service'}
                             <tr>
-                                <td>{$service.name}</td>
-                                <td>{$service.contacts}</td>
+                                <td>{:htmlspecialchars($service.name)}</td>
+                                <td>{:htmlspecialchars($service.contacts)}</td>
                                 <td>{$service.contact_num}</td>
                                 <td>{:date('Y-m-d H:i',$service.created_time)}</td>
                             </tr>
