@@ -79,8 +79,8 @@ class Buyer extends Base
         $where['created_user_id'] = $this->userId;
 
 
-        $payCount = $model->where($where)->whereIn('state',$condition)->count();
-        $recieveNumber = $model->where($where)->where(['state' => MallOrder::STATE_RECEIVE])->count();
+        $payCount = $model->where($where)->whereIn('service_type',[0,2])->whereIn('state',$condition)->count();
+        $recieveNumber = $model->where($where)->whereIn('service_type',[0,2])->where(['state' => MallOrder::STATE_RECEIVE])->count();
         $pendingNumber = $model->where($where)->where(['state' => MallOrder::STATE_DELIVER])->count();
         $serviceNumber = $model->where($where)->where(['service_type'=>1])->count();
         $moneyInfo = $model->where($where)->where(['confirm_delivery_time'=>['gt',0]])->field(['sum(`actual_money`) as money'])->find();
