@@ -190,11 +190,11 @@ class CompanyCertification  extends Base
 
             //同步更新原数据表
             $certModel = new FormUserCert();
-            $certRow = $certModel->find(['id' => $id]);
+            $certRow = $certModel->where(['company_name'=>$row->company_name])->order('id','desc')->find();
             if ($certRow) {
-                $result = $model->save(['status' => 2, 'audit_time' => time()], ['id' => $id]);
+                $result = $certModel->save(['status' => 2, 'audit_time' => time()], ['id' => $certRow->id]);
                 if ($result !== false) {
-                    $userRow2 = $userModel->getInfoById($row->writer);
+                    $userRow2 = $userModel->getInfoById($certRow->writer);
                     //更改角色
                     $groupId = 0;
                     if ($certRow->reg_role == '采购商') {
@@ -204,7 +204,7 @@ class CompanyCertification  extends Base
                         $groupId = IndexGroup::GROUP_SUPPLIER;
                     }
                     $groupId = $groupId > 0 ? $groupId : $userRow2->group;
-                    $userModel->save(['group' => $groupId, 'real_name' => $row->company_name], ['id' => $row->writer]);
+                    $userModel->save(['group' => $groupId, 'real_name' => $certRow->company_name], ['id' => $certRow->writer]);
                 }
             }
 
@@ -300,22 +300,9 @@ class CompanyCertification  extends Base
 
             //同步更新原数据表
             $certModel = new FormUserCert();
-            $certRow = $certModel->find(['id' => $id]);
+            $certRow = $certModel->where(['company_name'=>$row->company_name])->order('id','desc')->find();
             if ($certRow) {
-                $result = $model->save(['status' => EntCompanyAudit::STATE_REFUSED,'refuse_reason'=>$reason, 'audit_time' => time()], ['id' => $id]);
-                if ($result !== false) {
-                    $userRow2 = $userModel->getInfoById($row->writer);
-                    //更改角色
-                    $groupId = 0;
-                    if ($certRow->reg_role == '采购商') {
-                        $groupId = IndexGroup::GROUP_BUYER;
-                    }
-                    if ($certRow->reg_role == '供应商') {
-                        $groupId = IndexGroup::GROUP_SUPPLIER;
-                    }
-                    $groupId = $groupId > 0 ? $groupId : $userRow2->group;
-                    $userModel->save(['group' => $groupId, 'real_name' => $row->company_name], ['id' => $row->writer]);
-                }
+                $certModel->save(['status' => 3,'refuse_reason'=>$reason, 'audit_time' => time()], ['id' => $certRow->id]);
             }
 
             return ['status' => 0, 'msg' => '审核成功'];
