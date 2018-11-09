@@ -155,6 +155,16 @@ function getCompanyProperty($property = -1){
     return isset($list[$property]) ? $list[$property] : '';
 }
 
+function getCompanyPropertyNew($property = -1){
+    $list = [
+        1 => '有限责任公司',
+        2 => '中外合资企业',
+        3 => '个体工商户',
+        4 => '合伙企业'
+    ];
+    return isset($list[$property]) ? $list[$property] : '';
+}
+
 /**
  * 图片地址替换为绝对地址
  * @param string $content 内容
