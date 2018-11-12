@@ -181,7 +181,7 @@
                                     <label class="col-md-2">商品详情Web</label>
                                     <div class="col-md-8 no-padding">
                                         <div class="row">
-                                            <textarea id="html_content_1" class="textarea goods-content" placeholder="商品详情..."  name="html_content_1"  style="width:940px; height: 400px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                            <textarea id="html_content_1" class="textarea goods-content" placeholder="商品详情..."  name="html_content_1"  value="" style="width:940px; height: 400px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -197,7 +197,7 @@
                                     <label class="col-md-2">商品详情APP/H5</label>
                                     <div class="col-md-8 no-padding">
                                         <div class="row">
-                                            <textarea id="html_content_2" class="textarea goods-content" placeholder="商品详情..."  name="html_content_2"  style="width:960px; height: 400px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
+                                            <textarea id="html_content_2" class="textarea goods-content" placeholder="商品详情..."  name="html_content_2"  value="" style="width:960px; height: 400px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -273,49 +273,48 @@
 
 <!--模板html1-->
 <div class="template-html" style="display: none">
-    <div  style="width: 760px;margin:15px auto;padding:0 auto">
-    <fieldset style="border:1px solid #2475E2;border-radius:10px;margin-bottom:10px;">
-        <legend style="left:33%;height:30px;font-size:30px;font-weight:400;color:rgba(36,117,226,1);line-height:24px;text-align:center;">视频介绍</legend>
-        <div class="content" style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;">
-            文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
-        </div>
-        <br />
-        <div style="height:auto;margin:15px auto;text-align: center">
-            <embed src="" type="video/x-ms-asf-plugin" width="100%" height="400" autostart="false" loop="true" style="margin:0 auto;" />
-        </div>
-    </fieldset>
-    <fieldset style="border:1px solid #2475E2;border-radius:10px;margin-bottom:10px;">
-        <legend style="left:33%;background:white;width:33%;height:30px;font-size:30px;font-weight:400;color:rgba(36,117,226,1);line-height:24px;text-align:center;">标题</legend>
-        <div class="content" style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;">
-            文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
-        </div>
-        <p>
-            <br />
-        </p>
-        <div  style="height:auto;max-width: 100%;text-align: center">
-            <img style="margin-bottom:5px;max-width: 100%;" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
-        </div>
-    </fieldset>
-    <fieldset style="border:1px solid #2475E2;border-radius:10px;margin-bottom:10px;">
-        <legend style="left:33%;background:white;width:33%;height:30px;font-size:30px;font-weight:400;color:rgba(36,117,226,1);line-height:24px;text-align:center;">商品实拍</legend>
-        <div  style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;">
-            文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
-        </div>
-        <p>
-            <br />
-        </p>
-        <div  style="height:auto;padding:0px 10px;">
-            <img  style="margin-bottom:5px;max-width: 100%;" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
-            <div  style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;padding: 10px;">
-                文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
-            </div>
-            <img style="margin-bottom:5px;max-width: 100%" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
-            <div  style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;padding: 10px;">
-                文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="__STATIC__/css/detail-template.css">
+    <div class="template-01">
+        <div class="detail-content">
+            <h3 class="detail-content-title">视屏介绍</h3>
+            <div>
+                <p>请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定</p>
+                <video controls>
+                    <source src="http://192.168.3.135/web/public/uploads/4Mav.mp4" type="video/mp4">
+                    您的浏览器不支持 video 标签。
+                </video>
             </div>
         </div>
-    </fieldset>
+        <div class="detail-content">
+            <h3 class="detail-content-title">标题</h3>
+            <div>
+                <img src="http://192.168.3.135/web/public/static/img/product_detail_default-01.jpg" alt="" />
+                <p>请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定</p>
+            </div>
+        </div>
+        <div class="detail-content">
+            <h3 class="detail-content-title">商品实拍</h3>
+            <div>
+                <img src="http://192.168.3.135/web/public/static/img/product_detail_default-01.jpg" alt="" />
+                <p class="border-bottom">请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定</p>
+            </div>
+            <div>
+                <img src="http://192.168.3.135/web/public/static/img/product_detail_default-01.jpg" alt="" />
+                <p class="border-bottom">请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定</p>
+            </div>
+            <div>
+                <img src="http://192.168.3.135/web/public/static/img/product_detail_default-01.jpg" alt="" />
+                <p class="border-bottom">请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定</p>
+            </div>
+            <div>
+                <img src="http://192.168.3.135/web/public/static/img/product_detail_default-01.jpg" alt="" />
+                <p class="border-bottom">请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定</p>
+            </div>
+        </div>
     </div>
+
 </div>
 <!--模板1-->
 
@@ -526,49 +525,48 @@
 
 <!--模板app1-->
 <div class="template-app-html" style="display: none">
-    <div  style="width: 450px;margin:15px auto;padding:0 auto">
-        <fieldset style="border:1px solid #2475E2;border-radius:10px;margin-bottom:10px;">
-            <legend style="left:33%;height:30px;font-size:30px;font-weight:400;color:rgba(36,117,226,1);line-height:24px;text-align:center;">视频介绍</legend>
-            <div class="content" style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;">
-                文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="__STATIC__/css/detail-template.css">
+    <div class="template-01">
+        <div class="detail-content">
+            <h3 class="detail-content-title">视屏介绍</h3>
+            <div>
+                <p>请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定</p>
+                <video controls>
+                    <source src="http://192.168.3.135/web/public/uploads/4Mav.mp4" type="video/mp4">
+                    您的浏览器不支持 video 标签。
+                </video>
             </div>
-            <br />
-            <div style="height:auto;margin:15px auto;text-align: center">
-                <embed src="" type="video/x-ms-asf-plugin" width="100%" height="400" autostart="false" loop="true" style="margin:0 auto;" />
+        </div>
+        <div class="detail-content">
+            <h3 class="detail-content-title">标题</h3>
+            <div>
+                <img src="http://192.168.3.135/web/public/static/img/product_detail_default-01.jpg" alt="" />
+                <p>请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定</p>
             </div>
-        </fieldset>
-        <fieldset style="border:1px solid #2475E2;border-radius:10px;margin-bottom:10px;">
-            <legend style="left:33%;background:white;width:33%;height:30px;font-size:30px;font-weight:400;color:rgba(36,117,226,1);line-height:24px;text-align:center;">标题</legend>
-            <div class="content" style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;">
-                文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
+        </div>
+        <div class="detail-content">
+            <h3 class="detail-content-title">商品实拍</h3>
+            <div>
+                <img src="http://192.168.3.135/web/public/static/img/product_detail_default-01.jpg" alt="" />
+                <p class="border-bottom">请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定</p>
             </div>
-            <p>
-                <br />
-            </p>
-            <div class="imgs" style="height:auto;max-width: 100%">
-                <img style="margin-bottom:5px;max-width: 100%;" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
+            <div>
+                <img src="http://192.168.3.135/web/public/static/img/product_detail_default-01.jpg" alt="" />
+                <p class="border-bottom">请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定</p>
             </div>
-        </fieldset>
-        <fieldset style="border:1px solid #2475E2;border-radius:10px;margin-bottom:10px;">
-            <legend style="left:33%;background:white;width:33%;height:30px;font-size:30px;font-weight:400;color:rgba(36,117,226,1);line-height:24px;text-align:center;">商品实拍</legend>
-            <div  style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;">
-                文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
+            <div>
+                <img src="http://192.168.3.135/web/public/static/img/product_detail_default-01.jpg" alt="" />
+                <p class="border-bottom">请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定</p>
             </div>
-            <p>
-                <br />
-            </p>
-            <div class="imgs" style="height:auto;padding:0px 10px;">
-                <img  style="margin-bottom:5px;max-width: 100%;" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
-                <div  style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;padding: 10px;">
-                    文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
-                </div>
-                <img style="margin-bottom:5px;max-width: 100%" src="__STATIC__/img/product_detail_default-01.jpg" alt="" />
-                <div  style="width:100%;font-size:14px;font-family:MicrosoftYaHei;font-weight:400;color:rgba(102,102,102,1);line-height:24px;text-align:left;padding: 10px;">
-                    文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍文案介绍
-                </div>
+            <div>
+                <img src="http://192.168.3.135/web/public/static/img/product_detail_default-01.jpg" alt="" />
+                <p class="border-bottom">请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定义文字请输入自定</p>
             </div>
-        </fieldset>
+        </div>
     </div>
+
 </div>
 <!--模板1-->
 
@@ -1466,8 +1464,8 @@
         }
 
         $('.js_draft').click(function(){
-            $('#html_content_1').html(editor1.html());
-            $('#html_content_2').html(editor2.html());
+            $('#html_content_1').val(editor1.html());
+            $('#html_content_2').val(editor2.html());
             $('.js_audit_state').val(1);
              ajaxSubmit('#add-form');
             // //验证数据
@@ -1481,8 +1479,8 @@
         });
 
         $('.js_release').click(function(){
-            $('#html_content_1').html(editor1.html());
-            $('#html_content_2').html(editor2.html());
+            $('#html_content_1').val(editor1.html());
+            $('#html_content_2').val(editor2.html());
             $('.js_audit_state').val(2);
             ajaxSubmit('#add-form');
         });

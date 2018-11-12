@@ -177,6 +177,8 @@ function getImgUrl($content="",$suffix = ''){
     $content = preg_replace($pregRule,"src=\"{$suffix}/program/mall/attachd/image", $content);
     $pregRule2 = "/src=\\\"\/web\/public\/uploads\/attached\/image\//";
     $content = preg_replace($pregRule2,"src=\"{$suffix}/web/public/uploads/attached/image/",$content);
+    $pregRule3 = "/href=\\\"\/web\/public\/static\/css\//";
+    $content = preg_replace($pregRule3,"href=\"{$suffix}/web/public/static/css/",$content);
     return $content;
 }
 
