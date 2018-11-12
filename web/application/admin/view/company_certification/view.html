@@ -65,7 +65,7 @@
                             </div>
                             <div class="form-inline form-group">
                                 <label for="" class="col-md-3">审核状态</label>
-                                <span class="">{$row.state == 1 ? '待审核' : ($row.state == 2 ? '已通过' : '已拒绝')}</span>
+                                <span class="">{$row.state == 1 ? '待审核' : ($row.state == 3 ? '已通过' : '已拒绝')}</span>
                             </div>
                             {if $row.state == 3}
                             <div class="form-inline form-group">
