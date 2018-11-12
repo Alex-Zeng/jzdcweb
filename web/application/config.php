@@ -365,5 +365,5 @@ return [
 
     ////////////////////IOS审核配置参数//////////////////////
     'JZDC_APP_AUDIT' => true,
-    'JZDC_APP_VERSION' => '1.0.2',
+    'JZDC_APP_VERSION' => '1.0.4',
 ];
