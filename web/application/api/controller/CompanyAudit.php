@@ -83,7 +83,7 @@ class CompanyAudit extends Base
             'representative' => $companyAuditInfo ? $companyAuditInfo->legal_representative : '', //法定代表人
             'capital' => $companyAuditInfo ? $companyAuditInfo->reg_capital: '',  //注册资金
             'address' => $companyAuditInfo ? $companyAuditInfo->address : '',  //企业地址
-            'property' => $companyAuditInfo ? $companyAuditInfo->enterprise_type : '',   //企业性质
+            'property' => $companyAuditInfo ? getCompanyPropertyNew($companyAuditInfo->enterprise_type) : '',   //企业性质
             'isAgent' => $companyAuditInfo ? ($companyAuditInfo->agent_id_card_uri ? 1 : 0) : 0,
             'business' => $companyAuditInfo ? $companyAuditInfo->business_licence_uri : '', //营业执照
             'agentIdentityCard' => $companyAuditInfo ? $companyAuditInfo->agent_id_card_uri : '', //代办人身份

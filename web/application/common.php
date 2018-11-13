@@ -157,6 +157,7 @@ function getCompanyProperty($property = -1){
 
 function getCompanyPropertyNew($property = -1){
     $list = [
+        0 => '',
         1 => '有限责任公司',
         2 => '中外合资企业',
         3 => '个体工商户',
