@@ -117,7 +117,7 @@ class CompanyAudit extends Base
         $agentIdentityCard = $request->post('agentIdentityCard', '');//代理人身份证
         $powerOfAttorney = $request->post('attorney', ''); //代办人授权委托书
 
-        /*
+
         if (!$companyName) {
             return ['status' => 1, 'data' => [], 'msg' => '企业名称不能为空'];
         }
@@ -135,7 +135,7 @@ class CompanyAudit extends Base
             if (!$powerOfAttorney) {
                 return ['status' => 1, 'data' => [], 'msg' => '代办人授权委托书必须上传'];
             }
-        }*/
+        }
 
         $auth = $this->auth();
         if ($auth) {
