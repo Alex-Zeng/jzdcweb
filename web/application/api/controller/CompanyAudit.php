@@ -117,6 +117,7 @@ class CompanyAudit extends Base
         $agentIdentityCard = $request->post('agentIdentityCard', '');//代理人身份证
         $powerOfAttorney = $request->post('attorney', ''); //代办人授权委托书
 
+        /*
         if (!$companyName) {
             return ['status' => 1, 'data' => [], 'msg' => '企业名称不能为空'];
         }
@@ -134,7 +135,7 @@ class CompanyAudit extends Base
             if (!$powerOfAttorney) {
                 return ['status' => 1, 'data' => [], 'msg' => '代办人授权委托书必须上传'];
             }
-        }
+        }*/
 
         $auth = $this->auth();
         if ($auth) {
@@ -177,15 +178,14 @@ class CompanyAudit extends Base
         ];
 
         if($companyAuditInfo){
-            if($companyAuditInfo->created_user_id != $this->userId || $companyAuditInfo->company_id != $userInfo->company_id ){
-                return ['status' => 1, 'data' => [], 'msg' => '无权限操作'];
+            if(!($companyAuditInfo->created_user_id == $this->userId || $companyAuditInfo->company_id == $userInfo->company_id )){
+                return ['status' => 1, 'data' => [], 'msg' => '无权限操作1'];
             }
 
             $companyInfo = $companyModel->getInfoById($companyAuditInfo->company_id);
             if($companyInfo && $companyInfo->responsible_user_id != $this->userId){
                 return ['status' => 1, 'data' => [], 'msg' => '无权限操作'];
             }
-
             if($companyAuditInfo->state == EntCompanyAudit::STATE_PENDING) {
                 return ['status' => 0, 'data' => [], 'msg' => '已提交审核，请勿重复提交...'];
             }
