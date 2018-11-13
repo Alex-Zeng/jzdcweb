@@ -164,7 +164,7 @@ class CompanyAudit extends Base
             'company_name' => $companyName,
             'business_licence_uri' => $businessPath,
             'state' => EntCompanyAudit::STATE_PENDING,
-            'enterprise_type' => $property,
+            'enterprise_type' => ($property+1),
             'reg_capital' => $capital,
             'legal_representative' => $representative,
             'organization_code_uri' => $orgStructureCodePermits,
