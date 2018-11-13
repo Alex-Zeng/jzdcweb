@@ -158,6 +158,29 @@ class CompanyCertification  extends Base
             }
         }
 
+        //如果被拒绝
+        if($commit && $companyRow && $companyRow->audit_state == EntCompany::STATE_REFUSED){
+            $orgRow = $orgModel->where(['company_id'=>$companyId,'parent_id'=>0,'org_name'=>'未分组','level'=>1])->find();
+            if(!$orgRow){
+                //是否设置机构
+                $result = $orgModel->save(['company_id'=>$companyId,'parent_id'=>0,'org_name'=>'未分组','level'=>1,'depth_path'=>1,'created_time'=>time()]);
+                if($result === false){
+                    $commit = false;
+                }
+                $orgId = $orgModel->id;
+            }else{
+                $orgId = $orgRow->id;
+            }
+
+            //如果首次认证绑定用户与公司的关系
+            if($commit){
+                $result = $userModel->save(['company_id'=>$companyId,'organization_id'=>$orgId],['id'=>$responsibleId]);
+                if($result === false){
+                    $commit = false;
+                }
+            }
+        }
+
         if($commit && !$companyRow){
             //是否设置机构
             $result = $orgModel->save(['company_id'=>$companyId,'parent_id'=>0,'org_name'=>'未分组','level'=>1,'depth_path'=>1,'created_time'=>time()]);

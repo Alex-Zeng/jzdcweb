@@ -83,7 +83,7 @@ class CompanyAudit extends Base
             'representative' => $companyAuditInfo ? $companyAuditInfo->legal_representative : '', //法定代表人
             'capital' => $companyAuditInfo ? $companyAuditInfo->reg_capital: '',  //注册资金
             'address' => $companyAuditInfo ? $companyAuditInfo->address : '',  //企业地址
-            'property' => $companyAuditInfo ? $companyAuditInfo->enterprise_type : '',   //企业性质
+            'property' => $companyAuditInfo ? getCompanyPropertyNew($companyAuditInfo->enterprise_type) : '',   //企业性质
             'isAgent' => $companyAuditInfo ? ($companyAuditInfo->agent_id_card_uri ? 1 : 0) : 0,
             'business' => $companyAuditInfo ? $companyAuditInfo->business_licence_uri : '', //营业执照
             'agentIdentityCard' => $companyAuditInfo ? $companyAuditInfo->agent_id_card_uri : '', //代办人身份
@@ -116,6 +116,7 @@ class CompanyAudit extends Base
         $taxRegistrationCert = $request->post('taxRegistrationCert', ''); //税务登记
         $agentIdentityCard = $request->post('agentIdentityCard', '');//代理人身份证
         $powerOfAttorney = $request->post('attorney', ''); //代办人授权委托书
+
 
         if (!$companyName) {
             return ['status' => 1, 'data' => [], 'msg' => '企业名称不能为空'];
@@ -163,7 +164,7 @@ class CompanyAudit extends Base
             'company_name' => $companyName,
             'business_licence_uri' => $businessPath,
             'state' => EntCompanyAudit::STATE_PENDING,
-            'enterprise_type' => $property,
+            'enterprise_type' => ($property+1),
             'reg_capital' => $capital,
             'legal_representative' => $representative,
             'organization_code_uri' => $orgStructureCodePermits,
@@ -177,15 +178,14 @@ class CompanyAudit extends Base
         ];
 
         if($companyAuditInfo){
-            if($companyAuditInfo->created_user_id != $this->userId || $companyAuditInfo->company_id != $userInfo->company_id ){
-                return ['status' => 1, 'data' => [], 'msg' => '无权限操作'];
+            if(!($companyAuditInfo->created_user_id == $this->userId || $companyAuditInfo->company_id == $userInfo->company_id )){
+                return ['status' => 1, 'data' => [], 'msg' => '无权限操作1'];
             }
 
             $companyInfo = $companyModel->getInfoById($companyAuditInfo->company_id);
             if($companyInfo && $companyInfo->responsible_user_id != $this->userId){
                 return ['status' => 1, 'data' => [], 'msg' => '无权限操作'];
             }
-
             if($companyAuditInfo->state == EntCompanyAudit::STATE_PENDING) {
                 return ['status' => 0, 'data' => [], 'msg' => '已提交审核，请勿重复提交...'];
             }
