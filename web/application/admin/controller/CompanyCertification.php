@@ -283,7 +283,7 @@ class CompanyCertification  extends Base
 
         if($commit){
             //更新companyId
-            $result = $model->save(['company_id'=>$companyId,'state'=>EntCompanyAudit::STATE_REFUSED,'audit_time'=>time()],['id'=>$row->id]);
+            $result = $model->save(['company_id'=>$companyId,'state'=>EntCompanyAudit::STATE_REFUSED,'description'=>$reason,'audit_time'=>time()],['id'=>$row->id]);
             if($result === false){
                 $commit = false;
             }
