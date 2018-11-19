@@ -113,6 +113,7 @@
                                         {if getGroupId() == 3}
                                             {if $goods.audit_state == 2}
                                         		<a href="{:url('admin/product/view','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-info" >详情</a>
+                                                <a href="{:url('admin/product/edit','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-primary" >编辑</a>
                                             {/if}   
                                             {if $goods.audit_state == 4}
                                                 <a href="{:url('admin/product/edit','id='.$goods.id)}"  target="_blank" class="btn btn-sm btn-primary" >编辑</a>
