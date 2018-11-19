@@ -325,7 +325,7 @@
                                 <input type="hidden" name="audit_state" class="js_audit_state" value="1">
                                 <button type="button" class="btn btn-primary js_draft">存为草稿</button>
                                 <button type="button" class="btn btn-primary js_release">发布</button>
-                                {elseif condition="$row.audit_state eq 5" /}
+                                {elseif condition="$row.audit_state eq 5 || $row.audit_state eq 2" /}
                                 <input type="hidden" name="audit_state" class="js_audit_state" value="2">
                                 <button type="button" class="btn btn-primary js_release">修改</button>
                                 {elseif condition="$row.audit_state eq 4"/}
@@ -1550,8 +1550,8 @@
             //草稿还是发布
             $('.js_audit_state').val(val);
             //文本编辑框
-            $('#html_content_1').html(editor1.html());
-            $('#html_content_2').html(editor2.html());
+            $('#html_content_1').val(editor1.html());
+            $('#html_content_2').val(editor2.html());
             //最大值最小值
             if($('.js_specification_customization').prop('checked')==true){
                 var priceArr = [$('.js_custom_price').val()];
